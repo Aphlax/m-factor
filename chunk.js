@@ -14,11 +14,15 @@ Chunk.prototype.generate = function(mapGenerator) {
 };
 
 Chunk.prototype.draw = function(ctx, view) {
-	if (view.x > (this.x + 1) * SIZE * 5) return;
-	for (let x = 0; x < SIZE; x++) {
-		for (let y = 0; y < SIZE; y++) {
+	const xStart = Math.max(0, Math.floor(view.x / 5 - this.x * SIZE));
+	const xEnd = Math.min(SIZE, Math.ceil((view.width + view.x) / 5 - this.x * SIZE));
+	const yStart = Math.max(0, Math.floor(view.y / 5 - this.y * SIZE));
+	const yEnd = Math.min(SIZE, Math.ceil((view.height + view.y) / 5 - this.y * SIZE));
+	
+	for (let x = xStart; x < xEnd; x++) {
+		for (let y = yStart; y < yEnd; y++) {
 			ctx.fillStyle = this.tiles[x][y];
-			ctx.fillRect(view.x + (this.x * SIZE + x) * 5, view.y + (this.y * SIZE + y) * 5, 5, 5);
+			ctx.fillRect((this.x * SIZE + x) * 5 - view.x, (this.y * SIZE + y) * 5 - view.y, 5, 5);
 		}
 	}
 };

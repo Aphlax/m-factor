@@ -18,22 +18,22 @@ function PerlinNoise(seed, scale, octaves, freq, amp) {
 }
 
 PerlinNoise.prototype.getNoise = function(x, y) {
-	x %= 512;
-	y %= 512;
-	const x_ = Math.floor(x);
-	const y_ = Math.floor(y);
+	const x_ = Math.floor(x) & 511;
+	const y_ = Math.floor(y) & 511;
+	const dx = x - Math.floor(x);
+	const dy = y - Math.floor(y);
 	
 	const bottomLeft = getDir(this.permutation[this.permutation[x_] + y_]);
 	const bottomRight = getDir(this.permutation[this.permutation[x_ + 1] + y_]);
 	const topLeft = getDir(this.permutation[this.permutation[x_] + y_ + 1]);
 	const topRight = getDir(this.permutation[this.permutation[x_ + 1] + y_ + 1]);
 	
-	const a = dot(bottomLeft, {x: x - x_, y: y - y_});
-	const b = dot(bottomRight, {x: x - x_ - 1, y: y - y_});
-	const c = dot(topLeft, {x: x - x_, y: y - y_ - 1});
-	const d = dot(topRight, {x: x - x_ - 1, y: y - y_ - 1});
+	const a = dot(bottomLeft, {x: dx, y: dy});
+	const b = dot(bottomRight, {x: dx - 1, y: dy});
+	const c = dot(topLeft, {x: dx, y: dy - 1});
+	const d = dot(topRight, {x: dx - 1, y: dy - 1});
 	
-	return lerp(fade(y - y_), lerp(fade(x - x_), a, b), lerp(fade(x - x_), c, d));
+	return lerp(fade(dy), lerp(fade(dx), a, b), lerp(fade(dx), c, d));
 }
 
 PerlinNoise.prototype.get = function(x, y) {
