@@ -25,6 +25,15 @@ Chunk.prototype.draw = function(ctx, view) {
       ctx.fillRect((this.x * SIZE + x) * 5 - view.x, (this.y * SIZE + y) * 5 - view.y, 5, 5);
     }
   }
+  const lx = this.x * SIZE * 5 - view.x,
+      ly = this.y * SIZE * 5 - view.y;
+  ctx.beginPath();
+  ctx.moveTo(lx, ly + SIZE * 5);
+  ctx.lineTo(lx, ly);
+  ctx.lineTo(lx + SIZE * 5, ly);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "red";
+  ctx.stroke();
 };
 
 export {Chunk};

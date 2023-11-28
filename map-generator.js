@@ -35,7 +35,7 @@ const BIOMES = [
     heat: 0,
   },
   { // Ocean
-	color: "rgb(10, 40, 255)",
+	color: "rgb(40, 150, 255)",
     height: -0.2,
     moisture: -0.2,
     heat: -0.2,
@@ -47,6 +47,11 @@ const BIOMES = [
     heat: 0,
   },
 ];
+
+const lakeLimit = dist => dist <= 100 ? 1.2 :
+    dist <= 110 ? 1.2 - (dist - 100) / 25 :
+    dist <= 510 ? 0.8 - (dist - 110) / 2000 :
+    0.6;
 
 function MapGenerator(seed) {
   this.seed = seed;
@@ -61,17 +66,29 @@ MapGenerator.prototype.initialize = function() {
       0.046, 2, 2.4, 0.6);
   this.heatNoise = new PerlinNoise(randSeed(),
       0.0351, 2, 2.1, 0.5);
+  this.lakeNoise = new PerlinNoise(randSeed(),
+      0.01, 8, 2, 0.5);
 }
 
 
 MapGenerator.prototype.generateTiles = function (cx, cy) {
   let tiles = new Array(32).fill(0).map(a => []);
-  for (let x = 0; x < 32; x++) {
-    for (let y = 0; y < 32; y++) {
-      let height = this.heightNoise.get(cx * 32 + x, cy * 32 + y);
-      let moisture = this.moistureNoise.get(cx * 32 + x, cy * 32 + y);
-      let heat = this.heatNoise.get(cx * 32 + x, cy * 32 + y);
-      tiles[x].push(tile(height, moisture, heat));
+  for (let i = 0; i < 32; i++) {
+    for (let j = 0; j < 32; j++) {
+      const x = cx * 32 + i, y = cy * 32 + j;
+      let dist = Math.sqrt(x**2 + y**2);
+      if (this.lakeNoise.get(x, y) >= lakeLimit(dist)) {
+        if (this.lakeNoise.get(x, y) >= lakeLimit(dist) + 0.1)
+          tiles[i].push("rgb(0, 20, 200)");
+        else
+          tiles[i].push("rgb(10, 40, 255)");
+        continue;
+      }
+      
+      let height = this.heightNoise.get(x, y);
+      let moisture = this.moistureNoise.get(x, y);
+      let heat = this.heatNoise.get(x, y);
+      tiles[i].push(tile(height, moisture, heat));
     }
   }
   return tiles;

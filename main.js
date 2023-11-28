@@ -1,7 +1,7 @@
 /**
  * Main startup file for mFactor.
  */
- import {Game} from "./game.js";
+import {Game} from "./game.js";
 
 (function() {
   "use strict";

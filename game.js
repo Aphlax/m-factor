@@ -9,11 +9,18 @@ function Game(canvas) {
   this.mapGenerator.initialize();
   this.chunks = new Map();
   this.dragpos = {x: 0, y: 0};
-  this.view = {x: 0, y: 0, width: canvas.width, height: canvas.height, scale: 1};
+  this.view = {
+    x: Math.floor(-canvas.width / 2),
+    y: Math.floor(-canvas.height / 2),
+    width: canvas.width,
+    height: canvas.height,
+    scale: 1
+  };
 }
 
 Game.prototype.update = function(time, dt, input) {
-  const viewX = Math.floor(this.view.x / 160), viewY = Math.floor(this.view.y / 160);
+  const viewX = Math.floor(this.view.x / 160),
+      viewY = Math.floor(this.view.y / 160);
   for (let x = 0; x <= Math.ceil(this.view.width / 160); x++) {
 	for (let y = 0; y <= Math.ceil(this.view.height / 160); y++) {
       const cx = viewX + x;
