@@ -42,17 +42,19 @@ import {Game} from "./game.js";
     ctx.font = "24px Arial";
     ctx.fillStyle = "black";
     ctx.fillText(frameRate + "", canvas.width - 32, 24);
+    ctx.fillText(game.seed, canvas.width - 32, 50);
     
     window.requestAnimationFrame(loop);
   }
-    
+  /*
   // Input handling.
   const preventCanvasMove = function(e) {
 	if (e.target == canvas) {
 	  e.preventDefault();
     }
   };
-  document.body.addEventListener("touchstart", preventCanvasMove, false);
-  document.body.addEventListener("touchend", preventCanvasMove, false);
-  document.body.addEventListener("touchmove", preventCanvasMove, false);
+  document.body.addEventListener("touchstart", preventCanvasMove, {passive: false});
+  document.body.addEventListener("touchend", preventCanvasMove, {passive: false});
+  document.body.addEventListener("touchmove", preventCanvasMove, {passive: false});
+  */
 })();

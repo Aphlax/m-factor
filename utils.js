@@ -6,6 +6,14 @@ export function createRand(a, b, c, d) {
   };
 }
 
+/** Random seed generator to feed into other random generators */
+export function createSeedRand(a, b, c, d) {
+  let rand = createIntRand(a, b, c, d);
+  return function() {
+    return [rand(), rand(), rand(), rand()];
+  };
+}
+
 /** Seeded integer random generator */
 export function createIntRand(a, b, c, d) {
   let rand = function() {

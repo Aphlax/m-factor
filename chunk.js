@@ -4,14 +4,22 @@ function Chunk(cx, cy) {
   this.x = cx;
   this.y = cy;
   this.tiles = [];
-  this.belts = [];
-  this.entities = [];
+  this.entities = new Array(SIZE).fill(0).map(() => []);
 }
 
 Chunk.prototype.generate = function(mapGenerator) {
   this.tiles = mapGenerator.generateTiles(this.x, this.y);
   return this;
 };
+
+Chunk.prototype.update = function(time, dt) {
+  for (x in this.entities) {
+    for (y in this.entities[x]) {
+      if (this.entities[x][y].type != 1)
+        this.entities[x][y].update(time, dt);
+    }
+  }
+}
 
 Chunk.prototype.draw = function(ctx, view) {
   const xStart = Math.max(0, Math.floor(view.x / 5 - this.x * SIZE));
