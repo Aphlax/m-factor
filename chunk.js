@@ -30,15 +30,15 @@ Chunk.prototype.draw = function(ctx, view) {
   for (let x = xStart; x < xEnd; x++) {
     for (let y = yStart; y < yEnd; y++) {
       ctx.fillStyle = this.tiles[x][y];
-      ctx.fillRect((this.x * SIZE + x) * 5 - view.x, (this.y * SIZE + y) * 5 - view.y, 5, 5);
+      ctx.fillRect((this.x * SIZE + x) * view.scale - view.x, (this.y * SIZE + y) * view.scale - view.y, view.scale, view.scale);
     }
   }
-  const lx = this.x * SIZE * 5 - view.x,
-      ly = this.y * SIZE * 5 - view.y;
+  const lx = this.x * SIZE * view.scale - view.x,
+      ly = this.y * SIZE * view.scale - view.y;
   ctx.beginPath();
-  ctx.moveTo(lx, ly + SIZE * 5);
+  ctx.moveTo(lx, ly + SIZE * view.scale);
   ctx.lineTo(lx, ly);
-  ctx.lineTo(lx + SIZE * 5, ly);
+  ctx.lineTo(lx + SIZE * view.scale, ly);
   ctx.lineWidth = 1;
   ctx.strokeStyle = "red";
   ctx.stroke();

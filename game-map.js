@@ -9,7 +9,7 @@ function GameMap(canvas) {
     y: Math.floor(-canvas.height / 2),
     width: canvas.width,
     height: canvas.height,
-    scale: 1,
+    scale: 5,
   };
 }
 
