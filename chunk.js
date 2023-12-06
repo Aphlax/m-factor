@@ -1,4 +1,4 @@
-const SIZE = 32;
+const SIZE = Chunk.SIZE = 32;
 
 function Chunk(cx, cy) {
   this.x = cx;

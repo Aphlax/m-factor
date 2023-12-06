@@ -6,7 +6,9 @@ const SEED = [0x9E3779B9, 0x243F6A88, 0xB7E15162];
 const lakeLimit = dist => dist <= 150 ? 2 :
     dist <= 160 ? 1.2 - (dist - 150) / 25 :
     dist <= 560 ? 0.8 - (dist - 170) / 2000 :
-    0.6;
+    dist <= 1500 ? 0.6 :
+    dist <= 2000 ? 0.6 - (dist - 1500) / 5000 :
+    0.5;
 const starterLakeLimit = dist => dist <= 20 ? 0.4 :
     dist <= 40 ? 0.4 + (dist - 20) / 100 :
     dist <= 60 ? 0.6 + (dist - 40) / 33 : 2;
@@ -40,22 +42,23 @@ MapGenerator.prototype.generateTiles = function (cx, cy) {
         continue;
       }
       const dist = Math.sqrt(x**2 + y**2);
+      let lake = 0;
       if (dist <= 150) {
         const starterLakeDist =
             Math.sqrt((x - this.starterLakePos.x) ** 2 +
             (y - this.starterLakePos.y) ** 2);
-        const lake = this.lakeNoise.get(x * 2 + 1000, y * 2.1) -
+        lake = this.lakeNoise.get(x * 2 + 1000, y * 2.1) -
             starterLakeLimit(starterLakeDist);
-        if (lake > 0) {
-          if (lake > 0.1)
-            tiles[i].push("rgb(0, 20, 200)");
-          else
-            tiles[i].push("rgb(10, 40, 255)");
-          continue;
-        }
       } else {
-        const lake = this.lakeNoise.get(x, y) - lakeLimit(dist);
-        if (lake > 0) {
+        lake = this.lakeNoise.get(x, y) - lakeLimit(dist);
+      }
+      if (lake > -0.05) {
+        if (lake < 0) {
+          if (this.lakeNoise.get(x * 0.7 + 100, y * 0.7) > 0.4 - lake * 5) {
+            tiles[i].push("rgb(220, 170, 20)");
+            continue;
+          }
+        } else {
           if (lake > 0.1)
             tiles[i].push("rgb(0, 20, 200)");
           else

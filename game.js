@@ -19,7 +19,7 @@ function Game(canvas) {
 
 Game.prototype.update = function(time, dt, input) {
   if (this.mode == MODE.playing) {
-    this.gameMap.update();
+    this.gameMap.update(time);
   } else if (this.mode == MODE.loading) {
     if (this.spritePool.isLoaded() && time > 1000) {
       this.mode = MODE.playing;
@@ -36,16 +36,22 @@ Game.prototype.draw = function(time, dt, ctx) {
 };
 
 Game.prototype.touchStart = function(e) {
-  this.gameMap.dragStart(e.touches[0].clientX, e.touches[0].clientY);
-  if (e.touches[0].clientY < 50) {
-    this.gameMap.initialize(Math.floor(Math.random() * 1000));
+  if (this.mode == MODE.playing) {
+    this.gameMap.touchStart(e);
+    if (e.touches[0].clientY < 50) {
+      this.gameMap.initialize(Math.floor(Math.random() * 1000));
+    }
   }
 }
 Game.prototype.touchMove = function(e) {
-  this.gameMap.dragMove(e.touches[0].clientX, e.touches[0].clientY);
+  if (this.mode == MODE.playing) {
+    this.gameMap.touchMove(e);
+  }
 }
 Game.prototype.touchEnd = function(e) {
-  
+  if (this.mode == MODE.playing) {
+    this.gameMap.touchEnd(e);
+  }
 }
 
 export {Game};

@@ -42,7 +42,7 @@ import {Game} from "./game.js";
     ctx.font = "24px Arial";
     ctx.fillStyle = "black";
     ctx.fillText(frameRate + "", canvas.width - 32, 24);
-    ctx.fillText(game.seed, canvas.width - 32, 50);
+    ctx.fillText(game.gameMap.longTouchEnd, canvas.width - 100, 50);
     
     window.requestAnimationFrame(loop);
   }
