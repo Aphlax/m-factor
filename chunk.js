@@ -22,10 +22,10 @@ Chunk.prototype.update = function(time, dt) {
 }
 
 Chunk.prototype.draw = function(ctx, view) {
-  const xStart = Math.max(0, Math.floor(view.x / 5 - this.x * SIZE));
-  const xEnd = Math.min(SIZE, Math.ceil((view.width + view.x) / 5 - this.x * SIZE));
-  const yStart = Math.max(0, Math.floor(view.y / 5 - this.y * SIZE));
-  const yEnd = Math.min(SIZE, Math.ceil((view.height + view.y) / 5 - this.y * SIZE));
+  const xStart = Math.max(0, Math.floor(view.x / view.scale - this.x * SIZE));
+  const xEnd = Math.min(SIZE, Math.ceil((view.width + view.x) / view.scale - this.x * SIZE));
+  const yStart = Math.max(0, Math.floor(view.y / view.scale - this.y * SIZE));
+  const yEnd = Math.min(SIZE, Math.ceil((view.height + view.y) / view.scale - this.y * SIZE));
   
   for (let x = xStart; x < xEnd; x++) {
     for (let y = yStart; y < yEnd; y++) {

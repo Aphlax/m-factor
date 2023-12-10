@@ -37,7 +37,7 @@ Game.prototype.draw = function(time, dt, ctx) {
 
 Game.prototype.touchStart = function(e) {
   if (this.mode == MODE.playing) {
-    this.gameMap.touchStart(e);
+    this.gameMap.input.touchStart(e);
     if (e.touches[0].clientY < 50) {
       this.gameMap.initialize(Math.floor(Math.random() * 1000));
     }
@@ -45,12 +45,12 @@ Game.prototype.touchStart = function(e) {
 }
 Game.prototype.touchMove = function(e) {
   if (this.mode == MODE.playing) {
-    this.gameMap.touchMove(e);
+    this.gameMap.input.touchMove(e);
   }
 }
 Game.prototype.touchEnd = function(e) {
   if (this.mode == MODE.playing) {
-    this.gameMap.touchEnd(e);
+    this.gameMap.input.touchEnd(e);
   }
 }
 

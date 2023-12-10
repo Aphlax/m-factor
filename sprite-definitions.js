@@ -8,57 +8,53 @@
 export const SPRITES = [
   {
     path: "graphics/terrain/dirt-1.png",
-    sprites: [{
-      id: 0,
-      mip: mips(0, 0),
-    }, {
-      id: 1,
-      mip: mips(1, 1),
-    }, {
-      id: 2,
-      mip: mips(2, 2),
-    }, {
-      id: 3,
-      mip: mips(3, 3),
-    }, {
-      id: 4,
-      mip: mips(4, 4),
-    }, {
-      id: 5,
-      mip: mips(5, 5),
-    }, {
-      id: 6,
-      mip: mips(6, 6),
-    }, {
-      id: 7,
-      mip: mips(7, 7),
-    }, {
-      id: 8,
-      mip: mips(8, 8),
-    }, {
-      id: 9,
-      mip: mips(9, 9),
-    }, {
-      id: 10,
-      mip: mips(10, 10),
-    }, {
-      id: 11,
-      mip: mips(11, 11),
-    }, {
-      id: 12,
-      mip: mips(12, 12),
-    }, {
-      id: 13,
-      mip: mips(13, 13),
-    }, {
-      id: 14,
-      mip: mips(14, 14),
-    }, {
-      id: 15,
-      mip: mips(15, 15),
-    }],
-  }
+    sprites: sprites(0, 16),
+  },
+  {
+    path: "graphics/terrain/dirt-2.png",
+    sprites: sprites(16, 16),
+  },
+  {
+    path: "graphics/terrain/dirt-3.png",
+    sprites: sprites(32, 16),
+  },
+  {
+    path: "graphics/terrain/dirt-4.png",
+    sprites: sprites(48, 16),
+  },
+  {
+    path: "graphics/terrain/dirt-5.png",
+    sprites: sprites(64, 16),
+  },
+  {
+    path: "graphics/terrain/dirt-6.png",
+    sprites: sprites(80, 16),
+  },
+  {
+    path: "graphics/terrain/dirt-7.png",
+    sprites: sprites(96, 16),
+  },
+  {
+    path: "graphics/terrain/dry-dirt.png",
+    sprites: sprites(112, 16),
+  },
+  {
+    path: "graphics/terrain/grass-1.png",
+    sprites: sprites(128, 16),
+  },
+  {
+    path: "graphics/terrain/grass-2.png",
+    sprites: sprites(144, 16),
+  },
 ];
+
+function sprites(id, count) {
+  const res = [];
+  for (let i = 0; i < count; i++) {
+    res.push({id: id + i, mip: mips(i, i)});
+  }
+  return res;
+}
 
 function mips(a, b) {
   return [{
