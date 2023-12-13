@@ -6,6 +6,10 @@ function SpritePool() {
   this.sprites = new Map();
 }
 
+SpritePool.prototype.get = function(id) {
+  return this.sprites.get(id);
+};
+
 SpritePool.prototype.load = function() {
   for (let imageDef of SPRITES) {
     this.loadImage(imageDef);
@@ -41,8 +45,10 @@ SpritePool.prototype.draw = function(ctx) {
       Math.floor(ctx.canvas.width * 0.6), 60);
   ctx.fillStyle = "white";
   ctx.fillRect(Math.floor(ctx.canvas.width * 0.2 + 10),
-      Math.floor((ctx.canvas.height * 0.5 - 30) * this.current / this.total) + 10,
-      Math.floor(ctx.canvas.width * 0.6 - 20), 40);
+      Math.floor(ctx.canvas.height * 0.5 - 20),
+      Math.floor((ctx.canvas.width * 0.6 - 30) * this.current / this.total + 10), 40);
 };
 
-export {SpritePool};
+const INSTANCE = new SpritePool();
+
+export {INSTANCE as SPRITES};

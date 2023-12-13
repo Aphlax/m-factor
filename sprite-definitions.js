@@ -1,5 +1,5 @@
 /*
-  y coordinate:
+  terrain sprites y coordinate:
   32: 0
   64: 64
   128: 160
@@ -8,64 +8,114 @@
 export const SPRITES = [
   {
     path: "graphics/terrain/dirt-1.png",
-    sprites: sprites(0, 16),
+    sprites: terrainSprites(0, 16),
   },
   {
     path: "graphics/terrain/dirt-2.png",
-    sprites: sprites(16, 16),
+    sprites: terrainSprites(16, 16),
   },
   {
     path: "graphics/terrain/dirt-3.png",
-    sprites: sprites(32, 16),
+    sprites: terrainSprites(32, 16),
   },
   {
     path: "graphics/terrain/dirt-4.png",
-    sprites: sprites(48, 16),
+    sprites: terrainSprites(48, 16),
   },
   {
     path: "graphics/terrain/dirt-5.png",
-    sprites: sprites(64, 16),
+    sprites: terrainSprites(64, 16),
   },
   {
     path: "graphics/terrain/dirt-6.png",
-    sprites: sprites(80, 16),
+    sprites: terrainSprites(80, 16),
   },
   {
     path: "graphics/terrain/dirt-7.png",
-    sprites: sprites(96, 16),
+    sprites: terrainSprites(96, 16),
   },
   {
     path: "graphics/terrain/dry-dirt.png",
-    sprites: sprites(112, 16),
+    sprites: terrainSprites(112, 16),
   },
   {
     path: "graphics/terrain/grass-1.png",
-    sprites: sprites(128, 16),
+    sprites: terrainSprites(128, 16),
   },
   {
     path: "graphics/terrain/grass-2.png",
-    sprites: sprites(144, 16),
+    sprites: terrainSprites(144, 16),
+  },
+  {
+    path: "graphics/terrain/grass-3.png",
+    sprites: terrainSprites(160, 16),
+  },
+  {
+    path: "graphics/terrain/grass-4.png",
+    sprites: terrainSprites(176, 16),
+  },
+  {
+    path: "graphics/terrain/sand-1.png",
+    sprites: terrainSprites(192, 16),
+  },
+  {
+    path: "graphics/terrain/sand-2.png",
+    sprites: terrainSprites(208, 16),
+  },
+  {
+    path: "graphics/terrain/sand-3.png",
+    sprites: terrainSprites(224, 16),
+  },
+  {
+    path: "graphics/terrain/red-desert-0.png",
+    sprites: terrainSprites(240, 16),
+  },
+  {
+    path: "graphics/terrain/red-desert-1.png",
+    sprites: terrainSprites(256, 16),
+  },
+  {
+    path: "graphics/terrain/red-desert-2.png",
+    sprites: terrainSprites(17 * 16, 16),
+  },
+  {
+    path: "graphics/terrain/red-desert-3.png",
+    sprites: terrainSprites(18 * 16, 16),
+  },
+  {
+    path: "graphics/terrain/water1.png",
+    sprites: waterSprites(19 * 16, 16),
+  },
+  {
+    path: "graphics/terrain/deepwater1.png",
+    sprites: waterSprites(20 * 16, 16),
   },
 ];
 
-function sprites(id, count) {
+function terrainSprites(id, count) {
   const res = [];
   for (let i = 0; i < count; i++) {
-    res.push({id: id + i, mip: mips(i, i)});
+    res.push({id: id + i, mip: mips(i)});
   }
   return res;
 }
 
-function mips(a, b) {
+function waterSprites(id, count) {
+  const res = [];
+  for (let i = 0; i < count; i++) {
+    res.push({
+      id: id + i,
+      mip: mips(i),
+    });
+  }
+  return res;
+}
+
+function mips(a) {
   return [{
       x: a * 32,
       y: 0,
       width: 32,
       height: 32,
-    }, {
-      x: b * 64,
-      y: 64,
-      width: 64,
-      height: 64,
     }];
 }

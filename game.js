@@ -1,7 +1,7 @@
 "use strict";
 
 import {GameMap} from './game-map.js';
-import {SpritePool} from './sprite-pool.js';
+import {SPRITES} from './sprite-pool.js';
 
 const MODE = {
   loading: 0,
@@ -12,7 +12,7 @@ function Game(canvas) {
   this.seed = 1274;
   this.mode = MODE.loading;
   this.gameMap = new GameMap(canvas);
-  this.spritePool = new SpritePool();
+  this.spritePool = SPRITES;
   this.gameMap.initialize(this.seed);
   this.spritePool.load();
 }

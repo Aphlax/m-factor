@@ -1,3 +1,5 @@
+import {SPRITES} from './sprite-pool.js';
+
 const SIZE = Chunk.SIZE = 32;
 
 function Chunk(cx, cy) {
@@ -19,7 +21,7 @@ Chunk.prototype.update = function(time, dt) {
         this.entities[x][y].update(time, dt);
     }
   }
-}
+};
 
 Chunk.prototype.draw = function(ctx, view) {
   const xStart = Math.max(0, Math.floor(view.x / view.scale - this.x * SIZE));
@@ -29,8 +31,21 @@ Chunk.prototype.draw = function(ctx, view) {
   
   for (let x = xStart; x < xEnd; x++) {
     for (let y = yStart; y < yEnd; y++) {
-      ctx.fillStyle = this.tiles[x][y];
-      ctx.fillRect((this.x * SIZE + x) * view.scale - view.x, (this.y * SIZE + y) * view.scale - view.y, view.scale, view.scale);
+      const sprite = SPRITES.get(this.tiles[x][y]);
+      if (!sprite) continue;
+   //   ctx.font = "12px Arial";
+    //  ctx.fillStyle = "black";
+      
+      ctx.drawImage(
+          sprite.image,
+          sprite.mip[0].x, sprite.mip[0].y,
+          sprite.mip[0].width, sprite.mip[0].height,
+          (this.x * SIZE + x) * view.scale - view.x,
+          (this.y * SIZE + y) * view.scale - view.y,
+          view.scale, view.scale);
+     // ctx.fillText(sprite.id + "", 
+      //    (this.x * SIZE + x) * view.scale - view.x,
+        //  (this.y * SIZE + y) * view.scale - view.y + 16);
     }
   }
   const lx = this.x * SIZE * view.scale - view.x,
