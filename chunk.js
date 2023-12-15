@@ -28,24 +28,20 @@ Chunk.prototype.draw = function(ctx, view) {
   const xEnd = Math.min(SIZE, Math.ceil((view.width + view.x) / view.scale - this.x * SIZE));
   const yStart = Math.max(0, Math.floor(view.y / view.scale - this.y * SIZE));
   const yEnd = Math.min(SIZE, Math.ceil((view.height + view.y) / view.scale - this.y * SIZE));
+  const i = view.scale <= 8 ? 0 : view.scale <= 16 ? 1 : 2;
+  const scaleCeil = Math.ceil(view.scale);
   
   for (let x = xStart; x < xEnd; x++) {
     for (let y = yStart; y < yEnd; y++) {
       const sprite = SPRITES.get(this.tiles[x][y]);
-      if (!sprite) continue;
-   //   ctx.font = "12px Arial";
-    //  ctx.fillStyle = "black";
       
       ctx.drawImage(
           sprite.image,
-          sprite.mip[0].x, sprite.mip[0].y,
-          sprite.mip[0].width, sprite.mip[0].height,
-          (this.x * SIZE + x) * view.scale - view.x,
-          (this.y * SIZE + y) * view.scale - view.y,
-          view.scale, view.scale);
-     // ctx.fillText(sprite.id + "", 
-      //    (this.x * SIZE + x) * view.scale - view.x,
-        //  (this.y * SIZE + y) * view.scale - view.y + 16);
+          sprite.mip[i].x, sprite.mip[i].y,
+          sprite.mip[i].width, sprite.mip[i].height,
+          Math.floor((this.x * SIZE + x) * view.scale - view.x),
+          Math.floor((this.y * SIZE + y) * view.scale - view.y),
+          scaleCeil, scaleCeil);
     }
   }
   const lx = this.x * SIZE * view.scale - view.x,

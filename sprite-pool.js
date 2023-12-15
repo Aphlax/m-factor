@@ -19,17 +19,46 @@ SpritePool.prototype.load = function() {
 SpritePool.prototype.loadImage = function(imageDef) {
   const img = new Image();
   img.src = imageDef.path;
-  img.onload = e => {
-    for (let spriteDef of imageDef.sprites) {
-      if (this.sprites.has(spriteDef.id)) {
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    const {width, height} = imageDef.sprites[0].rect;
+    canvas.width = imageDef.sprites.length * width;
+    canvas.height = Math.ceil(height * (2 - 0.5**(imageDef.mips - 1)));
+    const ctx = canvas.getContext('2d');
+    const mipImg = new Image();
+    mipImg.onload = () => this.current++;
+    
+    for (let i in imageDef.sprites) {
+      const s = imageDef.sprites[i], r = s.rect;
+      if (this.sprites.has(s.id)) {
         throw new Error("Sprite id conflict.");
       }
-      this.sprites.set(spriteDef.id, {
-        image: img,
-        ...spriteDef,
+      const mip = new Array(imageDef.mips).fill(0)
+          .map((_, j) => ({
+            x: i * width / (2**j),
+            y: height * (2 - 2**(1 - j)),
+            width: width / (2**j),
+            height: height / (2**j),
+          })).reverse();
+      mip.forEach(m => ctx.drawImage(img,
+          r.x, r.y, r.width, r.height,
+          m.x, m.y, m.width, m.height));
+      
+      this.sprites.set(s.id, {
+        image: mipImg,
+        mip,
       });
     }
-    this.current++;
+    mipImg.src = canvas.toDataURL();
+    /*
+    let a = document.createElement('a');
+    a.download = imageDef.path;
+    a.href = canvas.toDataURL();
+    a.innerText = imageDef.path + " " + width + "\n";
+    //a.appendChild(mipImg);
+    //a.appendChild(canvas);
+    document.body.appendChild(a);
+    */
   };
 };
 

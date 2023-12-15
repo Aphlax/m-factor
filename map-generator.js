@@ -28,7 +28,7 @@ const TERRAIN = [
 const WATER = {
   beach: 192,
   water: 19 * 16,
-  deepWater: 20 * 16,
+  deepWater: 19.5 * 16,
 };
 
 const lakeLimit = dist => dist <= 150 ? 2 :
@@ -99,9 +99,9 @@ MapGenerator.prototype.lake = function(x, y) {
       }
     } else {
       if (lake > 0.1)
-        return WATER.water;
-      else
         return WATER.deepWater;
+      else
+        return WATER.water;
     }
   }
 }

@@ -1,5 +1,5 @@
 const LONG_TOUCH_DURATION = 500;
-const MIN_SCALE = 5;
+const MIN_SCALE = 12;
 const MAX_SCALE = 32;
 
 function GameMapInput(gameMap, view) {
