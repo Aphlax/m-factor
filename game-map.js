@@ -47,7 +47,16 @@ GameMap.prototype.draw = function(ctx) {
     for (let [y, chunk] of col.entries()) {
   	if ((y + 1) * SIZE <= this.view.y) continue;
       if (y * SIZE > this.view.height + this.view.y) continue;
-      chunk.draw(ctx, this.view);
+      chunk.drawTerrain(ctx, this.view);
+    }
+  }
+  for (let [x, col] of this.chunks.entries()) {
+    if ((x + 1) * SIZE <= this.view.x) continue;
+    if (x * SIZE > this.view.width + this.view.x) continue;
+    for (let [y, chunk] of col.entries()) {
+  	if ((y + 1) * SIZE <= this.view.y) continue;
+      if (y * SIZE > this.view.height + this.view.y) continue;
+      chunk.drawResources(ctx, this.view);
     }
   }
 };

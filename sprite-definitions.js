@@ -90,6 +90,22 @@ export const SPRITES = [
     path: "graphics/terrain/deepwater1.png",
     sprites: waterSprites(19.5 * 16, 8), mips: 3,
   },
+  {
+    path: "graphics/resources/iron-ore.png",
+    sprites: resourceSprites(20 * 16, 8, 8), mips: 1,
+  },
+  {
+    path: "graphics/resources/copper-ore.png",
+    sprites: resourceSprites(24 * 16, 8, 8), mips: 1,
+  },
+  {
+    path: "graphics/resources/coal.png",
+    sprites: resourceSprites(28 * 16, 8, 8), mips: 1,
+  },
+  {
+    path: "graphics/resources/stone.png",
+    sprites: resourceSprites(32 * 16, 8, 8), mips: 1,
+  },
 ];
 
 function terrainSprites(id, count) {
@@ -104,6 +120,24 @@ function waterSprites(id, count) {
   const res = [];
   for (let i = 0; i < count; i++) {
     res.push({id: id + i, rect: rect(i)});
+  }
+  return res;
+}
+
+function resourceSprites(id, variations, count) {
+  const res = [];
+  for (let i = 0; i < variations; i++) {
+    for (let j = 0; j < count; j++) {
+      res.push({
+        id: id + i * count + j,
+        rect: {
+          x: 8 + i * 64,
+          y: 8 + 64 * (count - 1) - j * 64,
+          width: 48,
+          height: 48,
+        }
+      });
+    }
   }
   return res;
 }

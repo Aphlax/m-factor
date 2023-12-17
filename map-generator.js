@@ -33,7 +33,8 @@ const WATER = {
 const RESOURCES = [
   {
     id: 1, // Iron.
-    startingDist: 50,
+    sprite: 20 * 16,
+    startingDist: 40,
     startingSize: 0.5,
     scale: 0.0104,
     limit: 0.9,
@@ -41,7 +42,8 @@ const RESOURCES = [
   },
   {
     id: 2, // Copper.
-    startingDist: 47,
+    sprite: 24 * 16,
+    startingDist: 37,
     startingSize: 0.44,
     scale: 0.0115,
     limit: 0.907,
@@ -49,7 +51,8 @@ const RESOURCES = [
   },
   {
     id: 3, // Coal.
-    startingDist: 60,
+    sprite: 28 * 16,
+    startingDist: 50,
     startingSize: 0.46,
     scale: 0.0124,
     limit: 0.914,
@@ -57,8 +60,9 @@ const RESOURCES = [
   },
   {
     id: 4, // Stone.
-    startingDist: 110,
-    startingSize: 0.25,
+    sprite: 32 * 16,
+    startingDist: 80,
+    startingSize: 0.33,
     scale: 0.0156,
     limit: 0.931,
     quantity: 0.6,
@@ -96,8 +100,8 @@ MapGenerator.prototype.initialize = function(seed) {
     this.resources.push({
         ...r,
         noise: new PerlinNoise(randSeed(),
-            r.scale, 8, 2, 0.56),
-        pos: createStarterPos(rand, r.startingDist, 40,
+            r.scale, 8, 2, 0.55),
+        pos: createStarterPos(rand, r.startingDist, 50,
             this.starterLakePos, this.resources.map(r => r.pos)),
       });
   }
@@ -107,18 +111,18 @@ MapGenerator.prototype.generateResources = function (cx, cy, tiles) {
   const resources = [];
   for (let i = 0; i < 32; i++) {
     for (let j = 0; j < 32; j++) {
-      if (tiles[i][j] >= 19 * 16) continue;
+      if (tiles[i][j] >= WATER.water) continue;
       const x = cx * 32 + i, y = cy * 32 + j;
       const d = Math.sqrt(x**2 + y**2);
       for (let r of this.resources) {
-        let resource;
+        let resource = -1;
         if (d <= 150) {
-          const limit = starterLimit(dist(r.pos, {x, y}) / r.startingSize);
           resource = r.noise.get(x * 4.07 + 1000, y * 4)
-              - limit;
+              - starterLimit(dist(r.pos, {x, y}) / r.startingSize);
           resource = resource > 0 ? Math.min(0.2, resource) / 0.2 : resource;
-        } else {
-          const limit = resourceLimit(d, r.limit)
+        }
+        if (d > 100 && resource < 0) {
+          const limit = resourceLimit(d, r.limit);
           resource = (r.noise.get(x, y) - limit);
           resource = resource > 0 ? resource / (1 - limit) : resource;
         }
@@ -126,10 +130,10 @@ MapGenerator.prototype.generateResources = function (cx, cy, tiles) {
           if (!resources[i]) resources[i] = [];
           resources[i][j] = {
             id: r.id,
-            amount: Math.floor((0.1 + resource)
-                * r.quantity * (10 + Math.sqrt(dist) / 4)
-                * 100 + this.tileOffsets[j][i] * 2),
-            sprite: this.tileOffsets[i][j] & 7,
+            amount: Math.floor((0.1 + resource)**2
+                * r.quantity * (10 + Math.sqrt(d) / 4)
+                * 80 + this.tileOffsets[j][i] * 1.5),
+            sprite: r.sprite + (this.tileOffsets[i][j] & 7) * 8,
           };
           break;
         }

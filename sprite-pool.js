@@ -76,6 +76,21 @@ SpritePool.prototype.draw = function(ctx) {
   ctx.fillRect(Math.floor(ctx.canvas.width * 0.2 + 10),
       Math.floor(ctx.canvas.height * 0.5 - 20),
       Math.floor((ctx.canvas.width * 0.6 - 30) * this.current / this.total + 10), 40);
+      
+  // Debug.
+  if (this.current == this.total) {
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        let s = this.get(20*16+i*8+j), r =s.mip[0];
+        let rect = [10+i*64, 10+ j*64, 48, 48];
+        ctx.drawImage(s.image,
+            r.x, r.y, r.width, r.height,
+            ...rect);
+        ctx.strokeStyle="red";
+        ctx.strokeRect(...rect);
+      }
+    }
+  }
 };
 
 const INSTANCE = new SpritePool();

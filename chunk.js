@@ -25,7 +25,7 @@ Chunk.prototype.update = function(time, dt) {
   }
 };
 
-Chunk.prototype.draw = function(ctx, view) {
+Chunk.prototype.drawTerrain = function(ctx, view) {
   const xStart = Math.max(0, Math.floor(view.x / view.scale - this.x * SIZE));
   const xEnd = Math.min(SIZE, Math.ceil((view.width + view.x) / view.scale - this.x * SIZE));
   const yStart = Math.max(0, Math.floor(view.y / view.scale - this.y * SIZE));
@@ -46,19 +46,35 @@ Chunk.prototype.draw = function(ctx, view) {
           scaleCeil, scaleCeil);
     }
   }
-  
+}
+
+Chunk.prototype.drawResources = function(ctx, view) {
+  const xStart = Math.max(0, Math.floor(view.x / view.scale - this.x * SIZE - 1));
+  const xEnd = Math.min(SIZE, Math.ceil((view.width + view.x) / view.scale - this.x * SIZE + 1));
+  const yStart = Math.max(0, Math.floor(view.y / view.scale - this.y * SIZE - 1));
+  const yEnd = Math.min(SIZE, Math.ceil((view.height + view.y) / view.scale - this.y * SIZE + 1));
+  const resourceSize = Math.ceil(view.scale * 1.5);
   if (this.resources) {
     for (let x = xStart; x < xEnd; x++) {
       if (!this.resources[x]) continue;
       for (let y = yStart; y < yEnd; y++) {
         const r = this.resources[x][y];
         if (!r) continue;
-        
-        ctx.fillStyle = r.id == 1 ? "grey" : r.id == 2 ? "#D87333" : i.id == 3 ? "black" : "#DB8C44";
-        ctx.fillRect(
-            Math.floor((this.x * SIZE + x) * view.scale - view.x) +2,
-            Math.floor((this.y * SIZE + y) * view.scale - view.y) +2,
-            scaleCeil -4, scaleCeil -4);
+        const sprite = SPRITES.get(r.sprite +
+            (r.amount <= 25 ? 0 :
+            r.amount <= 100 ? 1 :
+            r.amount <= 500 ? 2 :
+            r.amount <= 2500 ? 3 :
+            r.amount <= 10000 ? 4 :
+            r.amount <= 50000 ? 5 :
+            r.amount <= 250000 ? 6 : 7));
+        ctx.drawImage(
+          sprite.image,
+          sprite.mip[0].x, sprite.mip[0].y,
+          sprite.mip[0].width, sprite.mip[0].height,
+          Math.floor((this.x * SIZE + x - 0.25) * view.scale - view.x),
+          Math.floor((this.y * SIZE + y - 0.25) * view.scale - view.y),
+          resourceSize, resourceSize);
       }
     }
   }
@@ -74,5 +90,15 @@ Chunk.prototype.draw = function(ctx, view) {
   ctx.strokeStyle = "red";
   ctx.stroke();
 };
+
+function resourceSprite(amount) {
+  return amount <= 25 ? 0 :
+      amount <= 100 ? 1 :
+      amount <= 500 ? 2 :
+      amount <= 2500 ? 3 :
+      amount <= 10000 ? 4 :
+      amount <= 50000 ? 5 :
+      amount <= 250000 ? 6 : 7;
+}
 
 export {Chunk};
