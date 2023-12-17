@@ -38,7 +38,9 @@ PerlinNoise.prototype.get = function(x, y) {
   let noise = 0;
   for (let i = 0; i < this.octaves; i++) {
     let scale = this.scale * this.freq ** i;
-    noise += this.getNoise(x * scale, y * scale) * this.amp ** i;
+    noise += this.getNoise(
+        x * scale,
+        y * scale) * this.amp ** i;
   }
   return (noise + 1) / 2;
 }

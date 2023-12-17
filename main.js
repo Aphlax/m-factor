@@ -3,6 +3,8 @@
  */
 import {Game} from "./game.js";
 
+var STOP = false;
+
 (function() {
   "use strict";
   let canvas, ctx, game;
@@ -11,7 +13,6 @@ import {Game} from "./game.js";
 
   function onload() {
     canvas = document.getElementById('canvas');
-    // canvas.requestFullscreen();
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     ctx = canvas.getContext('2d');
@@ -44,17 +45,7 @@ import {Game} from "./game.js";
     ctx.fillText(frameRate + "", canvas.width - 32, 24);
     ctx.fillText(game.gameMap.view.scale, canvas.width - 100, 50);
     
-    window.requestAnimationFrame(loop);
+    if (!window.STOP)
+      window.requestAnimationFrame(loop);
   }
-  /*
-  // Input handling.
-  const preventCanvasMove = function(e) {
-	if (e.target == canvas) {
-	  e.preventDefault();
-    }
-  };
-  document.body.addEventListener("touchstart", preventCanvasMove, {passive: false});
-  document.body.addEventListener("touchend", preventCanvasMove, {passive: false});
-  document.body.addEventListener("touchmove", preventCanvasMove, {passive: false});
-  */
 })();

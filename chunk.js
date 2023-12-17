@@ -6,11 +6,13 @@ function Chunk(cx, cy) {
   this.x = cx;
   this.y = cy;
   this.tiles = [];
+  this.resources = undefined;
   this.entities = new Array(SIZE).fill(0).map(() => []);
 }
 
 Chunk.prototype.generate = function(mapGenerator) {
   this.tiles = mapGenerator.generateTiles(this.x, this.y);
+  this.resources = mapGenerator.generateResources(this.x, this.y, this.tiles);
   return this;
 };
 
@@ -44,6 +46,24 @@ Chunk.prototype.draw = function(ctx, view) {
           scaleCeil, scaleCeil);
     }
   }
+  
+  if (this.resources) {
+    for (let x = xStart; x < xEnd; x++) {
+      if (!this.resources[x]) continue;
+      for (let y = yStart; y < yEnd; y++) {
+        const r = this.resources[x][y];
+        if (!r) continue;
+        
+        ctx.fillStyle = r.id == 1 ? "grey" : r.id == 2 ? "#D87333" : i.id == 3 ? "black" : "#DB8C44";
+        ctx.fillRect(
+            Math.floor((this.x * SIZE + x) * view.scale - view.x) +2,
+            Math.floor((this.y * SIZE + y) * view.scale - view.y) +2,
+            scaleCeil -4, scaleCeil -4);
+      }
+    }
+  }
+  
+  // Chunk boundaries.
   const lx = this.x * SIZE * view.scale - view.x,
       ly = this.y * SIZE * view.scale - view.y;
   ctx.beginPath();
