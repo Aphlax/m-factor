@@ -5,6 +5,34 @@
   128: 160
 */
 
+export const NAMES = {
+  dirt1: 0,
+  dirt2: 16,
+  dirt3: 32,
+  dirt4: 48,
+  dirt5: 64,
+  dirt6: 80,
+  dirt7: 96,
+  dryDirt: 112,
+  grass1: 128,
+  grass2: 144,
+  grass3: 160,
+  grass4: 11*16,
+  sand1: 12*16,
+  sand2: 13*16,
+  sand3: 14*16,
+  redDesert0: 15*16,
+  redDesert1: 16*16,
+  redDesert2: 17*16,
+  redDesert3: 18*16,
+  water: 19*16,
+  deepWater: 19.5*16,
+  ironOre: 20*16,
+  copperOre: 24*16,
+  coal: 28*16,
+  stone: 32*16,
+};
+
 export const SPRITES = [
   {
     path: "graphics/terrain/dirt-1.png",

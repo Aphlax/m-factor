@@ -1,4 +1,5 @@
 import {SPRITES} from './sprite-definitions.js';
+export {NAMES as S} from './sprite-definitions.js';
 
 function SpritePool() {
   this.total = SPRITES.length;

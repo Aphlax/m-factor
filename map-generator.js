@@ -1,71 +1,67 @@
 import {PerlinNoise} from './perlin-noise.js';
 import {createRand, createSeedRand} from './utils.js';
+import {S} from './sprite-pool.js';
 
 const SEED = [0x9E3779B9, 0x243F6A88, 0xB7E15162];
 
-const DEFAULT_TERRAIN = 16; // dirt 2
+const DEFAULT_TERRAIN = S.dirt2;
 const TERRAIN = [
-  {id: 0, s: 0.005, p: 0.98},  // dirt 1
-  {id: 32, s: 0.005, p: 0.98},  // dirt 3
-  {id: 48, s: 0.005, p: 0.94},  // dirt 4
-  {id: 64, s: 0.0065, p: 0.97},  // dirt 5
-  {id: 80, s: 0.006, p: 0.95},  // dirt 6
-  {id: 96, s: 0.008, p: 0.95},  // dirt 7
-  {id: 112, s: 0.005, p: 0.99},  // dry dirt
-  {id: 128, s: 0.005, p: 0.7},  // grass 1
-  {id: 144, s: 0.005, p: 0.7},  // grass 2
-  {id: 160, s: 0.006, p: 0.7},  // grass 3
-  {id: 176, s: 0.007, p: 0.85},  // grass 4
-  {id: 192, s: 0.005, p: 0.9},  // sand 1
-  {id: 208, s: 0.005, p: 0.8},  // sand 2
-  {id: 224, s: 0.005, p: 0.8},  // sand 3
-  {id: 240, s: 0.008, p: 0.85},  // red-desert 0
-  {id: 256, s: 0.005, p: 0.7},  // red-desert 1
-  {id: 17 * 16, s: 0.005, p: 0.6},  // red-desert 2
-  {id: 18 * 16, s: 0.005, p: 0.5},  // red-desert 3
+  {id: S.dirt1, s: 0.005, p: 0.98},
+  {id: S.dirt3, s: 0.005, p: 0.98},
+  {id: S.dirt4, s: 0.005, p: 0.94},
+  {id: S.dirt5, s: 0.0065, p: 0.97},
+  {id: S.dirt6, s: 0.006, p: 0.95},
+  {id: S.dirt7, s: 0.008, p: 0.95},
+  {id: S.dryDirt, s: 0.005, p: 0.99},
+  {id: S.grass1, s: 0.005, p: 0.7},
+  {id: S.grass2, s: 0.005, p: 0.7},
+  {id: S.grass3, s: 0.006, p: 0.7},
+  {id: S.grass4, s: 0.007, p: 0.85},
+  {id: S.sand1, s: 0.005, p: 0.9},
+  {id: S.sand2, s: 0.005, p: 0.8},
+  {id: S.sand3, s: 0.005, p: 0.8},
+  {id: S.redDesert0, s: 0.008, p: 0.85},
+  {id: S.redDesert1, s: 0.005, p: 0.7},
+  {id: S.redDesert2, s: 0.005, p: 0.6},
+  {id: S.redDesert3, s: 0.005, p: 0.5},
 ];
-const WATER = {
-  beach: 192,
-  water: 19 * 16,
-  deepWater: 19.5 * 16,
-};
 
 const RESOURCES = [
   {
     id: 1, // Iron.
-    sprite: 20 * 16,
+    sprite: S.ironOre,
     startingDist: 40,
     startingSize: 0.5,
-    scale: 0.0104,
-    limit: 0.9,
+    scale: 0.0093,
+    limit: 0.927,
     quantity: 1,
   },
   {
     id: 2, // Copper.
-    sprite: 24 * 16,
+    sprite: S.copperOre,
     startingDist: 37,
     startingSize: 0.44,
-    scale: 0.0115,
-    limit: 0.907,
-    quantity: 0.9,
+    scale: 0.0103,
+    limit: 0.934,
+    quantity: 0.95,
   },
   {
     id: 3, // Coal.
-    sprite: 28 * 16,
+    sprite: S.coal,
     startingDist: 50,
     startingSize: 0.46,
-    scale: 0.0124,
-    limit: 0.914,
-    quantity: 0.8,
+    scale: 0.0112,
+    limit: 0.938,
+    quantity: 0.92,
   },
   {
     id: 4, // Stone.
-    sprite: 32 * 16,
+    sprite: S.stone,
     startingDist: 80,
     startingSize: 0.33,
-    scale: 0.0156,
-    limit: 0.931,
-    quantity: 0.6,
+    scale: 0.01405,
+    limit: 0.947,
+    quantity: 0.85,
   },
 ];
 
@@ -73,7 +69,7 @@ const starterLimit = dist => dist <= 20 ? 0.4 :
     dist <= 40 ? 0.4 + (dist - 20) / 100 :
     dist <= 60 ? 0.6 + (dist - 40) / 33 : 2;
 const resourceLimit = (dist, limit) => dist <= 100 ? 2 :
-    dist <= 110 ? 1.2 - (dist - 100) / 10 * (1.2 - limit) :
+    dist <= 170 ? 1.3 - (dist - 100) / 70 * (1.3 - limit) :
     limit;
 const lakeLimit = dist => dist <= 150 ? 2 :
     dist <= 160 ? 1.2 - (dist - 150) / 25 :
@@ -111,7 +107,7 @@ MapGenerator.prototype.generateResources = function (cx, cy, tiles) {
   const resources = [];
   for (let i = 0; i < 32; i++) {
     for (let j = 0; j < 32; j++) {
-      if (tiles[i][j] >= WATER.water) continue;
+      if (tiles[i][j] >= S.water) continue;
       const x = cx * 32 + i, y = cy * 32 + j;
       const d = Math.sqrt(x**2 + y**2);
       for (let r of this.resources) {
@@ -122,18 +118,28 @@ MapGenerator.prototype.generateResources = function (cx, cy, tiles) {
           resource = resource > 0 ? Math.min(0.2, resource) / 0.2 : resource;
         }
         if (d > 100 && resource < 0) {
-          const limit = resourceLimit(d, r.limit);
-          resource = (r.noise.get(x, y) - limit);
-          resource = resource > 0 ? resource / (1 - limit) : resource;
+          resource = r.noise.get(x, y) - resourceLimit(d, r.limit);
+          resource = resource > 0 ? resource / (1 - r.limit) : resource;
         }
         if (resource > 0) {
           if (!resources[i]) resources[i] = [];
+          const amount = Math.floor((0.1 + resource)**2
+              * r.quantity * (10 + Math.max(12, Math.sqrt(d)) / 4)
+              * 80 + this.tileOffsets[j][i] * 1.5);
+          const variation = r.sprite
+              + (this.tileOffsets[i][j] & 7) * 8;
           resources[i][j] = {
             id: r.id,
-            amount: Math.floor((0.1 + resource)**2
-                * r.quantity * (10 + Math.sqrt(d) / 4)
-                * 80 + this.tileOffsets[j][i] * 1.5),
-            sprite: r.sprite + (this.tileOffsets[i][j] & 7) * 8,
+            amount,
+            variation,
+            sprite: variation +
+                (amount <= 25 ? 0 :
+                amount <= 100 ? 1 :
+                amount <= 500 ? 2 :
+                amount <= 2500 ? 3 :
+                amount <= 10000 ? 4 :
+                amount <= 50000 ? 5 :
+                amount <= 250000 ? 6 : 7),
           };
           break;
         }
@@ -180,13 +186,13 @@ MapGenerator.prototype.lake = function(x, y) {
   if (lake > -0.05) {
     if (lake < 0) {
       if (this.lakeNoise.get(x * 0.7 + 100, y * 0.7) > 0.4 - lake * 5) {
-        return WATER.beach;
+        return S.sand1;
       }
     } else {
       if (lake > 0.1)
-        return WATER.deepWater;
+        return S.deepWater;
       else
-        return WATER.water;
+        return S.water;
     }
   }
 }

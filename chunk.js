@@ -60,14 +60,7 @@ Chunk.prototype.drawResources = function(ctx, view) {
       for (let y = yStart; y < yEnd; y++) {
         const r = this.resources[x][y];
         if (!r) continue;
-        const sprite = SPRITES.get(r.sprite +
-            (r.amount <= 25 ? 0 :
-            r.amount <= 100 ? 1 :
-            r.amount <= 500 ? 2 :
-            r.amount <= 2500 ? 3 :
-            r.amount <= 10000 ? 4 :
-            r.amount <= 50000 ? 5 :
-            r.amount <= 250000 ? 6 : 7));
+        const sprite = SPRITES.get(r.sprite);
         ctx.drawImage(
           sprite.image,
           sprite.mip[0].x, sprite.mip[0].y,

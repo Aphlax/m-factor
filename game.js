@@ -9,7 +9,7 @@ const MODE = {
 };
 
 function Game(canvas) {
-  this.seed = 1274;
+  this.seed = 1284;
   this.mode = MODE.loading;
   this.gameMap = new GameMap(canvas);
   this.spritePool = SPRITES;
