@@ -102,15 +102,6 @@ MapGenerator.prototype.initialize = function(seed) {
             this.starterLakePos, this.resources.map(r => r.pos)),
       });
   }
-  
-  let p = new Array(16).fill(0).map((a, i) => i);
-  for (let i = p.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * i), t = p[i];
-    p[i] = p[j];
-    p[j] = t;
-  }
-  console.log(p.map(i => Math.floor(i /4) -1).join(', '));
-  console.log(p.map(i => (i %4) -1).join(', '));
 }
 
 MapGenerator.prototype.generateResources = function (cx, cy, tiles) {

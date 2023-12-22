@@ -1,4 +1,4 @@
-
+import {S} from './sprite-pool.js';
 
 export const I = {
   ironOre: 1,
@@ -8,24 +8,24 @@ export const I = {
 };
 
 export const ITEMS = new Map([
-  I.ironOre,
+  [I.ironOre,
   {
     sprite: S.ironOreItem,
     stackSize: 50,
-  },
-  I.copperOre,
+  }],
+  [I.copperOre,
   {
     sprite: S.copperOreItem,
     stackSize: 50,
-  },
-  I.coal,
+  }],
+  [I.coal,
   {
     sprite: S.coalItem,
     stackSize: 50,
-  },
-  I.stone,
+  }],
+  [I.stone,
   {
     sprite: S.stoneItem,
     stackSize: 50,
-  },
+  }],
 ]);

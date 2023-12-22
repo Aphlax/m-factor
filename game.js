@@ -27,7 +27,7 @@ Game.prototype.update = function(time, dt) {
   }
 };
 
-Game.prototype.draw = function(time, dt, ctx) {
+Game.prototype.draw = function(ctx, time, dt) {
   if (this.mode == MODE.playing) {
     this.gameMap.draw(ctx);
   } else if (this.mode == MODE.loading) {

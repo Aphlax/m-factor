@@ -39,7 +39,7 @@ var STOP = false;
     
     game.update(time, dt);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    game.draw(time, dt, ctx);
+    game.draw(ctx, time, dt);
     ctx.font = "24px Arial";
     ctx.fillStyle = "black";
     ctx.fillText(frameRate + "", canvas.width - 32, 24);

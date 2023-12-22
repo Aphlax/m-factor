@@ -1,7 +1,7 @@
 import {MapGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {GameMapInput} from './game-map-input.js';
-import {MAX_SIZE} from './entity.js'!
+import {MAX_SIZE} from './entity.js';
 
 
 function GameMap(canvas) {

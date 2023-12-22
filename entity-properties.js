@@ -1,4 +1,4 @@
-
+import {I} from './item-definitions.js';
 
 export const RESOURCE_NAMES = {
   iron: 1,
@@ -18,8 +18,8 @@ export function resourceSprite(amount) {
 }
 
 export const MINE_PATTERN = {
-  x4: [],
-  y4: [],
+  x4: [2, 1, 0, -1, 1, 1, -1, 2, -1, 1, 0, -1, 2, 0, 0, 2],
+  y4: [-1, 2, -1, -1, 1, 0, 2, 1, 0, -1, 2, 1, 2, 0, 1, 0],
 };
 
 export const MINE_PRODUCTS = {
