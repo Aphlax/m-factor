@@ -17,9 +17,9 @@ function Game(canvas) {
   this.spritePool.load();
 }
 
-Game.prototype.update = function(time, dt, input) {
+Game.prototype.update = function(time, dt) {
   if (this.mode == MODE.playing) {
-    this.gameMap.update(time);
+    this.gameMap.update(time, dt);
   } else if (this.mode == MODE.loading) {
     if (this.spritePool.isLoaded() && time > 1000) {
       this.mode = MODE.playing;

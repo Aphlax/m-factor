@@ -1,6 +1,7 @@
 import {PerlinNoise} from './perlin-noise.js';
 import {createRand, createSeedRand} from './utils.js';
 import {S} from './sprite-pool.js';
+import {RESOURCE_NAMES, resourceSprite} from './entity-properties.js';
 
 const SEED = [0x9E3779B9, 0x243F6A88, 0xB7E15162];
 
@@ -28,7 +29,7 @@ const TERRAIN = [
 
 const RESOURCES = [
   {
-    id: 1, // Iron.
+    id: RESOURCE_NAMES.iron,
     sprite: S.ironOre,
     startingDist: 40,
     startingSize: 0.5,
@@ -37,7 +38,7 @@ const RESOURCES = [
     quantity: 1,
   },
   {
-    id: 2, // Copper.
+    id: RESOURCE_NAMES.copper,
     sprite: S.copperOre,
     startingDist: 37,
     startingSize: 0.44,
@@ -46,7 +47,7 @@ const RESOURCES = [
     quantity: 0.95,
   },
   {
-    id: 3, // Coal.
+    id: RESOURCE_NAMES.coal,
     sprite: S.coal,
     startingDist: 50,
     startingSize: 0.46,
@@ -55,7 +56,7 @@ const RESOURCES = [
     quantity: 0.92,
   },
   {
-    id: 4, // Stone.
+    id: RESOURCE_NAMES.stone,
     sprite: S.stone,
     startingDist: 80,
     startingSize: 0.33,
@@ -101,6 +102,15 @@ MapGenerator.prototype.initialize = function(seed) {
             this.starterLakePos, this.resources.map(r => r.pos)),
       });
   }
+  
+  let p = new Array(16).fill(0).map((a, i) => i);
+  for (let i = p.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * i), t = p[i];
+    p[i] = p[j];
+    p[j] = t;
+  }
+  console.log(p.map(i => Math.floor(i /4) -1).join(', '));
+  console.log(p.map(i => (i %4) -1).join(', '));
 }
 
 MapGenerator.prototype.generateResources = function (cx, cy, tiles) {
@@ -132,14 +142,7 @@ MapGenerator.prototype.generateResources = function (cx, cy, tiles) {
             id: r.id,
             amount,
             variation,
-            sprite: variation +
-                (amount <= 25 ? 0 :
-                amount <= 100 ? 1 :
-                amount <= 500 ? 2 :
-                amount <= 2500 ? 3 :
-                amount <= 10000 ? 4 :
-                amount <= 50000 ? 5 :
-                amount <= 250000 ? 6 : 7),
+            sprite: variation + resourceSprite(amount),
           };
           break;
         }

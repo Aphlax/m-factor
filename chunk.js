@@ -1,28 +1,24 @@
 import {SPRITES} from './sprite-pool.js';
 
-const SIZE = Chunk.SIZE = 32;
+export const SIZE = 32;
 
+
+/**
+ * Part of the game map.
+ * Inner fields get accessed directly from GameMap.
+ */
 function Chunk(cx, cy) {
   this.x = cx;
   this.y = cy;
   this.tiles = [];
   this.resources = undefined;
-  this.entities = new Array(SIZE).fill(0).map(() => []);
+  this.entities = [];
 }
 
 Chunk.prototype.generate = function(mapGenerator) {
   this.tiles = mapGenerator.generateTiles(this.x, this.y);
   this.resources = mapGenerator.generateResources(this.x, this.y, this.tiles);
   return this;
-};
-
-Chunk.prototype.update = function(time, dt) {
-  for (x in this.entities) {
-    for (y in this.entities[x]) {
-      if (this.entities[x][y].type != 1)
-        this.entities[x][y].update(time, dt);
-    }
-  }
 };
 
 Chunk.prototype.drawTerrain = function(ctx, view) {
@@ -83,15 +79,5 @@ Chunk.prototype.drawResources = function(ctx, view) {
   ctx.strokeStyle = "red";
   ctx.stroke();
 };
-
-function resourceSprite(amount) {
-  return amount <= 25 ? 0 :
-      amount <= 100 ? 1 :
-      amount <= 500 ? 2 :
-      amount <= 2500 ? 3 :
-      amount <= 10000 ? 4 :
-      amount <= 50000 ? 5 :
-      amount <= 250000 ? 6 : 7;
-}
 
 export {Chunk};
