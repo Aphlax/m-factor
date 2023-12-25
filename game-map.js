@@ -1,8 +1,8 @@
 import {MapGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {GameMapInput} from './game-map-input.js';
-import {MAX_SIZE} from './entity.js';
-
+import {MAX_SIZE} from './entity-properties.js';
+import {Entity} from './entity.js';
 
 function GameMap(canvas) {
   this.mapGenerator = new MapGenerator();
@@ -30,6 +30,7 @@ GameMap.prototype.update = function(time, dt) {
       }
     }
   }
+  
   // Generate missing chunks.
   const size = SIZE * this.view.scale;
   const viewX = Math.floor(this.view.x / size),
@@ -51,27 +52,51 @@ GameMap.prototype.update = function(time, dt) {
   this.input.update(time);
 };
 
-GameMap.prototype.draw = function(ctx) {
-  const SIZE = Chunk.SIZE * this.view.scale;
-  for (let [x, col] of this.chunks.entries()) {
-    if ((x + 1) * SIZE <= this.view.x) continue;
-    if (x * SIZE > this.view.width + this.view.x) continue;
-    for (let [y, chunk] of col.entries()) {
-  	if ((y + 1) * SIZE <= this.view.y) continue;
-      if (y * SIZE > this.view.height + this.view.y) continue;
+GameMap.prototype.draw = function(ctx, time, dt) {
+  const size = SIZE * this.view.scale;
+  for (let [x, chunks] of this.chunks.entries()) {
+    if ((x + 1) * size <= this.view.x) continue;
+    if (x * size > this.view.width + this.view.x) continue;
+    for (let [y, chunk] of chunks.entries()) {
+  	if ((y + 1) * size <= this.view.y) continue;
+      if (y * size > this.view.height + this.view.y) continue;
       chunk.drawTerrain(ctx, this.view);
     }
   }
-  for (let [x, col] of this.chunks.entries()) {
-    if ((x + 1) * SIZE <= this.view.x) continue;
-    if (x * SIZE > this.view.width + this.view.x) continue;
-    for (let [y, chunk] of col.entries()) {
-  	if ((y + 1) * SIZE <= this.view.y) continue;
-      if (y * SIZE > this.view.height + this.view.y) continue;
+  for (let [x, chunks] of this.chunks.entries()) {
+    if ((x + 1) * size <= this.view.x - 0.5 * this.view.scale) continue;
+    if (x * size > this.view.width + this.view.x + 0.5 * this.view.scale) continue;
+    for (let [y, chunk] of chunks.entries()) {
+  	if ((y + 1) * size <= this.view.y - 0.5 * this.view.scale) continue;
+      if (y * size > this.view.height + this.view.y + 0.5 * this.view.scale) continue;
       chunk.drawResources(ctx, this.view);
     }
   }
+  for (let [x, chunks] of this.chunks.entries()) {
+    if ((x + 1) * size <= this.view.x - this.view.scale * MAX_SIZE) continue;
+    if (x * size > this.view.width + this.view.x) continue;
+    for (let [y, chunk] of chunks.entries()) {
+  	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
+      if (y * size > this.view.height + this.view.y) continue;
+      for (let entity of chunk.entities) {
+        entity.draw(ctx, this.view, time, dt);
+      }
+    }
+  }
 };
+
+GameMap.prototype.createEntity = function(name, x, y, direction, time) {
+  // Create should not do any checks if there is enough space etc.
+  const entity = new Entity().setup(name, x, y, direction, time);
+  
+  const cx = Math.floor(x / SIZE);
+  const cy = Math.floor(y / SIZE);
+  if (!this.chunks.has(cx) || !this.chunks.get(cx).has(cy))
+    return;
+  this.chunks.get(cx).get(cy).entities.push(entity);
+  
+  // TODO: create events.
+}
 
 GameMap.prototype.canPlace = function(x, y, width, height, ignoredEntity) {
   for (let i = 0; i < width; i++) {
@@ -135,13 +160,18 @@ GameMap.prototype.getTerrainAt = function(x, y) {
   return chunk.tiles[x - cx][y - cy];
 }
 
-GameMap.prototype.getResourceAt = function(x, y) {
+GameMap.prototype.getResourceAt = function(x, y, remove) {
   const cx = Math.floor(x / SIZE);
   if (!this.chunks.has(cx)) return;
   const cy = Math.floor(y / SIZE);
   if (!this.chunks.get(cx).has(cy)) return;
   const chunk = this.chunks.get(cx).get(cy);
   if (!chunk.resources[x - cx]) return;
+  if (remove) {
+    const res = chunk.resources[x - cx][y - cy];
+    delete chunk.resources[x - cx][y - cy];
+    return res;
+  }
   return chunk.resources[x - cx][y - cy];
 }
 

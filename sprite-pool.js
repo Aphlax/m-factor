@@ -7,10 +7,6 @@ function SpritePool() {
   this.sprites = new Map();
 }
 
-SpritePool.prototype.get = function(id) {
-  return this.sprites.get(id);
-};
-
 SpritePool.prototype.load = function() {
   for (let imageDef of SPRITES) {
     this.loadImage(imageDef);
@@ -67,7 +63,7 @@ SpritePool.prototype.isLoaded = function() {
   return this.current == this.total;
 };
 
-SpritePool.prototype.draw = function(ctx) {
+SpritePool.prototype.draw = function(ctx, time) {
   // Loading bar.
   ctx.fillStyle = "black";
   ctx.fillRect(Math.floor(ctx.canvas.width * 0.2),
@@ -80,10 +76,12 @@ SpritePool.prototype.draw = function(ctx) {
       
   // Debug.
   if (this.current == this.total) {
-    for (let i = 0; i < 8; i++) {
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    let sprite = 42*16;
+    for (let i = 0; i < 4; i++) {
       for (let j = 0; j < 8; j++) {
-        let s = this.get(20*16+i*8+j), r =s.mip[0];
-        let rect = [10+i*64, 10+ j*64, 48, 48];
+        let s = this.get(sprite+i*8+j), r =s.mip[0];
+        let rect = [10+i*70, 10+ j*70, 64, 64];
         ctx.drawImage(s.image,
             r.x, r.y, r.width, r.height,
             ...rect);
@@ -91,9 +89,22 @@ SpritePool.prototype.draw = function(ctx) {
         ctx.strokeRect(...rect);
       }
     }
+    
+    let a = 32;
+    
+    let s = this.get(sprite + (Math.floor(time / 60) % a));
+    if(!s) return;
+    let r =s.mip[0];
+    let rect = [10, 570, 64, 64];
+    ctx.drawImage(s.image,
+        r.x, r.y, r.width, r.height,
+        ...rect);
+    ctx.strokeStyle="red";
+    ctx.strokeRect(...rect);
   }
 };
 
 const INSTANCE = new SpritePool();
+INSTANCE.get = INSTANCE.sprites.get.bind(INSTANCE.sprites);
 
 export {INSTANCE as SPRITES};

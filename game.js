@@ -15,11 +15,16 @@ function Game(canvas) {
   this.spritePool = SPRITES;
   this.gameMap.initialize(this.seed);
   this.spritePool.load();
+  this.test = true;
 }
 
 Game.prototype.update = function(time, dt) {
   if (this.mode == MODE.playing) {
     this.gameMap.update(time, dt);
+    if (this.test) {
+      this.gameMap.createEntity(1, 10, 10, 1, time);
+      this.test = false;
+    }
   } else if (this.mode == MODE.loading) {
     if (this.spritePool.isLoaded() && time > 1000) {
       this.mode = MODE.playing;
@@ -29,9 +34,9 @@ Game.prototype.update = function(time, dt) {
 
 Game.prototype.draw = function(ctx, time, dt) {
   if (this.mode == MODE.playing) {
-    this.gameMap.draw(ctx);
+    this.gameMap.draw(ctx, time, dt);
   } else if (this.mode == MODE.loading) {
-    this.spritePool.draw(ctx);
+    this.spritePool.draw(ctx, time);
   }
 };
 

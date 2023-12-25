@@ -1,5 +1,28 @@
 import {I} from './item-definitions.js';
 
+export const TYPE = {
+  mine: 1,
+};
+
+export const MAX_SIZE = 6;
+
+export const STATE = {
+  running: 0,
+  idle: 1,
+  missingItem: 1,
+  outputFull: 2,
+  noEnergy: 3,
+  mineNoOutput: 10,
+  mineEmpty: 11,
+};
+
+export const DIRECTION = {
+  north: 0,
+  east: 1,
+  south: 2,
+  west: 3,
+}
+
 export const RESOURCE_NAMES = {
   iron: 1,
   copper: 2,

@@ -31,6 +31,10 @@ export const NAMES = {
   copperOre: 24*16,
   coal: 28*16,
   stone: 32*16,
+  burnerDrillN: 36*16,
+  burnerDrillE: 38*16,
+  burnerDrillS: 40*16,
+  burnerDrillW: 42*16,
 };
 
 export const SPRITES = [
@@ -134,12 +138,45 @@ export const SPRITES = [
     path: "graphics/resources/stone.png",
     sprites: resourceSprites(32 * 16, 8, 8), mips: 1,
   },
+  {
+    path: "graphics/entities/burner-mining-drill/burner-mining-drill-N.png",
+    sprites: entitySprites(36 * 16, 87, 95, 4, 8, 4, 4, 4, 6), mips: 1,
+  },
+  {
+    path: "graphics/entities/burner-mining-drill/burner-mining-drill-E.png",
+    sprites: entitySprites(38 * 16, 93, 84, 4, 8, 7, 7, 0, 6), mips: 1,
+  },
+  {
+    path: "graphics/entities/burner-mining-drill/burner-mining-drill-S.png",
+    sprites: entitySprites(40 * 16, 87, 87, 4, 8, 3, 3, 2, 4), mips: 1,
+  },
+  {
+    path: "graphics/entities/burner-mining-drill/burner-mining-drill-W.png",
+    sprites: entitySprites(42 * 16, 91, 88, 4, 8, 6, 6, 2, 6), mips: 1,
+  },
 ];
+
+function entitySprites(id, width, height, xCount, yCount,
+                       trimLeft, trimRight, trimTop, trimBottom) {
+  const res = [];
+  for (let i = 0; i < xCount; i++) {
+    for (let j = 0; j < yCount; j++) {
+      res.push({
+        id: id + i * yCount + j,
+        rect: rect(i * width + (trimLeft ?? 0),
+            j* height + (trimTop ?? 0),
+            width - (trimLeft ?? 0) - (trimRight ?? 0),
+            height - (trimTop ?? 0) - (trimBottom ?? 0)),
+      });
+    }
+  }
+  return res;
+}
 
 function terrainSprites(id, count) {
   const res = [];
   for (let i = 0; i < count; i++) {
-    res.push({id: id + i, rect: rect(i)});
+    res.push({id: id + i, rect: rect(i * 32)});
   }
   return res;
 }
@@ -147,7 +184,7 @@ function terrainSprites(id, count) {
 function waterSprites(id, count) {
   const res = [];
   for (let i = 0; i < count; i++) {
-    res.push({id: id + i, rect: rect(i)});
+    res.push({id: id + i, rect: rect(i * 32)});
   }
   return res;
 }
@@ -170,11 +207,11 @@ function resourceSprites(id, variations, count) {
   return res;
 }
 
-function rect(a) {
+function rect(x, y, width, height) {
   return {
-      x: a * 32,
-      y: 0,
-      width: 32,
-      height: 32,
+      x: x ?? 0,
+      y: y ?? 0,
+      width: width ?? 32,
+      height: height ?? 32,
     };
 }
