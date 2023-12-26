@@ -22,7 +22,7 @@ Game.prototype.update = function(time, dt) {
   if (this.mode == MODE.playing) {
     this.gameMap.update(time, dt);
     if (this.test) {
-      this.gameMap.createEntity(1, 10, 10, 1, time);
+      this.gameMap.createEntity(1, 10, 10, 0, time);
       this.test = false;
     }
   } else if (this.mode == MODE.loading) {

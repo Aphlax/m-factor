@@ -72,6 +72,19 @@ GameMap.prototype.draw = function(ctx, time, dt) {
       chunk.drawResources(ctx, this.view);
     }
   }
+  ctx.globalAlpha = 0.7;
+  for (let [x, chunks] of this.chunks.entries()) {
+    if ((x + 1) * size <= this.view.x - this.view.scale * (MAX_SIZE + 2)) continue;
+    if (x * size > this.view.width + this.view.x) continue;
+    for (let [y, chunk] of chunks.entries()) {
+  	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
+      if (y * size > this.view.height + this.view.y) continue;
+      for (let entity of chunk.entities) {
+        entity.drawShadow(ctx, this.view, time, dt);
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x - this.view.scale * MAX_SIZE) continue;
     if (x * size > this.view.width + this.view.x) continue;

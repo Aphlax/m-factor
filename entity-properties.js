@@ -4,7 +4,7 @@ export const TYPE = {
   mine: 1,
 };
 
-export const MAX_SIZE = 6;
+export const MAX_SIZE = 3;
 
 export const STATE = {
   running: 0,

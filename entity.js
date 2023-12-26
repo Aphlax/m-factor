@@ -12,6 +12,7 @@ function Entity() {
   this.height = 0;
   this.direction = 0;
   this.sprite = 0;
+  this.spriteShadow = 0;
   this.animation = 0;
   this.animationLength = 0;
   
@@ -36,7 +37,8 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   this.width = def.width;
   this.height = def.height;
   this.direction = direction;
-  this.sprite = def.sprites[direction];
+  this.sprite = def.sprites[direction][0];
+  this.spriteShadow = def.sprites[direction][1];
   this.animation = 0;
   this.animationLength = def.animationLength;
   
@@ -115,13 +117,45 @@ Entity.prototype.draw = function(ctx, view, time, dt) {
         (time - this.taskStart) / 60) % this.animationLength;
   }
   const sprite = SPRITES.get(this.sprite + animation);
-  const r = sprite.mip[0];
+  const r = sprite.rect, e = sprite.extend;
+  const xScale = this.width * view.scale / (r.width - e.left - e.right);
+  const yScale = this.height * view.scale / (r.height - e.top - e.bottom);
   ctx.drawImage(sprite.image,
       r.x, r.y, r.width, r.height,
-      this.x * view.scale - view.x,
-      this.y * view.scale - view.y,
-      this.width * view.scale,
-      this.height * view.scale)
+      this.x * view.scale - view.x -
+          e.left * xScale,
+      this.y * view.scale - view.y -
+          e.top * yScale,
+      r.width * xScale,
+      r.height * yScale)
+};
+
+Entity.prototype.drawShadow = function(ctx, view, time, dt) {
+  if ((this.x + this.width) * view.scale <= view.x)
+    return;
+  if (this.x * view.scale > view.x + view.width)
+    return;
+  if ((this.y + this.height) * view.scale <= view.y)
+    return;
+  if (this.y * view.scale > view.y + view.height)
+    return;
+  let animation = this.animation;
+  if (this.animationLength && this.state == STATE.running) {
+    animation = Math.floor(animation +
+        (time - this.taskStart) / 60) % this.animationLength;
+  }
+  const sprite = SPRITES.get(this.spriteShadow + animation);
+  const r = sprite.rect, e = sprite.extend;
+  const xScale = this.width * view.scale / (r.width - e.left - e.right);
+  const yScale = this.height * view.scale / (r.height - e.top - e.bottom);
+  ctx.drawImage(sprite.image,
+      r.x, r.y, r.width, r.height,
+      this.x * view.scale - view.x -
+          e.left * xScale,
+      this.y * view.scale - view.y -
+          e.top * yScale,
+      r.width * xScale,
+      r.height * yScale)
 };
 
 Entity.prototype.insert = function(item, amount, time, origin) {

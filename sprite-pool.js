@@ -14,48 +14,16 @@ SpritePool.prototype.load = function() {
 };
 
 SpritePool.prototype.loadImage = function(imageDef) {
-  const img = new Image();
-  img.src = imageDef.path;
-  img.onload = () => {
-    const canvas = document.createElement("canvas");
-    const {width, height} = imageDef.sprites[0].rect;
-    canvas.width = imageDef.sprites.length * width;
-    canvas.height = Math.ceil(height * (2 - 0.5**(imageDef.mips - 1)));
-    const ctx = canvas.getContext('2d');
-    const mipImg = new Image();
-    mipImg.onload = () => this.current++;
-    
-    for (let i in imageDef.sprites) {
-      const s = imageDef.sprites[i], r = s.rect;
+  const image = new Image();
+  image.src = imageDef.path;
+  image.onload = () => {
+    for (let s of imageDef.sprites) {
       if (this.sprites.has(s.id)) {
         throw new Error("Sprite id conflict.");
       }
-      const mip = new Array(imageDef.mips).fill(0)
-          .map((_, j) => ({
-            x: i * width / (2**j),
-            y: height * (2 - 2**(1 - j)),
-            width: width / (2**j),
-            height: height / (2**j),
-          })).reverse();
-      mip.forEach(m => ctx.drawImage(img,
-          r.x, r.y, r.width, r.height,
-          m.x, m.y, m.width, m.height));
-      
-      this.sprites.set(s.id, {
-        image: mipImg,
-        mip,
-      });
+      this.sprites.set(s.id, {...s, image});
     }
-    mipImg.src = canvas.toDataURL();
-    /*
-    let a = document.createElement('a');
-    a.download = imageDef.path;
-    a.href = canvas.toDataURL();
-    a.innerText = imageDef.path + " " + width + "\n";
-    //a.appendChild(mipImg);
-    //a.appendChild(canvas);
-    document.body.appendChild(a);
-    */
+    this.current++;
   };
 };
 
@@ -78,13 +46,28 @@ SpritePool.prototype.draw = function(ctx, time) {
   if (this.current == this.total) {
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     let sprite = 42*16;
+    let shadow = 50*16;
     for (let i = 0; i < 4; i++) {
       for (let j = 0; j < 8; j++) {
-        let s = this.get(sprite+i*8+j), r =s.mip[0];
+        let s = this.get(sprite+i*8+j), r = s.rect, e = s.extend;
+        let ss = this.get(shadow+i*8+j), rs = ss.rect, es = ss.extend;
         let rect = [10+i*70, 10+ j*70, 64, 64];
+        let xScale = rect[2] / (r.width - e.left - e.right);
+        let yScale = rect[3] / (r.height - e.top - e.bottom);
+        let sxScale = rect[2] / (rs.width - es.left - es.right);
+        let syScale = rect[3] / (rs.height - es.top - es.bottom);
+        ctx.drawImage(ss.image,
+            rs.x, rs.y, rs.width, rs.height,
+            rect[0] - es.left * sxScale,
+            rect[1] - es.top * syScale,
+            rs.width * sxScale,
+            rs.height * syScale);
         ctx.drawImage(s.image,
             r.x, r.y, r.width, r.height,
-            ...rect);
+            rect[0] - e.left * xScale,
+            rect[1] - e.top * yScale,
+            r.width * xScale,
+            r.height * yScale);
         ctx.strokeStyle="red";
         ctx.strokeRect(...rect);
       }
@@ -93,12 +76,29 @@ SpritePool.prototype.draw = function(ctx, time) {
     let a = 32;
     
     let s = this.get(sprite + (Math.floor(time / 60) % a));
+    let ss = this.get(shadow + (Math.floor(time / 60) % a));
     if(!s) return;
-    let r =s.mip[0];
+    let r = s.rect, e = s.extend;
     let rect = [10, 570, 64, 64];
+    if (ss) {
+      let rs = ss.rect, es = ss.extend;
+      let sxScale = rect[2] / (rs.width - es.left - es.right);
+      let syScale = rect[3] / (rs.height - es.top - es.bottom);
+      ctx.drawImage(ss.image,
+        rs.x, rs.y, rs.width, rs.height,
+        rect[0] - es.left * sxScale,
+        rect[1] - es.top * syScale,
+        rs.width * sxScale,
+        rs.height * syScale);
+    }
+    let xScale = rect[2] / (r.width - e.left - e.right);
+    let yScale = rect[3] / (r.height - e.top - e.bottom);
     ctx.drawImage(s.image,
         r.x, r.y, r.width, r.height,
-        ...rect);
+        rect[0] - e.left * xScale,
+        rect[1] - e.top * yScale,
+        r.width * xScale,
+        r.height * yScale);
     ctx.strokeStyle="red";
     ctx.strokeRect(...rect);
   }

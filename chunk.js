@@ -26,7 +26,6 @@ Chunk.prototype.drawTerrain = function(ctx, view) {
   const xEnd = Math.min(SIZE, Math.ceil((view.width + view.x) / view.scale - this.x * SIZE));
   const yStart = Math.max(0, Math.floor(view.y / view.scale - this.y * SIZE));
   const yEnd = Math.min(SIZE, Math.ceil((view.height + view.y) / view.scale - this.y * SIZE));
-  const i = view.scale <= 8 ? 0 : view.scale <= 16 ? 1 : 2;
   const scaleCeil = Math.ceil(view.scale);
   
   for (let x = xStart; x < xEnd; x++) {
@@ -35,8 +34,8 @@ Chunk.prototype.drawTerrain = function(ctx, view) {
       
       ctx.drawImage(
           sprite.image,
-          sprite.mip[i].x, sprite.mip[i].y,
-          sprite.mip[i].width, sprite.mip[i].height,
+          sprite.rect.x, sprite.rect.y,
+          sprite.rect.width, sprite.rect.height,
           Math.floor((this.x * SIZE + x) * view.scale - view.x),
           Math.floor((this.y * SIZE + y) * view.scale - view.y),
           scaleCeil, scaleCeil);
@@ -59,8 +58,8 @@ Chunk.prototype.drawResources = function(ctx, view) {
         const sprite = SPRITES.get(r.sprite);
         ctx.drawImage(
           sprite.image,
-          sprite.mip[0].x, sprite.mip[0].y,
-          sprite.mip[0].width, sprite.mip[0].height,
+          sprite.rect.x, sprite.rect.y,
+          sprite.rect.width, sprite.rect.height,
           Math.floor((this.x * SIZE + x - 0.25) * view.scale - view.x),
           Math.floor((this.y * SIZE + y - 0.25) * view.scale - view.y),
           resourceSize, resourceSize);

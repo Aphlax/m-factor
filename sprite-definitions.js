@@ -32,141 +32,159 @@ export const NAMES = {
   coal: 28*16,
   stone: 32*16,
   burnerDrillN: 36*16,
-  burnerDrillE: 38*16,
-  burnerDrillS: 40*16,
-  burnerDrillW: 42*16,
+  burnerDrillShadowN: 38*16,
+  burnerDrillE: 40*16,
+  burnerDrillShadowE: 42*16,
+  burnerDrillS: 44*16,
+  burnerDrillShadowS: 46*16,
+  burnerDrillW: 48*16,
+  burnerDrillShadowW: 50*16,
 };
 
 export const SPRITES = [
   {
     path: "graphics/terrain/dirt-1.png",
-    sprites: terrainSprites(0, 16), mips: 3,
+    sprites: terrainSprites(0, 16),
   },
   {
     path: "graphics/terrain/dirt-2.png",
-    sprites: terrainSprites(16, 16), mips: 3,
+    sprites: terrainSprites(16, 16),
   },
   {
     path: "graphics/terrain/dirt-3.png",
-    sprites: terrainSprites(32, 16), mips: 3,
+    sprites: terrainSprites(32, 16),
   },
   {
     path: "graphics/terrain/dirt-4.png",
-    sprites: terrainSprites(48, 16), mips: 3,
+    sprites: terrainSprites(48, 16),
   },
   {
     path: "graphics/terrain/dirt-5.png",
-    sprites: terrainSprites(64, 16), mips: 3,
+    sprites: terrainSprites(64, 16),
   },
   {
     path: "graphics/terrain/dirt-6.png",
-    sprites: terrainSprites(80, 16), mips: 3,
+    sprites: terrainSprites(80, 16),
   },
   {
     path: "graphics/terrain/dirt-7.png",
-    sprites: terrainSprites(96, 16), mips: 3,
+    sprites: terrainSprites(96, 16),
   },
   {
     path: "graphics/terrain/dry-dirt.png",
-    sprites: terrainSprites(112, 16), mips: 3,
+    sprites: terrainSprites(112, 16),
   },
   {
     path: "graphics/terrain/grass-1.png",
-    sprites: terrainSprites(128, 16), mips: 3,
+    sprites: terrainSprites(128, 16),
   },
   {
     path: "graphics/terrain/grass-2.png",
-    sprites: terrainSprites(144, 16), mips: 3,
+    sprites: terrainSprites(144, 16),
   },
   {
     path: "graphics/terrain/grass-3.png",
-    sprites: terrainSprites(160, 16), mips: 3,
+    sprites: terrainSprites(160, 16),
   },
   {
     path: "graphics/terrain/grass-4.png",
-    sprites: terrainSprites(176, 16), mips: 3,
+    sprites: terrainSprites(176, 16),
   },
   {
     path: "graphics/terrain/sand-1.png",
-    sprites: terrainSprites(192, 16), mips: 3,
+    sprites: terrainSprites(192, 16),
   },
   {
     path: "graphics/terrain/sand-2.png",
-    sprites: terrainSprites(208, 16), mips: 3,
+    sprites: terrainSprites(208, 16),
   },
   {
     path: "graphics/terrain/sand-3.png",
-    sprites: terrainSprites(224, 16), mips: 3,
+    sprites: terrainSprites(224, 16),
   },
   {
     path: "graphics/terrain/red-desert-0.png",
-    sprites: terrainSprites(240, 16), mips: 3,
+    sprites: terrainSprites(240, 16),
   },
   {
     path: "graphics/terrain/red-desert-1.png",
-    sprites: terrainSprites(256, 16), mips: 3,
+    sprites: terrainSprites(256, 16),
   },
   {
     path: "graphics/terrain/red-desert-2.png",
-    sprites: terrainSprites(17 * 16, 16), mips: 3,
+    sprites: terrainSprites(17 * 16, 16),
   },
   {
     path: "graphics/terrain/red-desert-3.png",
-    sprites: terrainSprites(18 * 16, 16), mips: 3,
+    sprites: terrainSprites(18 * 16, 16),
   },
   {
     path: "graphics/terrain/water1.png",
-    sprites: waterSprites(19 * 16, 8), mips: 3,
+    sprites: waterSprites(19 * 16, 8),
   },
   {
     path: "graphics/terrain/deepwater1.png",
-    sprites: waterSprites(19.5 * 16, 8), mips: 3,
+    sprites: waterSprites(19.5 * 16, 8),
   },
   {
     path: "graphics/resources/iron-ore.png",
-    sprites: resourceSprites(20 * 16, 8, 8), mips: 1,
+    sprites: resourceSprites(20 * 16, 8, 8),
   },
   {
     path: "graphics/resources/copper-ore.png",
-    sprites: resourceSprites(24 * 16, 8, 8), mips: 1,
+    sprites: resourceSprites(24 * 16, 8, 8),
   },
   {
     path: "graphics/resources/coal.png",
-    sprites: resourceSprites(28 * 16, 8, 8), mips: 1,
+    sprites: resourceSprites(28 * 16, 8, 8),
   },
   {
     path: "graphics/resources/stone.png",
-    sprites: resourceSprites(32 * 16, 8, 8), mips: 1,
+    sprites: resourceSprites(32 * 16, 8, 8),
   },
   {
     path: "graphics/entities/burner-mining-drill/burner-mining-drill-N.png",
-    sprites: entitySprites(36 * 16, 87, 95, 4, 8, 4, 4, 4, 6), mips: 1,
+    sprites: entitySprites(36 * 16, 87, 95, 4, 8, 12, 11, 19, 12),
+  },
+  {
+    path: "graphics/entities/burner-mining-drill/burner-mining-drill-N-shadow.png",
+    sprites: entitySprites(38 * 16, 109, 76, 4, 8, 0, 45, 12, 0),
   },
   {
     path: "graphics/entities/burner-mining-drill/burner-mining-drill-E.png",
-    sprites: entitySprites(38 * 16, 93, 84, 4, 8, 7, 7, 0, 6), mips: 1,
+    sprites: entitySprites(40 * 16, 93, 84, 4, 8, 12, 17, 9, 11),
+  },
+  {
+    path: "graphics/entities/burner-mining-drill/burner-mining-drill-E-shadow.png",
+    sprites: entitySprites(42 * 16, 93, 65, 4, 8, 3, 26, 0, 1),
   },
   {
     path: "graphics/entities/burner-mining-drill/burner-mining-drill-S.png",
-    sprites: entitySprites(40 * 16, 87, 87, 4, 8, 3, 3, 2, 4), mips: 1,
+    sprites: entitySprites(44 * 16, 87, 87, 4, 8, 11, 12, 12, 11),
+  },
+  {
+    path: "graphics/entities/burner-mining-drill/burner-mining-drill-S-shadow.png",
+    sprites: entitySprites(46 * 16, 88, 69, 4, 8, 3, 21, 1, 4),
   },
   {
     path: "graphics/entities/burner-mining-drill/burner-mining-drill-W.png",
-    sprites: entitySprites(42 * 16, 91, 88, 4, 8, 6, 6, 2, 6), mips: 1,
+    sprites: entitySprites(48 * 16, 91, 88, 4, 8, 15, 12, 12, 12),
+  },
+  {
+    path: "graphics/entities/burner-mining-drill/burner-mining-drill-W-shadow.png",
+    sprites: entitySprites(50 * 16, 89, 66, 4, 8, 5, 20, 0, 2),
   },
 ];
 
 function entitySprites(id, width, height, xCount, yCount,
-                       trimLeft, trimRight, trimTop, trimBottom) {
+                       left, right, top, bottom) {
   const res = [];
   for (let i = 0; i < xCount; i++) {
     for (let j = 0; j < yCount; j++) {
       res.push({
         id: id + i * yCount + j,
-        rect: rect(i * width + (trimLeft ?? 0),
-            j* height + (trimTop ?? 0),
-            width - (trimLeft ?? 0) - (trimRight ?? 0),
-            height - (trimTop ?? 0) - (trimBottom ?? 0)),
+        rect: rect(i * width, j * height, width, height),
+        extend: {left, right, top, bottom},
       });
     }
   }
