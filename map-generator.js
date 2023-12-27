@@ -91,7 +91,7 @@ MapGenerator.prototype.initialize = function(seed) {
   this.tileOffsets = new Array(32).fill(0).map(() =>
       new Array(32).fill(0).map(() => Math.floor(rand() * 16)));
   this.starterLakePos =
-      createStarterPos(rand, 70, 30);
+      createStarterPos(rand, 85, 15);
   this.resources = [];
   for (let r of RESOURCES) {
     this.resources.push({
@@ -193,7 +193,7 @@ MapGenerator.prototype.lake = function(x, y) {
 
 function createStarterPos(rand, x, dx, lake, others) {
   while(true) {
-    let phi = rand() * 2 * Math.PI, a = x + rand() * dx;
+    let phi = rand() * 2 * Math.PI, a = x + (2 * rand() - 1) * dx;
     const pos = {x: Math.cos(phi) * a, y: Math.sin(phi) * a};
     if (lake && dist(pos, lake) < 60) {
       continue;

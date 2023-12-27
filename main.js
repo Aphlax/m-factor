@@ -43,6 +43,7 @@ var STOP = false;
     ctx.font = "24px Arial";
     ctx.fillStyle = "black";
     ctx.fillText(frameRate + "", canvas.width - 32, 24);
+    ctx.fillText(game.seed, canvas.width - 50, canvas.height - 5);
     ctx.fillText(game.gameMap.view.scale, canvas.width - 100, 50);
     
     if (!window.STOP)

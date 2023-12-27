@@ -39,6 +39,8 @@ export const NAMES = {
   burnerDrillShadowS: 46*16,
   burnerDrillW: 48*16,
   burnerDrillShadowW: 50*16,
+  woodenChest: 100*16,
+  woodenChestShadow: 100*16 + 1,
 };
 
 export const SPRITES = [
@@ -173,6 +175,14 @@ export const SPRITES = [
   {
     path: "graphics/entities/burner-mining-drill/burner-mining-drill-W-shadow.png",
     sprites: entitySprites(50 * 16, 89, 66, 4, 8, 5, 20, 0, 2),
+  },
+  {
+    path: "graphics/entities/wooden-chest/wooden-chest.png",
+    sprites: entitySprites(100 * 16, 32, 37, 1, 1, 0, 0, 4, 1),
+  },
+  {
+    path: "graphics/entities/wooden-chest/wooden-chest-shadow.png",
+    sprites: entitySprites(100 * 16 + 1, 52, 20, 1, 1, 0, 20, -13, 1),
   },
 ];
 

@@ -4,6 +4,7 @@ import {DIRECTION, TYPE} from './entity-properties.js';
 
 export const NAME = {
   burnerDrill: 1,
+  woodenChest: 2,
 };
 
 export const ENTITIES = new Map([
@@ -20,5 +21,21 @@ export const ENTITIES = new Map([
       [DIRECTION.west]: [S.burnerDrillW, S.burnerDrillShadowW],
     },
     animationLength: 32,
+  }],
+  [NAME.woodenChest,
+  {
+    name: 'WoodenChest',
+    type: TYPE.chest,
+    width: 1,
+    height: 1,
+    sprites: {
+      [DIRECTION.north]: [S.woodenChest, S.woodenChestShadow],
+      [DIRECTION.east]: [S.woodenChest, S.woodenChestShadow],
+      [DIRECTION.south]: [S.woodenChest, S.woodenChestShadow],
+      [DIRECTION.west]: [S.woodenChest, S.woodenChestShadow],
+    },
+    animationLength: 0,
+    
+    capacity: 8,
   }],
 ]);

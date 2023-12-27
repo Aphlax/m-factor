@@ -9,21 +9,22 @@ const MODE = {
 };
 
 function Game(canvas) {
-  this.seed = 1284;
+  this.seed = 546;
   this.mode = MODE.loading;
   this.gameMap = new GameMap(canvas);
   this.spritePool = SPRITES;
   this.gameMap.initialize(this.seed);
   this.spritePool.load();
-  this.test = true;
+  this.setupScenario = true;
 }
 
 Game.prototype.update = function(time, dt) {
   if (this.mode == MODE.playing) {
     this.gameMap.update(time, dt);
-    if (this.test) {
-      this.gameMap.createEntity(1, 10, 10, 0, time);
-      this.test = false;
+    if (this.setupScenario) {
+      this.gameMap.createEntity(2, 9, 11, 0, time);
+      this.gameMap.createEntity(1, 10, 10, 3, time);
+      this.setupScenario = false;
     }
   } else if (this.mode == MODE.loading) {
     if (this.spritePool.isLoaded() && time > 1000) {
@@ -44,7 +45,9 @@ Game.prototype.touchStart = function(e) {
   if (this.mode == MODE.playing) {
     this.gameMap.input.touchStart(e);
     if (e.touches[0].clientY < 50) {
-      this.gameMap.initialize(Math.floor(Math.random() * 1000));
+      this.seed = Math.floor(Math.random() * 1000);
+      this.setupScenario = true;
+      this.gameMap.initialize(this.seed);
     }
   }
 }

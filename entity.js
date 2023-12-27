@@ -1,3 +1,4 @@
+import {Inventory} from './inventory.js';
 import {S, SPRITES} from './sprite-pool.js';
 import {ENTITIES} from './entity-definitions.js';
 import {TYPE, MAX_SIZE, STATE, MINE_PATTERN, MINE_PRODUCTS} from './entity-properties.js';
@@ -21,8 +22,8 @@ function Entity() {
   this.state = 0;
   this.data = 0;
   // Inventories.
-  this.inputInv = undefined;
-  this.outputInv = undefined;
+  this.inputInventory = undefined;
+  this.outputInventory = undefined;
   // Connected entities.
   this.inputEntities = [];
   this.outputEntities = [];
@@ -47,6 +48,9 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.nextUpdate = time + 666;
     this.taskStart = time;
     this.data = 0;
+  } else if (this.type == TYPE.chest) {
+    this.inputInventory = this.outputInventory =
+        new Inventory(def.capacity);
   }
   return this;
 };

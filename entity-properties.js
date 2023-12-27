@@ -2,6 +2,7 @@ import {I} from './item-definitions.js';
 
 export const TYPE = {
   mine: 1,
+  chest: 2,
 };
 
 export const MAX_SIZE = 3;
