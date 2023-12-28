@@ -20,13 +20,13 @@ function Entity() {
   this.taskStart = 0;
   this.nextUpdate = 0;
   this.state = 0;
-  this.data = 0;
+  this.data = {};
   // Inventories.
   this.inputInventory = undefined;
   this.outputInventory = undefined;
   // Connected entities.
-  this.inputEntities = [];
-  this.outputEntities = [];
+  this.inputEntities = new Set();
+  this.outputEntities = new Set();
 }
 
 Entity.prototype.setup = function(name, x, y, direction, time) {
@@ -42,12 +42,16 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   this.spriteShadow = def.sprites[direction][1];
   this.animation = 0;
   this.animationLength = def.animationLength;
+  this.inputEntities.clear();
+  this.outputEntities.clear();
   
   if (this.type == TYPE.mine) {
     this.state = STATE.running;
     this.nextUpdate = time + 666;
     this.taskStart = time;
-    this.data = 0;
+    this.data.minePattern = 0;
+    this.data.mineOutputX = def.mineOutput[direction].x;
+    this.data.mineOutputY = def.mineOutput[direction].y;
   } else if (this.type == TYPE.chest) {
     this.inputInventory = this.outputInventory =
         new Inventory(def.capacity);
@@ -58,20 +62,14 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
 Entity.prototype.update = function(gameMap, time, dt) {
   if (this.type == TYPE.mine) {
     if (time >= this.nextUpdate) {
-      this.animation = (this.animation + (time - this.taskStart) / 60) % this.animationLength;
-      const outEntity = this.outputEntities[0];
-      if (!outEntity) {
-        this.state = STATE.running;//STATE.mineNoOutput;
-        this.nextUpdate = Number.MAX_SAFE_INTEGER;
-        return;
-      }
+      this.animation = Math.floor(this.animation + (time - this.taskStart) / 60) % this.animationLength;
       let resource, x, y;
       for (let i = 0; i < 16; i++) {
         resource = gameMap.getResourceAt(
-            x = this.x + MINE_PATTERN.x4[(i + this.data) & 15],
-            y = this.y + MINE_PATTERN.y4[(i + this.data) & 15]);
+            x = (this.x + MINE_PATTERN.x4[(i + this.data.minePattern) % 16]),
+            y = (this.y + MINE_PATTERN.y4[(i + this.data.minePattern) % 16]));
         if (resource) {
-          this.data = (this.data + i + 1) & 15;
+          this.data.minePattern = (this.data.minePattern + i + 1) % 16;
           break;
         }
       }
@@ -80,7 +78,14 @@ Entity.prototype.update = function(gameMap, time, dt) {
         this.nextUpdate = Number.MAX_SAFE_INTEGER;
         return;
       }
+      
       // no energy
+      const [outEntity] = this.outputEntities;
+      if (!outEntity) {
+        this.state = STATE.mineNoOutput;
+        this.nextUpdate = Number.MAX_SAFE_INTEGER;
+        return;
+      }
       const item = MINE_PRODUCTS[resource.id];
       if (outEntity.insert(item, 1, this.nextUpdate, this)) {
         this.taskStart = this.nextUpdate;
@@ -163,6 +168,17 @@ Entity.prototype.drawShadow = function(ctx, view, time, dt) {
 };
 
 Entity.prototype.insert = function(item, amount, time, origin) {
+  if (this.type == TYPE.chest) {
+    const count = this.inputInventory.insert(item, amount, time);
+    if (count) {
+      for (let oEntity of this.outputEntities) {
+        if (oEntity.state == STATE.missingInput) {
+          // TODO ,, use time.
+        }
+      }
+    }
+    return count;
+  }
   return 0;
 };
 
@@ -174,8 +190,23 @@ Entity.prototype.outputEntityHasSpace = function() {
   
 };
 
-Entity.prototype.nearbyEntityCreated = function() {
-  
+Entity.prototype.connectMineTo = function(other, time) {
+  const x = this.x + this.data.mineOutputX,
+        y = this.y + this.data.mineOutputY;
+  if (other.x > x || other.x + other.width <= x ||
+      other.y > y || other.y + other.height <= y) {
+    return;
+  }
+  this.outputEntities.add(other);
+  other.inputEntities.add(this);
+  if (this.state == STATE.mineNoOutput) {
+    this.state == STATE.running;
+    this.nextUpdate = time + 666;
+  }
+};
+
+Entity.prototype.connectInserterTo = function(other) {
+    
 };
 
 export {Entity};

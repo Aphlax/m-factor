@@ -21,6 +21,13 @@ export const ENTITIES = new Map([
       [DIRECTION.west]: [S.burnerDrillW, S.burnerDrillShadowW],
     },
     animationLength: 32,
+    
+    mineOutput: {
+      [DIRECTION.north]: {x: 0, y: -1},
+      [DIRECTION.east]: {x: 2, y: 0},
+      [DIRECTION.south]: {x: 1, y: 2},
+      [DIRECTION.west]: {x: -1, y: 1},
+    },
   }],
   [NAME.woodenChest,
   {

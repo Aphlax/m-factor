@@ -42,9 +42,12 @@ var STOP = false;
     game.draw(ctx, time, dt);
     ctx.font = "24px Arial";
     ctx.fillStyle = "black";
-    ctx.fillText(frameRate + "", canvas.width - 32, 24);
-    ctx.fillText(game.seed, canvas.width - 50, canvas.height - 5);
-    ctx.fillText(game.gameMap.view.scale, canvas.width - 100, 50);
+    ctx.fillText(frameRate + "", canvas.width - 48, 24);
+    ctx.fillText(Math.round(game.gameMap.view.scale * 10) / 10, canvas.width - 48, 48);
+    ctx.fillText(game.seed, canvas.width - 50, canvas.height - 4);
+    if (game.debug !== undefined) {
+      ctx.fillText(game.debug, 4, 28);
+    }
     
     if (!window.STOP)
       window.requestAnimationFrame(loop);

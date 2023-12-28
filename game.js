@@ -9,7 +9,7 @@ const MODE = {
 };
 
 function Game(canvas) {
-  this.seed = 546;
+  this.seed = 500;
   this.mode = MODE.loading;
   this.gameMap = new GameMap(canvas);
   this.spritePool = SPRITES;
@@ -19,11 +19,13 @@ function Game(canvas) {
 }
 
 Game.prototype.update = function(time, dt) {
+  if (this.chest?.inputInventory?.amounts?.length)
+    this.debug = this.chest.inputInventory.amounts.reduce((a,b)=>a+b, 0);
   if (this.mode == MODE.playing) {
     this.gameMap.update(time, dt);
     if (this.setupScenario) {
-      this.gameMap.createEntity(2, 9, 11, 0, time);
-      this.gameMap.createEntity(1, 10, 10, 3, time);
+      this.chest = this.gameMap.createEntity(2, 4, -3, 0, time);
+      this.mine = this.gameMap.createEntity(1, 5, -4, 3, time);
       this.setupScenario = false;
     }
   } else if (this.mode == MODE.loading) {

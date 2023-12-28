@@ -1,7 +1,7 @@
 import {MapGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {GameMapInput} from './game-map-input.js';
-import {MAX_SIZE} from './entity-properties.js';
+import {TYPE, MAX_SIZE, rectOverlap} from './entity-properties.js';
 import {Entity} from './entity.js';
 
 function GameMap(canvas) {
@@ -102,13 +102,16 @@ GameMap.prototype.createEntity = function(name, x, y, direction, time) {
   // Create should not do any checks if there is enough space etc.
   const entity = new Entity().setup(name, x, y, direction, time);
   
+  this.connectEntity(entity, time);
+  
   const cx = Math.floor(x / SIZE);
   const cy = Math.floor(y / SIZE);
   if (!this.chunks.has(cx) || !this.chunks.get(cx).has(cy))
     return;
   this.chunks.get(cx).get(cy).entities.push(entity);
   
-  // TODO: create events.
+  // TODO: check if connected machines were blocked & unblock them, use time
+  return entity;
 }
 
 GameMap.prototype.canPlace = function(x, y, width, height, ignoredEntity) {
@@ -121,7 +124,7 @@ GameMap.prototype.canPlace = function(x, y, width, height, ignoredEntity) {
   const cx1 = Math.floor((x - MAX_SIZE) / SIZE);
   const cx2 = Math.floor((x + width - 1) / SIZE);
   const cy1 = Math.floor((y - MAX_SIZE) / SIZE);
-  const cy2 = Math.floor((y + width - 1) / SIZE);
+  const cy2 = Math.floor((y + height - 1) / SIZE);
   for (let i = cx1; i <= cx2; i++) {
     if (!this.chunks.has(i)) {
       if (i == cx1 && cx1 != Math.floor(x / SIZE))
@@ -164,6 +167,34 @@ GameMap.prototype.getEntityAt = function(x, y) {
   return undefined;
 }
 
+GameMap.prototype.connectEntity = function(entity, time) {
+  const x = entity.x - 2, y = entity.y - 2,
+        width = entity.width + 4, height = entity.height + 4;
+  const cx1 = Math.floor((x - MAX_SIZE) / SIZE);
+  const cx2 = Math.floor((x + width - 1) / SIZE);
+  const cy1 = Math.floor((y - MAX_SIZE) / SIZE);
+  const cy2 = Math.floor((y + height - 1) / SIZE);
+  for (let i = cx1; i <= cx2; i++) {
+    if (!this.chunks.has(i)) continue;
+    for (let j = cy1; j <= cy2; j++) {
+      if (!this.chunks.get(i).has(j)) continue;
+      for (let other of this.chunks.get(i).get(j).entities) {
+        if (rectOverlap(entity.x, y, entity.width, 2, other) ||
+            rectOverlap(entity.x + entity.width, entity.y, 2, entity.height, other) ||
+            rectOverlap(entity.x, entity.y + entity.height, entity.width, 2, other) ||
+            rectOverlap(x, entity.y, 2, entity.height, other)) {
+          if (entity.type == TYPE.mine) {
+            entity.connectMineTo(other, time);
+          }
+          if (other.type == TYPE.mine) {
+            other.connectMineTo(entity, time);
+          }
+        }
+      }
+    }
+  }
+}
+
 GameMap.prototype.getTerrainAt = function(x, y) {
   const cx = Math.floor(x / SIZE);
   if (!this.chunks.has(cx)) return;
@@ -179,13 +210,13 @@ GameMap.prototype.getResourceAt = function(x, y, remove) {
   const cy = Math.floor(y / SIZE);
   if (!this.chunks.get(cx).has(cy)) return;
   const chunk = this.chunks.get(cx).get(cy);
-  if (!chunk.resources[x - cx]) return;
+  if (!chunk.resources[x - cx * SIZE]) return;
   if (remove) {
-    const res = chunk.resources[x - cx][y - cy];
-    delete chunk.resources[x - cx][y - cy];
+    const res = chunk.resources[x - cx * SIZE][y - cy * SIZE];
+    delete chunk.resources[x - cx * SIZE][y - cy * SIZE];
     return res;
   }
-  return chunk.resources[x - cx][y - cy];
+  return chunk.resources[x - cx * SIZE][y - cy * SIZE];
 }
 
 export {GameMap};
