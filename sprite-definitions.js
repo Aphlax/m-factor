@@ -41,6 +41,11 @@ export const NAMES = {
   burnerDrillShadowW: 50*16,
   woodenChest: 100*16,
   woodenChestShadow: 100*16 + 1,
+  
+  ironOreItem: 1000*16,
+  copperOreItem: 1000*16 + 1,
+  coalItem: 1000*16 + 2,
+  stoneItem: 1000*16 + 3,
 };
 
 export const SPRITES = [
@@ -184,6 +189,22 @@ export const SPRITES = [
     path: "graphics/entities/wooden-chest/wooden-chest-shadow.png",
     sprites: entitySprites(100 * 16 + 1, 52, 20, 1, 1, 0, 20, -13, 1),
   },
+  {
+    path: "graphics/items/iron-ore.png",
+    sprites: itemSprites(NAMES.ironOreItem),
+  },
+  {
+    path: "graphics/items/copper-ore.png",
+    sprites: itemSprites(NAMES.copperOreItem),
+  },
+  {
+    path: "graphics/items/coal.png",
+    sprites: itemSprites(NAMES.coalItem),
+  },
+  {
+    path: "graphics/items/stone.png",
+    sprites: itemSprites(NAMES.stoneItem),
+  },
 ];
 
 function entitySprites(id, width, height, xCount, yCount,
@@ -200,6 +221,11 @@ function entitySprites(id, width, height, xCount, yCount,
   }
   return res;
 }
+
+function itemSprites(id) {
+  return [{id: id, rect: rect(64)}];
+}
+
 
 function terrainSprites(id, count) {
   const res = [];

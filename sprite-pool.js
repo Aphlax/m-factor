@@ -45,29 +45,33 @@ SpritePool.prototype.draw = function(ctx, time) {
   // Debug.
   if (this.current == this.total) {
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    let sprite = 100*16;
-    let shadow = 100*16+1;
+    let sprite = 1000*16;
+    let shadow = 0;
     let size = [32, 32];
     for (let i = 0; i < 1; i++) {
-      for (let j = 0; j < 1; j++) {
-        let s = this.get(sprite+i*8+j), r = s.rect, e = s.extend;
-        let ss = this.get(shadow+i*8+j), rs = ss.rect, es = ss.extend;
+      for (let j = 0; j < 4; j++) {
+        let s = this.get(sprite+i*8+j), r = s.rect,
+            e = s.extend ?? {left: 0, right: 0, top: 0, bottom: 0};
         let rect = [10+i*70, 10+ j*70, ...size];
         let xScale = rect[2] / (r.width - e.left - e.right);
         let yScale = rect[3] / (r.height - e.top - e.bottom);
-        let sxScale = rect[2] / (rs.width - es.left - es.right);
-        let syScale = rect[3] / (rs.height - es.top - es.bottom);
-        ctx.strokeStyle="blue";
-        ctx.strokeRect(rect[0] - es.left * sxScale - 1,
-            rect[1] - es.top * syScale - 1,
-            rs.width * sxScale + 2,
-            rs.height * syScale + 2);
-        ctx.drawImage(ss.image,
-            rs.x, rs.y, rs.width, rs.height,
-            rect[0] - es.left * sxScale,
-            rect[1] - es.top * syScale,
-            rs.width * sxScale,
-            rs.height * syScale);
+        if (shadow) {
+          let ss = this.get(shadow+i*8+j), rs = ss.rect,
+              es = ss.extend ?? {left: 0, right: 0, top: 0, bottom: 0};
+          let sxScale = rect[2] / (rs.width - es.left - es.right);
+          let syScale = rect[3] / (rs.height - es.top - es.bottom);
+          ctx.strokeStyle="blue";
+          ctx.strokeRect(rect[0] - es.left * sxScale - 1,
+              rect[1] - es.top * syScale - 1,
+              rs.width * sxScale + 2,
+              rs.height * syScale + 2);
+          ctx.drawImage(ss.image,
+              rs.x, rs.y, rs.width, rs.height,
+              rect[0] - es.left * sxScale,
+              rect[1] - es.top * syScale,
+              rs.width * sxScale,
+              rs.height * syScale);
+        }
         ctx.drawImage(s.image,
             r.x, r.y, r.width, r.height,
             rect[0] - e.left * xScale,

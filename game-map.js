@@ -1,6 +1,7 @@
 import {MapGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {GameMapInput} from './game-map-input.js';
+import {GameUi} from './game-ui.js';
 import {TYPE, MAX_SIZE, rectOverlap} from './entity-properties.js';
 import {Entity} from './entity.js';
 
@@ -14,7 +15,9 @@ function GameMap(canvas) {
     scale: 24,
   };
   this.input = new GameMapInput(this, this.view);
+  this.ui = new GameUi(this);
   this.chunks = new Map();
+  this.selectedEntity = undefined;
 }
 
 GameMap.prototype.initialize = function(seed) {
@@ -22,14 +25,15 @@ GameMap.prototype.initialize = function(seed) {
   this.mapGenerator.initialize(seed);
 };
 
-GameMap.prototype.update = function(time, dt) {
+GameMap.prototype.update = function(time) {
   for (let chunks of this.chunks.values()) {
     for (let chunk of chunks.values()) {
       for (let entity of chunk.entities) {
-        entity.update(this, time, dt);
+        entity.update(this, time);
       }
     }
   }
+  this.ui.update(time);
   
   // Generate missing chunks.
   const size = SIZE * this.view.scale;
@@ -52,7 +56,7 @@ GameMap.prototype.update = function(time, dt) {
   this.input.update(time);
 };
 
-GameMap.prototype.draw = function(ctx, time, dt) {
+GameMap.prototype.draw = function(ctx, time) {
   const size = SIZE * this.view.scale;
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x) continue;
@@ -80,7 +84,7 @@ GameMap.prototype.draw = function(ctx, time, dt) {
   	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
       if (y * size > this.view.height + this.view.y) continue;
       for (let entity of chunk.entities) {
-        entity.drawShadow(ctx, this.view, time, dt);
+        entity.drawShadow(ctx, this.view, time);
       }
     }
   }
@@ -92,11 +96,47 @@ GameMap.prototype.draw = function(ctx, time, dt) {
   	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
       if (y * size > this.view.height + this.view.y) continue;
       for (let entity of chunk.entities) {
-        entity.draw(ctx, this.view, time, dt);
+        entity.draw(ctx, this.view, time);
       }
     }
   }
+  if (this.selectedEntity) {
+    this.drawSelection(ctx, this.selectedEntity);
+  }
+  this.ui.draw(ctx, time);
 };
+
+GameMap.prototype.drawSelection = function(ctx, selection) {
+  const x = selection.x * this.view.scale - this.view.x;
+  const width = (selection.width ?? 1) * this.view.scale;
+  const y = selection.y * this.view.scale - this.view.y;
+  const height = (selection.height ?? 1) * this.view.scale;
+  if (x + width <= -2 || x > this.view.width + 2 ||
+      y + height <= -2 || y > this.view.height + 2)
+    return;
+  const d = 0.35 * this.view.scale;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(x, y + d);
+  ctx.lineTo(x, y);
+  ctx.lineTo(x + d, y);
+  ctx.moveTo(x + width, y + d);
+  ctx.lineTo(x + width, y);
+  ctx.lineTo(x + width - d, y);
+  ctx.moveTo(x, y + height - d);
+  ctx.lineTo(x, y + height);
+  ctx.lineTo(x + d, y + height);
+  ctx.moveTo(x + width, y + height - d);
+  ctx.lineTo(x + width, y + height);
+  ctx.lineTo(x + width - d, y + height);
+  ctx.strokeStyle = "#FFAA00";
+  ctx.lineWidth = 4;
+  ctx.stroke();
+  ctx.strokeStyle = "#EEEE00";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
 
 GameMap.prototype.createEntity = function(name, x, y, direction, time) {
   // Create should not do any checks if there is enough space etc.
@@ -210,13 +250,21 @@ GameMap.prototype.getResourceAt = function(x, y, remove) {
   const cy = Math.floor(y / SIZE);
   if (!this.chunks.get(cx).has(cy)) return;
   const chunk = this.chunks.get(cx).get(cy);
-  if (!chunk.resources[x - cx * SIZE]) return;
+  if (!chunk.resources || !chunk.resources[x - cx * SIZE]) return;
   if (remove) {
     const res = chunk.resources[x - cx * SIZE][y - cy * SIZE];
     delete chunk.resources[x - cx * SIZE][y - cy * SIZE];
     return res;
   }
   return chunk.resources[x - cx * SIZE][y - cy * SIZE];
+}
+
+GameMap.prototype.selectEntity = function(screenX, screenY) {
+  const x = (this.view.x + screenX) / this.view.scale;
+  const y = (this.view.y + screenY) / this.view.scale;
+  this.selectedEntity = this.getEntityAt(x, y);
+  if (this.selectedEntity) return;
+  this.selectedEntity = this.getResourceAt(Math.floor(x), Math.floor(y));
 }
 
 export {GameMap};

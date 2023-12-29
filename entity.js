@@ -6,7 +6,7 @@ import {TYPE, MAX_SIZE, STATE, MINE_PATTERN, MINE_PRODUCTS} from './entity-prope
 
 function Entity() {
   this.type = 0;
-  this.name = undefined;
+  this.label = undefined;
   this.x = 0;
   this.y = 0;
   this.width = 0;
@@ -32,7 +32,7 @@ function Entity() {
 Entity.prototype.setup = function(name, x, y, direction, time) {
   const def = ENTITIES.get(name);
   this.type = def.type;
-  this.name = name;
+  this.label = def.label;
   this.x = x;
   this.y = y;
   this.width = def.width;
@@ -59,7 +59,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   return this;
 };
 
-Entity.prototype.update = function(gameMap, time, dt) {
+Entity.prototype.update = function(gameMap, time) {
   if (this.type == TYPE.mine) {
     if (time >= this.nextUpdate) {
       this.animation = Math.floor(this.animation + (time - this.taskStart) / 60) % this.animationLength;
@@ -80,6 +80,7 @@ Entity.prototype.update = function(gameMap, time, dt) {
       }
       
       // no energy
+      
       const [outEntity] = this.outputEntities;
       if (!outEntity) {
         this.state = STATE.mineNoOutput;
@@ -111,14 +112,14 @@ Entity.prototype.update = function(gameMap, time, dt) {
   }
 };
 
-Entity.prototype.draw = function(ctx, view, time, dt) {
+Entity.prototype.draw = function(ctx, view, time) {
   if ((this.x + this.width) * view.scale <= view.x)
     return;
   if (this.x * view.scale > view.x + view.width)
     return;
   if ((this.y + this.height) * view.scale <= view.y)
     return;
-  if (this.y * view.scale > view.y + view.height)
+  if ((this.y - 1) * view.scale > view.y + view.height)
     return;
   let animation = this.animation;
   if (this.animationLength && this.state == STATE.running) {
@@ -139,8 +140,8 @@ Entity.prototype.draw = function(ctx, view, time, dt) {
       r.height * yScale)
 };
 
-Entity.prototype.drawShadow = function(ctx, view, time, dt) {
-  if ((this.x + this.width) * view.scale <= view.x)
+Entity.prototype.drawShadow = function(ctx, view, time) {
+  if ((this.x + this.width + 1) * view.scale <= view.x)
     return;
   if (this.x * view.scale > view.x + view.width)
     return;

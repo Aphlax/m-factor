@@ -18,11 +18,11 @@ function Game(canvas) {
   this.setupScenario = true;
 }
 
-Game.prototype.update = function(time, dt) {
+Game.prototype.update = function(time) {
   if (this.chest?.inputInventory?.amounts?.length)
     this.debug = this.chest.inputInventory.amounts.reduce((a,b)=>a+b, 0);
   if (this.mode == MODE.playing) {
-    this.gameMap.update(time, dt);
+    this.gameMap.update(time);
     if (this.setupScenario) {
       this.chest = this.gameMap.createEntity(2, 4, -3, 0, time);
       this.mine = this.gameMap.createEntity(1, 5, -4, 3, time);
@@ -35,9 +35,9 @@ Game.prototype.update = function(time, dt) {
   }
 };
 
-Game.prototype.draw = function(ctx, time, dt) {
+Game.prototype.draw = function(ctx, time) {
   if (this.mode == MODE.playing) {
-    this.gameMap.draw(ctx, time, dt);
+    this.gameMap.draw(ctx, time);
   } else if (this.mode == MODE.loading) {
     this.spritePool.draw(ctx, time);
   }

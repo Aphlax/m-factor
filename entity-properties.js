@@ -32,6 +32,13 @@ export const RESOURCE_NAMES = {
   stone: 4,
 };
 
+export const RESOURCE_LABELS = {
+  [RESOURCE_NAMES.iron]: "Iron ore",
+  [RESOURCE_NAMES.copper]: "Copper ore",
+  [RESOURCE_NAMES.coal]: "Coal",
+  [RESOURCE_NAMES.stone]: "Stone",
+};
+
 export function resourceSprite(amount) {
   return amount <= 25 ? 0 :
       amount <= 100 ? 1 :

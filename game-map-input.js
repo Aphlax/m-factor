@@ -1,5 +1,5 @@
 const LONG_TOUCH_DURATION = 500;
-const MIN_SCALE = 5;
+const MIN_SCALE = 16;
 const MAX_SCALE = 32;
 
 function GameMapInput(gameMap, view) {
@@ -9,6 +9,7 @@ function GameMapInput(gameMap, view) {
   this.longTouchStarted = false;
   this.longTouchEnd = 0;
   this.longTouch = false;
+  this.shortTouch = false;
 }
 
 GameMapInput.prototype.update = function(time) {
@@ -19,6 +20,7 @@ GameMapInput.prototype.update = function(time) {
   } else if (this.longTouchEnd && time >= this.longTouchEnd) {
     this.longTouchEnd = 0;
     this.longTouch = true;
+    this.shortTouch = false;
     navigator.vibrate(200);
   }
 };
@@ -26,8 +28,12 @@ GameMapInput.prototype.update = function(time) {
 GameMapInput.prototype.touchStart = function(e) {
   if (e.touches.length == 1) {
     this.longTouchStarted = true;
-  } else if (this.longTouchEnd) {
-    this.longTouchEnd = 0;
+    this.shortTouch = true;
+  } else {
+    this.shortTouch = false;
+    if (this.longTouchEnd) {
+      this.longTouchEnd = 0;
+    }
   }
   this.setTouches(e);
 };
@@ -38,7 +44,6 @@ GameMapInput.prototype.touchStart = function(e) {
 */
 GameMapInput.prototype.touchMove = function(e) {
   if (!this.longTouch) {
-    let dx, dy;
     if (e.touches.length > 1) {
       const emx = (e.touches[0].clientX + e.touches[1].clientX);
       const emy = (e.touches[0].clientY + e.touches[1].clientY);
@@ -57,8 +62,9 @@ GameMapInput.prototype.touchMove = function(e) {
       const dy = e.touches[0].clientY - this.touches[0].y;
       this.view.y = Math.round(this.view.y - dy);
     }
-    
-    
+  }
+  if (this.shortTouch) {
+    this.shortTouch = false;
   }
   if (this.longTouchEnd) {
     this.longTouchEnd = 0;
@@ -67,6 +73,9 @@ GameMapInput.prototype.touchMove = function(e) {
 };
 
 GameMapInput.prototype.touchEnd = function(e) {
+  if (this.shortTouch) {
+    this.gameMap.selectEntity(this.touches[0].x, this.touches[0].y);
+  }
   if (this.longTouchEnd) {
     this.longTouchEnd = 0;
   }

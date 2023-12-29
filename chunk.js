@@ -41,6 +41,17 @@ Chunk.prototype.drawTerrain = function(ctx, view) {
           scaleCeil, scaleCeil);
     }
   }
+  
+  // Chunk boundaries.
+  const lx = this.x * SIZE * view.scale - view.x,
+      ly = this.y * SIZE * view.scale - view.y;
+  ctx.beginPath();
+  ctx.moveTo(lx, ly + SIZE * view.scale);
+  ctx.lineTo(lx, ly);
+  ctx.lineTo(lx + SIZE * view.scale, ly);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "red";
+  ctx.stroke();
 }
 
 Chunk.prototype.drawResources = function(ctx, view) {
@@ -66,17 +77,6 @@ Chunk.prototype.drawResources = function(ctx, view) {
       }
     }
   }
-  
-  // Chunk boundaries.
-  const lx = this.x * SIZE * view.scale - view.x,
-      ly = this.y * SIZE * view.scale - view.y;
-  ctx.beginPath();
-  ctx.moveTo(lx, ly + SIZE * view.scale);
-  ctx.lineTo(lx, ly);
-  ctx.lineTo(lx + SIZE * view.scale, ly);
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = "red";
-  ctx.stroke();
 };
 
 export {Chunk};

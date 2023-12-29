@@ -28,7 +28,6 @@ var STOP = false;
   }
 
   function loop(time) {
-	let dt = time - lastFrame;
     lastFrame = time;
     frameCount++;
     if (time >= nextFps) {
@@ -37,14 +36,15 @@ var STOP = false;
   	nextFps = time + 500;
     }
     
-    game.update(time, dt);
+    game.update(time);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    game.draw(ctx, time, dt);
+    game.draw(ctx, time);
     ctx.font = "24px Arial";
     ctx.fillStyle = "black";
+    ctx.textBaseline = "alphabetic";
     ctx.fillText(frameRate + "", canvas.width - 48, 24);
     ctx.fillText(Math.round(game.gameMap.view.scale * 10) / 10, canvas.width - 48, 48);
-    ctx.fillText(game.seed, canvas.width - 50, canvas.height - 4);
+    ctx.fillText(game.seed, canvas.width - 48, 72);
     if (game.debug !== undefined) {
       ctx.fillText(game.debug, 4, 28);
     }
