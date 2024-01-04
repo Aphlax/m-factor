@@ -16,6 +16,7 @@ function Entity() {
   this.spriteShadow = 0;
   this.animation = 0;
   this.animationLength = 0;
+  this.animationSpeed = 0;
   
   this.taskStart = 0;
   this.nextUpdate = 0;
@@ -42,10 +43,16 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   this.spriteShadow = def.sprites[direction][1];
   this.animation = 0;
   this.animationLength = def.animationLength;
+  this.animationSpeed = def.animationSpeed ?? 1;
   this.inputEntities.clear();
   this.outputEntities.clear();
   
-  if (this.type == TYPE.mine) {
+  if (this.type == TYPE.belt) {
+    this.data.beltSprites = def.beltSprites[direction];
+    this.data.beltBeginSprite = 0;
+    this.data.beltEndSprite = 0;
+    this.data.beltEndSprites = def.beltEndSprites[direction];
+  } else if (this.type == TYPE.mine) {
     this.state = STATE.running;
     this.nextUpdate = time + 666;
     this.taskStart = time;
@@ -62,7 +69,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
 Entity.prototype.update = function(gameMap, time) {
   if (this.type == TYPE.mine) {
     if (time >= this.nextUpdate) {
-      this.animation = Math.floor(this.animation + (time - this.taskStart) / 60) % this.animationLength;
+      this.animation = Math.floor(this.animation + (time - this.taskStart) * this.animationSpeed / 60) % this.animationLength;
       let resource, x, y;
       for (let i = 0; i < 16; i++) {
         resource = gameMap.getResourceAt(
@@ -124,7 +131,7 @@ Entity.prototype.draw = function(ctx, view, time) {
   let animation = this.animation;
   if (this.animationLength && this.state == STATE.running) {
     animation = Math.floor(animation +
-        (time - this.taskStart) / 60) % this.animationLength;
+        (time - this.taskStart) * this.animationSpeed / 60) % this.animationLength;
   }
   const sprite = SPRITES.get(this.sprite + animation);
   const r = sprite.rect, e = sprite.extend;
@@ -152,7 +159,8 @@ Entity.prototype.drawShadow = function(ctx, view, time) {
   let animation = this.animation;
   if (this.animationLength && this.state == STATE.running) {
     animation = Math.floor(animation +
-        (time - this.taskStart) / 60) % this.animationLength;
+        (time - this.taskStart) * this.animationSpeed / 60) %
+        this.animationLength;
   }
   const sprite = SPRITES.get(this.spriteShadow + animation);
   const r = sprite.rect, e = sprite.extend;
@@ -189,6 +197,47 @@ Entity.prototype.extract = function(item, amount, time, origin) {
 
 Entity.prototype.outputEntityHasSpace = function() {
   
+};
+
+Entity.prototype.connectBelts = function(other, time) {
+  const posX = this.x - (this.direction - 2) % 2;
+  const posY = this.y + (this.direction - 1) % 2;
+  if (posX == other.x && posY == other.y) {
+    if (other.direction + 2 % 4 == this.direction) {
+      return;
+    }
+    this.outputEntities.push(other);
+    other.inputEntities.push(this);
+    return true;
+  }
+  const posX_ = other.x - (other.direction - 2) % 2;
+  const posY_ = other.y + (other.direction - 1) % 2;
+  if (posX_ == this.x && posY_ == this.y) {
+    this.inputEntities.push(other);
+    other.outputEntities.push(this);
+    return true;
+  }
+  
+  // TODO: update state
+};
+
+Entity.prototype.updateBeltSprites = function() {
+  let left = false, right = false, mid = false;
+  for (let other of this.inputEntities) {
+    if (other.type != TYPE.belt) continue;
+    //
+  }
+  if ((left == right) && !mid) {
+    this.data.beltBeginSprite = this.data.beltEndSprites[0];
+  } else {
+    this.data.beltBeginSprite = 0;
+    this.sprite = this.data.beltSprites[mid ? 0 : left ? 1 : 2];
+  }
+  if (!this.outputEntities.filter(e => e.type == TYPE.belt).length) {
+    this.data.beltEndSprite = this.data.beltEndSprites[1];
+  } else {
+    this.data.beltEndSprite = 0;
+  }
 };
 
 Entity.prototype.connectMineTo = function(other, time) {

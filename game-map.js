@@ -84,6 +84,7 @@ GameMap.prototype.draw = function(ctx, time) {
   	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
       if (y * size > this.view.height + this.view.y) continue;
       for (let entity of chunk.entities) {
+        if (!entity.spriteShadow) continue;
         entity.drawShadow(ctx, this.view, time);
       }
     }
@@ -228,6 +229,14 @@ GameMap.prototype.connectEntity = function(entity, time) {
           }
           if (other.type == TYPE.mine) {
             other.connectMineTo(entity, time);
+          }
+          if (entity.type == TYPE.belt && other.type == TYPE.belt) {
+            if (Math.abs(entity.x - other x) + Math.abs(entity.y - other.y) == 1) {
+              if (entity.connectBelt(other, time)) {
+                entity.updateBeltSprites();
+                other.updateBeltSprites();
+              }
+            }
           }
         }
       }

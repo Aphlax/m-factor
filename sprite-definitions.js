@@ -5,7 +5,7 @@
   128: 160
 */
 
-export const NAMES = {
+export const S = {
   dirt1: 0,
   dirt2: 16,
   dirt3: 32,
@@ -39,6 +39,27 @@ export const NAMES = {
   burnerDrillShadowS: 46*16,
   burnerDrillW: 48*16,
   burnerDrillShadowW: 50*16,
+  transportBeltE: 52*16,
+  transportBeltW: 53*16,
+  transportBeltN: 54*16,
+  transportBeltS: 55*16,
+  transportBeltEN: 56*16,
+  transportBeltNE: 57*16,
+  transportBeltWN: 58*16,
+  transportBeltNW: 59*16,
+  transportBeltSE: 60*16,
+  transportBeltES: 61*16,
+  transportBeltSW: 62*16,
+  transportBeltWS: 63*16,
+  transportBeltBeginS: 64*16,
+  transportBeltEndS: 65*16,
+  transportBeltBeginW: 66*16,
+  transportBeltEndW: 67*16,
+  transportBeltBeginN: 68*16,
+  transportBeltEndN: 69*16,
+  transportBeltBeginE: 70*16,
+  transportBeltEndE: 71*16,
+  
   woodenChest: 100*16,
   woodenChestShadow: 100*16 + 1,
   
@@ -51,7 +72,7 @@ export const NAMES = {
 export const SPRITES = [
   {
     path: "graphics/terrain/dirt-1.png",
-    sprites: terrainSprites(0, 16),
+    sprites: terrainSprites(S.dirt1, 16),
   },
   {
     path: "graphics/terrain/dirt-2.png",
@@ -182,38 +203,42 @@ export const SPRITES = [
     sprites: entitySprites(50 * 16, 89, 66, 4, 8, 5, 20, 0, 2),
   },
   {
+    path: "graphics/entities/transport-belt/transport-belt.png",
+    sprites: entitySprites(S.transportBeltE, 64, 64, 16, 20, 16, 16, 16, 16, true),
+  },
+  {
     path: "graphics/entities/wooden-chest/wooden-chest.png",
-    sprites: entitySprites(100 * 16, 32, 37, 1, 1, 0, 0, 4, 1),
+    sprites: entitySprites(S.woodenChest, 32, 37, 1, 1, 0, 0, 4, 1),
   },
   {
     path: "graphics/entities/wooden-chest/wooden-chest-shadow.png",
-    sprites: entitySprites(100 * 16 + 1, 52, 20, 1, 1, 0, 20, -13, 1),
+    sprites: entitySprites(S.woodenChestShadow, 52, 20, 1, 1, 0, 20, -13, 1),
   },
   {
     path: "graphics/items/iron-ore.png",
-    sprites: itemSprites(NAMES.ironOreItem),
+    sprites: itemSprites(S.ironOreItem),
   },
   {
     path: "graphics/items/copper-ore.png",
-    sprites: itemSprites(NAMES.copperOreItem),
+    sprites: itemSprites(S.copperOreItem),
   },
   {
     path: "graphics/items/coal.png",
-    sprites: itemSprites(NAMES.coalItem),
+    sprites: itemSprites(S.coalItem),
   },
   {
     path: "graphics/items/stone.png",
-    sprites: itemSprites(NAMES.stoneItem),
+    sprites: itemSprites(S.stoneItem),
   },
 ];
 
 function entitySprites(id, width, height, xCount, yCount,
-                       left, right, top, bottom) {
+                       left, right, top, bottom, flipXY) {
   const res = [];
   for (let i = 0; i < xCount; i++) {
     for (let j = 0; j < yCount; j++) {
       res.push({
-        id: id + i * yCount + j,
+        id: id + (flipXY ? j * xCount + i : i * yCount + j),
         rect: rect(i * width, j * height, width, height),
         extend: {left, right, top, bottom},
       });

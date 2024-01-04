@@ -2,6 +2,8 @@ import {TYPE, RESOURCE_LABELS} from './entity-properties.js';
 import {SPRITES} from './sprite-pool.js';
 import {ITEMS} from './item-definitions.js';
 
+
+const EXPAND_HEIGHT = 90;
 const COLOR = {
   background1: "#333335",
   background2: "#373739",
@@ -27,11 +29,11 @@ GameUi.prototype.update = function(time) {
 GameUi.prototype.draw = function(ctx, time) {
   let height;
   if (time > this.animationEnd) {
-    height = this.extended ? 90 : 0;
+    height = this.extended ? EXPAND_HEIGHT : 0;
   } else {
-    height = (this.animationEnd - time) / 100 * 90;
+    height = (this.animationEnd - time) / 100 * EXPAND_HEIGHT;
     if (this.extended) {
-      height = 90 - height;
+      height = EXPAND_HEIGHT - height;
     }
   }
   
@@ -103,22 +105,23 @@ GameUi.prototype.drawResourceUi = function(ctx, resource, x, y, width, height) {
 GameUi.prototype.drawInventory = function(ctx, inventory, x, y, width, height) {
   for (let i = 0; i < inventory.capacity; i++) {
     ctx.fillStyle = COLOR.background3;
-    ctx.fillRect(x + i * 44, y, 40, 40);
+    ctx.fillRect(x + i * 46, y, 40, 40);
     ctx.lineWidth = 1;
     ctx.strokeStyle = COLOR.border2;
-    ctx.strokeRect(x + i * 44, y, 40, 40);
+    ctx.strokeRect(x + i * 46, y, 40, 40);
     if (inventory.items[i]) {
       const itemDef = ITEMS.get(inventory.items[i]);
       const sprite = SPRITES.get(itemDef.sprite);
       ctx.drawImage(sprite.image,
           sprite.rect.x, sprite.rect.y,
           sprite.rect.width, sprite.rect.height,
-          x + i * 44 + 5, y + 5, 32, 32);
+          x + i * 46 + 5, y + 5, 32, 32);
       ctx.font = "16px monospace";
       ctx.textAlign = "end";
       ctx.textBaseline = "middle";
       ctx.fillStyle = COLOR.primary;
-      ctx.fillText(inventory.amounts[i], x + i * 44 + 37, y + 32);
+      ctx.fillText(inventory.amounts[i],
+          x + i * 46 + 37, y + 32);
       ctx.textAlign = "start";
     }
   }

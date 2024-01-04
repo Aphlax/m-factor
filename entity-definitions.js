@@ -5,6 +5,7 @@ import {DIRECTION, TYPE} from './entity-properties.js';
 export const NAME = {
   burnerDrill: 1,
   woodenChest: 2,
+  transportBelt: 3,
 };
 
 export const ENTITIES = new Map([
@@ -44,5 +45,33 @@ export const ENTITIES = new Map([
     animationLength: 0,
     
     capacity: 8,
+  }],
+  [NAME.transportBelt,
+  {
+    label: 'Transport belt',
+    type: TYPE.belt,
+    width: 1,
+    height: 1,
+    sprites: {
+      [DIRECTION.north]: [S.transportBeltN],
+      [DIRECTION.east]: [S.transportBeltE],
+      [DIRECTION.south]: [S.transportBeltS],
+      [DIRECTION.west]: [S.transportBeltW],
+    },
+    animationLength: 16,
+    animationSpeed: 2,
+    
+    beltSprites: {
+      [DIRECTION.north]: [S.transportBeltN, S.transportBeltEN, S.transportBeltWN],
+      [DIRECTION.east]: [S.transportBeltE, S.transportBeltSE, S.transportBeltNE],
+      [DIRECTION.south]: [S.transportBeltS, S.transportBeltWS, S.transportBeltES],
+      [DIRECTION.west]: [S.transportBeltW, S.transportBeltNW, S.transportBeltSW],
+    },
+    beltEndSprites: {
+      [DIRECTION.north]: [S.transportBeltBeginN, S.transportBeltEndN],
+      [DIRECTION.east]: [S.transportBeltBeginE, S.transportBeltEndE],
+      [DIRECTION.south]: [S.transportBeltBeginS, S.transportBeltEndS],
+      [DIRECTION.west]: [S.transportBeltBeginW, S.transportBeltEndW],
+    },
   }],
 ]);

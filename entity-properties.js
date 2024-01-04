@@ -3,7 +3,7 @@ import {I} from './item-definitions.js';
 export const TYPE = {
   mine: 1,
   chest: 2,
-  inserter: 3,
+  belt: 3,
 };
 
 export const MAX_SIZE = 3;
@@ -60,6 +60,8 @@ export const MINE_PRODUCTS = {
   [RESOURCE_NAMES.coal]: I.coal,
   [RESOURCE_NAMES.stone]: I.stone,
 };
+
+
 
 export function rectOverlap(x, y, width, height, entity) {
   return x + width > entity.x && x < entity.x + entity.width &&

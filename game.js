@@ -2,6 +2,7 @@
 
 import {GameMap} from './game-map.js';
 import {SPRITES} from './sprite-pool.js';
+import {scenario} from './scenario.js';
 
 const MODE = {
   loading: 0,
@@ -9,7 +10,7 @@ const MODE = {
 };
 
 function Game(canvas) {
-  this.seed = 500;
+  this.seed = 114;
   this.mode = MODE.loading;
   this.gameMap = new GameMap(canvas);
   this.spritePool = SPRITES;
@@ -24,8 +25,7 @@ Game.prototype.update = function(time) {
   if (this.mode == MODE.playing) {
     this.gameMap.update(time);
     if (this.setupScenario) {
-      this.chest = this.gameMap.createEntity(2, 4, -3, 0, time);
-      this.mine = this.gameMap.createEntity(1, 5, -4, 3, time);
+      this.chest = scenario(this.gameMap, time).chest;
       this.setupScenario = false;
     }
   } else if (this.mode == MODE.loading) {
