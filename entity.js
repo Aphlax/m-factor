@@ -26,8 +26,8 @@ function Entity() {
   this.inputInventory = undefined;
   this.outputInventory = undefined;
   // Connected entities.
-  this.inputEntities = new Set();
-  this.outputEntities = new Set();
+  this.inputEntities = [];
+  this.outputEntities = [];
 }
 
 Entity.prototype.setup = function(name, x, y, direction, time) {
@@ -44,14 +44,14 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   this.animation = 0;
   this.animationLength = def.animationLength;
   this.animationSpeed = def.animationSpeed ?? 1;
-  this.inputEntities.clear();
-  this.outputEntities.clear();
+  this.inputEntities.length = 0;
+  this.outputEntities.length = 0;
   
   if (this.type == TYPE.belt) {
+    this.animation = time % def.animationLength;
     this.data.beltSprites = def.beltSprites[direction];
-    this.data.beltBeginSprite = 0;
-    this.data.beltEndSprite = 0;
     this.data.beltEndSprites = def.beltEndSprites[direction];
+    this.updateBeltSprites();
   } else if (this.type == TYPE.mine) {
     this.state = STATE.running;
     this.nextUpdate = time + 666;
@@ -144,7 +144,49 @@ Entity.prototype.draw = function(ctx, view, time) {
       this.y * view.scale - view.y -
           e.top * yScale,
       r.width * xScale,
-      r.height * yScale)
+      r.height * yScale);
+  if (this.type == TYPE.belt) {
+    if (this.data.beltEndSprite) {
+      const s = SPRITES.get(this.data.beltEndSprite + animation);
+      const x = this.x - (this.direction - 2) % 2;
+      const y = this.y + (this.direction - 1) % 2;
+      ctx.drawImage(s.image,
+          s.rect.x, s.rect.y, s.rect.width, s.rect.height,
+          x * view.scale - view.x - e.left * xScale,
+          y * view.scale - view.y - e.top * yScale,
+          s.rect.width * xScale,
+          s.rect.height * yScale);
+    }
+    if (this.data.beltBeginSprite) {
+      const s = SPRITES.get(this.data.beltBeginSprite + animation);
+      const x = this.x + (this.direction - 2) % 2;
+      const y = this.y - (this.direction - 1) % 2;
+      ctx.drawImage(s.image,
+          s.rect.x, s.rect.y, s.rect.width, s.rect.height,
+          x * view.scale - view.x - e.left * xScale,
+          y * view.scale - view.y - e.top * yScale,
+          s.rect.width * xScale,
+          s.rect.height * yScale);
+    }
+    if (this.data.beltExtraRightSprite) {
+      const s = SPRITES.get(this.data.beltExtraRightSprite + animation);
+      ctx.drawImage(s.image,
+          s.rect.x, s.rect.y, s.rect.width, s.rect.height,
+          this.x * view.scale - view.x - e.left * xScale,
+          this.y * view.scale - view.y - e.top * yScale,
+          s.rect.width * xScale,
+          s.rect.height * yScale);
+    }
+    if (this.data.beltExtraLeftSprite) {
+      const s = SPRITES.get(this.data.beltExtraLeftSprite + animation);
+      ctx.drawImage(s.image,
+          s.rect.x, s.rect.y, s.rect.width, s.rect.height,
+          this.x * view.scale - view.x - e.left * xScale,
+          this.y * view.scale - view.y - e.top * yScale,
+          s.rect.width * xScale,
+          s.rect.height * yScale);
+    }
+  }
 };
 
 Entity.prototype.drawShadow = function(ctx, view, time) {
@@ -173,7 +215,7 @@ Entity.prototype.drawShadow = function(ctx, view, time) {
       this.y * view.scale - view.y -
           e.top * yScale,
       r.width * xScale,
-      r.height * yScale)
+      r.height * yScale);
 };
 
 Entity.prototype.insert = function(item, amount, time, origin) {
@@ -199,10 +241,10 @@ Entity.prototype.outputEntityHasSpace = function() {
   
 };
 
-Entity.prototype.connectBelts = function(other, time) {
-  const posX = this.x - (this.direction - 2) % 2;
-  const posY = this.y + (this.direction - 1) % 2;
-  if (posX == other.x && posY == other.y) {
+Entity.prototype.connectBelt = function(other, time) {
+  const x = this.x - (this.direction - 2) % 2;
+  const y = this.y + (this.direction - 1) % 2;
+  if (x == other.x && y == other.y) {
     if (other.direction + 2 % 4 == this.direction) {
       return;
     }
@@ -210,9 +252,9 @@ Entity.prototype.connectBelts = function(other, time) {
     other.inputEntities.push(this);
     return true;
   }
-  const posX_ = other.x - (other.direction - 2) % 2;
-  const posY_ = other.y + (other.direction - 1) % 2;
-  if (posX_ == this.x && posY_ == this.y) {
+  const x2 = other.x - (other.direction - 2) % 2;
+  const y2 = other.y + (other.direction - 1) % 2;
+  if (x2 == this.x && y2 == this.y) {
     this.inputEntities.push(other);
     other.outputEntities.push(this);
     return true;
@@ -222,18 +264,32 @@ Entity.prototype.connectBelts = function(other, time) {
 };
 
 Entity.prototype.updateBeltSprites = function() {
-  let left = false, right = false, mid = false;
+  let left = false, right = false, back = false;
   for (let other of this.inputEntities) {
     if (other.type != TYPE.belt) continue;
-    //
+    if (!back &&
+        this.x + (this.direction - 2) % 2 == other.x &&
+        this.y - (this.direction - 1) % 2 == other.y) {
+      back = true;
+    } else if (!right &&
+        this.x - (this.direction - 1) % 2 == other.x &&
+        this.y - (this.direction - 2) % 2 == other.y) {
+      right = true;
+    } else if (!left &&
+        this.x + (this.direction - 1) % 2 == other.x &&
+        this.y + (this.direction - 2) % 2 == other.y) {
+      left = true;
+    }
   }
-  if ((left == right) && !mid) {
+  this.sprite = this.data.beltSprites[back || (left == right) ? 0 : right ? 1 : 2];
+  this.data.beltExtraRightSprite = (back || left) && right ? this.data.beltEndSprites[2] : 0;
+  this.data.beltExtraLeftSprite = (back || right) && left ? this.data.beltEndSprites[3] : 0;
+  if ((left == right) && !back) {
     this.data.beltBeginSprite = this.data.beltEndSprites[0];
   } else {
     this.data.beltBeginSprite = 0;
-    this.sprite = this.data.beltSprites[mid ? 0 : left ? 1 : 2];
   }
-  if (!this.outputEntities.filter(e => e.type == TYPE.belt).length) {
+  if (!this.outputEntities.length) {
     this.data.beltEndSprite = this.data.beltEndSprites[1];
   } else {
     this.data.beltEndSprite = 0;
@@ -247,8 +303,8 @@ Entity.prototype.connectMineTo = function(other, time) {
       other.y > y || other.y + other.height <= y) {
     return;
   }
-  this.outputEntities.add(other);
-  other.inputEntities.add(this);
+  this.outputEntities.push(other);
+  other.inputEntities.push(this);
   if (this.state == STATE.mineNoOutput) {
     this.state == STATE.running;
     this.nextUpdate = time + 666;

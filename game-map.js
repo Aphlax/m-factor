@@ -115,7 +115,7 @@ GameMap.prototype.drawSelection = function(ctx, selection) {
   if (x + width <= -2 || x > this.view.width + 2 ||
       y + height <= -2 || y > this.view.height + 2)
     return;
-  const d = 0.35 * this.view.scale;
+  const d = 0.3 * this.view.scale;
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
   ctx.beginPath();
@@ -143,13 +143,16 @@ GameMap.prototype.createEntity = function(name, x, y, direction, time) {
   // Create should not do any checks if there is enough space etc.
   const entity = new Entity().setup(name, x, y, direction, time);
   
-  this.connectEntity(entity, time);
-  
   const cx = Math.floor(x / SIZE);
   const cy = Math.floor(y / SIZE);
   if (!this.chunks.has(cx) || !this.chunks.get(cx).has(cy))
     return;
-  this.chunks.get(cx).get(cy).entities.push(entity);
+  
+  this.connectEntity(entity, time);
+  
+  const entities = this.chunks.get(cx).get(cy).entities;
+  const i = entities.findIndex(e => e.y >= y && (e.y > y || e.x > x));
+  entities.splice(i, 0, entity);
   
   // TODO: check if connected machines were blocked & unblock them, use time
   return entity;
@@ -231,7 +234,7 @@ GameMap.prototype.connectEntity = function(entity, time) {
             other.connectMineTo(entity, time);
           }
           if (entity.type == TYPE.belt && other.type == TYPE.belt) {
-            if (Math.abs(entity.x - other x) + Math.abs(entity.y - other.y) == 1) {
+            if (Math.abs(entity.x - other.x) + Math.abs(entity.y - other.y) == 1) {
               if (entity.connectBelt(other, time)) {
                 entity.updateBeltSprites();
                 other.updateBeltSprites();

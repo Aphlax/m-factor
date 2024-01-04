@@ -68,10 +68,10 @@ export const ENTITIES = new Map([
       [DIRECTION.west]: [S.transportBeltW, S.transportBeltNW, S.transportBeltSW],
     },
     beltEndSprites: {
-      [DIRECTION.north]: [S.transportBeltBeginN, S.transportBeltEndN],
-      [DIRECTION.east]: [S.transportBeltBeginE, S.transportBeltEndE],
-      [DIRECTION.south]: [S.transportBeltBeginS, S.transportBeltEndS],
-      [DIRECTION.west]: [S.transportBeltBeginW, S.transportBeltEndW],
+      [DIRECTION.north]: [S.transportBeltBeginN, S.transportBeltEndN, S.transportBeltEndW, S.transportBeltEndE],
+      [DIRECTION.east]: [S.transportBeltBeginE, S.transportBeltEndE, S.transportBeltEndN, S.transportBeltEndS],
+      [DIRECTION.south]: [S.transportBeltBeginS, S.transportBeltEndS, S.transportBeltEndE, S.transportBeltEndW],
+      [DIRECTION.west]: [S.transportBeltBeginW, S.transportBeltEndW, S.transportBeltEndS, S.transportBeltEndN],
     },
   }],
 ]);
