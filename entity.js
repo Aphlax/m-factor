@@ -51,6 +51,8 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.animation = time % def.animationLength;
     this.data.beltSprites = def.beltSprites[direction];
     this.data.beltEndSprites = def.beltEndSprites[direction];
+    this.data.beltInput = undefined;
+    this.data.beltOutput = undefined;
     this.updateBeltSprites();
   } else if (this.type == TYPE.mine) {
     this.state = STATE.running;
@@ -218,7 +220,7 @@ Entity.prototype.drawShadow = function(ctx, view, time) {
       r.height * yScale);
 };
 
-Entity.prototype.insert = function(item, amount, time, origin) {
+Entity.prototype.insert = function(item, amount, time, positionForBelt) {
   if (this.type == TYPE.chest) {
     const count = this.inputInventory.insert(item, amount, time);
     if (count) {
@@ -250,6 +252,8 @@ Entity.prototype.connectBelt = function(other, time) {
     }
     this.outputEntities.push(other);
     other.inputEntities.push(this);
+    this.data.beltOutput = other;
+    other.beltInputOutput();
     return true;
   }
   const x2 = other.x - (other.direction - 2) % 2;
@@ -257,21 +261,45 @@ Entity.prototype.connectBelt = function(other, time) {
   if (x2 == this.x && y2 == this.y) {
     this.inputEntities.push(other);
     other.outputEntities.push(this);
+    other.data.beltOutput = this;
+    this.beltInputOutput();
     return true;
   }
   
   // TODO: update state
 };
 
-Entity.prototype.updateBeltSprites = function() {
-  let left = false, right = false, back = false;
+Entity.prototype.beltInputOutput = function() {
+  let right = undefined, left = undefined;
   for (let other of this.inputEntities) {
     if (other.type != TYPE.belt) continue;
-    if (!back &&
-        this.x + (this.direction - 2) % 2 == other.x &&
+    if (this.x + (this.direction - 2) % 2 == other.x &&
         this.y - (this.direction - 1) % 2 == other.y) {
-      back = true;
+      this.data.beltInput = other;
+      return;
     } else if (!right &&
+        this.x - (this.direction - 1) % 2 == other.x &&
+        this.y - (this.direction - 2) % 2 == other.y) {
+      right = other;
+    } else if (!left &&
+        this.x + (this.direction - 1) % 2 == other.x &&
+        this.y + (this.direction - 2) % 2 == other.y) {
+      left = other;
+    }
+  }
+  if (right && left) {
+    this.data.beltInput = undefined;
+    return;
+  }
+  this.data.beltInput = right || left;
+};
+
+Entity.prototype.updateBeltSprites = function() {
+  let right = false, left = false;
+  for (let other of this.inputEntities) {
+    if (other == this.data.beltInput) continue;
+    if (other.type != TYPE.belt) continue;
+    if (!right &&
         this.x - (this.direction - 1) % 2 == other.x &&
         this.y - (this.direction - 2) % 2 == other.y) {
       right = true;
@@ -281,15 +309,17 @@ Entity.prototype.updateBeltSprites = function() {
       left = true;
     }
   }
-  this.sprite = this.data.beltSprites[back || (left == right) ? 0 : right ? 1 : 2];
-  this.data.beltExtraRightSprite = (back || left) && right ? this.data.beltEndSprites[2] : 0;
-  this.data.beltExtraLeftSprite = (back || right) && left ? this.data.beltEndSprites[3] : 0;
-  if ((left == right) && !back) {
+  this.data.beltExtraRightSprite = right ? this.data.beltEndSprites[2] : 0;
+  this.data.beltExtraLeftSprite = left ? this.data.beltEndSprites[3] : 0;
+  if (!this.data.beltInput) {
+    this.sprite = this.data.beltSprites[0];
     this.data.beltBeginSprite = this.data.beltEndSprites[0];
   } else {
+    const curve = (this.direction - this.data.beltInput.direction + 4) % 4;
+    this.sprite = this.data.beltSprites[curve == 3 ? 2 : curve];
     this.data.beltBeginSprite = 0;
   }
-  if (!this.outputEntities.length) {
+  if (!this.data.beltOutput) {
     this.data.beltEndSprite = this.data.beltEndSprites[1];
   } else {
     this.data.beltEndSprite = 0;

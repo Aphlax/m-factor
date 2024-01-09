@@ -4,6 +4,7 @@ import {GameMapInput} from './game-map-input.js';
 import {GameUi} from './game-ui.js';
 import {TYPE, MAX_SIZE, rectOverlap} from './entity-properties.js';
 import {Entity} from './entity.js';
+import {TransportNetwork} from './transport-network.js';
 
 function GameMap(canvas) {
   this.mapGenerator = new MapGenerator();
@@ -17,12 +18,14 @@ function GameMap(canvas) {
   this.input = new GameMapInput(this, this.view);
   this.ui = new GameUi(this);
   this.chunks = new Map();
+  this.transportNetwork = new TransportNetwork(this);
   this.selectedEntity = undefined;
 }
 
 GameMap.prototype.initialize = function(seed) {
   this.chunks = new Map(); // Reset.
   this.mapGenerator.initialize(seed);
+  this.transportNetwork.reset();
 };
 
 GameMap.prototype.update = function(time) {
@@ -34,6 +37,7 @@ GameMap.prototype.update = function(time) {
     }
   }
   this.ui.update(time);
+  this.transportNetwork.update(time);
   
   // Generate missing chunks.
   const size = SIZE * this.view.scale;
@@ -102,42 +106,11 @@ GameMap.prototype.draw = function(ctx, time) {
     }
   }
   if (this.selectedEntity) {
-    this.drawSelection(ctx, this.selectedEntity);
+    this.ui.drawSelection(ctx, this.view, this.selectedEntity);
   }
   this.ui.draw(ctx, time);
+  this.transportNetwork.draw(ctx, this.view);
 };
-
-GameMap.prototype.drawSelection = function(ctx, selection) {
-  const x = selection.x * this.view.scale - this.view.x;
-  const width = (selection.width ?? 1) * this.view.scale;
-  const y = selection.y * this.view.scale - this.view.y;
-  const height = (selection.height ?? 1) * this.view.scale;
-  if (x + width <= -2 || x > this.view.width + 2 ||
-      y + height <= -2 || y > this.view.height + 2)
-    return;
-  const d = 0.3 * this.view.scale;
-  ctx.lineJoin = "round";
-  ctx.lineCap = "round";
-  ctx.beginPath();
-  ctx.moveTo(x, y + d);
-  ctx.lineTo(x, y);
-  ctx.lineTo(x + d, y);
-  ctx.moveTo(x + width, y + d);
-  ctx.lineTo(x + width, y);
-  ctx.lineTo(x + width - d, y);
-  ctx.moveTo(x, y + height - d);
-  ctx.lineTo(x, y + height);
-  ctx.lineTo(x + d, y + height);
-  ctx.moveTo(x + width, y + height - d);
-  ctx.lineTo(x + width, y + height);
-  ctx.lineTo(x + width - d, y + height);
-  ctx.strokeStyle = "#FFAA00";
-  ctx.lineWidth = 4;
-  ctx.stroke();
-  ctx.strokeStyle = "#EEEE00";
-  ctx.lineWidth = 2;
-  ctx.stroke();
-}
 
 GameMap.prototype.createEntity = function(name, x, y, direction, time) {
   // Create should not do any checks if there is enough space etc.
@@ -153,6 +126,10 @@ GameMap.prototype.createEntity = function(name, x, y, direction, time) {
   const entities = this.chunks.get(cx).get(cy).entities;
   const i = entities.findIndex(e => e.y >= y && (e.y > y || e.x > x));
   entities.splice(i, 0, entity);
+  
+  if (entity.type == TYPE.belt) {
+    entity.data.lane = this.transportNetwork.add(entity);
+  }
   
   // TODO: check if connected machines were blocked & unblock them, use time
   return entity;
