@@ -127,10 +127,6 @@ GameMap.prototype.createEntity = function(name, x, y, direction, time) {
   const i = entities.findIndex(e => e.y >= y && (e.y > y || e.x > x));
   entities.splice(i, 0, entity);
   
-  if (entity.type == TYPE.belt) {
-    entity.data.lane = this.transportNetwork.add(entity);
-  }
-  
   // TODO: check if connected machines were blocked & unblock them, use time
   return entity;
 }
@@ -205,14 +201,14 @@ GameMap.prototype.connectEntity = function(entity, time) {
             rectOverlap(entity.x, entity.y + entity.height, entity.width, 2, other) ||
             rectOverlap(x, entity.y, 2, entity.height, other)) {
           if (entity.type == TYPE.mine) {
-            entity.connectMineTo(other, time);
+            entity.connectMine(other, time);
           }
           if (other.type == TYPE.mine) {
-            other.connectMineTo(entity, time);
+            other.connectMine(entity, time);
           }
           if (entity.type == TYPE.belt && other.type == TYPE.belt) {
             if (Math.abs(entity.x - other.x) + Math.abs(entity.y - other.y) == 1) {
-              if (entity.connectBelt(other, time)) {
+              if (entity.connectBelt(other, time, this.transportNetwork)) {
                 entity.updateBeltSprites();
                 other.updateBeltSprites();
               }
@@ -221,6 +217,9 @@ GameMap.prototype.connectEntity = function(entity, time) {
         }
       }
     }
+  }
+  if (entity.type == TYPE.belt) {
+    this.transportNetwork.addBelt(entity);
   }
 }
 

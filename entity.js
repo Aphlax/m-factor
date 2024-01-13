@@ -243,7 +243,7 @@ Entity.prototype.outputEntityHasSpace = function() {
   
 };
 
-Entity.prototype.connectBelt = function(other, time) {
+Entity.prototype.connectBelt = function(other, time, transportNetwork) {
   const x = this.x - (this.direction - 2) % 2;
   const y = this.y + (this.direction - 1) % 2;
   if (x == other.x && y == other.y) {
@@ -252,8 +252,10 @@ Entity.prototype.connectBelt = function(other, time) {
     }
     this.outputEntities.push(other);
     other.inputEntities.push(this);
-    this.data.beltOutput = other;
-    other.beltInputOutput();
+    if (other.beltInputOutput()) {
+      console.log("other");
+      transportNetwork.beltInputChanged(other);
+    }
     return true;
   }
   const x2 = other.x - (other.direction - 2) % 2;
@@ -261,22 +263,42 @@ Entity.prototype.connectBelt = function(other, time) {
   if (x2 == this.x && y2 == this.y) {
     this.inputEntities.push(other);
     other.outputEntities.push(this);
-    other.data.beltOutput = this;
-    this.beltInputOutput();
+    if (this.beltInputOutput()) {
+      console.log("this");
+      transportNetwork.beltInputChanged(this);
+    }
     return true;
   }
   
   // TODO: update state
 };
 
+/**
+ * Computes the belt connection input and output of this belt.
+ * Returns true iff the input of this belt changed.
+ */
 Entity.prototype.beltInputOutput = function() {
+  const oldBeltInput = this.data.beltInput;
   let right = undefined, left = undefined;
-  for (let other of this.inputEntities) {
+  for (let i = 0; i < this.inputEntities.length; i++) {
+    const other = this.inputEntities[i];
     if (other.type != TYPE.belt) continue;
     if (this.x + (this.direction - 2) % 2 == other.x &&
         this.y - (this.direction - 1) % 2 == other.y) {
       this.data.beltInput = other;
-      return;
+      other.data.beltOutput = this;
+      if (right?.data.beltOutput) {
+        right.data.beltOutput = undefined;
+      }
+      if (left?.data.beltOutput) {
+        left.data.beltOutput = undefined;
+      }
+      for (i++; i < this.inputEntities.length; i++) {
+        if (this.inputEntities[i].type != TYPE.belt ||
+            !this.inputEntities[i].data.beltOutput) continue;
+        this.inputEntities[i].data.beltOutput = undefined;
+      }
+      return oldBeltInput != this.data.beltInput;
     } else if (!right &&
         this.x - (this.direction - 1) % 2 == other.x &&
         this.y - (this.direction - 2) % 2 == other.y) {
@@ -289,9 +311,19 @@ Entity.prototype.beltInputOutput = function() {
   }
   if (right && left) {
     this.data.beltInput = undefined;
-    return;
+    if (right.data.beltOutput) {
+      right.data.beltOutput = undefined;
+    }
+    if (left.data.beltOutput) {
+      left.data.beltOutput = undefined;
+    }
+    return oldBeltInput != this.data.beltInput;
   }
   this.data.beltInput = right || left;
+  if (this.data.beltInput) {
+    this.data.beltInput.data.beltOutput = this;
+  }
+  return oldBeltInput != this.data.beltInput;
 };
 
 Entity.prototype.updateBeltSprites = function() {
@@ -326,7 +358,7 @@ Entity.prototype.updateBeltSprites = function() {
   }
 };
 
-Entity.prototype.connectMineTo = function(other, time) {
+Entity.prototype.connectMine = function(other, time) {
   const x = this.x + this.data.mineOutputX,
         y = this.y + this.data.mineOutputY;
   if (other.x > x || other.x + other.width <= x ||

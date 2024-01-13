@@ -8,19 +8,25 @@ function TransportNetwork() {
 TransportNetwork.prototype.reset = function() {
   this.lanes.length = 0;
 }
-TransportNetwork.prototype.add = function(belt) {
+TransportNetwork.prototype.addBelt = function(belt) {
   if (belt.data.beltInput) {
     const lane = belt.data.beltInput.data.lane.extendEnd(belt);
-    if (belt.data.beltOutput?.data.beltInput == belt) {
-      lane.appendEnd(belt.data.beltOutput.data.lane);
+    if (belt.data.beltOutput) {
+      lane.appendLaneEnd(belt.data.beltOutput.data.lane);
     }
-    return lane;
-  } else if (belt.data.beltOutput?.data.beltInput == belt) {
+    return;
+  } else if (belt.data.beltOutput) {
     return belt.data.beltOutput.data.lane.extendBegin(belt);
   }
-  const lane = new Lane(belt);
-  this.lanes.push(lane);
-  return lane;
+  this.lanes.push(Lane.fromBelt(belt));
+};
+
+TransportNetwork.prototype.beltInputChanged = function(belt) {
+  if (!belt.data.lane || belt.data.lane.belts[0] == belt) return;
+  this.lanes.push(belt.data.lane.split(belt));
+  if (belt.data.beltInput?.lane) {
+    belt.data.beltInput.data.lane.appendLaneEnd(belt.data.lane);
+  }
 };
 
 TransportNetwork.prototype.update = function(time) {
@@ -41,10 +47,16 @@ TransportNetwork.prototype.draw = function(ctx, view) {
   ctx.globalAlpha = 1;
 };
 
+function Lane(belts, nodes) {
+  this.belts = belts;
+  this.nodes = nodes;
+}
 
-function Lane(belt) {
-  this.belts = [belt];
-  this.nodes = [new Node(belt.x, belt.y, belt.direction, 1)];
+Lane.fromBelt = function(belt) {
+  const lane = new Lane([belt],
+      [new Node(belt.x, belt.y, belt.direction, 1)]);
+  belt.data.lane = lane;
+  return lane;
 }
 
 Lane.prototype.update = function(time, dt) {
@@ -73,6 +85,7 @@ Lane.prototype.draw = function(ctx, view) {
 };
 
 Lane.prototype.extendEnd = function(belt) {
+  belt.data.lane = this;
   if (this.nodes[this.nodes.length - 1].direction == belt.direction) {
     this.nodes[this.nodes.length - 1].length++;
     this.belts.push(belt);
@@ -84,6 +97,7 @@ Lane.prototype.extendEnd = function(belt) {
 };
 
 Lane.prototype.extendBegin = function(belt) {
+  belt.data.lane = this;
   if (this.nodes[0].direction == belt.direction) {
     this.nodes[0].x += (belt.direction - 2) % 2;
     this.nodes[0].y += -(belt.direction - 1) % 2;
@@ -96,7 +110,7 @@ Lane.prototype.extendBegin = function(belt) {
   return this;
 };
 
-Lane.prototype.appendEnd = function(other) {
+Lane.prototype.appendLaneEnd = function(other) {
   if (other == this) return;
   if (this.nodes[this.nodes.length - 1].direction == other.nodes[0].direction) {
     this.nodes[this.nodes.length - 1].length += other.nodes[0].length;
@@ -113,11 +127,45 @@ Lane.prototype.appendEnd = function(other) {
   return other;
 };
 
+/**
+ * Splits a lane just before the given belt.
+ */
+Lane.prototype.split = function(belt) {
+  const n = this.nodes.findIndex(n => n.contains(belt));
+  const nodes = this.nodes.slice(n);
+  const d = Math.abs(this.nodes[n].x - belt.x) +
+      Math.abs(this.nodes[n].y - belt.y);
+  if (d) {
+    nodes[0] = new Node(
+        nodes[0].x - ((nodes[0].direction - 2) % 2) * d,
+        nodes[0].y + ((nodes[0].direction - 1) % 2) * d,
+        nodes[0].direction,
+        nodes[0].length - d);
+    this.nodes[n].length = d;
+  }
+  this.nodes.length = n + (d ? 1 : 0);
+  
+  const b = this.belts.indexOf(belt);
+  const belts = this.belts.splice(b);
+  const lane = new Lane(belts, nodes);
+  lane.belts.forEach(b => b.data.lane = lane);
+  
+  return lane;
+}
+
 function Node(x, y, direction, length) {
   this.x = x;
   this.y = y;
   this.direction = direction;
   this.length = length;
+}
+
+Node.prototype.contains = function(belt) {
+  const x = (belt.x - this.x) * (this.direction == 3 ? -1 : 1);
+  const y = (belt.y - this.y) * (this.direction == 0 ? -1 : 1);
+  return this.direction % 2 ?
+      x >= 0 && x < this.length && y == 0 :
+      x == 0 && y >= 0 && y < this.length;
 }
 
 export {TransportNetwork};
