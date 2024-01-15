@@ -11,7 +11,7 @@ export const NAME = {
 export const ENTITIES = new Map([
   [NAME.burnerDrill,
   {
-    label: 'Burner drill',
+    label: 'Wind up drill',
     type: TYPE.mine,
     width: 2,
     height: 2,

@@ -1,4 +1,4 @@
-
+import {NAME} from './entity-definitions.js';
 
 export function scenario(gameMap, time) {
   const s = {};
@@ -26,6 +26,8 @@ export function scenario(gameMap, time) {
     [8, 3, 0, 2],
     [6, 3, 1],
     
+    [9, 4, 1],
+    
     [2, -3, 0],
     [2, -1, 1],
     [2, 1, 2],
@@ -49,14 +51,42 @@ export function scenario(gameMap, time) {
     [8, -4, 2],
     
     [7, -1, 0],
-  ].map(b => [b[0] - 5, b[1] - 2, (b[2] + 0) % 4, b[3] ?? 1]);
-  belts.forEach(b => {
-    for (let i = 0; i < b[3]; i++) {
-      const dx = -((b[2] - 2) % 2) * i;
-      const dy = ((b[2] - 1) % 2) * i;
-      gameMap.createEntity(3, b[0] + dx, b[1] + dy, b[2], time);
-    }
-  });
+    
+    [1, 5, 1],
+    [2, 6, 0, 3],
+    [3, 5, 3],
+  ].map(([x, y, d, l]) => [x - 5, y - 2, d, l ?? 1]);
+  belts.forEach(b => createLane(gameMap, ...b, time));
+  
+  const remove = [
+    [-3, -7],
+    
+    [5, 1],
+    
+    [2, 2],
+    
+    [-3, 4],
+    [-3, 2],
+    
+    [0, 0],
+    
+    [1, 4],
+  ].map(([x, y]) => 
+      gameMap.deleteEntity(gameMap.getEntityAt(x, y)));
+  
+  createLane(gameMap, 2, 2, 3, 1, time);
+  createLane(gameMap, 0, 0, 0, 1, time);
+  createLane(gameMap, 0, 1, 0, 1, time);
+  gameMap.deleteEntity(gameMap.getEntityAt(0, 0));
   
   return s;
+}
+
+function createLane(gameMap, x, y, direction, length, time) {
+  for (let i = 0; i < length; i++) {
+    const dx = -((direction - 2) % 2) * i;
+    const dy = ((direction - 1) % 2) * i;
+    gameMap.createEntity(NAME.transportBelt,
+        x + dx, y + dy, direction, time);
+  }
 }

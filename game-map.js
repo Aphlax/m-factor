@@ -131,6 +131,15 @@ GameMap.prototype.createEntity = function(name, x, y, direction, time) {
   return entity;
 }
 
+GameMap.prototype.deleteEntity = function(entity) {
+  const cx = Math.floor(entity.x / SIZE);
+  const cy = Math.floor(entity.y / SIZE);
+  const entities = this.chunks.get(cx).get(cy).entities;
+  entities.splice(entities.indexOf(entity), 1);
+  
+  this.disconnectEntity(entity);
+};
+
 GameMap.prototype.canPlace = function(x, y, width, height, ignoredEntity) {
   for (let i = 0; i < width; i++) {
     for (let j = 0; j < height; j++) {
@@ -220,6 +229,32 @@ GameMap.prototype.connectEntity = function(entity, time) {
   }
   if (entity.type == TYPE.belt) {
     this.transportNetwork.addBelt(entity);
+  }
+}
+
+GameMap.prototype.disconnectEntity = function(entity) {
+  entity.inputEntities.forEach(other =>
+      other.outputEntities.splice(other.outputEntities.indexOf(entity), 1));
+  entity.outputEntities.forEach(other =>
+      other.inputEntities.splice(other.inputEntities.indexOf(entity), 1));
+  
+  if (entity.type == TYPE.belt) {
+    this.transportNetwork.removeBelt(entity);
+    for (let other of entity.inputEntities) {
+      if (other.type == TYPE.belt) {
+        if (other.data.beltOutput == entity) {
+          other.data.beltOutput = undefined;
+        }
+        other.updateBeltSprites();
+      }
+    }
+    for (let other of entity.outputEntities) {
+      if (other.type == TYPE.belt &&
+          other.beltInputOutput()) {
+        other.updateBeltSprites();
+        this.transportNetwork.beltInputChanged(other);
+      }
+    }
   }
 }
 

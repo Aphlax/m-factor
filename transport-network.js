@@ -8,6 +8,7 @@ function TransportNetwork() {
 TransportNetwork.prototype.reset = function() {
   this.lanes.length = 0;
 }
+
 TransportNetwork.prototype.addBelt = function(belt) {
   if (belt.data.beltInput) {
     const lane = belt.data.beltInput.data.lane.extendEnd(belt);
@@ -21,10 +22,30 @@ TransportNetwork.prototype.addBelt = function(belt) {
   this.lanes.push(Lane.fromBelt(belt));
 };
 
+TransportNetwork.prototype.removeBelt = function(belt) {
+  if (belt.data.lane.belts[0] != belt) {
+    if (belt.data.lane.belts[belt.data.lane.belts.length - 1] != belt) {
+      this.lanes.push(belt.data.lane.split(belt.data.beltOutput));
+    }
+    belt.data.lane.removeEnd();
+    return;
+  } else if (belt.data.lane.belts[belt.data.lane.belts.length - 1] != belt) {
+    console.log(belt);
+    console.log(belt.data.lane);
+    console.log(belt.data.lane.belts[0] == belt);
+    belt.data.lane.removeBegin();
+    return;
+  }
+  belt.data.lane.belts.length = 0;
+  belt.data.lane.nodes.length = 0;
+};
+
 TransportNetwork.prototype.beltInputChanged = function(belt) {
-  if (!belt.data.lane || belt.data.lane.belts[0] == belt) return;
-  this.lanes.push(belt.data.lane.split(belt));
-  if (belt.data.beltInput?.lane) {
+  if (!belt.data.lane) return;
+  if(belt.data.lane.belts[0] != belt) {
+    this.lanes.push(belt.data.lane.split(belt));
+  }
+  if (belt.data.beltInput?.data.lane) {
     belt.data.beltInput.data.lane.appendLaneEnd(belt.data.lane);
   }
 };
@@ -32,14 +53,24 @@ TransportNetwork.prototype.beltInputChanged = function(belt) {
 TransportNetwork.prototype.update = function(time) {
   const dt = time - this.lastUpdate;
   this.lastUpdate = time;
-  for (let lane of this.lanes) {
-    if (!lane.nodes.length) continue;
-    lane.update(time, dt);
+  let removedLanes = 0;
+  for (let i = 0; i < this.lanes.length; i++) {
+    if (!this.lanes[i].nodes.length) {
+      removedLanes++;
+      continue;
+    }
+    this.lanes[i].update(time, dt);
+    if (removedLanes) {
+      this.lanes[i - removedLanes] = this.lanes[i];
+    }
+  }
+  if (removedLanes) {
+    this.lanes.length -= removedLanes;
   }
 };
 
 TransportNetwork.prototype.draw = function(ctx, view) {
-  ctx.globalAlpha = 0.5;
+  ctx.globalAlpha = 0.3;
   for (let lane of this.lanes) {
     if (!lane.nodes.length) continue;
     lane.draw(ctx, view);
@@ -50,6 +81,7 @@ TransportNetwork.prototype.draw = function(ctx, view) {
 function Lane(belts, nodes) {
   this.belts = belts;
   this.nodes = nodes;
+  this.circular = false;
 }
 
 Lane.fromBelt = function(belt) {
@@ -79,39 +111,66 @@ Lane.prototype.draw = function(ctx, view) {
   ctx.lineTo(
       (x + 0.5) * view.scale - view.x,
       (y + 0.5) * view.scale - view.y);
-  ctx.strokeStyle = "#00FFFF";
+  ctx.strokeStyle = this.circular ? "#FF00FF" : "#00FFFF";
   ctx.lineWidth = 2;
   ctx.stroke();
 };
 
 Lane.prototype.extendEnd = function(belt) {
   belt.data.lane = this;
+  this.belts.push(belt);
   if (this.nodes[this.nodes.length - 1].direction == belt.direction) {
     this.nodes[this.nodes.length - 1].length++;
-    this.belts.push(belt);
     return this;
   }
   this.nodes.push(new Node(belt.x, belt.y, belt.direction, 1));
-  this.belts.push(belt);
   return this;
 };
 
 Lane.prototype.extendBegin = function(belt) {
   belt.data.lane = this;
+  this.belts.unshift(belt);
+  if (this.circular) {
+    this.circular = false;
+  }
   if (this.nodes[0].direction == belt.direction) {
     this.nodes[0].x += (belt.direction - 2) % 2;
     this.nodes[0].y += -(belt.direction - 1) % 2;
     this.nodes[0].length++;
-    this.belts.unshift(belt);
     return this;
   }
   this.nodes.unshift(new Node(belt.x, belt.y, belt.direction, 1));
-  this.belts.unshift(belt);
   return this;
 };
 
+Lane.prototype.removeEnd = function() {
+  this.belts.pop().data.lane = undefined;
+  if (this.circular) {
+    this.circular = false;
+  }
+  if (!--this.nodes[this.nodes.length - 1].length) {
+    this.nodes.pop();
+  }
+};
+
+Lane.prototype.removeBegin = function() {
+  this.belts.shift().data.lane = undefined;
+  if (this.circular) {
+    this.circular = false;
+  }
+  if (--this.nodes[0].length) {
+    this.nodes[0].x += -(this.nodes[0].direction - 2) % 2;
+    this.nodes[0].y += (this.nodes[0].direction - 1) % 2;
+    return;
+  }
+  this.nodes.shift();
+};
+
 Lane.prototype.appendLaneEnd = function(other) {
-  if (other == this) return;
+  if (other == this) {
+    this.circular = true;
+    return;
+  }
   if (this.nodes[this.nodes.length - 1].direction == other.nodes[0].direction) {
     this.nodes[this.nodes.length - 1].length += other.nodes[0].length;
     for (let i = 1; i < other.nodes.length; i++) {
@@ -124,7 +183,7 @@ Lane.prototype.appendLaneEnd = function(other) {
   other.belts.forEach(b => b.data.lane = this);
   other.nodes.length = 0;
   other.belts.length = 0;
-  return other;
+  return;
 };
 
 /**
@@ -149,6 +208,11 @@ Lane.prototype.split = function(belt) {
   const belts = this.belts.splice(b);
   const lane = new Lane(belts, nodes);
   lane.belts.forEach(b => b.data.lane = lane);
+  
+  if (this.circular) {
+    this.circular = false;
+    lane.appendLaneEnd(this);
+  }
   
   return lane;
 }

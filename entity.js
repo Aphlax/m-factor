@@ -48,7 +48,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   this.outputEntities.length = 0;
   
   if (this.type == TYPE.belt) {
-    this.animation = time % def.animationLength;
+    this.animation = (time * this.animationSpeed / 60) % def.animationLength;
     this.data.beltSprites = def.beltSprites[direction];
     this.data.beltEndSprites = def.beltEndSprites[direction];
     this.data.beltInput = undefined;
@@ -253,7 +253,6 @@ Entity.prototype.connectBelt = function(other, time, transportNetwork) {
     this.outputEntities.push(other);
     other.inputEntities.push(this);
     if (other.beltInputOutput()) {
-      console.log("other");
       transportNetwork.beltInputChanged(other);
     }
     return true;
@@ -264,7 +263,6 @@ Entity.prototype.connectBelt = function(other, time, transportNetwork) {
     this.inputEntities.push(other);
     other.outputEntities.push(this);
     if (this.beltInputOutput()) {
-      console.log("this");
       transportNetwork.beltInputChanged(this);
     }
     return true;
