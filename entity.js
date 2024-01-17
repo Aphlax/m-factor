@@ -97,7 +97,8 @@ Entity.prototype.update = function(gameMap, time) {
         return;
       }
       const item = MINE_PRODUCTS[resource.id];
-      if (outEntity.insert(item, 1, this.nextUpdate, this)) {
+      const positionForBelt = this.direction * 3 + 1;
+      if (outEntity.insert(item, 1, this.nextUpdate, positionForBelt)) {
         this.taskStart = this.nextUpdate;
         this.nextUpdate += 666;
         resource.amount--;
@@ -221,7 +222,9 @@ Entity.prototype.drawShadow = function(ctx, view, time) {
 };
 
 Entity.prototype.insert = function(item, amount, time, positionForBelt) {
-  if (this.type == TYPE.chest) {
+  if (this.type == TYPE.belt) {
+    return this.data.lane.insertItem(item, this, time, positionForBelt) ? 1 : 0;
+  } else if (this.type == TYPE.chest) {
     const count = this.inputInventory.insert(item, amount, time);
     if (count) {
       for (let oEntity of this.outputEntities) {
@@ -371,7 +374,7 @@ Entity.prototype.connectMine = function(other, time) {
   }
 };
 
-Entity.prototype.connectInserterTo = function(other) {
+Entity.prototype.connectInserter = function(other) {
     
 };
 

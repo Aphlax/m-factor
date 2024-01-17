@@ -132,6 +132,7 @@ GameMap.prototype.createEntity = function(name, x, y, direction, time) {
 }
 
 GameMap.prototype.deleteEntity = function(entity) {
+  if (!entity) return;
   const cx = Math.floor(entity.x / SIZE);
   const cy = Math.floor(entity.y / SIZE);
   const entities = this.chunks.get(cx).get(cy).entities;

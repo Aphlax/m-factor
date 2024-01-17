@@ -2,10 +2,9 @@ import {NAME} from './entity-definitions.js';
 
 export function scenario(gameMap, time) {
   const s = {};
-  gameMap.createEntity(2, 4, -9, 0, time);
-  gameMap.createEntity(1, 5, -10, 3, time);
-  s.chest = gameMap.createEntity(2, -18, -9, 0, time);
-  gameMap.createEntity(1, -17, -10, 3, time);
+  gameMap.createEntity(NAME.burnerDrill, 6, -6, 3, time);
+  s.chest = gameMap.createEntity(NAME.woodenChest, -18, -9, 0, time);
+  gameMap.createEntity(NAME.burnerDrill, -17, -10, 3, time);
   
   const belts = [
     [0, 1, 0, 6],
@@ -61,7 +60,7 @@ export function scenario(gameMap, time) {
   const remove = [
     [-3, -7],
     
-    [5, 1],
+    //[5, 1],
     
     [2, 2],
     
@@ -74,7 +73,7 @@ export function scenario(gameMap, time) {
   ].map(([x, y]) => 
       gameMap.deleteEntity(gameMap.getEntityAt(x, y)));
   
-  createLane(gameMap, 2, 2, 3, 1, time);
+  createLane(gameMap, 1, 4, 0, 2, time);
   createLane(gameMap, 0, 0, 0, 1, time);
   createLane(gameMap, 0, 1, 0, 1, time);
   gameMap.deleteEntity(gameMap.getEntityAt(0, 0));
