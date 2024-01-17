@@ -34,8 +34,8 @@ Chunk.prototype.drawTerrain = function(ctx, view) {
       
       ctx.drawImage(
           sprite.image,
-          sprite.rect.x, sprite.rect.y,
-          sprite.rect.width, sprite.rect.height,
+          sprite.x, sprite.y,
+          sprite.width, sprite.height,
           Math.floor((this.x * SIZE + x) * view.scale - view.x),
           Math.floor((this.y * SIZE + y) * view.scale - view.y),
           scaleCeil, scaleCeil);
@@ -69,8 +69,8 @@ Chunk.prototype.drawResources = function(ctx, view) {
         const sprite = SPRITES.get(r.sprite);
         ctx.drawImage(
           sprite.image,
-          sprite.rect.x, sprite.rect.y,
-          sprite.rect.width, sprite.rect.height,
+          sprite.x, sprite.y,
+          sprite.width, sprite.height,
           Math.floor((this.x * SIZE + x - 0.25) * view.scale - view.x),
           Math.floor((this.y * SIZE + y - 0.25) * view.scale - view.y),
           resourceSize, resourceSize);

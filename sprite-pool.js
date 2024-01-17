@@ -50,34 +50,32 @@ SpritePool.prototype.draw = function(ctx, time) {
     let size = [32, 32];
     for (let i = 0; i < 4; i++) {
       for (let j = 0; j < 8; j++) {
-        let s = this.get(sprite+i*8+j), r = s.rect,
-            e = s.extend ?? {left: 0, right: 0, top: 0, bottom: 0};
+        let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(sprite+i*8+j)};
         let rect = [10+i*70, 10+ j*70, ...size];
-        let xScale = rect[2] / (r.width - e.left - e.right);
-        let yScale = rect[3] / (r.height - e.top - e.bottom);
+        let xScale = rect[2] / (s.width - s.left - s.right);
+        let yScale = rect[3] / (s.height - s.top - s.bottom);
         if (shadow) {
-          let ss = this.get(shadow+i*8+j), rs = ss.rect,
-              es = ss.extend ?? {left: 0, right: 0, top: 0, bottom: 0};
-          let sxScale = rect[2] / (rs.width - es.left - es.right);
-          let syScale = rect[3] / (rs.height - es.top - es.bottom);
+          let ss = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(shadow+i*8+j)};
+          let sxScale = rect[2] / (ss.width - ss.left - ss.right);
+          let syScale = rect[3] / (ss.height - ss.top - ss.bottom);
           ctx.strokeStyle="blue";
-          ctx.strokeRect(rect[0] - es.left * sxScale - 1,
-              rect[1] - es.top * syScale - 1,
-              rs.width * sxScale + 2,
-              rs.height * syScale + 2);
+          ctx.strokeRect(rect[0] - ss.left * sxScale - 1,
+              rect[1] - ss.top * syScale - 1,
+              ss.width * sxScale + 2,
+              ss.height * syScale + 2);
           ctx.drawImage(ss.image,
-              rs.x, rs.y, rs.width, rs.height,
-              rect[0] - es.left * sxScale,
-              rect[1] - es.top * syScale,
-              rs.width * sxScale,
-              rs.height * syScale);
+              ss.x, ss.y, ss.width, ss.height,
+              rect[0] - ss.left * sxScale,
+              rect[1] - ss.top * syScale,
+              ss.width * sxScale,
+              ss.height * syScale);
         }
         ctx.drawImage(s.image,
-            r.x, r.y, r.width, r.height,
-            rect[0] - e.left * xScale,
-            rect[1] - e.top * yScale,
-            r.width * xScale,
-            r.height * yScale);
+            s.x, s.y, s.width, s.height,
+            rect[0] - s.left * xScale,
+            rect[1] - s.top * yScale,
+            s.width * xScale,
+            s.height * yScale);
         ctx.strokeStyle="red";
         ctx.strokeRect(...rect);
       }
@@ -92,23 +90,23 @@ SpritePool.prototype.draw = function(ctx, time) {
     if (shadow) {
       let ss = this.get(shadow + (Math.floor(time / 60) % a));
       let rs = ss.rect, es = ss.extend;
-      let sxScale = rect[2] / (rs.width - es.left - es.right);
-      let syScale = rect[3] / (rs.height - es.top - es.bottom);
+      let sxScale = rect[2] / (ss.width - ss.left - ss.right);
+      let syScale = rect[3] / (ss.height - ss.top - ss.bottom);
       ctx.drawImage(ss.image,
-        rs.x, rs.y, rs.width, rs.height,
-        rect[0] - es.left * sxScale,
-        rect[1] - es.top * syScale,
-        rs.width * sxScale,
-        rs.height * syScale);
+        ss.x, ss.y, ss.width, ss.height,
+        rect[0] - ss.left * sxScale,
+        rect[1] - ss.top * syScale,
+        ss.width * sxScale,
+        ss.height * syScale);
     }
-    let xScale = rect[2] / (r.width - e.left - e.right);
-    let yScale = rect[3] / (r.height - e.top - e.bottom);
+    let xScale = rect[2] / (s.width - s.left - s.right);
+    let yScale = rect[3] / (s.height - s.top - s.bottom);
     ctx.drawImage(s.image,
-        r.x, r.y, r.width, r.height,
-        rect[0] - e.left * xScale,
-        rect[1] - e.top * yScale,
-        r.width * xScale,
-        r.height * yScale);
+        s.x, s.y, s.width, s.height,
+        rect[0] - s.left * xScale,
+        rect[1] - s.top * yScale,
+        s.width * xScale,
+        s.height * yScale);
     ctx.strokeStyle="red";
     ctx.strokeRect(...rect);
   }

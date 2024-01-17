@@ -137,57 +137,58 @@ Entity.prototype.draw = function(ctx, view, time) {
         (time - this.taskStart) * this.animationSpeed / 60) % this.animationLength;
   }
   const sprite = SPRITES.get(this.sprite + animation);
-  const r = sprite.rect, e = sprite.extend;
-  const xScale = this.width * view.scale / (r.width - e.left - e.right);
-  const yScale = this.height * view.scale / (r.height - e.top - e.bottom);
+  const xScale = this.width * view.scale /
+      (sprite.width - sprite.left - sprite.right);
+  const yScale = this.height * view.scale /
+      (sprite.height - sprite.top - sprite.bottom);
   ctx.drawImage(sprite.image,
-      r.x, r.y, r.width, r.height,
+      sprite.x, sprite.y, sprite.width, sprite.height,
       this.x * view.scale - view.x -
-          e.left * xScale,
+          sprite.left * xScale,
       this.y * view.scale - view.y -
-          e.top * yScale,
-      r.width * xScale,
-      r.height * yScale);
+          sprite.top * yScale,
+      sprite.width * xScale,
+      sprite.height * yScale);
   if (this.type == TYPE.belt) {
     if (this.data.beltEndSprite) {
       const s = SPRITES.get(this.data.beltEndSprite + animation);
       const x = this.x - (this.direction - 2) % 2;
       const y = this.y + (this.direction - 1) % 2;
       ctx.drawImage(s.image,
-          s.rect.x, s.rect.y, s.rect.width, s.rect.height,
-          x * view.scale - view.x - e.left * xScale,
-          y * view.scale - view.y - e.top * yScale,
-          s.rect.width * xScale,
-          s.rect.height * yScale);
+          s.x, s.y, s.width, s.height,
+          x * view.scale - view.x - s.left * xScale,
+          y * view.scale - view.y - s.top * yScale,
+          s.width * xScale,
+          s.height * yScale);
     }
     if (this.data.beltBeginSprite) {
       const s = SPRITES.get(this.data.beltBeginSprite + animation);
       const x = this.x + (this.direction - 2) % 2;
       const y = this.y - (this.direction - 1) % 2;
       ctx.drawImage(s.image,
-          s.rect.x, s.rect.y, s.rect.width, s.rect.height,
-          x * view.scale - view.x - e.left * xScale,
-          y * view.scale - view.y - e.top * yScale,
-          s.rect.width * xScale,
-          s.rect.height * yScale);
+          s.x, s.y, s.width, s.height,
+          x * view.scale - view.x - s.left * xScale,
+          y * view.scale - view.y - s.top * yScale,
+          s.width * xScale,
+          s.height * yScale);
     }
     if (this.data.beltExtraRightSprite) {
       const s = SPRITES.get(this.data.beltExtraRightSprite + animation);
       ctx.drawImage(s.image,
-          s.rect.x, s.rect.y, s.rect.width, s.rect.height,
-          this.x * view.scale - view.x - e.left * xScale,
-          this.y * view.scale - view.y - e.top * yScale,
-          s.rect.width * xScale,
-          s.rect.height * yScale);
+          s.x, s.y, s.width, s.height,
+          this.x * view.scale - view.x - s.left * xScale,
+          this.y * view.scale - view.y - s.top * yScale,
+          s.width * xScale,
+          s.height * yScale);
     }
     if (this.data.beltExtraLeftSprite) {
       const s = SPRITES.get(this.data.beltExtraLeftSprite + animation);
       ctx.drawImage(s.image,
-          s.rect.x, s.rect.y, s.rect.width, s.rect.height,
-          this.x * view.scale - view.x - e.left * xScale,
-          this.y * view.scale - view.y - e.top * yScale,
-          s.rect.width * xScale,
-          s.rect.height * yScale);
+          s.x, s.y, s.width, s.height,
+          this.x * view.scale - view.x - s.left * xScale,
+          this.y * view.scale - view.y - s.top * yScale,
+          s.width * xScale,
+          s.height * yScale);
     }
   }
 };
@@ -208,17 +209,18 @@ Entity.prototype.drawShadow = function(ctx, view, time) {
         this.animationLength;
   }
   const sprite = SPRITES.get(this.spriteShadow + animation);
-  const r = sprite.rect, e = sprite.extend;
-  const xScale = this.width * view.scale / (r.width - e.left - e.right);
-  const yScale = this.height * view.scale / (r.height - e.top - e.bottom);
+  const xScale = this.width * view.scale /
+      (sprite.width - sprite.left - sprite.right);
+  const yScale = this.height * view.scale /
+      (sprite.height - sprite.top - sprite.bottom);
   ctx.drawImage(sprite.image,
-      r.x, r.y, r.width, r.height,
+      sprite.x, sprite.y, sprite.width, sprite.height,
       this.x * view.scale - view.x -
-          e.left * xScale,
+          sprite.left * xScale,
       this.y * view.scale - view.y -
-          e.top * yScale,
-      r.width * xScale,
-      r.height * yScale);
+          sprite.top * yScale,
+      sprite.width * xScale,
+      sprite.height * yScale);
 };
 
 Entity.prototype.insert = function(item, amount, time, positionForBelt) {

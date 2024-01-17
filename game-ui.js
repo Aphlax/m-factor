@@ -124,8 +124,8 @@ GameUi.prototype.drawResourceUi = function(ctx, resource, x, y, width, height) {
   ctx.clip();
   const sprite = SPRITES.get(resource.sprite);
   ctx.drawImage(sprite.image,
-      sprite.rect.x, sprite.rect.y,
-      sprite.rect.width, sprite.rect.height,
+      sprite.x, sprite.y,
+      sprite.width, sprite.height,
       x + 6, y + 36, 48, 48);
   ctx.restore();
   ctx.lineWidth = 1;
@@ -147,8 +147,8 @@ GameUi.prototype.drawInventory = function(ctx, inventory, x, y, width, height) {
       const itemDef = ITEMS.get(inventory.items[i]);
       const sprite = SPRITES.get(itemDef.sprite);
       ctx.drawImage(sprite.image,
-          sprite.rect.x, sprite.rect.y,
-          sprite.rect.width, sprite.rect.height,
+          sprite.x, sprite.y,
+          sprite.width, sprite.height,
           x + i * 46 + 5, y + 5, 32, 32);
       ctx.font = "16px monospace";
       ctx.textAlign = "end";

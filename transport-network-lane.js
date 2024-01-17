@@ -101,8 +101,8 @@ Lane.prototype.draw = function(ctx, view) {
           ((this.nodes[n].direction - 1) % 2) *
           (this.nodes[n].length - dte - 0.5);
       ctx.drawImage(sprite.image,
-          sprite.rect.x, sprite.rect.y,
-          sprite.rect.width, sprite.rect.height,
+          sprite.x, sprite.y,
+          sprite.width, sprite.height,
           (x - 0.25) * view.scale - view.x,
           (y - 0.25) * view.scale - view.y,
           view.scale / 2, view.scale / 2);

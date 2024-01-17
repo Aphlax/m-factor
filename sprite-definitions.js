@@ -239,8 +239,8 @@ function entitySprites(id, width, height, xCount, yCount,
     for (let j = 0; j < yCount; j++) {
       res.push({
         id: id + (flipXY ? j * xCount + i : i * yCount + j),
-        rect: rect(i * width, j * height, width, height),
-        extend: {left, right, top, bottom},
+        ...rect(i * width, j * height, width, height),
+        left, right, top, bottom,
       });
     }
   }
@@ -248,14 +248,14 @@ function entitySprites(id, width, height, xCount, yCount,
 }
 
 function itemSprites(id) {
-  return [{id: id, rect: rect(64)}];
+  return [{id: id, ...rect(64)}];
 }
 
 
 function terrainSprites(id, count) {
   const res = [];
   for (let i = 0; i < count; i++) {
-    res.push({id: id + i, rect: rect(i * 32)});
+    res.push({id: id + i, ...rect(i * 32)});
   }
   return res;
 }
@@ -263,7 +263,7 @@ function terrainSprites(id, count) {
 function waterSprites(id, count) {
   const res = [];
   for (let i = 0; i < count; i++) {
-    res.push({id: id + i, rect: rect(i * 32)});
+    res.push({id: id + i, ...rect(i * 32)});
   }
   return res;
 }
@@ -274,12 +274,10 @@ function resourceSprites(id, variations, count) {
     for (let j = 0; j < count; j++) {
       res.push({
         id: id + i * count + j,
-        rect: {
-          x: 8 + i * 64,
-          y: 8 + 64 * (count - 1) - j * 64,
-          width: 48,
-          height: 48,
-        }
+        x: 8 + i * 64,
+        y: 8 + 64 * (count - 1) - j * 64,
+        width: 48,
+        height: 48,
       });
     }
   }
