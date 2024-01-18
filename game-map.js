@@ -250,10 +250,11 @@ GameMap.prototype.disconnectEntity = function(entity) {
       }
     }
     for (let other of entity.outputEntities) {
-      if (other.type == TYPE.belt &&
-          other.beltInputOutput()) {
+      if (other.type == TYPE.belt) {
+        if (other.beltInputOutput()) {
+          this.transportNetwork.beltInputChanged(other);
+        }
         other.updateBeltSprites();
-        this.transportNetwork.beltInputChanged(other);
       }
     }
   }

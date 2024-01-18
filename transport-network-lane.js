@@ -89,17 +89,37 @@ Lane.prototype.draw = function(ctx, view) {
     let dte = 0, n = this.nodes.length - 1;
     for (let flow of this.minusFlow) {
       dte += flow + 0.125;
-      while (dte > this.nodes[n].length) {
+      while (n && dte > this.nodes[n].length) {
         dte -= this.nodes[n--].length;
       }
-      const x = this.nodes[n].x + 0.5 +
-          ((this.nodes[n].direction - 1) % 2) * 0.25 -
-          ((this.nodes[n].direction - 2) % 2) *
-          (this.nodes[n].length - dte - 0.5);
-      const y = this.nodes[n].y + 0.5 +
-          ((this.nodes[n].direction - 2) % 2) * 0.25 +
-          ((this.nodes[n].direction - 1) % 2) *
-          (this.nodes[n].length - dte - 0.5);
+      let x, y;
+      if (n && dte > this.nodes[n].length - 1) {
+        const large = ((this.nodes[n].direction -
+            this.nodes[n - 1].direction + 4) % 4) == 1;
+        const angle =
+            ((1 - (dte - this.nodes[n].length + 1) /
+            (large ? 1.0 : 1)) *
+            (large ? 1 : -1) +
+            (this.nodes[n].direction + 1)) *
+            Math.PI / 2;
+        x = this.nodes[n].x + 0.5 +
+            ((this.nodes[n].direction - 2) % 2) * -0.5 +
+            ((this.nodes[n - 1].direction - 2) % 2) * 0.5 +
+            (large ? 0.75 : 0.25) * Math.cos(angle);
+        y = this.nodes[n].y + 0.5 +
+            ((this.nodes[n].direction - 1) % 2) * 0.5 +
+            ((this.nodes[n - 1].direction - 1) % 2) * -0.5 +
+            (large ? 0.75 : 0.25) * Math.sin(angle);
+      } else {
+        x = this.nodes[n].x + 0.5 +
+            ((this.nodes[n].direction - 1) % 2) * 0.25 -
+            ((this.nodes[n].direction - 2) % 2) *
+            (this.nodes[n].length - dte - 0.5);
+        y = this.nodes[n].y + 0.5 +
+            ((this.nodes[n].direction - 2) % 2) * 0.25 +
+            ((this.nodes[n].direction - 1) % 2) *
+            (this.nodes[n].length - dte - 0.5);
+      }
       ctx.drawImage(sprite.image,
           sprite.x, sprite.y,
           sprite.width, sprite.height,
