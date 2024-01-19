@@ -29,6 +29,7 @@ GameMap.prototype.initialize = function(seed) {
 };
 
 GameMap.prototype.update = function(time) {
+  this.transportNetwork.update(time);
   for (let chunks of this.chunks.values()) {
     for (let chunk of chunks.values()) {
       for (let entity of chunk.entities) {
@@ -37,7 +38,6 @@ GameMap.prototype.update = function(time) {
     }
   }
   this.ui.update(time);
-  this.transportNetwork.update(time);
   
   // Generate missing chunks.
   const size = SIZE * this.view.scale;
@@ -105,11 +105,11 @@ GameMap.prototype.draw = function(ctx, time) {
       }
     }
   }
+  this.transportNetwork.draw(ctx, this.view);
   if (this.selectedEntity) {
     this.ui.drawSelection(ctx, this.view, this.selectedEntity);
   }
   this.ui.draw(ctx, time);
-  this.transportNetwork.draw(ctx, this.view);
 };
 
 GameMap.prototype.createEntity = function(name, x, y, direction, time) {

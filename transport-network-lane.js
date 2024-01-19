@@ -23,31 +23,45 @@ Lane.prototype.insertItem = function(item, belt, time, positionForBelt) {
   if (!this.minusItem) {
     this.minusItem = item;
   }
-  let distanceToEnd = 0, direction = undefined;
-  for (let i = 0; i < this.nodes.length; i++) {
-    if (distanceToEnd) {
-      distanceToEnd += this.nodes[i].length;
+  
+  let dte = 0;
+  for (let i = this.nodes.length - 1; i >= 0; i--) {
+    dte += this.nodes[i].length;
+    if (i) {
+      const turn = ((this.nodes[i].direction -
+          this.nodes[i - 1].direction + 4) % 4) - 2;
+      dte += -turn * 0.5;
     }
     if (this.nodes[i].contains(belt)) {
       const d = Math.abs(this.nodes[i].x - belt.x) +
           Math.abs(this.nodes[i].y - belt.y);
-      distanceToEnd = this.nodes[i].length - d - 0.5;
+      dte -= d + 0.5;
+      break;
     }
   }
   
   for (let i = 0; i < this.minusFlow.length; i++) {
-    if (distanceToEnd >= this.minusFlow[i] + 0.25) {
-      distanceToEnd -= this.minusFlow[i] + 0.25;
+    // rearrange..
+    if (dte >= this.minusFlow[i] + 0.25) {
+      dte -= this.minusFlow[i] + 0.25;
       continue;
     }
-    if (distanceToEnd >= this.minusFlow[i]) {
+    if (dte >= this.minusFlow[i]) {
       return false;
     }
-    this.minusFlow[i] -= distanceToEnd + 0.25;
-    this.minusFlow.splice(i, 0, distanceToEnd);
+    this.minusFlow.splice(i, 0, dte);
+    dte += 0.25;
+    while (++i < this.minusFlow.length) {
+      if (this.minusFlow[i] >= dte) {
+        this.minusFlow[i] -= dte;
+        break;
+      }
+      dte -= this.minusFlow[i];
+      this.minusFlow[i] = 0;
+    }
     return true;
   }
-  this.minusFlow.push(distanceToEnd);
+  this.minusFlow.push(dte);
   return true;
 };
 
@@ -89,8 +103,12 @@ Lane.prototype.draw = function(ctx, view) {
     let dte = 0, n = this.nodes.length - 1;
     for (let flow of this.minusFlow) {
       dte += flow + 0.125;
-      while (n && dte > this.nodes[n].length) {
-        dte -= this.nodes[n--].length;
+      let len;
+      while (n && dte > (len = (this.nodes[n].length +
+          (((this.nodes[n].direction -
+          this.nodes[n - 1].direction + 4) % 4) - 2) * -0.5))) {
+        dte -= len;
+        n--;
       }
       let x, y;
       if (n && dte > this.nodes[n].length - 1) {
@@ -98,7 +116,7 @@ Lane.prototype.draw = function(ctx, view) {
             this.nodes[n - 1].direction + 4) % 4) == 1;
         const angle =
             ((1 - (dte - this.nodes[n].length + 1) /
-            (large ? 1.0 : 1)) *
+            (large ? 1.5 : 0.5)) *
             (large ? 1 : -1) +
             (this.nodes[n].direction + 1)) *
             Math.PI / 2;
@@ -120,12 +138,17 @@ Lane.prototype.draw = function(ctx, view) {
             ((this.nodes[n].direction - 1) % 2) *
             (this.nodes[n].length - dte - 0.5);
       }
-      ctx.drawImage(sprite.image,
-          sprite.x, sprite.y,
-          sprite.width, sprite.height,
-          (x - 0.25) * view.scale - view.x,
-          (y - 0.25) * view.scale - view.y,
-          view.scale / 2, view.scale / 2);
+      if ((x + 0.24) * view.scale >= view.x &&
+          (y + 0.24) * view.scale >= view.y &&
+          (x - 0.24) * view.scale < view.x + view.width &&
+          (y - 0.24) * view.scale < view.y + view.height) {
+        ctx.drawImage(sprite.image,
+            sprite.x, sprite.y,
+            sprite.width, sprite.height,
+            (x - 0.24) * view.scale - view.x,
+            (y - 0.24) * view.scale - view.y,
+            view.scale * 0.48, view.scale * 0.48);
+      }
       dte += 0.125;
     }
   }
