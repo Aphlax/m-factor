@@ -61,6 +61,7 @@ export const ENTITIES = new Map([
     animationLength: 16,
     animationSpeed: 2,
     
+    beltSpeed: 1.875,
     beltSprites: {
       [DIRECTION.north]: [S.transportBeltN, S.transportBeltEN, S.transportBeltWN],
       [DIRECTION.east]: [S.transportBeltE, S.transportBeltSE, S.transportBeltNE],

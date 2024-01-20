@@ -49,6 +49,8 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   
   if (this.type == TYPE.belt) {
     this.animation = (time * this.animationSpeed / 60) % def.animationLength;
+    this.animationSpeed *= def.beltSpeed;
+    this.data.beltSpeed = def.beltSpeed;
     this.data.beltSprites = def.beltSprites[direction];
     this.data.beltEndSprites = def.beltEndSprites[direction];
     this.data.beltInput = undefined;

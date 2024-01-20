@@ -6,6 +6,8 @@ export function scenario(gameMap, time) {
   s.chest = gameMap.createEntity(NAME.woodenChest, -18, -9, 0, time);
   gameMap.createEntity(NAME.burnerDrill, -17, -10, 3, time);
   
+  gameMap.createEntity(NAME.burnerDrill, 6, -8, 3, time);
+  gameMap.createEntity(NAME.burnerDrill, 6, -6, 3, time);
   gameMap.createEntity(NAME.burnerDrill, 0, -9, 2, time);
   gameMap.createEntity(NAME.burnerDrill, -7, 0, 1, time);
   

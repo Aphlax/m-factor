@@ -2,6 +2,11 @@ import {TYPE} from './entity-properties.js';
 import {SPRITES} from './sprite-pool.js';
 import {ITEMS} from './item-definitions.js';
 
+const FLOW = {
+  minus: -1, plus: 1
+};
+const FLOWS = [FLOW.minus, FLOW.plus];
+
 function Lane(belts, nodes) {
   this.belts = belts;
   this.nodes = nodes;
@@ -9,6 +14,8 @@ function Lane(belts, nodes) {
   
   this.minusItem = undefined;
   this.minusFlow = [];
+  this.plusItem = undefined;
+  this.plusFlow = [];
 }
 
 Lane.fromBelt = function(belt) {
@@ -19,76 +26,90 @@ Lane.fromBelt = function(belt) {
 }
 
 Lane.prototype.insertItem = function(item, belt, time, positionForBelt) {
-  if (this.minusItem && this.minusItem != item) return false;
-  if (!this.minusItem) {
-    this.minusItem = item;
+  let flow, flowSign;
+  if (positionForBelt >= 0) {
+    flowSign = FLOW.minus;
+    flow = this.minusFlow;
+    if (this.minusItem && this.minusItem != item) return false;
+    if (!this.minusItem) {
+      this.minusItem = item;
+    }
+  } else {
+    flowSign = FLOW.plus;
+    flow = this.plusFlow;
+    if (this.plusItem && this.plusItem != item) return false;
+    if (!this.plusItem) {
+      this.plusItem = item;
+    }
   }
   
   let dte = 0;
-  for (let i = this.nodes.length - 1; i >= 0; i--) {
-    dte += this.nodes[i].length;
-    if (i) {
-      const turn = ((this.nodes[i].direction -
-          this.nodes[i - 1].direction + 4) % 4) - 2;
-      dte += -turn * 0.5;
-    }
-    if (this.nodes[i].contains(belt)) {
-      const d = Math.abs(this.nodes[i].x - belt.x) +
-          Math.abs(this.nodes[i].y - belt.y);
+  for (let n = this.nodes.length - 1; n >= 0; n--) {
+    dte += this.nodes[n].length;
+    if (this.nodes[n].contains(belt)) {
+      const d = Math.abs(this.nodes[n].x - belt.x) +
+          Math.abs(this.nodes[n].y - belt.y);
       dte -= d + 0.5;
       break;
     }
+    if (n) {
+      const turn = ((this.nodes[n].direction -
+          this.nodes[n - 1].direction + 4) % 4) - 2;
+      dte += flowSign * turn * 0.5;
+    }
   }
   
-  for (let i = 0; i < this.minusFlow.length; i++) {
-    // rearrange..
-    if (dte >= this.minusFlow[i] + 0.25) {
-      dte -= this.minusFlow[i] + 0.25;
-      continue;
+  for (let i = 0; i < flow.length; i++) {
+    if (dte < flow[i]) {
+      flow[i] -= dte + 0.25;
+      flow.splice(i, 0, dte);
+      return true;
     }
-    if (dte >= this.minusFlow[i]) {
+    if (dte < flow[i] + 0.25) {
       return false;
     }
-    this.minusFlow.splice(i, 0, dte);
-    dte += 0.25;
-    while (++i < this.minusFlow.length) {
-      if (this.minusFlow[i] >= dte) {
-        this.minusFlow[i] -= dte;
-        break;
-      }
-      dte -= this.minusFlow[i];
-      this.minusFlow[i] = 0;
-    }
-    return true;
+    dte -= flow[i] + 0.25;
   }
-  this.minusFlow.push(dte);
+  flow.push(dte);
   return true;
 };
 
 Lane.prototype.update = function(time, dt) {
-  let movement = dt * 0.001;
-  let i = 0;
-  while (movement && i < this.minusFlow.length) {
-    if (this.minusFlow[i] >= movement) {
-      this.minusFlow[i] -= movement;
-      break;
+  const total = dt * 0.001 * this.belts[0].data.beltSpeed;
+  for (let flowSign of FLOWS) {
+    const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
+    let movement = total, i = 0;
+    while (i < flow.length) {
+      if (flow[i] >= movement) {
+        flow[i] -= movement;
+        movement = 0;
+      } else if (flow[i] > 0) {
+        movement -= flow[i];
+        flow[i] = 0;
+      } else if (flow[i] < 0) {
+        const old = flow[i];
+        flow[i] = Math.min(flow[i] + total - movement, 0);
+        movement += flow[i] - old;
+      }
+      i++;
     }
-    if (this.minusFlow[i]) {
-      movement -= this.minusFlow[i];
-      this.minusFlow[i] = 0;
-    }
-    i++;
-  }
-  if (this.minusFlow.length && !this.minusFlow[0]) {
-    const belt = this.belts[this.belts.length - 1];
-    for (let entity of belt.outputEntities) {
-      if (entity.type == TYPE.belt) {
-        if (entity.insert(this.minusItem, 1, time, ((belt.direction + 2) % 4) * 3 + 2)) {
-          this.minusFlow.shift();
-          if (this.minusFlow.length) {
-            this.minusFlow[0] += 0.25;
-          } else {
-            this.minusItem = undefined;
+    if (flow.length && !flow[0]) {
+      const belt = this.belts[this.belts.length - 1];
+      for (let entity of belt.outputEntities) {
+        if (entity.type == TYPE.belt) {
+          const positionForBelt = ((belt.direction + 2) % 4) * 3 + 1 - flowSign;
+          const item = flowSign == FLOW.minus ? this.minusItem : this.plusItem;
+          if (entity.insert(item, 1, time, positionForBelt)) {
+            flow.shift();
+            if (flow.length) {
+              flow[0] += 0.25;
+            } else {
+              if (flowSign == FLOW.minus) {
+                this.minusItem = undefined;
+              } else {
+                this.plusItem = undefined;
+              }
+            }
           }
         }
       }
@@ -97,62 +118,68 @@ Lane.prototype.update = function(time, dt) {
 };
 
 Lane.prototype.draw = function(ctx, view) {
-  if (this.minusFlow.length) {
-    const itemDef = ITEMS.get(this.minusItem);
-    const sprite = SPRITES.get(itemDef.sprite);
-    let dte = 0, n = this.nodes.length - 1;
-    for (let flow of this.minusFlow) {
-      dte += flow + 0.125;
-      let len;
-      while (n && dte > (len = (this.nodes[n].length +
-          (((this.nodes[n].direction -
-          this.nodes[n - 1].direction + 4) % 4) - 2) * -0.5))) {
-        dte -= len;
-        n--;
+  for (let flowSign of FLOWS) {
+    const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
+    const item = flowSign == FLOW.minus ? this.minusItem : this.plusItem;
+    if (flow.length) {
+      const itemDef = ITEMS.get(item);
+      const sprite = SPRITES.get(itemDef.sprite);
+      let dte = 0, n = this.nodes.length - 1;
+      for (let distanceToPrevious of flow) {
+        dte += distanceToPrevious + 0.125;
+        let len;
+        while (n && dte > (len = (this.nodes[n].length +
+            (((this.nodes[n].direction -
+            this.nodes[n - 1].direction + 4) % 4) - 2) * flowSign * 0.5))) {
+          dte -= len;
+          n--;
+        }
+        let x, y;
+        if (n && dte > this.nodes[n].length - 1) {
+          const large = ((this.nodes[n].direction -
+              this.nodes[n - 1].direction + 4) % 4) ==
+              2 + flowSign;
+          const angle =
+              ((1 - (dte - this.nodes[n].length + 1) /
+              (large ? 1.5 : 0.5)) *
+              (large ? -1 : 1) * flowSign +
+              (this.nodes[n].direction + 1)) *
+              Math.PI / 2;
+          x = this.nodes[n].x + 0.5 +
+              ((this.nodes[n].direction - 2) % 2) * -0.5 +
+              ((this.nodes[n - 1].direction - 2) % 2) * 0.5 +
+              (large ? 0.73 : 0.27) * Math.cos(angle);
+          y = this.nodes[n].y + 0.5 +
+              ((this.nodes[n].direction - 1) % 2) * 0.5 +
+              ((this.nodes[n - 1].direction - 1) % 2) * -0.5 +
+              (large ? 0.73 : 0.27) * Math.sin(angle);
+        } else {
+          x = this.nodes[n].x + 0.5 - flowSign *
+              ((this.nodes[n].direction - 1) % 2) * 0.23 -
+              ((this.nodes[n].direction - 2) % 2) *
+              (this.nodes[n].length - dte - 0.5);
+          y = this.nodes[n].y + 0.5 - flowSign *
+              ((this.nodes[n].direction - 2) % 2) * 0.23 +
+              ((this.nodes[n].direction - 1) % 2) *
+              (this.nodes[n].length - dte - 0.5);
+        }
+        if ((x + 0.24) * view.scale >= view.x &&
+            (y + 0.24) * view.scale >= view.y &&
+            (x - 0.24) * view.scale < view.x + view.width &&
+            (y - 0.24) * view.scale < view.y + view.height) {
+          ctx.drawImage(sprite.image,
+              sprite.x, sprite.y,
+              sprite.width, sprite.height,
+              (x - 0.24) * view.scale - view.x,
+              (y - 0.24) * view.scale - view.y,
+              view.scale * 0.48, view.scale * 0.48);
+        }
+        dte += 0.125;
       }
-      let x, y;
-      if (n && dte > this.nodes[n].length - 1) {
-        const large = ((this.nodes[n].direction -
-            this.nodes[n - 1].direction + 4) % 4) == 1;
-        const angle =
-            ((1 - (dte - this.nodes[n].length + 1) /
-            (large ? 1.5 : 0.5)) *
-            (large ? 1 : -1) +
-            (this.nodes[n].direction + 1)) *
-            Math.PI / 2;
-        x = this.nodes[n].x + 0.5 +
-            ((this.nodes[n].direction - 2) % 2) * -0.5 +
-            ((this.nodes[n - 1].direction - 2) % 2) * 0.5 +
-            (large ? 0.75 : 0.25) * Math.cos(angle);
-        y = this.nodes[n].y + 0.5 +
-            ((this.nodes[n].direction - 1) % 2) * 0.5 +
-            ((this.nodes[n - 1].direction - 1) % 2) * -0.5 +
-            (large ? 0.75 : 0.25) * Math.sin(angle);
-      } else {
-        x = this.nodes[n].x + 0.5 +
-            ((this.nodes[n].direction - 1) % 2) * 0.25 -
-            ((this.nodes[n].direction - 2) % 2) *
-            (this.nodes[n].length - dte - 0.5);
-        y = this.nodes[n].y + 0.5 +
-            ((this.nodes[n].direction - 2) % 2) * 0.25 +
-            ((this.nodes[n].direction - 1) % 2) *
-            (this.nodes[n].length - dte - 0.5);
-      }
-      if ((x + 0.24) * view.scale >= view.x &&
-          (y + 0.24) * view.scale >= view.y &&
-          (x - 0.24) * view.scale < view.x + view.width &&
-          (y - 0.24) * view.scale < view.y + view.height) {
-        ctx.drawImage(sprite.image,
-            sprite.x, sprite.y,
-            sprite.width, sprite.height,
-            (x - 0.24) * view.scale - view.x,
-            (y - 0.24) * view.scale - view.y,
-            view.scale * 0.48, view.scale * 0.48);
-      }
-      dte += 0.125;
     }
   }
   
+  return;
   // Debug.
   ctx.beginPath();
   ctx.moveTo(
