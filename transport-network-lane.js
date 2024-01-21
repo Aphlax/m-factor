@@ -80,7 +80,7 @@ Lane.prototype.update = function(time, dt) {
     const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
     let movement = total, i = 0;
     while (i < flow.length) {
-      if (flow[i] >= movement) {
+      if (flow[i] > movement) {
         flow[i] -= movement;
         movement = 0;
       } else if (flow[i] > 0) {
@@ -130,7 +130,8 @@ Lane.prototype.draw = function(ctx, view) {
         let len;
         while (n && dte > (len = (this.nodes[n].length +
             (((this.nodes[n].direction -
-            this.nodes[n - 1].direction + 4) % 4) - 2) * flowSign * 0.5))) {
+            this.nodes[n - 1].direction + 4) % 4) - 2) *
+            flowSign * 0.5))) {
           dte -= len;
           n--;
         }
@@ -206,6 +207,12 @@ Lane.prototype.draw = function(ctx, view) {
 Lane.prototype.extendEnd = function(belt) {
   belt.data.lane = this;
   this.belts.push(belt);
+  if (this.minusFlow.length) {
+    this.minusFlow[0]++;
+  }
+  if (this.plusFlow.length) {
+    this.plusFlow[0]++;
+  }
   if (this.nodes[this.nodes.length - 1].direction == belt.direction) {
     this.nodes[this.nodes.length - 1].length++;
     return this;
@@ -232,6 +239,19 @@ Lane.prototype.extendBegin = function(belt) {
 
 Lane.prototype.removeEnd = function() {
   this.belts.pop().data.lane = undefined;
+  for (let flowSign of FLOWS) {
+    const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
+    let removal = 1, i = 0;
+    while (i < flow.length && removal > flow[i]) {
+      removal -= flow[i++] + 0.25;
+    }
+    if (i < flow.length && removal > 0) {
+      flow[i] -= removal;
+    }
+    if (i) {
+      flow.splice(0, i);
+    }
+  }
   if (this.circular) {
     this.circular = false;
   }
@@ -242,6 +262,25 @@ Lane.prototype.removeEnd = function() {
 
 Lane.prototype.removeBegin = function() {
   this.belts.shift().data.lane = undefined;
+  for (let flowSign of FLOWS) {
+    const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
+    let laneLength = -1;
+    for (let n = 0; n < this.nodes.length; n++) {
+      laneLength += this.nodes[n].length;
+      if (n) {
+        const turn = ((this.nodes[n].direction -
+            this.nodes[n - 1].direction + 4) % 4) - 2;
+        laneLength += flowSign * turn * 0.5;
+      }
+    }
+    let i = 0;
+    while (i < flow.length && laneLength >= flow[i] + 0.25) {
+      laneLength -= flow[i++] + 0.25;
+    }
+    if (i < flow.length && laneLength < flow[i] + 0.25) {
+      flow.length = i;
+    }
+  }
   if (this.circular) {
     this.circular = false;
   }
@@ -257,6 +296,30 @@ Lane.prototype.appendLaneEnd = function(other) {
   if (other == this) {
     this.circular = true;
     return;
+  }
+  for (let flowSign of FLOWS) {
+    const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
+    const otherFlow = flowSign == FLOW.minus ? other.minusFlow : other.plusFlow;
+    if (!flow.length) {
+      flow.push(...otherFlow);
+      otherFlow.length = 0;
+      continue;
+    }
+    let laneLength = 0;
+    for (let n = 0; n < other.nodes.length; n++) {
+      laneLength += other.nodes[n].length;
+      if (n) {
+        const turn = ((other.nodes[n].direction -
+            other.nodes[n - 1].direction + 4) % 4) - 2;
+        laneLength += flowSign * turn * 0.5;
+      }
+    }
+    for (let i = 0; i < otherFlow.length; i++) {
+      laneLength -= otherFlow[i] + 0.25;
+    }
+    flow[0] += laneLength;
+    flow.unshift(...otherFlow);
+    otherFlow.length = 0;
   }
   if (this.nodes[this.nodes.length - 1].direction == other.nodes[0].direction) {
     this.nodes[this.nodes.length - 1].length += other.nodes[0].length;
@@ -295,6 +358,31 @@ Lane.prototype.split = function(belt) {
   const belts = this.belts.splice(b);
   const lane = new Lane(belts, nodes);
   lane.belts.forEach(b => b.data.lane = lane);
+  
+  for (let flowSign of FLOWS) {
+    const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
+    const laneFlow = flowSign == FLOW.minus ? lane.minusFlow : lane.plusFlow;
+    let laneLength = 0;
+    for (let n = 0; n < lane.nodes.length; n++) {
+      laneLength += lane.nodes[n].length;
+      if (n) {
+        const turn = ((lane.nodes[n].direction -
+            lane.nodes[n - 1].direction + 4) % 4) - 2;
+        laneLength += flowSign * turn * 0.5;
+      }
+    }
+    let i = 0;
+    while (i < flow.length && laneLength >= flow[i] + 0.25) {
+      laneLength -= flow[i++] + 0.25;
+    }
+    if (i < flow.length && laneLength < flow[i] + 0.25) {
+      laneFlow.push(...flow.splice(0, i));
+      flow[0] -= laneLength;
+    } else {
+      laneFlow.push(...flow);
+      flow.length = 0;
+    }
+  }
   
   if (this.circular) {
     this.circular = false;
