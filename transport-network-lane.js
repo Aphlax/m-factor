@@ -6,20 +6,16 @@ const FLOW = {
   minus: -1, plus: 1
 };
 const FLOWS = [FLOW.minus, FLOW.plus];
-const BELT_POSITION = {
-  [0]: 0.0,
-  [1]: 0.25,
-  [2]: 0.0,
-  [3]: 0.25,
-  [4]: 0.5,
-  [5]: 0.75,
-  [6]: 1.0,
-  [7]: 0.75,
-  [8]: 1.0,
-  [9]: 0.75,
-  [10]: 0.5,
-  [11]: 0.25,
-};
+const BELT_POSITION =
+    [0.0, 0.25, 0.0, 0.25, 0.5, 0.75,
+     1.0, 0.75, 1.0, 0.75, 0.5, 0.25];
+const LEFT_TURN_BELT_POSITION =
+    [0.0, 0.25, 0.0, 0.25, 0.5, 0.75,
+     0.75, 1.0, 1.25, 1.5, 0.25, 0.5];
+const RIGHT_TURN_BELT_POSITION =
+    [0.0, 0.25, 0.0, 0.5, 1.25, 1.5,
+     1.25, 1.0, 0.75, 0.75, 0.5, 0.25];
+
 
 function Lane(belts, nodes) {
   this.belts = belts;
@@ -42,15 +38,19 @@ Lane.fromBelt = function(belt) {
 Lane.prototype.insertItem = function(item, belt, time, positionForBelt) {
   let flow, flowSign;
   let minusSide;
-  const turnBelt = belt.data.beltInput &&
-      belt.direction != belt.data.beltInput.direction;
+  const turnBelt = (belt.direction -
+      (belt.data.beltInput?.direction ??
+      belt.direction) + 4) % 4;
+  const normalPos = (positionForBelt -
+        belt.direction * 3 + 12) % 12;
   if (!turnBelt) {
-    minusSide = (positionForBelt - 1 -
-        belt.direction * 3 + 12) % 12 >= 6;
+    minusSide = !normalPos || normalPos >= 7;
   } else {
-    const turn = (belt.direction -
-        belt.data.beltInput.direction + 4) % 4;
-    minusSide = turn == 1;
+    if (turnBelt == 1) {
+      minusSide = !normalPos || normalPos >= 4;
+    } else {
+      minusSide = !normalPos || normalPos >= 10;
+    }
   }
   if (minusSide) {
     flowSign = FLOW.minus;
@@ -76,11 +76,13 @@ Lane.prototype.insertItem = function(item, belt, time, positionForBelt) {
           Math.abs(this.nodes[n].y - belt.y);
       let exactPosition;
       if (!turnBelt) {
-        const pos = (positionForBelt -
-            belt.direction * 3 + 12) % 12;
-        exactPosition = BELT_POSITION[pos];
+        exactPosition = BELT_POSITION[normalPos];
       } else {
-        exactPosition = 0.75;
+        if (turnBelt == 1) {
+          exactPosition = RIGHT_TURN_BELT_POSITION[normalPos];
+        } else {
+          exactPosition = LEFT_TURN_BELT_POSITION[normalPos];
+        }
       }
       dte -= d + 1 - exactPosition;
       break;
