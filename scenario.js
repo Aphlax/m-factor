@@ -90,6 +90,10 @@ export function scenario(gameMap, time) {
   createLane(gameMap, 4, 2, 0, 2, time);
   createLane(gameMap, 4, 0, 3, 1, time);
   
+  createLane(gameMap, -4, -6, 1, 3, time);
+  createLane(gameMap, -1, -6, 0, 1, time);
+  createLane(gameMap, -3, -7, 2, 1, time);
+  
   return s;
 }
 

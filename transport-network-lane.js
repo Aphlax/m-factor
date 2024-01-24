@@ -6,6 +6,20 @@ const FLOW = {
   minus: -1, plus: 1
 };
 const FLOWS = [FLOW.minus, FLOW.plus];
+const BELT_POSITION = {
+  [0]: 0.0,
+  [1]: 0.25,
+  [2]: 0.0,
+  [3]: 0.25,
+  [4]: 0.5,
+  [5]: 0.75,
+  [6]: 1.0,
+  [7]: 0.75,
+  [8]: 1.0,
+  [9]: 0.75,
+  [10]: 0.5,
+  [11]: 0.25,
+};
 
 function Lane(belts, nodes) {
   this.belts = belts;
@@ -27,7 +41,18 @@ Lane.fromBelt = function(belt) {
 
 Lane.prototype.insertItem = function(item, belt, time, positionForBelt) {
   let flow, flowSign;
-  if (positionForBelt >= 0) {
+  let minusSide;
+  const turnBelt = belt.data.beltInput &&
+      belt.direction != belt.data.beltInput.direction;
+  if (!turnBelt) {
+    minusSide = (positionForBelt - 1 -
+        belt.direction * 3 + 12) % 12 >= 6;
+  } else {
+    const turn = (belt.direction -
+        belt.data.beltInput.direction + 4) % 4;
+    minusSide = turn == 1;
+  }
+  if (minusSide) {
     flowSign = FLOW.minus;
     flow = this.minusFlow;
     if (this.minusItem && this.minusItem != item) return false;
@@ -49,7 +74,15 @@ Lane.prototype.insertItem = function(item, belt, time, positionForBelt) {
     if (this.nodes[n].contains(belt)) {
       const d = Math.abs(this.nodes[n].x - belt.x) +
           Math.abs(this.nodes[n].y - belt.y);
-      dte -= d + 0.5;
+      let exactPosition;
+      if (!turnBelt) {
+        const pos = (positionForBelt -
+            belt.direction * 3 + 12) % 12;
+        exactPosition = BELT_POSITION[pos];
+      } else {
+        exactPosition = 0.75;
+      }
+      dte -= d + 1 - exactPosition;
       break;
     }
     if (n) {
@@ -78,8 +111,8 @@ Lane.prototype.update = function(time, dt) {
   const total = dt * 0.001 * this.belts[0].data.beltSpeed;
   for (let flowSign of FLOWS) {
     const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
-    let movement = total, i = 0;
-    while (i < flow.length) {
+    let movement = total;
+    for (let i = 0; i < flow.length; i++) {
       if (flow[i] > movement) {
         flow[i] -= movement;
         movement = 0;
@@ -91,7 +124,6 @@ Lane.prototype.update = function(time, dt) {
         flow[i] = Math.min(flow[i] + total - movement, 0);
         movement += flow[i] - old;
       }
-      i++;
     }
     if (flow.length && !flow[0]) {
       const belt = this.belts[this.belts.length - 1];

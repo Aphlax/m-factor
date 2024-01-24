@@ -59,7 +59,7 @@ export const ENTITIES = new Map([
       [DIRECTION.west]: [S.transportBeltW],
     },
     animationLength: 16,
-    animationSpeed: 2,
+    animationSpeed: 1.925,
     
     beltSpeed: 1.875,
     beltSprites: {

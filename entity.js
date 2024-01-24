@@ -99,7 +99,7 @@ Entity.prototype.update = function(gameMap, time) {
         return;
       }
       const item = MINE_PRODUCTS[resource.id];
-      const positionForBelt = this.direction * 3 + 1;
+      const positionForBelt = ((this.direction + 2) % 4) * 3 + 1;
       if (outEntity.insert(item, 1, this.nextUpdate, positionForBelt)) {
         this.taskStart = this.nextUpdate;
         this.nextUpdate += 666;
