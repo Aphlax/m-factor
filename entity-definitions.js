@@ -6,6 +6,7 @@ export const NAME = {
   burnerDrill: 1,
   woodenChest: 2,
   transportBelt: 3,
+  inserter: 4,
 };
 
 export const ENTITIES = new Map([
@@ -74,5 +75,21 @@ export const ENTITIES = new Map([
       [DIRECTION.south]: [S.transportBeltBeginS, S.transportBeltEndS, S.transportBeltEndE, S.transportBeltEndW],
       [DIRECTION.west]: [S.transportBeltBeginW, S.transportBeltEndW, S.transportBeltEndS, S.transportBeltEndN],
     },
+  }],
+  [NAME.inserter,
+  {
+    label: 'Inserter',
+    type: TYPE.inserter,
+    width: 1,
+    height: 1,
+    sprites: {
+      [DIRECTION.north]: [S.inserter],
+      [DIRECTION.east]: [S.inserter + 1],
+      [DIRECTION.south]: [S.inserter + 2],
+      [DIRECTION.west]: [S.inserter + 3],
+    },
+    animationLength: 0,
+    
+    inserterHandSprites: S.inserterHand,
   }],
 ]);

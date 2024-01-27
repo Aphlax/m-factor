@@ -56,6 +56,10 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.beltInput = undefined;
     this.data.beltOutput = undefined;
     this.updateBeltSprites();
+  } else if (this.type == TYPE.inserter) {
+    this.data.inserterHandSprites = def.inserterHandSprites;
+    this.data.inserterPosition = 0;
+    this.data.inserterItem = 0;
   } else if (this.type == TYPE.mine) {
     this.state = STATE.running;
     this.nextUpdate = time + 666;
@@ -71,7 +75,9 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
 };
 
 Entity.prototype.update = function(gameMap, time) {
-  if (this.type == TYPE.mine) {
+  if (this.type == TYPE.inserter) {
+    
+  } else if (this.type == TYPE.mine) {
     if (time >= this.nextUpdate) {
       this.animation = Math.floor(this.animation + (time - this.taskStart) * this.animationSpeed / 60) % this.animationLength;
       let resource, x, y;
@@ -192,6 +198,30 @@ Entity.prototype.draw = function(ctx, view, time) {
           s.width * xScale,
           s.height * yScale);
     }
+  } else if (this.type == TYPE.inserter) {
+    const s = SPRITES.get(this.data.inserterHandSprites);
+    ctx.translate(
+        (this.x + 0.5) * view.scale - view.x,
+        (this.y + 0.5) * view.scale - view.y);
+    const angle = (time/3 % 1000) / 1000 * 2;
+    const offset = ((angle < 1 ? angle : 2 - angle) - 0.5) * 0.6;
+    ctx.rotate((-0.5 + angle + offset) * Math.PI);
+    ctx.drawImage(s.image,
+        s.x, s.y, s.width, s.height,
+        -4 * view.scale / 32,
+        -4 * view.scale / 32,
+        s.width * view.scale / 32,
+        s.height * view.scale / 32);
+    ctx.translate(0, 24 / 32 * view.scale);
+    ctx.rotate((1 - offset * 1.9) * Math.PI);
+    const ss = SPRITES.get(this.data.inserterHandSprites + 1);
+    ctx.drawImage(ss.image,
+        ss.x, ss.y, ss.width, ss.height,
+        -8 * view.scale / 32,
+        -40 * view.scale / 32,
+        ss.width * view.scale / 32,
+        ss.height * view.scale / 32);
+    ctx.setTransform();
   }
 };
 

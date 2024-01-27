@@ -4,6 +4,7 @@ export const TYPE = {
   mine: 1,
   chest: 2,
   belt: 3,
+  inserter: 4,
 };
 
 export const MAX_SIZE = 3;

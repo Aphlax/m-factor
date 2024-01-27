@@ -1,4 +1,5 @@
 import {SPRITES} from './sprite-definitions.js';
+import {S} from './sprite-definitions.js';
 export {S} from './sprite-definitions.js';
 
 function SpritePool() {
@@ -44,18 +45,20 @@ SpritePool.prototype.draw = function(ctx, time) {
       
   // Debug.
   if (this.current == this.total) {
+    ctx.fillStyle = "black";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    let sprite = 68*16;
+    let sprite = S.inserter;
     let shadow = 0;
-    let size = [32, 32];
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 8; j++) {
-        let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(sprite+i*8+j)};
+    let size = [32, 32], xlen = 2, ylen = 4;
+    for (let i = 0; i < xlen; i++) {
+      for (let j = 0; j < ylen; j++) {
+        let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(sprite+i*ylen+j)};
+        if (!s.image) continue;
         let rect = [10+i*70, 10+ j*70, ...size];
         let xScale = rect[2] / (s.width - s.left - s.right);
         let yScale = rect[3] / (s.height - s.top - s.bottom);
         if (shadow) {
-          let ss = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(shadow+i*8+j)};
+          let ss = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(shadow+i*ylen+j)};
           let sxScale = rect[2] / (ss.width - ss.left - ss.right);
           let syScale = rect[3] / (ss.height - ss.top - ss.bottom);
           ctx.strokeStyle="blue";
@@ -80,7 +83,7 @@ SpritePool.prototype.draw = function(ctx, time) {
         ctx.strokeRect(...rect);
       }
     }
-  //  return;
+    return;
     let a = 16;
     
     let s = this.get(sprite + (Math.floor(time / 60) % a));

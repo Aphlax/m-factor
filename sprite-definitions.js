@@ -62,6 +62,8 @@ export const S = {
   
   woodenChest: 100*16,
   woodenChestShadow: 100*16 + 1,
+  inserter: 1602,
+  inserterHand: 1606,
   
   ironOreItem: 1000*16,
   copperOreItem: 1000*16 + 1,
@@ -172,11 +174,11 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/burner-mining-drill/burner-mining-drill-N.png",
-    sprites: entitySprites(36 * 16, 87, 95, 4, 8, 12, 11, 19, 12),
+    sprites: entitySprites(36 * 16, 87, 95, 4, 8, 12, 11, 18, 13),
   },
   {
     path: "graphics/entities/burner-mining-drill/burner-mining-drill-N-shadow.png",
-    sprites: entitySprites(38 * 16, 109, 76, 4, 8, 0, 45, 12, 0),
+    sprites: entitySprites(38 * 16, 109, 76, 4, 8, 0, 45, 11, 1),
   },
   {
     path: "graphics/entities/burner-mining-drill/burner-mining-drill-E.png",
@@ -213,6 +215,22 @@ export const SPRITES = [
   {
     path: "graphics/entities/wooden-chest/wooden-chest-shadow.png",
     sprites: entitySprites(S.woodenChestShadow, 52, 20, 1, 1, 0, 20, -13, 1),
+  },
+  {
+    path: "graphics/entities/inserter/inserter-platform.png",
+    sprites: entitySprites(S.inserter, 46, 46, 4, 1, 5, 9, 5, 9),
+  },
+  {
+    path: "graphics/entities/inserter/inserter-hand-base.png",
+    sprites: entitySprites(S.inserterHand, 8, 32, 1, 1, -12, -12, 0, 0),
+  },
+  {
+    path: "graphics/entities/inserter/inserter-hand-open.png",
+    sprites: entitySprites(S.inserterHand + 1, 18, 44, 1, 1, -7, -7, 0, 12),
+  },
+  {
+    path: "graphics/entities/inserter/inserter-hand-closed.png",
+    sprites: entitySprites(S.inserterHand + 2, 18, 44, 1, 1, -7, -7, 0, 12),
   },
   {
     path: "graphics/items/iron-ore.png",

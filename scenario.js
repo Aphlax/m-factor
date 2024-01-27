@@ -10,6 +10,7 @@ export function scenario(gameMap, time) {
   gameMap.createEntity(NAME.burnerDrill, 6, -6, 3, time);
   gameMap.createEntity(NAME.burnerDrill, 0, -9, 2, time);
   gameMap.createEntity(NAME.burnerDrill, -7, 0, 1, time);
+  gameMap.createEntity(NAME.burnerDrill, 3, 5, 0, time);
   
   const belts = [
     [0, 1, 0, 6],
@@ -93,6 +94,15 @@ export function scenario(gameMap, time) {
   createLane(gameMap, -4, -6, 1, 3, time);
   createLane(gameMap, -1, -6, 0, 1, time);
   createLane(gameMap, -3, -7, 2, 1, time);
+  
+  gameMap.createEntity(NAME.inserter,
+      4, -11, 3, time);
+  gameMap.createEntity(NAME.inserter,
+      4, -3, 0, time);
+  gameMap.createEntity(NAME.inserter,
+      4, -1, 1, time);
+  gameMap.createEntity(NAME.inserter,
+      4, 3, 2, time);
   
   return s;
 }

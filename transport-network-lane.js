@@ -198,16 +198,16 @@ Lane.prototype.draw = function(ctx, view) {
               ((this.nodes[n].direction - 1) % 2) *
               (this.nodes[n].length - dte - 0.5);
         }
-        if ((x + 0.24) * view.scale >= view.x &&
-            (y + 0.24) * view.scale >= view.y &&
-            (x - 0.24) * view.scale < view.x + view.width &&
-            (y - 0.24) * view.scale < view.y + view.height) {
+        if ((x + 0.234375) * view.scale >= view.x &&
+            (y + 0.234375) * view.scale >= view.y &&
+            (x - 0.234375) * view.scale < view.x + view.width &&
+            (y - 0.234375) * view.scale < view.y + view.height) {
           ctx.drawImage(sprite.image,
               sprite.x, sprite.y,
               sprite.width, sprite.height,
-              (x - 0.24) * view.scale - view.x,
-              (y - 0.24) * view.scale - view.y,
-              view.scale * 0.48, view.scale * 0.48);
+              (x - 0.234375) * view.scale - view.x,
+              (y - 0.234375) * view.scale - view.y,
+              view.scale * 0.46875, view.scale * 0.46875);
         }
         dte += 0.125;
       }
