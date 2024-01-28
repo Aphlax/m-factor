@@ -95,10 +95,11 @@ export function scenario(gameMap, time) {
   createLane(gameMap, -1, -6, 0, 1, time);
   createLane(gameMap, -3, -7, 2, 1, time);
   
-  gameMap.createEntity(NAME.inserter,
+  const i = gameMap.createEntity(NAME.inserter,
       4, -11, 3, time);
+  i.data.inserterItem = 2;
   gameMap.createEntity(NAME.inserter,
-      4, -3, 0, time);
+      4, -4, 0, time);
   gameMap.createEntity(NAME.inserter,
       4, -1, 1, time);
   gameMap.createEntity(NAME.inserter,

@@ -101,11 +101,39 @@ GameMap.prototype.draw = function(ctx, time) {
   	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
       if (y * size > this.view.height + this.view.y) continue;
       for (let entity of chunk.entities) {
-        entity.draw(ctx, this.view, time);
+        if (entity.type == TYPE.belt) {
+          entity.drawBelt(ctx, this.view, time);
+        }
       }
     }
   }
   this.transportNetwork.draw(ctx, this.view);
+  for (let [x, chunks] of this.chunks.entries()) {
+    if ((x + 1) * size <= this.view.x - this.view.scale * MAX_SIZE) continue;
+    if (x * size > this.view.width + this.view.x) continue;
+    for (let [y, chunk] of chunks.entries()) {
+  	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
+      if (y * size > this.view.height + this.view.y) continue;
+      for (let entity of chunk.entities) {
+        if (entity.type != TYPE.belt) {
+          entity.draw(ctx, this.view, time);
+        }
+      }
+    }
+  }
+  for (let [x, chunks] of this.chunks.entries()) {
+    if ((x + 1) * size <= this.view.x - this.view.scale * MAX_SIZE) continue;
+    if (x * size > this.view.width + this.view.x) continue;
+    for (let [y, chunk] of chunks.entries()) {
+  	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
+      if (y * size > this.view.height + this.view.y) continue;
+      for (let entity of chunk.entities) {
+        if (entity.type == TYPE.inserter) {
+          entity.drawInserterHand(ctx, this.view, time);
+        }
+      }
+    }
+  }
   if (this.selectedEntity) {
     this.ui.drawSelection(ctx, this.view, this.selectedEntity);
   }

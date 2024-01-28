@@ -62,6 +62,13 @@ export const MINE_PRODUCTS = {
   [RESOURCE_NAMES.stone]: I.stone,
 };
 
+export const INSERTER_PICKUP_BEND = {
+  [DIRECTION.north]: 0,
+  [DIRECTION.east]: -0.22 * 0.9,
+  [DIRECTION.south]: 0,
+  [DIRECTION.west]: 0.22 * 0.9,
+};
+
 
 
 export function rectOverlap(x, y, width, height, entity) {

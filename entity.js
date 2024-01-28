@@ -1,9 +1,10 @@
 import {Inventory} from './inventory.js';
 import {S, SPRITES} from './sprite-pool.js';
 import {ENTITIES} from './entity-definitions.js';
-import {TYPE, MAX_SIZE, STATE, MINE_PATTERN, MINE_PRODUCTS} from './entity-properties.js';
+import {TYPE, MAX_SIZE, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND} from './entity-properties.js';
+import * as entityLogic from './entity-logic.js';
 
-
+Object.assign(Entity.prototype, entityLogic);
 function Entity() {
   this.type = 0;
   this.label = undefined;
@@ -60,6 +61,8 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.inserterHandSprites = def.inserterHandSprites;
     this.data.inserterPosition = 0;
     this.data.inserterItem = 0;
+    this.data.inserterPickupBend =
+        INSERTER_PICKUP_BEND[(direction + 2) % 4];
   } else if (this.type == TYPE.mine) {
     this.state = STATE.running;
     this.nextUpdate = time + 666;
@@ -157,72 +160,6 @@ Entity.prototype.draw = function(ctx, view, time) {
           sprite.top * yScale,
       sprite.width * xScale,
       sprite.height * yScale);
-  if (this.type == TYPE.belt) {
-    if (this.data.beltEndSprite) {
-      const s = SPRITES.get(this.data.beltEndSprite + animation);
-      const x = this.x - (this.direction - 2) % 2;
-      const y = this.y + (this.direction - 1) % 2;
-      ctx.drawImage(s.image,
-          s.x, s.y, s.width, s.height,
-          x * view.scale - view.x - s.left * xScale,
-          y * view.scale - view.y - s.top * yScale,
-          s.width * xScale,
-          s.height * yScale);
-    }
-    if (this.data.beltBeginSprite) {
-      const s = SPRITES.get(this.data.beltBeginSprite + animation);
-      const x = this.x + (this.direction - 2) % 2;
-      const y = this.y - (this.direction - 1) % 2;
-      ctx.drawImage(s.image,
-          s.x, s.y, s.width, s.height,
-          x * view.scale - view.x - s.left * xScale,
-          y * view.scale - view.y - s.top * yScale,
-          s.width * xScale,
-          s.height * yScale);
-    }
-    if (this.data.beltExtraRightSprite) {
-      const s = SPRITES.get(this.data.beltExtraRightSprite + animation);
-      ctx.drawImage(s.image,
-          s.x, s.y, s.width, s.height,
-          this.x * view.scale - view.x - s.left * xScale,
-          this.y * view.scale - view.y - s.top * yScale,
-          s.width * xScale,
-          s.height * yScale);
-    }
-    if (this.data.beltExtraLeftSprite) {
-      const s = SPRITES.get(this.data.beltExtraLeftSprite + animation);
-      ctx.drawImage(s.image,
-          s.x, s.y, s.width, s.height,
-          this.x * view.scale - view.x - s.left * xScale,
-          this.y * view.scale - view.y - s.top * yScale,
-          s.width * xScale,
-          s.height * yScale);
-    }
-  } else if (this.type == TYPE.inserter) {
-    const s = SPRITES.get(this.data.inserterHandSprites);
-    ctx.translate(
-        (this.x + 0.5) * view.scale - view.x,
-        (this.y + 0.5) * view.scale - view.y);
-    const angle = (time/3 % 1000) / 1000 * 2;
-    const offset = ((angle < 1 ? angle : 2 - angle) - 0.5) * 0.6;
-    ctx.rotate((-0.5 + angle + offset) * Math.PI);
-    ctx.drawImage(s.image,
-        s.x, s.y, s.width, s.height,
-        -4 * view.scale / 32,
-        -4 * view.scale / 32,
-        s.width * view.scale / 32,
-        s.height * view.scale / 32);
-    ctx.translate(0, 24 / 32 * view.scale);
-    ctx.rotate((1 - offset * 1.9) * Math.PI);
-    const ss = SPRITES.get(this.data.inserterHandSprites + 1);
-    ctx.drawImage(ss.image,
-        ss.x, ss.y, ss.width, ss.height,
-        -8 * view.scale / 32,
-        -40 * view.scale / 32,
-        ss.width * view.scale / 32,
-        ss.height * view.scale / 32);
-    ctx.setTransform();
-  }
 };
 
 Entity.prototype.drawShadow = function(ctx, view, time) {
