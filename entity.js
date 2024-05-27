@@ -1,10 +1,12 @@
 import {Inventory} from './inventory.js';
 import {S, SPRITES} from './sprite-pool.js';
 import {ENTITIES} from './entity-definitions.js';
-import {TYPE, MAX_SIZE, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND} from './entity-properties.js';
+import {TYPE, MAX_SIZE, NEVER, NOW, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND} from './entity-properties.js';
 import * as entityLogic from './entity-logic.js';
+import * as entityDrawing from './entity-drawing.js';
 
 Object.assign(Entity.prototype, entityLogic);
+Object.assign(Entity.prototype, entityDrawing);
 function Entity() {
   this.type = 0;
   this.label = undefined;
@@ -20,7 +22,8 @@ function Entity() {
   this.animationSpeed = 0;
   
   this.taskStart = 0;
-  this.nextUpdate = 0;
+  this.taskDuration = 0;
+  this.nextUpdate = 0; // taskEnd?
   this.state = 0;
   this.data = {};
   // Inventories.
@@ -58,6 +61,10 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.beltOutput = undefined;
     this.updateBeltSprites();
   } else if (this.type == TYPE.inserter) {
+    this.state = STATE.missingItem;
+    this.nextUpdate = time + def.taskDuration;
+    this.taskStart = time;
+    this.taskDuration = def.taskDuration;
     this.data.inserterHandSprites = def.inserterHandSprites;
     this.data.inserterPosition = 0;
     this.data.inserterItem = 0;
@@ -65,9 +72,11 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
         INSERTER_PICKUP_BEND[(direction + 2) % 4];
   } else if (this.type == TYPE.mine) {
     this.state = STATE.running;
-    this.nextUpdate = time + 666;
+    this.nextUpdate = time + def.taskDuration;
     this.taskStart = time;
+    this.taskDuration = def.taskDuration;
     this.data.minePattern = 0;
+    this.data.minedResource = 0;
     this.data.mineOutputX = def.mineOutput[direction].x;
     this.data.mineOutputY = def.mineOutput[direction].y;
   } else if (this.type == TYPE.chest) {
@@ -79,9 +88,101 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
 
 Entity.prototype.update = function(gameMap, time) {
   if (this.type == TYPE.inserter) {
-    
+    if (this.state == STATE.inserterCoolDown) {
+      this.state = STATE.missingItem;
+    }
+    if (this.state == STATE.missingItem) {
+      if (!this.outputEntities.length || !this.inputEntities.length) {
+        this.nextUpdate = NEVER;
+        return;
+      }
+      const [inputEntity] = this.inputEntities;
+      const [outputEntity] = this.outputEntities;
+      
+      if (inputEntity.type == TYPE.belt) {
+        const wants = outputEntity.insertWants();
+        const positionForBelt = this.direction * 3 + 1;
+        const waitOrItem = inputEntity.beltExtract(
+            wants, this.nextUpdate, positionForBelt);
+        if (waitOrItem >= 0) {
+          this.nextUpdate += waitOrItem;
+          return;
+        }
+        this.data.inserterItem = -waitOrItem;
+        this.state = STATE.running;
+        this.taskStart = this.nextUpdate;
+        this.nextUpdate = this.taskStart + this.taskDuration;
+        return;
+      } else if (outputEntity.type == TYPE.belt) {
+        const [item] = inputEntity.outputInventory.items;
+        if (!inputEntity.extract(item, 1, this.nextUpdate)) {
+          this.nextUpdate = NEVER;
+          return;
+        }
+        this.data.inserterItem = item;
+        this.state = STATE.running;
+        this.taskStart = this.nextUpdate;
+        this.nextUpdate = this.taskStart + this.taskDuration;
+        return;
+      } else {
+        const wants = outputEntity.insertWants();
+        for (let i = 0; i < inputEntity.outputInventory.items.length; i++) {
+          const item = inputEntity.outputInventory.items[i];
+          if (!i && item == inputEntity.outputInventory.items[i - 1]) {
+            continue;
+          }
+          if (wants != -1 && !wants.includes(item)) {
+            continue;
+          }
+          if (inputEntity.extract(item, 1, this.nextUpdate)) {
+            this.data.inserterItem = item;
+            this.state = STATE.running;
+            this.taskStart = this.nextUpdate;
+            this.nextUpdate = this.taskStart + this.taskDuration;
+            return;
+          }
+        }
+        this.nextUpdate = NEVER;
+        return;
+      }
+    } else if (this.state == STATE.running) {
+      // We arrived at the target with the hand holding an item.
+      if (!this.outputEntities.length) {
+        this.state = STATE.noOutput;
+        this.nextUpdate = NEVER;
+        return;
+      }
+      const [outputEntity] = this.outputEntities;
+      if (outputEntity.type == TYPE.belt) {
+        const positionForBelt = this.direction * 3 + 1;
+        const wait = outputEntity.beltInsert(
+            this.data.inserterItem,
+            this.taskStart + this.taskDuration,
+            positionForBelt);
+        if (wait) {
+          this.nextUpdate += wait;
+          return;
+        }
+        this.data.inserterItem = undefined;
+        this.state = STATE.inserterCoolDown;
+        this.taskStart = this.nextUpdate;
+        this.nextUpdate = this.taskStart + this.taskDuration;
+        return;
+      }
+      
+      const amount = outputEntity.insert(this.data.inserterItem, 1, this.nextUpdate);
+      if (!amount) {
+        this.nextUpdate = NEVER;
+        return;
+      }
+      this.data.inserterItem = undefined;
+      this.state = STATE.inserterCoolDown;
+      this.taskStart = this.nextUpdate;
+      this.nextUpdate = this.taskStart + this.taskDuration;
+      return;
+    }
   } else if (this.type == TYPE.mine) {
-    if (time >= this.nextUpdate) {
+    if (this.state == STATE.running) {
       this.animation = Math.floor(this.animation + (time - this.taskStart) * this.animationSpeed / 60) % this.animationLength;
       let resource, x, y;
       for (let i = 0; i < 16; i++) {
@@ -95,107 +196,61 @@ Entity.prototype.update = function(gameMap, time) {
       }
       if (!resource) {
         this.state = STATE.mineEmpty;
-        this.nextUpdate = Number.MAX_SAFE_INTEGER;
+        this.nextUpdate = NEVER;
         return;
       }
       
-      // no energy
+      // Modify resource.
+      resource.amount--;
+      if (resource.amount == 25 ||
+          resource.amount == 100 ||
+          resource.amount == 500 ||
+          resource.amount == 2500 ||
+          resource.amount == 10000 ||
+          resource.amount == 50000 ||
+          resource.amount == 250000) {
+        resource.sprite--;
+      } else if (!resource.amount) {
+        gameMap.getResourceAt(x, y, /*remove*/ true);
+      }
       
-      const [outEntity] = this.outputEntities;
-      if (!outEntity) {
-        this.state = STATE.mineNoOutput;
-        this.nextUpdate = Number.MAX_SAFE_INTEGER;
+      this.data.minedResource = resource.id;
+      this.state = STATE.itemReady;
+    }
+    if (this.state == STATE.itemReady) {
+      const [outputEntity] = this.outputEntities;
+      if (!outputEntity) {
+        this.state = STATE.noOutput;
+        this.nextUpdate = NEVER;
         return;
       }
-      const item = MINE_PRODUCTS[resource.id];
-      const positionForBelt = ((this.direction + 2) % 4) * 3 + 1;
-      if (outEntity.insert(item, 1, this.nextUpdate, positionForBelt)) {
-        this.taskStart = this.nextUpdate;
-        this.nextUpdate += 666;
-        resource.amount--;
-        
-        if (resource.amount == 25 ||
-            resource.amount == 100 ||
-            resource.amount == 500 ||
-            resource.amount == 2500 ||
-            resource.amount == 10000 ||
-            resource.amount == 50000 ||
-            resource.amount == 250000) {
-          resource.sprite--;
-        } else if (!resource.amount) {
-          gameMap.getResourceAt(x, y, /*remove*/ true);
+      const item = MINE_PRODUCTS[this.data.minedResource];
+      if (outputEntity.type == TYPE.belt) {
+        const positionForBelt = ((this.direction + 2) % 4) * 3 + 1;
+        const wait = outputEntity.beltInsert(item, this.nextUpdate, positionForBelt);
+        if (wait) {
+          this.nextUpdate += wait;
+          return;
         }
-      } else {
-        this.state = STATE.outputFull;
-        this.nextUpdate = Number.MAX_SAFE_INTEGER;
+        this.state = STATE.running;
+        this.taskStart = this.nextUpdate;
+        this.nextUpdate = this.taskStart + this.taskDuration;
+        return;
       }
+      if (!outputEntity.insert(item, 1, this.nextUpdate)) {
+        this.nextUpdate = NEVER;
+        return;
+      }
+      this.state = STATE.running;
+      this.taskStart = this.nextUpdate;
+      this.nextUpdate = this.taskStart + this.taskDuration;
+      return;
     }
   }
 };
 
-Entity.prototype.draw = function(ctx, view, time) {
-  if ((this.x + this.width) * view.scale <= view.x)
-    return;
-  if (this.x * view.scale > view.x + view.width)
-    return;
-  if ((this.y + this.height) * view.scale <= view.y)
-    return;
-  if ((this.y - 1) * view.scale > view.y + view.height)
-    return;
-  let animation = this.animation;
-  if (this.animationLength && this.state == STATE.running) {
-    animation = Math.floor(animation +
-        (time - this.taskStart) * this.animationSpeed / 60) % this.animationLength;
-  }
-  const sprite = SPRITES.get(this.sprite + animation);
-  const xScale = this.width * view.scale /
-      (sprite.width - sprite.left - sprite.right);
-  const yScale = this.height * view.scale /
-      (sprite.height - sprite.top - sprite.bottom);
-  ctx.drawImage(sprite.image,
-      sprite.x, sprite.y, sprite.width, sprite.height,
-      this.x * view.scale - view.x -
-          sprite.left * xScale,
-      this.y * view.scale - view.y -
-          sprite.top * yScale,
-      sprite.width * xScale,
-      sprite.height * yScale);
-};
-
-Entity.prototype.drawShadow = function(ctx, view, time) {
-  if ((this.x + this.width + 1) * view.scale <= view.x)
-    return;
-  if (this.x * view.scale > view.x + view.width)
-    return;
-  if ((this.y + this.height) * view.scale <= view.y)
-    return;
-  if (this.y * view.scale > view.y + view.height)
-    return;
-  let animation = this.animation;
-  if (this.animationLength && this.state == STATE.running) {
-    animation = Math.floor(animation +
-        (time - this.taskStart) * this.animationSpeed / 60) %
-        this.animationLength;
-  }
-  const sprite = SPRITES.get(this.spriteShadow + animation);
-  const xScale = this.width * view.scale /
-      (sprite.width - sprite.left - sprite.right);
-  const yScale = this.height * view.scale /
-      (sprite.height - sprite.top - sprite.bottom);
-  ctx.drawImage(sprite.image,
-      sprite.x, sprite.y, sprite.width, sprite.height,
-      this.x * view.scale - view.x -
-          sprite.left * xScale,
-      this.y * view.scale - view.y -
-          sprite.top * yScale,
-      sprite.width * xScale,
-      sprite.height * yScale);
-};
-
-Entity.prototype.insert = function(item, amount, time, positionForBelt) {
-  if (this.type == TYPE.belt) {
-    return this.data.lane.insertItem(item, this, time, positionForBelt) ? 1 : 0;
-  } else if (this.type == TYPE.chest) {
+Entity.prototype.insert = function(item, amount, time) {
+  if (this.type == TYPE.chest) {
     const count = this.inputInventory.insert(item, amount, time);
     if (count) {
       for (let oEntity of this.outputEntities) {
@@ -205,16 +260,46 @@ Entity.prototype.insert = function(item, amount, time, positionForBelt) {
       }
     }
     return count;
+  } else if (this.type == TYPE.belt) {
+    throw new Error("Can only insert into belts with beltInsert.");
   }
   return 0;
 };
+
+/**
+ * Returns the expected wait time in ms until the belt is free to take the item.
+ * If 0, the item was put on the belt.
+ */
+Entity.prototype.beltInsert = function(item, time, positionForBelt) {
+  return this.data.lane.insertItem(item, this, time, positionForBelt);
+};
+
+/**
+ * What does this entiry want to have inserted?
+ * Either an array of items or -1 for anything.
+ */
+Entity.prototype.insertWants = function() {
+  if (this.type == TYPE.belt) {
+    return -1;
+  } else if (this.type == TYPE.chest) {
+    return this.inputInventory.insertWants();
+  }
+  return [];
+}
 
 Entity.prototype.extract = function(item, amount, time, origin) {
   return 0;
 };
 
-Entity.prototype.outputEntityHasSpace = function() {
-  
+/**
+ * items is a filter, -1 for any, otherwise an array of allowed items
+ * positionForBelt determines which lane is considered first.
+ *
+ * returns a negative item id if extracted.
+ * returns a positive wait time in ms if no item.
+ */
+Entity.prototype.beltExtract = function(items, time, positionForBelt) {
+  return this.data.lane.extractItem(items, this, time, positionForBelt);
 };
 
 Entity.prototype.connectBelt = function(other, time, transportNetwork) {
@@ -241,8 +326,6 @@ Entity.prototype.connectBelt = function(other, time, transportNetwork) {
     }
     return true;
   }
-  
-  // TODO: update state
 };
 
 /**
@@ -330,6 +413,28 @@ Entity.prototype.updateBeltSprites = function() {
   }
 };
 
+Entity.prototype.connectInserter = function(other) {
+  const dx = -(this.direction - 2) % 2;
+  const dy = (this.direction - 1) % 2;
+  if (other.x <= this.x + dx &&
+      other.x + other.width > this.x + dx &&
+      other.y <= this.y + dy &&
+      other.y + other.height > this.y + dy) {
+    if (other.inputInventory || other.type == TYPE.belt) {
+      this.outputEntities.push(other);
+      other.inputEntities.push(this);
+    }
+  } else if (other.x <= this.x - dx &&
+      other.x + other.width > this.x - dx &&
+      other.y <= this.y - dy &&
+      other.y + other.height > this.y - dy) {
+    if (other.outputInventory || other.type == TYPE.belt) {
+      this.inputEntities.push(other);
+      other.outputEntities.push(this);
+    }
+  }
+};
+
 Entity.prototype.connectMine = function(other, time) {
   const x = this.x + this.data.mineOutputX,
         y = this.y + this.data.mineOutputY;
@@ -341,12 +446,8 @@ Entity.prototype.connectMine = function(other, time) {
   other.inputEntities.push(this);
   if (this.state == STATE.mineNoOutput) {
     this.state == STATE.running;
-    this.nextUpdate = time + 666;
+    this.nextUpdate = time + this.taskDuration;
   }
-};
-
-Entity.prototype.connectInserter = function(other) {
-    
 };
 
 export {Entity};

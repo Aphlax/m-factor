@@ -17,7 +17,7 @@ function GameMap(canvas) {
   };
   this.input = new GameMapInput(this, this.view);
   this.ui = new GameUi(this);
-  this.chunks = new Map();
+  this.chunks = new Map(); // 2-D map of coordinate -> chunk
   this.transportNetwork = new TransportNetwork(this);
   this.selectedEntity = undefined;
 }
@@ -33,6 +33,8 @@ GameMap.prototype.update = function(time) {
   for (let chunks of this.chunks.values()) {
     for (let chunk of chunks.values()) {
       for (let entity of chunk.entities) {
+        if (time < entity.nextUpdate ||
+            entity.type == TYPE.belt) continue;
         entity.update(this, time);
       }
     }
@@ -136,6 +138,9 @@ GameMap.prototype.draw = function(ctx, time) {
   }
   if (this.selectedEntity) {
     this.ui.drawSelection(ctx, this.view, this.selectedEntity);
+    if (this.selectedEntity.type) {
+      this.selectedEntity.drawIO(ctx, this.view, time);
+    }
   }
   this.ui.draw(ctx, time);
 };
@@ -238,6 +243,12 @@ GameMap.prototype.connectEntity = function(entity, time) {
             rectOverlap(entity.x + entity.width, entity.y, 2, entity.height, other) ||
             rectOverlap(entity.x, entity.y + entity.height, entity.width, 2, other) ||
             rectOverlap(x, entity.y, 2, entity.height, other)) {
+          if (entity.type == TYPE.inserter) {
+            entity.connectInserter(other, time);
+          }
+          if (other.type == TYPE.inserter) {
+            other.connectInserter(entity, time);
+          }
           if (entity.type == TYPE.mine) {
             entity.connectMine(other, time);
           }

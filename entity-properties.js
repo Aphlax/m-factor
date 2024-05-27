@@ -7,16 +7,21 @@ export const TYPE = {
   inserter: 4,
 };
 
+/** Never value for next update. */
+export const NEVER = Number.MAX_SAFE_INTEGER;
+/** Now value for next update. */
+export const NOW = -1;
 export const MAX_SIZE = 3;
 
 export const STATE = {
   running: 0,
-  idle: 1,
   missingItem: 1,
   outputFull: 2,
-  noEnergy: 3,
-  mineNoOutput: 10,
-  mineEmpty: 11,
+  
+  itemReady: 10, // Inserter or mine ready to drop item (but output entity does not accept it).
+  noOutput: 11, // Inserter or mine has no output (after item is ready to drop).
+  inserterCoolDown: 12, // Inserter moving back to initial position.
+  mineEmpty: 13,
 };
 
 export const DIRECTION = {
@@ -68,8 +73,6 @@ export const INSERTER_PICKUP_BEND = {
   [DIRECTION.south]: 0,
   [DIRECTION.west]: 0.22 * 0.9,
 };
-
-
 
 export function rectOverlap(x, y, width, height, entity) {
   return x + width > entity.x && x < entity.x + entity.width &&

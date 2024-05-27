@@ -99,11 +99,23 @@ export function scenario(gameMap, time) {
       4, -11, 3, time);
   i.data.inserterItem = 2;
   gameMap.createEntity(NAME.inserter,
-      4, -4, 0, time);
+      4, -5, 3, time);
   gameMap.createEntity(NAME.inserter,
       4, -1, 1, time);
   gameMap.createEntity(NAME.inserter,
       4, 3, 2, time);
+  gameMap.createEntity(NAME.inserter,
+      0, -2, 2, time);
+  gameMap.createEntity(NAME.inserter,
+      -2, -1, 3, time);
+  gameMap.createEntity(NAME.inserter,
+      -3, -2, 0, time);
+  gameMap.createEntity(NAME.inserter,
+      -3, -4, 0, time);
+  gameMap.createEntity(NAME.inserter,
+      2, 0, 3, time);
+  gameMap.createEntity(NAME.woodenChest,
+      1, 0, 0, time);
   
   return s;
 }

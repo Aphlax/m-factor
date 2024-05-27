@@ -6,6 +6,10 @@ const FLOW = {
   minus: -1, plus: 1
 };
 const FLOWS = [FLOW.minus, FLOW.plus];
+/**
+ *  The 12 insertion positions from inserters
+ *  and side loading start from north TODO
+ */
 const BELT_POSITION =
     [0.0, 0.25, 0.0, 0.25, 0.5, 0.75,
      1.0, 0.75, 1.0, 0.75, 0.5, 0.25];
@@ -17,11 +21,22 @@ const RIGHT_TURN_BELT_POSITION =
      1.25, 1.0, 0.75, 0.75, 0.5, 0.25];
 
 
+// TODO: do more bookkeeping where in a
+// flow each belt is. Mostly during update,
+// but also when inserting and extracting.
+// All lane changes should not interfere.
+
+// maybe also not. this requires us to go
+// through all belts of a lane each update.
+// it may be cheaper to just do this for
+// inserts and extracts.
+
 function Lane(belts, nodes) {
   this.belts = belts;
   this.nodes = nodes;
   this.circular = false;
   
+  // For belts going north, minus side is left.
   this.minusItem = undefined;
   this.minusFlow = [];
   this.plusItem = undefined;
@@ -35,6 +50,10 @@ Lane.fromBelt = function(belt) {
   return lane;
 }
 
+/**
+ * Returns the expected wait time in ms until the lane is free to take the item.
+ * If 0, the item was put on the belt.
+ */
 Lane.prototype.insertItem = function(item, belt, time, positionForBelt) {
   let flow, flowSign;
   let minusSide;
@@ -98,16 +117,103 @@ Lane.prototype.insertItem = function(item, belt, time, positionForBelt) {
     if (dte < flow[i]) {
       flow[i] -= dte + 0.25;
       flow.splice(i, 0, dte);
-      return true;
+      return 0; // Item inserted, 0 wait.
     }
     if (dte < flow[i] + 0.25) {
-      return false;
+      // Item can't be inserted here,
+      // calculate how much wait until potential gap.
+      let wait = flow[i] + 0.25 - dte;
+      while (++i < flow.length && !flow[i] && wait < 1) {
+        wait += 0.25;
+      }
+      return Math.ceil(wait / belt.data.beltSpeed * 1000);
     }
     dte -= flow[i] + 0.25;
   }
   flow.push(dte);
-  return true;
+  return 0; // Item inserted, 0 wait.
 };
+
+/**
+ * items is a filter, -1 for any, otherwise an array of allowed items
+ * positionForBelt determines which lane is considered first.
+ *
+ * returns a negative item id if extracted.
+ * returns a positive wait time in ms if no item.
+ */
+Lane.prototype.extractItem = function(items, belt, time, positionForBelt) {
+  let minusSide;
+  const turnBelt = (belt.direction -
+      (belt.data.beltInput?.direction ??
+      belt.direction) + 4) % 4;
+  const normalPos = (positionForBelt -
+        belt.direction * 3 + 12) % 12;
+  if (!turnBelt) {
+    minusSide = !normalPos || normalPos >= 7;
+  } else {
+    if (turnBelt == 1) {
+      minusSide = !normalPos || normalPos >= 4;
+    } else {
+      minusSide = !normalPos || normalPos >= 10;
+    }
+  }
+  const startFlowSign = minusSide ? FLOW.minus : FLOW.plus;
+  let waitTime = Math.ceil(1000 / belt.data.beltSpeed);
+  
+  laneLoop:
+  for (let flowSign of FLOWS) {
+    flowSign *= -startFlowSign;
+    const flow = flowSign == FLOW.minus ?
+        this.minusFlow : this.plusFlow;
+    const flowItem = flowSign == FLOW.minus ?
+        this.minusItem : this.plusItem;
+    if (items != -1 && !items.includes(flowItem))
+      continue;
+    
+    let dte = 0, dteLength = 1;
+    if (turnBelt) {
+      dteLength = turnBelt * flowSign == 1 ? 0.5 : 1.5;
+    }
+    for (let n = this.nodes.length - 1; n >= 0; n--) {
+      dte += this.nodes[n].length;
+      if (this.nodes[n].contains(belt)) {
+        dte -= Math.abs(this.nodes[n].x - belt.x) +
+            Math.abs(this.nodes[n].y - belt.y) - 1;
+        break;
+      }
+      if (n) {
+        const turn = ((this.nodes[n].direction -
+            this.nodes[n - 1].direction + 4) % 4) - 2;
+        dte += flowSign * turn * 0.5;
+      }
+    }
+    
+    for (let i = 0; i < flow.length; i++) {
+      const itemPos = flow[i] + 0.125;
+      if (itemPos > dte + dteLength) {
+        const wait = Math.ceil(Math.min(itemPos - dte - dteLength, 1) / belt.data.beltSpeed * 1000);
+        if (wait < waitTime) {
+          waitTime = wait;
+        }
+        continue laneLoop;
+      }
+      if (itemPos > dte && itemPos <= dte + dteLength) {
+        if (i + 1 < flow.length && itemPos + flow[i + 1] + 0.25 < dte + dteLength * 0.5) {
+          dte -= flow[i] + 0.25;
+          continue;
+        }
+        // Extract this item.
+        const [len] = flow.splice(i, 1);
+        if (i < flow.length) {
+          flow[i] += len + 0.25;
+        }
+        return -flowItem;
+      }
+      dte -= flow[i] + 0.25;
+    }
+  }
+  return waitTime;
+}
 
 Lane.prototype.update = function(time, dt) {
   const total = dt * 0.001 * this.belts[0].data.beltSpeed;
@@ -133,7 +239,8 @@ Lane.prototype.update = function(time, dt) {
         if (entity.type == TYPE.belt) {
           const positionForBelt = ((belt.direction + 2) % 4) * 3 + 1 - flowSign;
           const item = flowSign == FLOW.minus ? this.minusItem : this.plusItem;
-          if (entity.insert(item, 1, time, positionForBelt)) {
+          const wait = entity.beltInsert(item, time, positionForBelt);
+          if (!wait) {
             flow.shift();
             if (flow.length) {
               flow[0] += 0.25;
@@ -171,23 +278,23 @@ Lane.prototype.draw = function(ctx, view) {
         }
         let x, y;
         if (n && dte > this.nodes[n].length - 1) {
-          const large = ((this.nodes[n].direction -
+          const largeTurn = ((this.nodes[n].direction -
               this.nodes[n - 1].direction + 4) % 4) ==
               2 + flowSign;
           const angle =
               ((1 - (dte - this.nodes[n].length + 1) /
-              (large ? 1.5 : 0.5)) *
-              (large ? -1 : 1) * flowSign +
+              (largeTurn ? 1.5 : 0.5)) *
+              (largeTurn ? -1 : 1) * flowSign +
               (this.nodes[n].direction + 1)) *
               Math.PI / 2;
           x = this.nodes[n].x + 0.5 +
               ((this.nodes[n].direction - 2) % 2) * -0.5 +
               ((this.nodes[n - 1].direction - 2) % 2) * 0.5 +
-              (large ? 0.73 : 0.27) * Math.cos(angle);
+              (largeTurn ? 0.73 : 0.27) * Math.cos(angle);
           y = this.nodes[n].y + 0.5 +
               ((this.nodes[n].direction - 1) % 2) * 0.5 +
               ((this.nodes[n - 1].direction - 1) % 2) * -0.5 +
-              (large ? 0.73 : 0.27) * Math.sin(angle);
+              (largeTurn ? 0.73 : 0.27) * Math.sin(angle);
         } else {
           x = this.nodes[n].x + 0.5 - flowSign *
               ((this.nodes[n].direction - 1) % 2) * 0.23 -

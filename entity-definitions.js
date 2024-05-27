@@ -24,6 +24,7 @@ export const ENTITIES = new Map([
     },
     animationLength: 32,
     
+    taskDuration: 1250,
     mineOutput: {
       [DIRECTION.north]: {x: 0, y: -1},
       [DIRECTION.east]: {x: 2, y: 0},
@@ -62,7 +63,7 @@ export const ENTITIES = new Map([
     animationLength: 16,
     animationSpeed: 1.925,
     
-    beltSpeed: 1.875,
+    beltSpeed: 1.875, // 15 = 1.875 * 8
     beltSprites: {
       [DIRECTION.north]: [S.transportBeltN, S.transportBeltEN, S.transportBeltWN],
       [DIRECTION.east]: [S.transportBeltE, S.transportBeltSE, S.transportBeltNE],
@@ -91,5 +92,6 @@ export const ENTITIES = new Map([
     animationLength: 0,
     
     inserterHandSprites: S.inserterHand,
+    taskDuration: 400,
   }],
 ]);
