@@ -116,6 +116,10 @@ export function scenario(gameMap, time) {
       2, 0, 3, time);
   gameMap.createEntity(NAME.woodenChest,
       1, 0, 0, time);
+  gameMap.createEntity(NAME.transportBelt,
+      1, -5, 3, time);
+  s.inserter = gameMap.createEntity(NAME.inserter,
+      2, -5, 3, time);
   
   return s;
 }

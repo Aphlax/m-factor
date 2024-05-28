@@ -12,7 +12,7 @@ const MODE = {
 function Game(canvas) {
   this.seed = 114;
   this.mode = MODE.loading;
-  this.gameMap = new GameMap(canvas);
+  this.gameMap = new GameMap(this, canvas);
   this.spritePool = SPRITES;
   this.gameMap.initialize(this.seed);
   this.spritePool.load();
@@ -20,12 +20,12 @@ function Game(canvas) {
 }
 
 Game.prototype.update = function(time) {
-  if (this.chest?.inputInventory?.amounts?.length)
-    this.debug = this.chest.inputInventory.amounts.reduce((a,b)=>a+b, 0);
+  if (this.entity)
+    this.debug = this.entity.nextUpdate;
   if (this.mode == MODE.playing) {
     this.gameMap.update(time);
     if (this.setupScenario) {
-      this.chest = scenario(this.gameMap, time).chest;
+      this.entity = scenario(this.gameMap, time).inserter;
       this.setupScenario = false;
     }
   } else if (this.mode == MODE.loading) {

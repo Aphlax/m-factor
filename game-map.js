@@ -6,7 +6,8 @@ import {TYPE, MAX_SIZE, rectOverlap} from './entity-properties.js';
 import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
 
-function GameMap(canvas) {
+function GameMap(game, canvas) {
+  this.game = game;
   this.mapGenerator = new MapGenerator();
   this.view = {
     x: Math.floor(-canvas.width / 2),

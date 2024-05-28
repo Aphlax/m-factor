@@ -23,7 +23,7 @@ function Entity() {
   
   this.taskStart = 0;
   this.taskDuration = 0;
-  this.nextUpdate = 0; // taskEnd?
+  this.nextUpdate = 0;
   this.state = 0;
   this.data = {};
   // Inventories.
@@ -59,6 +59,8 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.beltEndSprites = def.beltEndSprites[direction];
     this.data.beltInput = undefined;
     this.data.beltOutput = undefined;
+    this.data.beltSideLoadMinusWait = 0;
+    this.data.beltSideLoadPlusWait = 0;
     this.updateBeltSprites();
   } else if (this.type == TYPE.inserter) {
     this.state = STATE.missingItem;
@@ -423,6 +425,7 @@ Entity.prototype.connectInserter = function(other) {
     if (other.inputInventory || other.type == TYPE.belt) {
       this.outputEntities.push(other);
       other.inputEntities.push(this);
+      // TODO: update state.
     }
   } else if (other.x <= this.x - dx &&
       other.x + other.width > this.x - dx &&
@@ -431,6 +434,7 @@ Entity.prototype.connectInserter = function(other) {
     if (other.outputInventory || other.type == TYPE.belt) {
       this.inputEntities.push(other);
       other.outputEntities.push(this);
+      // TODO: update state.
     }
   }
 };
@@ -447,6 +451,7 @@ Entity.prototype.connectMine = function(other, time) {
   if (this.state == STATE.mineNoOutput) {
     this.state == STATE.running;
     this.nextUpdate = time + this.taskDuration;
+    // TODO: is this still necessary?
   }
 };
 

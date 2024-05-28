@@ -172,13 +172,13 @@ Lane.prototype.extractItem = function(items, belt, time, positionForBelt) {
     
     let dte = 0, dteLength = 1;
     if (turnBelt) {
-      dteLength = turnBelt * flowSign == 1 ? 0.5 : 1.5;
+      dteLength = (turnBelt == 1) == (flowSign == 1) ? 0.5 : 1.5;
     }
     for (let n = this.nodes.length - 1; n >= 0; n--) {
       dte += this.nodes[n].length;
       if (this.nodes[n].contains(belt)) {
         dte -= Math.abs(this.nodes[n].x - belt.x) +
-            Math.abs(this.nodes[n].y - belt.y) - 1;
+            Math.abs(this.nodes[n].y - belt.y) + 1;
         break;
       }
       if (n) {
@@ -233,25 +233,39 @@ Lane.prototype.update = function(time, dt) {
         movement += flow[i] - old;
       }
     }
-    if (flow.length && !flow[0]) {
-      const belt = this.belts[this.belts.length - 1];
-      for (let entity of belt.outputEntities) {
-        if (entity.type == TYPE.belt) {
-          const positionForBelt = ((belt.direction + 2) % 4) * 3 + 1 - flowSign;
-          const item = flowSign == FLOW.minus ? this.minusItem : this.plusItem;
-          const wait = entity.beltInsert(item, time, positionForBelt);
-          if (!wait) {
-            flow.shift();
-            if (flow.length) {
-              flow[0] += 0.25;
-            } else {
-              if (flowSign == FLOW.minus) {
-                this.minusItem = undefined;
-              } else {
-                this.plusItem = undefined;
-              }
-            }
+    // Belt side loading.
+    if (!flow.length || flow[0]) {
+      continue;
+    }
+    const belt = this.belts[this.belts.length - 1];
+    if ((flowSign == FLOW.minus ?
+        belt.data.beltSideLoadMinusWait :
+        belt.data.beltSideLoadPlusWait) > time) {
+      continue;
+    }
+    for (let entity of belt.outputEntities) {
+      if (entity.type != TYPE.belt) {
+        continue;
+      }
+      const positionForBelt = ((belt.direction + 2) % 4) * 3 + 1 - flowSign;
+      const item = flowSign == FLOW.minus ? this.minusItem : this.plusItem;
+      const wait = entity.beltInsert(item, time, positionForBelt);
+      if (!wait) {
+        flow.shift();
+        if (flow.length) {
+          flow[0] += 0.25;
+        } else {
+          if (flowSign == FLOW.minus) {
+            this.minusItem = undefined;
+          } else {
+            this.plusItem = undefined;
           }
+        }
+      } else {
+        if (flowSign == FLOW.minus) {
+          belt.data.beltSideLoadMinusWait = time + wait;
+        } else {
+          belt.data.beltSideLoadPlusWait = time + wait;
         }
       }
     }
