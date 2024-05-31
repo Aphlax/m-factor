@@ -65,7 +65,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   } else if (this.type == TYPE.inserter) {
     this.state = STATE.missingItem;
     this.nextUpdate = time + def.taskDuration;
-    this.taskStart = time;
+    this.taskStart = time - def.taskDuration;
     this.taskDuration = def.taskDuration;
     this.data.inserterHandSprites = def.inserterHandSprites;
     this.data.inserterPosition = 0;

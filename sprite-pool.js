@@ -45,11 +45,11 @@ SpritePool.prototype.draw = function(ctx, time) {
       
   // Debug.
   if (this.current == this.total) {
-    ctx.fillStyle = "black";
+    ctx.fillStyle = "lightgrey";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    let sprite = S.inserter;
+    let sprite = S.stoneFurnaceWorking;
     let shadow = 0;
-    let size = [32, 32], xlen = 2, ylen = 4;
+    let size = [64, 64], xlen = 8, ylen = 6;
     for (let i = 0; i < xlen; i++) {
       for (let j = 0; j < ylen; j++) {
         let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(sprite+i*ylen+j)};
@@ -58,7 +58,7 @@ SpritePool.prototype.draw = function(ctx, time) {
         let xScale = rect[2] / (s.width - s.left - s.right);
         let yScale = rect[3] / (s.height - s.top - s.bottom);
         if (shadow) {
-          let ss = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(shadow+i*ylen+j)};
+          let ss = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(shadow/*+i*ylen+j*/)};
           let sxScale = rect[2] / (ss.width - ss.left - ss.right);
           let syScale = rect[3] / (ss.height - ss.top - ss.bottom);
           ctx.strokeStyle="blue";
@@ -73,6 +73,12 @@ SpritePool.prototype.draw = function(ctx, time) {
               ss.width * sxScale,
               ss.height * syScale);
         }
+        ctx.strokeStyle="yellow";
+        ctx.strokeRect(
+            rect[0] - s.left * xScale,
+            rect[1] - s.top * yScale,
+            s.width * xScale,
+            s.height * yScale);
         ctx.drawImage(s.image,
             s.x, s.y, s.width, s.height,
             rect[0] - s.left * xScale,
@@ -83,15 +89,16 @@ SpritePool.prototype.draw = function(ctx, time) {
         ctx.strokeRect(...rect);
       }
     }
-    return;
-    let a = 16;
     
-    let s = this.get(sprite + (Math.floor(time / 60) % a));
+    //return;
+    let a = 48;
+    
+    let s = this.get(sprite + (Math.floor(time / 120) % a));
     if(!s) return;
     let r = s.rect, e = s.extend;
     let rect = [10, 570, ...size];
     if (shadow) {
-      let ss = this.get(shadow + (Math.floor(time / 60) % a));
+      let ss = this.get(shadow/* + (Math.floor(time / 60) % a)*/);
       let rs = ss.rect, es = ss.extend;
       let sxScale = rect[2] / (ss.width - ss.left - ss.right);
       let syScale = rect[3] / (ss.height - ss.top - ss.bottom);
@@ -112,8 +119,70 @@ SpritePool.prototype.draw = function(ctx, time) {
         s.height * yScale);
     ctx.strokeStyle="red";
     ctx.strokeRect(...rect);
+    
+    
+    //return;
+    if (!this.spriteSheetExported) {
+      this.spriteSheetExported = true;
+      this.exportSpriteSheet();
+    }
   }
 };
+
+
+/** For dev only. Used for stone furnace. */
+SpritePool.prototype.exportSpriteSheet = function() {
+  let sprite = S.stoneFurnaceFire;
+  let shadow = S.stoneFurnace;
+  let size = [64, 64], xlen = 8, ylen = 6;
+  let tile = [80, 64], xoff = -6, yoff = 0;
+  let name = "stone-furnace-working";
+  
+  const canvas = document.createElement("canvas");
+  canvas.width = tile[0] * xlen;
+  canvas.height = tile[1] * ylen;
+  const ctx = canvas.getContext('2d');
+  
+  
+  for (let i = 0; i < xlen; i++) {
+    for (let j = 0; j < ylen; j++) {
+      let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(sprite+i*ylen+j)};
+      if (!s.image) continue;
+      let rect = [i * tile[0] + xoff, j * tile[1] + yoff, ...size];
+      let xScale = rect[2] / (s.width - s.left - s.right);
+      let yScale = rect[3] / (s.height - s.top - s.bottom);
+      if (shadow) {
+        let ss = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(shadow/*+i*ylen+j*/)};
+        let sxScale = rect[2] / (ss.width - ss.left - ss.right);
+        let syScale = rect[3] / (ss.height - ss.top - ss.bottom);
+        
+        ctx.drawImage(ss.image,
+            ss.x, ss.y, ss.width, ss.height,
+            rect[0] - ss.left * sxScale,
+            rect[1] - ss.top * syScale,
+            ss.width * sxScale,
+            ss.height * syScale);
+      }
+      ctx.drawImage(s.image,
+          s.x, s.y, s.width, s.height,
+          rect[0] - s.left * xScale,
+          rect[1] - s.top * yScale,
+          s.width * xScale,
+          s.height * yScale);
+    }
+  }
+  
+  // Open in web browser to download.
+  let a = document.createElement('a');
+  a.download = name + ".png";
+  a.href = canvas.toDataURL();
+  a.style.position = "absolute";
+  a.style.bottom = "10px";
+  a.style.left = "10px";
+  a.style["z-index"] = 1;
+  a.innerText = "download spritesheet\n";
+  document.body.appendChild(a);
+}
 
 const INSTANCE = new SpritePool();
 INSTANCE.get = INSTANCE.sprites.get.bind(INSTANCE.sprites);

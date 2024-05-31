@@ -1,6 +1,10 @@
 import {NAME} from './entity-definitions.js';
 
 export function scenario(gameMap, time) {
+  return inserterTest(gameMap, time);
+}
+
+function inserterTest(gameMap, time) {
   const s = {};
   gameMap.createEntity(NAME.burnerDrill, 6, 0, 3, time);
   s.chest = gameMap.createEntity(NAME.woodenChest, -18, -9, 0, time);

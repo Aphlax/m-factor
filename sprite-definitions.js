@@ -59,11 +59,14 @@ export const S = {
   transportBeltEndN: 69*16,
   transportBeltBeginW: 70*16,
   transportBeltEndE: 71*16,
+  stoneFurnaceFire: 72*16,
+  stoneFurnaceWorking: 75*16,
   
-  woodenChest: 100*16,
-  woodenChestShadow: 100*16 + 1,
+  woodenChest: 1600,
+  woodenChestShadow: 1601,
   inserter: 1602,
   inserterHand: 1606,
+  stoneFurnace: 1609,
   
   ironOreItem: 1000*16,
   copperOreItem: 1000*16 + 1,
@@ -231,6 +234,18 @@ export const SPRITES = [
   {
     path: "graphics/entities/inserter/inserter-hand-closed.png",
     sprites: entitySprites(S.inserterHand + 2, 18, 44, 1, 1, -7, -7, 0, 12),
+  },
+  {
+    path: "graphics/entities/stone-furnace/stone-furnace.png",
+    sprites: entitySprites(S.stoneFurnace, 80, 64, 1, 1, -6, 22, 0, 0),
+  },
+  {
+    path: "graphics/entities/stone-furnace/stone-furnace-fire.png",
+    sprites: entitySprites(S.stoneFurnaceFire, 20, 49, 8, 6, -22, -23, -7, -8),
+  },
+  {
+    path: "graphics/entities/stone-furnace/stone-furnace-working.png",
+    sprites: entitySprites(S.stoneFurnaceWorking, 80, 64, 8, 6, -6, 22, 0, 0),
   },
   {
     path: "graphics/items/iron-ore.png",

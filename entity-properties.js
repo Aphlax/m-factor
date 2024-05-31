@@ -5,6 +5,7 @@ export const TYPE = {
   chest: 2,
   belt: 3,
   inserter: 4,
+  furnace: 5,
 };
 
 /** Never value for next update. */

@@ -7,6 +7,7 @@ export const NAME = {
   woodenChest: 2,
   transportBelt: 3,
   inserter: 4,
+  stoneFurnace: 5,
 };
 
 export const ENTITIES = new Map([
@@ -93,5 +94,19 @@ export const ENTITIES = new Map([
     
     inserterHandSprites: S.inserterHand,
     taskDuration: 400,
+  }],
+  [NAME.smelter,
+  {
+    label: "Stone Furnace",
+    type: TYPE.furnace,
+    width: 2,
+    height: 2,
+    sprites: {
+      [DIRECTION.north]: [S.stoneFurnaceFire],
+      [DIRECTION.east]: [S.stoneFurnaceFire],
+      [DIRECTION.south]: [S.stoneFurnaceFire],
+      [DIRECTION.west]: [S.stoneFurnaceFire],
+    },
+    animationLength: 48,
   }],
 ]);
