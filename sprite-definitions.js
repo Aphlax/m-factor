@@ -59,19 +59,20 @@ export const S = {
   transportBeltEndN: 69*16,
   transportBeltBeginW: 70*16,
   transportBeltEndE: 71*16,
-  stoneFurnaceFire: 72*16,
-  stoneFurnaceWorking: 75*16,
+  stoneFurnaceFire: 72*16, // 48
   
   woodenChest: 1600,
   woodenChestShadow: 1601,
   inserter: 1602,
   inserterHand: 1606,
   stoneFurnace: 1609,
+  stoneFurnaceWorking: 1610, // 48
   
   ironOreItem: 1000*16,
   copperOreItem: 1000*16 + 1,
   coalItem: 1000*16 + 2,
   stoneItem: 1000*16 + 3,
+  ironPlateItem: 16000 + 4,
 };
 
 export const SPRITES = [
@@ -262,6 +263,10 @@ export const SPRITES = [
   {
     path: "graphics/items/stone.png",
     sprites: itemSprites(S.stoneItem),
+  },
+  {
+    path: "graphics/items/iron-plate.png",
+    sprites: itemSprites(S.ironPlateItem),
   },
 ];
 

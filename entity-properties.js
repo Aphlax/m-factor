@@ -10,16 +10,15 @@ export const TYPE = {
 
 /** Never value for next update. */
 export const NEVER = Number.MAX_SAFE_INTEGER;
-/** Now value for next update. */
-export const NOW = -1;
+
 export const MAX_SIZE = 3;
 
 export const STATE = {
   running: 0,
   missingItem: 1,
-  outputFull: 2,
+  outputFull: 2, // Inserter output does not want anything.
+  itemReady: 3, // Inserter or mine ready to drop item (but output entity does not accept it). Assembler & forge output yellow.
   
-  itemReady: 10, // Inserter or mine ready to drop item (but output entity does not accept it).
   noOutput: 11, // Inserter or mine has no output (after item is ready to drop).
   inserterCoolDown: 12, // Inserter moving back to initial position.
   mineEmpty: 13,

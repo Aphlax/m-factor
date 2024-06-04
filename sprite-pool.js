@@ -121,7 +121,7 @@ SpritePool.prototype.draw = function(ctx, time) {
     ctx.strokeRect(...rect);
     
     
-    //return;
+    return;
     if (!this.spriteSheetExported) {
       this.spriteSheetExported = true;
       this.exportSpriteSheet();

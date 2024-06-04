@@ -1,7 +1,8 @@
 import {Inventory} from './inventory.js';
 import {S, SPRITES} from './sprite-pool.js';
 import {ENTITIES} from './entity-definitions.js';
-import {TYPE, MAX_SIZE, NEVER, NOW, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND} from './entity-properties.js';
+import {TYPE, MAX_SIZE, NEVER, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND} from './entity-properties.js';
+import {RECIPES, FURNACE_FILTERS} from './recipe-definitions.js';
 import * as entityLogic from './entity-logic.js';
 import * as entityDrawing from './entity-drawing.js';
 
@@ -64,11 +65,10 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.updateBeltSprites();
   } else if (this.type == TYPE.inserter) {
     this.state = STATE.missingItem;
-    this.nextUpdate = time + def.taskDuration;
+    this.nextUpdate = time;
     this.taskStart = time - def.taskDuration;
     this.taskDuration = def.taskDuration;
     this.data.inserterHandSprites = def.inserterHandSprites;
-    this.data.inserterPosition = 0;
     this.data.inserterItem = 0;
     this.data.inserterPickupBend =
         INSERTER_PICKUP_BEND[(direction + 2) % 4];
@@ -81,6 +81,16 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.minedResource = 0;
     this.data.mineOutputX = def.mineOutput[direction].x;
     this.data.mineOutputY = def.mineOutput[direction].y;
+  } else if (this.type == TYPE.furnace) {
+    this.state = STATE.missingItem;
+    this.nextUpdate = NEVER;
+    this.taskStart = 0;
+    this.taskDuration = 0;
+    this.data.processingSpeed = def.processingSpeed;
+    this.data.recipe = undefined;
+    this.inputInventory = new Inventory(1)
+        .setFilters(FURNACE_FILTERS);
+    this.outputInventory = new Inventory(1);
   } else if (this.type == TYPE.chest) {
     this.inputInventory = this.outputInventory =
         new Inventory(def.capacity);
@@ -93,7 +103,8 @@ Entity.prototype.update = function(gameMap, time) {
     if (this.state == STATE.inserterCoolDown) {
       this.state = STATE.missingItem;
     }
-    if (this.state == STATE.missingItem) {
+    if (this.state == STATE.missingItem ||
+        this.state == STATE.outputFull) {
       if (!this.outputEntities.length || !this.inputEntities.length) {
         this.nextUpdate = NEVER;
         return;
@@ -103,6 +114,11 @@ Entity.prototype.update = function(gameMap, time) {
       
       if (inputEntity.type == TYPE.belt) {
         const wants = outputEntity.insertWants();
+        if (wants != -1 && !wants.length) {
+          this.state = STATE.outputFull;
+          this.nextUpdate = NEVER;
+          return;
+        }
         const positionForBelt = this.direction * 3 + 1;
         const waitOrItem = inputEntity.beltExtract(
             wants, this.nextUpdate, positionForBelt);
@@ -128,6 +144,11 @@ Entity.prototype.update = function(gameMap, time) {
         return;
       } else {
         const wants = outputEntity.insertWants();
+        if (wants != -1 && !wants.length) {
+          this.state = STATE.outputFull;
+          this.nextUpdate = NEVER;
+          return;
+        }
         for (let i = 0; i < inputEntity.outputInventory.items.length; i++) {
           const item = inputEntity.outputInventory.items[i];
           if (!i && item == inputEntity.outputInventory.items[i - 1]) {
@@ -248,17 +269,63 @@ Entity.prototype.update = function(gameMap, time) {
       this.nextUpdate = this.taskStart + this.taskDuration;
       return;
     }
+  } else if (this.type == TYPE.furnace) {
+    if (this.state == STATE.running || this.state == STATE.itemReady) {
+      const output = this.data.recipe.outputs[0];
+      const amount = this.outputInventory.insert(output.item, output.amount);
+      if (!amount) {
+        this.state = STATE.itemReady;
+        this.nextUpdate = NEVER;
+        return;
+      }
+      this.state = STATE.missingItem;
+    }
+    if (this.state == STATE.missingItem) {
+      const item = this.inputInventory.items[0];
+      if (!this.data.recipe ||
+          this.data.recipe.inputs[0].item != item) {
+        this.data.recipe = RECIPES.filter(r =>
+             r.entity == TYPE.furnace &&
+             r.inputs[0].item == item)[0];
+      }
+      if (!this.data.recipe) {
+        this.nextUpdate = NEVER;
+        return;
+      }
+      const amount = this.inputInventory.extract(
+          item, this.data.recipe.inputs[0].amount,
+          true /* onlyFullAmount */);
+      if (!amount) {
+        this.nextUpdate = NEVER;
+        return;
+      }
+      this.state = STATE.running;
+      this.taskStart = this.nextUpdate;
+      this.nextUpdate = this.taskStart +
+          this.data.processingSpeed * this.data.recipe.duration;
+      for (let inputEntity of this.inputEntities) {
+        if (inputEntity.state == STATE.outputFull) {
+          inputEntity.nextUpdate = this.taskStart;
+        }
+      }
+      return;
+    }
   }
 };
 
 Entity.prototype.insert = function(item, amount, time) {
-  if (this.type == TYPE.chest) {
+  if (this.inputInventory) {
     const count = this.inputInventory.insert(item, amount, time);
     if (count) {
-      for (let oEntity of this.outputEntities) {
-        if (oEntity.state == STATE.missingInput) {
-          // TODO ,, use time.
+      if (this.type == TYPE.chest) {
+        for (let outputEntity of this.outputEntities) {
+          if (outputEntity.state == STATE.missingItem) {
+            outputEntity.nextUpdate = time;
+          }
         }
+      } else if (this.type == TYPE.furnace
+          && this.state == STATE.missingItem) {
+        this.nextUpdate = time;
       }
     }
     return count;
@@ -273,7 +340,15 @@ Entity.prototype.insert = function(item, amount, time) {
  * If 0, the item was put on the belt.
  */
 Entity.prototype.beltInsert = function(item, time, positionForBelt) {
-  return this.data.lane.insertItem(item, this, time, positionForBelt);
+  const wait = this.data.lane.insertItem(item, this, time, positionForBelt);
+  if (!wait) {
+    for (let outputEntity of this.outputEntities) {
+      if (outputEntity.state == STATE.missingItem) {
+        outputEntity.nextUpdate = time;
+      }
+    }
+  }
+  return wait;
 };
 
 /**
@@ -283,7 +358,7 @@ Entity.prototype.beltInsert = function(item, time, positionForBelt) {
 Entity.prototype.insertWants = function() {
   if (this.type == TYPE.belt) {
     return -1;
-  } else if (this.type == TYPE.chest) {
+  } else if (this.inputInventory) {
     return this.inputInventory.insertWants();
   }
   return [];

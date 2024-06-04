@@ -25,7 +25,8 @@ Game.prototype.update = function(time) {
   if (this.mode == MODE.playing) {
     this.gameMap.update(time);
     if (this.setupScenario) {
-      this.entity = scenario(this.gameMap, time).inserter;
+      const s = scenario(this.gameMap, time);
+      this.entity = s.inserter;
       this.setupScenario = false;
     }
   } else if (this.mode == MODE.loading) {

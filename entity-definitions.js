@@ -95,18 +95,20 @@ export const ENTITIES = new Map([
     inserterHandSprites: S.inserterHand,
     taskDuration: 400,
   }],
-  [NAME.smelter,
+  [NAME.stoneFurnace,
   {
     label: "Stone Furnace",
     type: TYPE.furnace,
     width: 2,
     height: 2,
     sprites: {
-      [DIRECTION.north]: [S.stoneFurnaceFire],
-      [DIRECTION.east]: [S.stoneFurnaceFire],
-      [DIRECTION.south]: [S.stoneFurnaceFire],
-      [DIRECTION.west]: [S.stoneFurnaceFire],
+      [DIRECTION.north]: [S.stoneFurnace],
+      [DIRECTION.east]: [S.stoneFurnace],
+      [DIRECTION.south]: [S.stoneFurnace],
+      [DIRECTION.west]: [S.stoneFurnace],
     },
-    animationLength: 48,
+    animationLength: 48 + 1,
+    
+    processingSpeed: 1,
   }],
 ]);

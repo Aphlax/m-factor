@@ -19,7 +19,8 @@ export function draw(ctx, view, time) {
   let animation = this.animation;
   if (this.animationLength && this.state == STATE.running) {
     animation = Math.floor(animation +
-        (time - this.taskStart) * this.animationSpeed / 60) % this.animationLength;
+        (time - this.taskStart) *
+        this.animationSpeed / 60) % this.animationLength;
   }
   const sprite = SPRITES.get(this.sprite + animation);
   const xScale = this.width * view.scale /
@@ -139,7 +140,8 @@ export function drawInserterHand(ctx, view, time) {
   
   let p = Math.min((time - this.taskStart) / this.taskDuration, 1);
   if (this.state == STATE.inserterCoolDown ||
-      this.state == STATE.missingItem) {
+      this.state == STATE.missingItem ||
+      this.state == STATE.outputFull) {
     p = 1 - p;
   }
   const smooth = p < 0.5 ? 2 * p * p : 1 - Math.pow(2 - 2 * p, 2) / 2;

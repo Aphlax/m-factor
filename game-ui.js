@@ -108,6 +108,11 @@ GameUi.prototype.drawEntityUi = function(ctx, entity, x, y, width, height) {
   } else if (entity.type == TYPE.chest) {
     this.drawInventory(ctx, entity.inputInventory,
         x + 16, y + 40, width - 32, height - 64);
+  } else if (entity.type == TYPE.furnace) {
+    this.drawInventory(ctx, entity.inputInventory,
+        x + 16, y + 40, 64, height - 64);
+    this.drawInventory(ctx, entity.outputInventory,
+        x + 80, y + 40, 64, height - 64);
   }
 };
 
