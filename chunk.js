@@ -13,6 +13,7 @@ function Chunk(cx, cy) {
   this.tiles = [];
   this.resources = undefined;
   this.entities = [];
+  this.particles = [];
 }
 
 Chunk.prototype.generate = function(mapGenerator) {
@@ -77,6 +78,34 @@ Chunk.prototype.drawResources = function(ctx, view) {
       }
     }
   }
+};
+
+Chunk.prototype.drawParticles = function(ctx, view, time) {
+  for (let p of this.particles) {
+    if (time < p.startTime) continue;
+    if (time > p.startTime + p.duration) continue;
+    const t = (time - p.startTime) / p.duration;
+    const e = t * t;
+    const x = (1 - e) * p.xStart + e * p.xEnd;
+    const y = (1 - t) * p.yStart + t * p.yEnd;
+    const size = (1 - e) * p.sizeStart + e * p.sizeEnd;
+    
+    const animation = Math.floor(p.animation +
+        (time - p.startTime) * p.animationSpeed / 60) %
+        p.animationLength;
+    const sprite = SPRITES.get(p.sprite + animation);
+    ctx.globalAlpha = Math.min((time - p.startTime) / 200,
+        (1 - e) * p.alphaStart + e * p.alphaEnd);
+    ctx.drawImage(
+        sprite.image,
+        sprite.x, sprite.y,
+        sprite.width, sprite.height,
+        x * view.scale - view.x,
+        y * view.scale - view.y,
+        sprite.width * size * view.scale / 64,
+        sprite.height * size * view.scale / 64);
+  }
+  ctx.globalAlpha = 1;
 };
 
 export {Chunk};
