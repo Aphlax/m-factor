@@ -47,9 +47,9 @@ SpritePool.prototype.draw = function(ctx, time) {
   if (this.current == this.total) {
     ctx.fillStyle = "lightgrey";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    let sprite = S.stoneFurnaceWorking;
+    let sprite = S.smoke;
     let shadow = 0;
-    let size = [64, 64], xlen = 8, ylen = 6;
+    let size = [64, 64], xlen = 5, ylen = 8;
     for (let i = 0; i < xlen; i++) {
       for (let j = 0; j < ylen; j++) {
         let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(sprite+i*ylen+j)};
@@ -91,35 +91,35 @@ SpritePool.prototype.draw = function(ctx, time) {
     }
     
     //return;
-    let a = 48;
+    let a = 60;
     
     let s = this.get(sprite + (Math.floor(time / 120) % a));
     if(!s) return;
-    let r = s.rect, e = s.extend;
+    let r = s.rect;
     let rect = [10, 570, ...size];
     if (shadow) {
       let ss = this.get(shadow/* + (Math.floor(time / 60) % a)*/);
-      let rs = ss.rect, es = ss.extend;
-      let sxScale = rect[2] / (ss.width - ss.left - ss.right);
-      let syScale = rect[3] / (ss.height - ss.top - ss.bottom);
+      let rs = ss.rect;
+      let sxScale = rect[2] / (ss.width - (ss.left ?? 0) - (ss.right ?? 0));
+      let syScale = rect[3] / (ss.height - (ss.top ?? 0) - (ss.bottom ?? 0));
       ctx.drawImage(ss.image,
         ss.x, ss.y, ss.width, ss.height,
-        rect[0] - ss.left * sxScale,
-        rect[1] - ss.top * syScale,
+        rect[0] - (ss.left ?? 0) * sxScale,
+        rect[1] - (ss.top ?? 0) * syScale,
         ss.width * sxScale,
         ss.height * syScale);
     }
-    let xScale = rect[2] / (s.width - s.left - s.right);
-    let yScale = rect[3] / (s.height - s.top - s.bottom);
+    let xScale = rect[2] / (s.width - (s.left ?? 0) - (s.right ?? 0));
+    let yScale = rect[3] / (s.height - (s.top ?? 0) - (s.bottom ?? 0));
     ctx.drawImage(s.image,
         s.x, s.y, s.width, s.height,
-        rect[0] - s.left * xScale,
-        rect[1] - s.top * yScale,
+        rect[0] - (s.left ?? 0) * xScale,
+        rect[1] - (s.top ?? 0) * yScale,
         s.width * xScale,
         s.height * yScale);
     ctx.strokeStyle="red";
     ctx.strokeRect(...rect);
-    
+    console.log(s.left);
     
     return;
     if (!this.spriteSheetExported) {

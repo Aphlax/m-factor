@@ -102,13 +102,15 @@ export const ENTITIES = new Map([
     width: 2,
     height: 2,
     sprites: {
-      [DIRECTION.north]: [S.stoneFurnace],
-      [DIRECTION.east]: [S.stoneFurnace],
-      [DIRECTION.south]: [S.stoneFurnace],
-      [DIRECTION.west]: [S.stoneFurnace],
+      [DIRECTION.north]: [S.stoneFurnaceWorking],
+      [DIRECTION.east]: [S.stoneFurnaceWorking],
+      [DIRECTION.south]: [S.stoneFurnaceWorking],
+      [DIRECTION.west]: [S.stoneFurnaceWorking],
     },
-    animationLength: 48 + 1,
+    animationLength: 48,
+    animationSpeed: 0.6,
     
     processingSpeed: 1,
+    idleAnimation: S.stoneFurnace,
   }],
 ]);

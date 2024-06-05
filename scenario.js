@@ -64,6 +64,8 @@ function inserterTest(gameMap, time) {
     [1, 5, 1],
     [2, 6, 0, 3],
     [3, 5, 3],
+    
+    [7, 11, 3, 8],
   ].map(([x, y, d, l]) => [x - 5, y - 2, d, l ?? 1]);
   belts.forEach(b => createLane(gameMap, ...b, time));
   
@@ -99,6 +101,8 @@ function inserterTest(gameMap, time) {
   createLane(gameMap, -1, -6, 0, 1, time);
   createLane(gameMap, -3, -7, 2, 1, time);
   
+  createLane(gameMap, 0, -6, 2, 1, time);
+  
   const i = gameMap.createEntity(NAME.inserter,
       4, -11, 3, time);
   i.data.inserterItem = 2;
@@ -125,7 +129,7 @@ function inserterTest(gameMap, time) {
   gameMap.createEntity(NAME.inserter,
       2, -5, 3, time);
       
-  s.inserter = gameMap.createEntity(NAME.inserter,
+  gameMap.createEntity(NAME.inserter,
       1, 5, 2, time);
   s.furnace = gameMap.createEntity(NAME.stoneFurnace,
       0, 6, 0, time);
@@ -133,6 +137,8 @@ function inserterTest(gameMap, time) {
       -2, 6, 0, time);
   gameMap.createEntity(NAME.stoneFurnace,
       -4, 6, 0, time);
+  s.inserter = gameMap.createEntity(NAME.inserter,
+      1, 8, 2, time);
   
   return s;
 }

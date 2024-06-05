@@ -1,9 +1,4 @@
-/*
-  terrain sprites y coordinate:
-  32: 0
-  64: 64
-  128: 160
-*/
+
 
 export const S = {
   dirt1: 0,
@@ -60,19 +55,22 @@ export const S = {
   transportBeltBeginW: 70*16,
   transportBeltEndE: 71*16,
   stoneFurnaceFire: 72*16, // 48
+  stoneFurnaceWorking: 75*16, // 48
   
   woodenChest: 1600,
   woodenChestShadow: 1601,
   inserter: 1602,
   inserterHand: 1606,
   stoneFurnace: 1609,
-  stoneFurnaceWorking: 1610, // 48
   
   ironOreItem: 1000*16,
   copperOreItem: 1000*16 + 1,
   coalItem: 1000*16 + 2,
   stoneItem: 1000*16 + 3,
   ironPlateItem: 16000 + 4,
+  copperPlateItem: 16000 + 5,
+  
+  smoke: 17000,
 };
 
 export const SPRITES = [
@@ -242,7 +240,7 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/stone-furnace/stone-furnace-fire.png",
-    sprites: entitySprites(S.stoneFurnaceFire, 20, 49, 8, 6, -22, -23, -7, -8),
+    sprites: entitySprites(S.stoneFurnaceFire, 20, 49, 8, 6, -22, -23, -13, -2),
   },
   {
     path: "graphics/entities/stone-furnace/stone-furnace-working.png",
@@ -268,7 +266,28 @@ export const SPRITES = [
     path: "graphics/items/iron-plate.png",
     sprites: itemSprites(S.ironPlateItem),
   },
+  {
+    path: "graphics/items/copper-plate.png",
+    sprites: itemSprites(S.copperPlateItem),
+  },
+  {
+    path: "graphics/decoratives/smoke.png",
+    sprites: sprites(S.smoke, 152, 120, 5, 12),
+  },
 ];
+
+function sprites(id, width, height, xCount, yCount) {
+  const res = [];
+  for (let i = 0; i < xCount; i++) {
+    for (let j = 0; j < yCount; j++) {
+      res.push({
+        id: id + i + j * xCount,
+        ...rect(i * width, j * height, width, height),
+      });
+    }
+  }
+  return res;
+}
 
 function entitySprites(id, width, height, xCount, yCount,
                        left, right, top, bottom, flipXY) {
@@ -289,7 +308,12 @@ function itemSprites(id) {
   return [{id: id, ...rect(64)}];
 }
 
-
+/*
+  terrain sprites y coordinate:
+  32: 0
+  64: 64
+  128: 160
+*/
 function terrainSprites(id, count) {
   const res = [];
   for (let i = 0; i < count; i++) {

@@ -86,8 +86,11 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.nextUpdate = NEVER;
     this.taskStart = 0;
     this.taskDuration = 0;
+    this.sprite = def.idleAnimation;
     this.data.processingSpeed = def.processingSpeed;
     this.data.recipe = undefined;
+    this.data.idleAnimation = def.idleAnimation;
+    this.data.workingAnimation = def.sprites[direction][0];
     this.inputInventory = new Inventory(1)
         .setFilters(FURNACE_FILTERS);
     this.outputInventory = new Inventory(1);
@@ -206,7 +209,9 @@ Entity.prototype.update = function(gameMap, time) {
     }
   } else if (this.type == TYPE.mine) {
     if (this.state == STATE.running) {
-      this.animation = Math.floor(this.animation + (time - this.taskStart) * this.animationSpeed / 60) % this.animationLength;
+      this.animation = Math.floor(this.animation +
+          (time - this.taskStart) * this.animationSpeed / 60) %
+          this.animationLength;
       let resource, x, y;
       for (let i = 0; i < 16; i++) {
         resource = gameMap.getResourceAt(
@@ -270,17 +275,25 @@ Entity.prototype.update = function(gameMap, time) {
       return;
     }
   } else if (this.type == TYPE.furnace) {
+    let continueNextItem = false;
     if (this.state == STATE.running || this.state == STATE.itemReady) {
       const output = this.data.recipe.outputs[0];
       const amount = this.outputInventory.insert(output.item, output.amount);
       if (!amount) {
         this.state = STATE.itemReady;
         this.nextUpdate = NEVER;
+        this.sprite = this.data.idleAnimation;
+        this.animation = 0;
         return;
       }
-      this.state = STATE.missingItem;
+      for (let outputEntity of this.outputEntities) {
+        if (outputEntity.state == STATE.missingItem) {
+          outputEntity.nextUpdate = this.nextUpdate;
+        }
+      }
+      continueNextItem = true;
     }
-    if (this.state == STATE.missingItem) {
+    if (continueNextItem || this.state == STATE.missingItem) {
       const item = this.inputInventory.items[0];
       if (!this.data.recipe ||
           this.data.recipe.inputs[0].item != item) {
@@ -289,25 +302,40 @@ Entity.prototype.update = function(gameMap, time) {
              r.inputs[0].item == item)[0];
       }
       if (!this.data.recipe) {
+        this.state = STATE.missingItem;
         this.nextUpdate = NEVER;
+        this.sprite = this.data.idleAnimation;
+        this.animation = 0;
         return;
       }
       const amount = this.inputInventory.extract(
           item, this.data.recipe.inputs[0].amount,
           true /* onlyFullAmount */);
       if (!amount) {
+        this.state = STATE.missingItem;
         this.nextUpdate = NEVER;
+        this.sprite = this.data.idleAnimation;
+        this.animation = 0;
         return;
+      }
+      for (let inputEntity of this.inputEntities) {
+        if (inputEntity.state == STATE.outputFull ||
+            inputEntity.state == STATE.itemReady) {
+          inputEntity.nextUpdate = this.nextUpdate;
+        }
+      }
+      if (continueNextItem && this.state == STATE.running) {
+        this.animation = Math.floor(this.animation +
+          (time - this.taskStart) * this.animationSpeed / 60) %
+          this.animationLength;
       }
       this.state = STATE.running;
       this.taskStart = this.nextUpdate;
       this.nextUpdate = this.taskStart +
           this.data.processingSpeed * this.data.recipe.duration;
-      for (let inputEntity of this.inputEntities) {
-        if (inputEntity.state == STATE.outputFull) {
-          inputEntity.nextUpdate = this.taskStart;
-        }
-      }
+      this.sprite = this.data.workingAnimation;
+      gameMap.createSmoke(this.x, this.y, this.taskStart,
+          this.data.processingSpeed * this.data.recipe.duration,);
       return;
     }
   }
@@ -315,7 +343,7 @@ Entity.prototype.update = function(gameMap, time) {
 
 Entity.prototype.insert = function(item, amount, time) {
   if (this.inputInventory) {
-    const count = this.inputInventory.insert(item, amount, time);
+    const count = this.inputInventory.insert(item, amount);
     if (count) {
       if (this.type == TYPE.chest) {
         for (let outputEntity of this.outputEntities) {
@@ -364,7 +392,25 @@ Entity.prototype.insertWants = function() {
   return [];
 }
 
-Entity.prototype.extract = function(item, amount, time, origin) {
+Entity.prototype.extract = function(item, amount, time) {
+  if (this.outputInventory) {
+    const count = this.outputInventory.extract(item, amount);
+    if (count) {
+      if (this.type == TYPE.chest) {
+        for (let inputEntity of this.inputEntities) {
+          if (inputEntity.state == STATE.outputFull ||
+              inputEntity.state == STATE.itemReady) {
+            inputEntity.nextUpdate = time;
+          }
+        }
+      } else if (this.type == TYPE.furnace &&
+          (this.state == STATE.outputFull ||
+          this.state == STATE.itemReady)) {
+        this.nextUpdate = time;
+      }
+    }
+    return count;
+  }
   return 0;
 };
 
@@ -524,9 +570,8 @@ Entity.prototype.connectMine = function(other, time) {
   this.outputEntities.push(other);
   other.inputEntities.push(this);
   if (this.state == STATE.mineNoOutput) {
-    this.state == STATE.running;
-    this.nextUpdate = time + this.taskDuration;
-    // TODO: is this still necessary?
+    this.state == STATE.itemReady;
+    this.nextUpdate = time;
   }
 };
 

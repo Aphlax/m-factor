@@ -21,7 +21,8 @@ function Game(canvas) {
 
 Game.prototype.update = function(time) {
   if (this.entity)
-    this.debug = this.entity.nextUpdate;
+    this.debug = this.entity.state + ", " +
+        this.entity.nextUpdate;
   if (this.mode == MODE.playing) {
     this.gameMap.update(time);
     if (this.setupScenario) {

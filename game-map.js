@@ -2,6 +2,7 @@ import {MapGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {GameMapInput} from './game-map-input.js';
 import {GameUi} from './game-ui.js';
+import {S} from './sprite-definitions.js';
 import {TYPE, MAX_SIZE, rectOverlap} from './entity-properties.js';
 import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
@@ -21,6 +22,7 @@ function GameMap(game, canvas) {
   this.chunks = new Map(); // 2-D map of coordinate -> chunk
   this.transportNetwork = new TransportNetwork(this);
   this.selectedEntity = undefined;
+  this.particles = []; // Expired particles.
 }
 
 GameMap.prototype.initialize = function(seed) {
@@ -135,6 +137,15 @@ GameMap.prototype.draw = function(ctx, time) {
           entity.drawInserterHand(ctx, this.view, time);
         }
       }
+    }
+  }
+  for (let [x, chunks] of this.chunks.entries()) {
+    if ((x + 1) * size <= this.view.x - this.view.scale * MAX_SIZE) continue;
+    if (x * size > this.view.width + this.view.x) continue;
+    for (let [y, chunk] of chunks.entries()) {
+  	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
+      if (y * size > this.view.height + this.view.y) continue;
+      chunk.drawParticles(ctx, this.view, time);
     }
   }
   if (this.selectedEntity) {
@@ -331,5 +342,41 @@ GameMap.prototype.selectEntity = function(screenX, screenY) {
   if (this.selectedEntity) return;
   this.selectedEntity = this.getResourceAt(Math.floor(x), Math.floor(y));
 }
+
+GameMap.prototype.createSmoke = function(x, y, time, duration) {
+  const cx = Math.floor(x / SIZE);
+  if (!this.chunks.has(cx)) return;
+  const cy = Math.floor(y / SIZE);
+  if (!this.chunks.get(cx).has(cy)) return;
+  const count = Math.floor(duration * 0.005);
+  for (let i = 0; i < count; i++) {
+    let p;
+    if (this.particles.length) {
+      p = this.particles[this.particles.length - 1];
+      this.particles.length--;
+    } else {
+      p = {};
+    }
+    p.sprite = S.smoke;
+    p.xStart = x + 0.43 - 0.01 + 0.02 * Math.random();
+    p.yStart = y - 0.2;
+    p.xEnd = x + 1.5 + Math.random();
+    p.yEnd = y - 4 - 1.5 * Math.random();
+    p.sizeStart = 0.4 + 0.15 * Math.random();
+    p.sizeEnd = 2 + Math.random();
+    p.rStart = Math.random() * Math.PI * 2;
+    p.rEnd = p.rStart - 0.2 * Math.random();
+    p.startTime = time + i * duration / count;
+    const d = (p.xEnd - p.xStart) ** 2 + (p.yEnd - p.yStart) ** 2;
+    p.duration = (d + 25) / 55 * 4000;
+    p.alphaStart = 0.8;
+    p.alphaEnd = 0.05;
+    p.animationLength = 60;
+    p.animation = Math.floor(60 * Math.random());
+    p.animationSpeed = 0.6;
+    
+    this.chunks.get(cx).get(cy).particles.push(p);
+  }
+};
 
 export {GameMap};
