@@ -22,6 +22,16 @@ export const RECIPES = [
     entity: TYPE.furnace,
     duration: 3200,
   },
+  {
+    inputs: [
+      {item: I.ironPlate, amount: 2},
+    ],
+    outputs: [
+      {item: I.ironGear, amount: 1},
+    ],
+    entity: TYPE.assembler,
+    duration: 500,
+  },
 ];
 
 export const FURNACE_FILTERS = RECIPES

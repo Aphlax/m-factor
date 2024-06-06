@@ -8,6 +8,7 @@ export const NAME = {
   transportBelt: 3,
   inserter: 4,
   stoneFurnace: 5,
+  assemblingMachine1: 6,
 };
 
 export const ENTITIES = new Map([
@@ -51,7 +52,7 @@ export const ENTITIES = new Map([
   }],
   [NAME.transportBelt,
   {
-    label: 'Transport belt',
+    label: 'Belt',
     type: TYPE.belt,
     width: 1,
     height: 1,
@@ -112,5 +113,22 @@ export const ENTITIES = new Map([
     
     processingSpeed: 1,
     idleAnimation: S.stoneFurnace,
+  }],
+  [NAME.assemblingMachine1,
+  {
+    label: "Assembler 1",
+    type: TYPE.assembler,
+    width: 3,
+    height: 3,
+    sprites: {
+      [DIRECTION.north]: [S.assemblingMachine1, S.assemblingMachine1Shadow],
+      [DIRECTION.east]: [S.assemblingMachine1, S.assemblingMachine1Shadow],
+      [DIRECTION.south]: [S.assemblingMachine1, S.assemblingMachine1Shadow],
+      [DIRECTION.west]: [S.assemblingMachine1, S.assemblingMachine1Shadow],
+    },
+    animationLength: 32,
+    animationSpeed: 1,
+    
+    processingSpeed: 2,
   }],
 ]);

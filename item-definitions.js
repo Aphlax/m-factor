@@ -7,6 +7,7 @@ export const I = {
   stone: 4,
   ironPlate: 5,
   copperPlate: 6,
+  ironGear: 7,
 };
 
 export const ITEMS = new Map([
@@ -38,6 +39,11 @@ export const ITEMS = new Map([
   [I.copperPlate,
   {
     sprite: S.copperPlateItem,
+    stackSize: 100,
+  }],
+  [I.ironGear,
+  {
+    sprite: S.ironGearItem,
     stackSize: 100,
   }],
 ]);

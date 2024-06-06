@@ -135,4 +135,40 @@ Inventory.prototype.setFilters = function(filters) {
   return this;
 };
 
+/** Extracts exactly the filters from this inventory. */
+Inventory.prototype.extractFilters = function() {
+  if (this.filters.length != this.capacity) return false;
+  for (let i = 0; i < this.filters.length; i++) {
+    if ((this.amounts[i] ?? 0) < this.filters[i].amount) {
+      return false;
+    }
+  }
+  for (let i = 0; i < this.filters.length; i++) {
+    this.amounts[i] -= this.filters[i].amount;
+    if (!this.amounts[i]) {
+      this.items[i] = undefined;
+      this.amounts[i] = undefined;
+    }
+  }
+  return true;
+};
+
+/** Inserts exactly the filters into this inventory. */
+Inventory.prototype.insertFilters = function() {
+  if (this.filters.length != this.capacity) return false;
+  for (let i = 0; i < this.filters.length; i++) {
+    const stackSize = ITEMS.get(this.filters[i].item).stackSize;
+    if ((this.amounts[i] ?? 0) >= Math.max(stackSize, Math.floor(this.filters[i].amount * 2.2))) {
+      return false;
+    }
+  }
+  for (let i = 0; i < this.filters.length; i++) {
+    if (!this.items[i]) {
+      this.items[i] = this.filters[i].item;
+    }
+    this.amounts[i] = (this.amounts[i] ?? 0) + this.filters[i].amount;
+  }
+  return true;
+};
+
 export {Inventory};

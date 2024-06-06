@@ -94,6 +94,13 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.inputInventory = new Inventory(1)
         .setFilters(FURNACE_FILTERS);
     this.outputInventory = new Inventory(1);
+  } else if (this.type == TYPE.assembler) {
+    this.state = STATE.noRecipe;
+    this.nextUpdate = NEVER;
+    this.data.processingSpeed = def.processingSpeed;
+    this.data.recipe = undefined;
+    this.inputInventory = new Inventory(0);
+    this.outputInventory = new Inventory(0);
   } else if (this.type == TYPE.chest) {
     this.inputInventory = this.outputInventory =
         new Inventory(def.capacity);
@@ -126,6 +133,7 @@ Entity.prototype.update = function(gameMap, time) {
         const waitOrItem = inputEntity.beltExtract(
             wants, this.nextUpdate, positionForBelt);
         if (waitOrItem >= 0) {
+          this.state = STATE.missingItem;
           this.nextUpdate += waitOrItem;
           return;
         }
@@ -334,9 +342,46 @@ Entity.prototype.update = function(gameMap, time) {
       this.nextUpdate = this.taskStart +
           this.data.processingSpeed * this.data.recipe.duration;
       this.sprite = this.data.workingAnimation;
-      gameMap.createSmoke(this.x, this.y, this.taskStart,
-          this.data.processingSpeed * this.data.recipe.duration,);
+      gameMap.createSmoke(this.x + 1, this.y, this.taskStart,
+          this.nextUpdate - this.taskStart);
       return;
+    }
+  } else if (this.type == TYPE.assembler) {
+    let continueNextItem = false;
+    if (this.state == STATE.running || this.state == STATE.itemReady) {
+      if (this.state == STATE.running) {
+        this.animation = Math.floor(this.animation +
+          (time - this.taskStart) * this.animationSpeed / 60) %
+          this.animationLength;
+      }
+      if (!this.outputInventory.insertFilters()) {
+        this.state = STATE.itemReady;
+        this.nextUpdate = NEVER;
+        return;
+      }
+      for (let outputEntity of this.outputEntities) {
+        if (outputEntity.state == STATE.missingItem) {
+          outputEntity.nextUpdate = this.nextUpdate;
+        }
+      }
+      continueNextItem = true;
+    }
+    if (continueNextItem || this.state == STATE.missingItem) {
+      if (!this.inputInventory.extractFilters()) {
+        this.state = STATE.missingItem;
+        this.nextUpdate = NEVER;
+        return;
+      }
+      for (let inputEntity of this.inputEntities) {
+        if (inputEntity.state == STATE.outputFull ||
+            inputEntity.state == STATE.itemReady) {
+          inputEntity.nextUpdate = this.nextUpdate;
+        }
+      }
+      this.state = STATE.running;
+      this.taskStart = this.nextUpdate;
+      this.nextUpdate = this.taskStart +
+          this.data.processingSpeed * this.data.recipe.duration;
     }
   }
 };
@@ -351,7 +396,8 @@ Entity.prototype.insert = function(item, amount, time) {
             outputEntity.nextUpdate = time;
           }
         }
-      } else if (this.type == TYPE.furnace
+      } else if ((this.type == TYPE.furnace ||
+          this.type == TYPE.assembler)
           && this.state == STATE.missingItem) {
         this.nextUpdate = time;
       }
@@ -403,7 +449,8 @@ Entity.prototype.extract = function(item, amount, time) {
             inputEntity.nextUpdate = time;
           }
         }
-      } else if (this.type == TYPE.furnace &&
+      } else if ((this.type == TYPE.furnace ||
+          this.type == TYPE.assembler) &&
           (this.state == STATE.outputFull ||
           this.state == STATE.itemReady)) {
         this.nextUpdate = time;
@@ -572,6 +619,39 @@ Entity.prototype.connectMine = function(other, time) {
   if (this.state == STATE.mineNoOutput) {
     this.state == STATE.itemReady;
     this.nextUpdate = time;
+  }
+};
+
+Entity.prototype.setRecipe = function(recipe, time) {
+  if (this.type != TYPE.assembler ||
+      this.data.recipe == recipe) return;
+  
+  this.inputInventory.items.length = 0;
+  this.inputInventory.amounts.length = 0;
+  this.outputInventory.items.length = 0;
+  this.outputInventory.amounts.length = 0;
+  if (!recipe) {
+    this.inputInventory.capacity = 0;
+    this.inputInventory.setFilters();
+    this.outputInventory.capacity = 0;
+    this.outputInventory.setFilters();
+  } else {
+    this.inputInventory.capacity = recipe.inputs.length;
+    this.inputInventory.setFilters(recipe.inputs);
+    this.outputInventory.capacity = recipe.outputs.length;
+    this.outputInventory.setFilters(recipe.outputs);
+  }
+  
+  this.data.recipe = recipe;
+  this.state = recipe ? STATE.missingItem : STATE.noRecipe;
+  this.nextUpdate = NEVER;
+  if (recipe) {
+    for (let inputEntity of this.inputEntities) {
+      if (inputEntity.state == STATE.outputFull ||
+          inputEntity.state == STATE.itemReady) {
+        inputEntity.nextUpdate = time;
+      }
+    }
   }
 };
 

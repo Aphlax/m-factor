@@ -3,6 +3,7 @@
 import {GameMap} from './game-map.js';
 import {SPRITES} from './sprite-pool.js';
 import {scenario} from './scenario.js';
+import {STATE} from './entity-properties.js';
 
 const MODE = {
   loading: 0,
@@ -21,13 +22,14 @@ function Game(canvas) {
 
 Game.prototype.update = function(time) {
   if (this.entity)
-    this.debug = this.entity.state + ", " +
-        this.entity.nextUpdate;
+    this.debug = Object.keys(STATE)
+        .filter(s => STATE[s] == this.entity.state)[0] +
+        ", " + this.entity.nextUpdate;
   if (this.mode == MODE.playing) {
     this.gameMap.update(time);
     if (this.setupScenario) {
       const s = scenario(this.gameMap, time);
-      this.entity = s.inserter;
+      this.entity = s.assembler;
       this.setupScenario = false;
     }
   } else if (this.mode == MODE.loading) {

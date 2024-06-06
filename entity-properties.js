@@ -6,6 +6,7 @@ export const TYPE = {
   belt: 3,
   inserter: 4,
   furnace: 5,
+  assembler: 6,
 };
 
 /** Never value for next update. */
@@ -22,6 +23,7 @@ export const STATE = {
   noOutput: 11, // Inserter or mine has no output (after item is ready to drop).
   inserterCoolDown: 12, // Inserter moving back to initial position.
   mineEmpty: 13,
+  noRecipe: 14,
 };
 
 export const DIRECTION = {

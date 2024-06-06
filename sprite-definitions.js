@@ -56,6 +56,8 @@ export const S = {
   transportBeltEndE: 71*16,
   stoneFurnaceFire: 72*16, // 48
   stoneFurnaceWorking: 75*16, // 48
+  assemblingMachine1: 78*16,
+  assemblingMachine1Shadow: 80*16,
   
   woodenChest: 1600,
   woodenChestShadow: 1601,
@@ -69,6 +71,7 @@ export const S = {
   stoneItem: 1000*16 + 3,
   ironPlateItem: 16000 + 4,
   copperPlateItem: 16000 + 5,
+  ironGearItem: 16000 + 6,
   
   smoke: 17000,
 };
@@ -247,6 +250,14 @@ export const SPRITES = [
     sprites: entitySprites(S.stoneFurnaceWorking, 80, 64, 8, 6, -6, 22, 0, 0),
   },
   {
+    path: "graphics/entities/assembling-machine-1/assembling-machine-1.png",
+    sprites: entitySprites(S.assemblingMachine1, 108, 114, 8, 4, 6, 6, 6, 12, true),
+  },
+  {
+    path: "graphics/entities/assembling-machine-1/assembling-machine-1-shadow.png",
+    sprites: entitySprites(S.assemblingMachine1Shadow, 95, 83, 8, 4, -6, 5, -13, 0, true),
+  },
+  {
     path: "graphics/items/iron-ore.png",
     sprites: itemSprites(S.ironOreItem),
   },
@@ -269,6 +280,10 @@ export const SPRITES = [
   {
     path: "graphics/items/copper-plate.png",
     sprites: itemSprites(S.copperPlateItem),
+  },
+  {
+    path: "graphics/items/iron-gear-wheel.png",
+    sprites: itemSprites(S.ironGearItem),
   },
   {
     path: "graphics/decoratives/smoke.png",

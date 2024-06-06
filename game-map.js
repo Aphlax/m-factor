@@ -40,6 +40,19 @@ GameMap.prototype.update = function(time) {
             entity.type == TYPE.belt) continue;
         entity.update(this, time);
       }
+      let expired = 0;
+      for (let i = 0; i < chunk.particles.length; i++) {
+        const p = chunk.particles[i];
+        if (p.startTime + p.duration < time) {
+          this.particles.push(p);
+          expired++;
+        } else if (expired) {
+          chunk.particles[i - expired] = p;
+        }
+      }
+      if (expired) {
+        chunk.particles.length -= expired;
+      }
     }
   }
   this.ui.update(time);
@@ -358,14 +371,12 @@ GameMap.prototype.createSmoke = function(x, y, time, duration) {
       p = {};
     }
     p.sprite = S.smoke;
-    p.xStart = x + 0.43 - 0.01 + 0.02 * Math.random();
+    p.xStart = x - 0.59;
     p.yStart = y - 0.2;
     p.xEnd = x + 1.5 + Math.random();
     p.yEnd = y - 4 - 1.5 * Math.random();
     p.sizeStart = 0.4 + 0.15 * Math.random();
     p.sizeEnd = 2 + Math.random();
-    p.rStart = Math.random() * Math.PI * 2;
-    p.rEnd = p.rStart - 0.2 * Math.random();
     p.startTime = time + i * duration / count;
     const d = (p.xEnd - p.xStart) ** 2 + (p.yEnd - p.yStart) ** 2;
     p.duration = (d + 25) / 55 * 4000;

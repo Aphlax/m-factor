@@ -1,4 +1,6 @@
 import {NAME} from './entity-definitions.js';
+import {I} from './item-definitions.js';
+import {RECIPES} from './recipe-definitions.js';
 
 export function scenario(gameMap, time) {
   return inserterTest(gameMap, time);
@@ -135,10 +137,19 @@ function inserterTest(gameMap, time) {
       0, 6, 0, time);
   gameMap.createEntity(NAME.stoneFurnace,
       -2, 6, 0, time);
-  gameMap.createEntity(NAME.stoneFurnace,
+  const f = gameMap.createEntity(NAME.stoneFurnace,
       -4, 6, 0, time);
-  s.inserter = gameMap.createEntity(NAME.inserter,
+  f.outputInventory.insert(I.ironPlate, 100);
+  gameMap.createEntity(NAME.inserter,
       1, 8, 2, time);
+  gameMap.createEntity(NAME.inserter,
+      -3, 8, 2, time);
+  
+  s.assembler = gameMap.createEntity(NAME.assemblingMachine1,
+      -6, 11, 0, time);
+  s.inserter = gameMap.createEntity(NAME.inserter,
+      -5, 10, 2, time);
+  s.assembler.setRecipe(RECIPES[2], time);
   
   return s;
 }
