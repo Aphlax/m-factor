@@ -1,7 +1,7 @@
 import {Inventory} from './inventory.js';
 import {S, SPRITES} from './sprite-pool.js';
 import {ENTITIES} from './entity-definitions.js';
-import {TYPE, MAX_SIZE, NEVER, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND} from './entity-properties.js';
+import {TYPE, MAX_SIZE, NEVER, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS} from './entity-properties.js';
 import {RECIPES, FURNACE_FILTERS} from './recipe-definitions.js';
 import * as entityLogic from './entity-logic.js';
 import * as entityDrawing from './entity-drawing.js';
@@ -9,6 +9,7 @@ import * as entityDrawing from './entity-drawing.js';
 Object.assign(Entity.prototype, entityLogic);
 Object.assign(Entity.prototype, entityDrawing);
 function Entity() {
+  this.name = 0;
   this.type = 0;
   this.label = undefined;
   this.x = 0;
@@ -21,6 +22,7 @@ function Entity() {
   this.animation = 0;
   this.animationLength = 0;
   this.animationSpeed = 0;
+  this.spriteShadowAnimation = true;
   
   this.taskStart = 0;
   this.taskDuration = 0;
@@ -37,6 +39,7 @@ function Entity() {
 
 Entity.prototype.setup = function(name, x, y, direction, time) {
   const def = ENTITIES.get(name);
+  this.name = name;
   this.type = def.type;
   this.label = def.label;
   this.x = x;
@@ -49,6 +52,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   this.animation = 0;
   this.animationLength = def.animationLength;
   this.animationSpeed = def.animationSpeed ?? 1;
+  this.spriteShadowAnimation = !def.noShadowAnimation;
   this.inputEntities.length = 0;
   this.outputEntities.length = 0;
   
@@ -104,6 +108,11 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   } else if (this.type == TYPE.chest) {
     this.inputInventory = this.outputInventory =
         new Inventory(def.capacity);
+  } else if (this.type == TYPE.lab) {
+    this.state = STATE.missingItem;
+    this.nextUpdate = NEVER;
+    this.inputInventory = new Inventory(1)
+        .setFilters(LAB_FILTERS);
   }
   return this;
 };
@@ -306,7 +315,7 @@ Entity.prototype.update = function(gameMap, time) {
       if (!this.data.recipe ||
           this.data.recipe.inputs[0].item != item) {
         this.data.recipe = RECIPES.filter(r =>
-             r.entity == TYPE.furnace &&
+             r.entities.includes(this.name) &&
              r.inputs[0].item == item)[0];
       }
       if (!this.data.recipe) {
@@ -382,6 +391,22 @@ Entity.prototype.update = function(gameMap, time) {
       this.taskStart = this.nextUpdate;
       this.nextUpdate = this.taskStart +
           this.data.processingSpeed * this.data.recipe.duration;
+      return;
+    }
+  } else if (this.type == TYPE.lab) {
+    if (this.state == STATE.running ||
+        this.state == STATE.missingItem) {
+      this.animation = Math.floor(this.animation +
+          (time - this.taskStart) * this.animationSpeed / 60) %
+          this.animationLength;
+      if (!this.inputInventory.extractFilters()) {
+        this.state = STATE.missingItem;
+        this.nextUpdate = NEVER;
+        return;
+      }
+      this.state = STATE.running;
+      this.taskStart = this.nextUpdate;
+      this.nextUpdate = this.taskStart + 10000;
     }
   }
 };
@@ -396,9 +421,7 @@ Entity.prototype.insert = function(item, amount, time) {
             outputEntity.nextUpdate = time;
           }
         }
-      } else if ((this.type == TYPE.furnace ||
-          this.type == TYPE.assembler)
-          && this.state == STATE.missingItem) {
+      } else if (this.state == STATE.missingItem) {
         this.nextUpdate = time;
       }
     }
@@ -449,10 +472,8 @@ Entity.prototype.extract = function(item, amount, time) {
             inputEntity.nextUpdate = time;
           }
         }
-      } else if ((this.type == TYPE.furnace ||
-          this.type == TYPE.assembler) &&
-          (this.state == STATE.outputFull ||
-          this.state == STATE.itemReady)) {
+      } else if (this.state == STATE.outputFull ||
+          this.state == STATE.itemReady) {
         this.nextUpdate = time;
       }
     }

@@ -29,7 +29,7 @@ Game.prototype.update = function(time) {
     this.gameMap.update(time);
     if (this.setupScenario) {
       const s = scenario(this.gameMap, time);
-      this.entity = s.assembler;
+      this.entity = s.lab;
       this.setupScenario = false;
     }
   } else if (this.mode == MODE.loading) {

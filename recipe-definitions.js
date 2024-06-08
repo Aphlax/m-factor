@@ -1,5 +1,5 @@
 import {I} from './item-definitions.js';
-import {TYPE} from './entity-properties.js';
+import {NAME} from './entity-definitions.js';
 
 export const RECIPES = [
   {
@@ -9,7 +9,7 @@ export const RECIPES = [
     outputs: [
       {item: I.ironPlate, amount: 1},
     ],
-    entity: TYPE.furnace,
+    entities: [NAME.stoneFurnace],
     duration: 3200,
   },
   {
@@ -19,7 +19,7 @@ export const RECIPES = [
     outputs: [
       {item: I.copperPlate, amount: 1},
     ],
-    entity: TYPE.furnace,
+    entities: [NAME.stoneFurnace],
     duration: 3200,
   },
   {
@@ -29,12 +29,23 @@ export const RECIPES = [
     outputs: [
       {item: I.ironGear, amount: 1},
     ],
-    entity: TYPE.assembler,
+    entities: [NAME.assemblingMachine1],
     duration: 500,
+  },
+  {
+    inputs: [
+      {item: I.ironGear, amount: 1},
+      {item: I.copperPlate, amount: 1},
+    ],
+    outputs: [
+      {item: I.redScience, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 5000,
   },
 ];
 
 export const FURNACE_FILTERS = RECIPES
-    .filter(r => r.entity == TYPE.furnace)
+    .filter(r => r.entities.includes(NAME.stoneFurnace))
     .map(r => r.inputs[0])
     .sort((a, b) => b - a);

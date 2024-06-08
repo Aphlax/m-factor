@@ -68,6 +68,10 @@ function inserterTest(gameMap, time) {
     [3, 5, 3],
     
     [7, 11, 3, 8],
+    
+    [-16, -8, 2, 20],
+    [-11, 6, 2, 7],
+    [-11, 13, 1, 3]
   ].map(([x, y, d, l]) => [x - 5, y - 2, d, l ?? 1]);
   belts.forEach(b => createLane(gameMap, ...b, time));
   
@@ -149,7 +153,51 @@ function inserterTest(gameMap, time) {
       -6, 11, 0, time);
   s.inserter = gameMap.createEntity(NAME.inserter,
       -5, 10, 2, time);
+  s.inserter = gameMap.createEntity(NAME.inserter,
+      -4, 10, 2, time);
   s.assembler.setRecipe(RECIPES[2], time);
+  gameMap.createEntity(NAME.inserter,
+      -7, 12, 3, time);
+  createLane(gameMap, -8, 12, 2, 2, time);
+ 
+  gameMap.createEntity(NAME.burnerDrill, -23, -7, 1, time);
+  gameMap.createEntity(NAME.burnerDrill, -23, -9, 1, time);
+  gameMap.createEntity(NAME.burnerDrill, -23, -4, 1, time);
+  gameMap.createEntity(NAME.burnerDrill, -22, -12, 2, time);
+  gameMap.createEntity(NAME.stoneFurnace,
+      -19, 4, 0, time);
+  gameMap.createEntity(NAME.stoneFurnace,
+      -19, 7, 0, time);
+  gameMap.createEntity(NAME.stoneFurnace,
+      -19, 9, 0, time);
+  gameMap.createEntity(NAME.inserter,
+      -20, 4, 1, time);
+  gameMap.createEntity(NAME.inserter,
+      -20, 8, 1, time);
+  gameMap.createEntity(NAME.inserter,
+      -17, 4, 1, time);
+  gameMap.createEntity(NAME.inserter,
+      -17, 7, 1, time);
+  gameMap.createEntity(NAME.inserter,
+      -20, 9, 1, time);
+  gameMap.createEntity(NAME.inserter,
+      -17, 9, 1, time);
+  
+  gameMap.createEntity(NAME.assemblingMachine1,
+      -12, 11, 0, time).setRecipe(RECIPES[3], time);
+  gameMap.createEntity(NAME.inserter,
+      -9, 13, 3, time);
+  gameMap.createEntity(NAME.inserter,
+      -13, 11, 1, time);
+  gameMap.createEntity(NAME.inserter,
+      -11, 14, 2, time);
+  createLane(gameMap, -11, 15, 2, 2, time);
+  gameMap.createEntity(NAME.inserter,
+      -11, 17, 2, time);
+  s.lab = gameMap.createEntity(NAME.lab,
+      -12, 18, 0, time);
+  
+  
   
   return s;
 }

@@ -105,7 +105,8 @@ GameUi.prototype.drawEntityUi = function(ctx, entity, x, y, width, height) {
   ctx.fillText(entity.label, 8, y + 17);
   if (entity.type == TYPE.mine) {
     
-  } else if (entity.type == TYPE.chest) {
+  } else if (entity.type == TYPE.chest ||
+      entity.type == TYPE.lab) {
     this.drawInventory(ctx, entity.inputInventory,
         x + 16, y + 40, width - 32, height - 64);
   } else if (entity.type == TYPE.furnace ||

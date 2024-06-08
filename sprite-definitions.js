@@ -2,16 +2,16 @@
 
 export const S = {
   dirt1: 0,
-  dirt2: 16,
-  dirt3: 32,
-  dirt4: 48,
-  dirt5: 64,
-  dirt6: 80,
-  dirt7: 96,
-  dryDirt: 112,
-  grass1: 128,
-  grass2: 144,
-  grass3: 160,
+  dirt2: 1*16,
+  dirt3: 2*16,
+  dirt4: 3*16,
+  dirt5: 4*16,
+  dirt6: 5*16,
+  dirt7: 6*16,
+  dryDirt: 7*16,
+  grass1: 8*16,
+  grass2: 9*16,
+  grass3: 10*16,
   grass4: 11*16,
   sand1: 12*16,
   sand2: 13*16,
@@ -59,11 +59,14 @@ export const S = {
   assemblingMachine1: 78*16,
   assemblingMachine1Shadow: 80*16,
   
+  
   woodenChest: 1600,
   woodenChestShadow: 1601,
   inserter: 1602,
   inserterHand: 1606,
   stoneFurnace: 1609,
+  lab: 1610,
+  labShadow: 1643,
   
   ironOreItem: 1000*16,
   copperOreItem: 1000*16 + 1,
@@ -72,6 +75,7 @@ export const S = {
   ironPlateItem: 16000 + 4,
   copperPlateItem: 16000 + 5,
   ironGearItem: 16000 + 6,
+  redScienceItem: 16000 + 7,
   
   smoke: 17000,
 };
@@ -258,6 +262,14 @@ export const SPRITES = [
     sprites: entitySprites(S.assemblingMachine1Shadow, 95, 83, 8, 4, -6, 5, -13, 0, true),
   },
   {
+    path: "graphics/entities/lab/lab.png",
+    sprites: entitySprites(S.lab, 98, 87, 11, 3, 1, 1, -6, -3, true),
+  },
+  {
+    path: "graphics/entities/lab/lab-shadow.png",
+    sprites: entitySprites(S.labShadow, 122, 68, 1, 1, 1, 25, -25, -3, true),
+  },
+  {
     path: "graphics/items/iron-ore.png",
     sprites: itemSprites(S.ironOreItem),
   },
@@ -284,6 +296,10 @@ export const SPRITES = [
   {
     path: "graphics/items/iron-gear-wheel.png",
     sprites: itemSprites(S.ironGearItem),
+  },
+  {
+    path: "graphics/items/automation-science-pack.png",
+    sprites: itemSprites(S.redScienceItem),
   },
   {
     path: "graphics/decoratives/smoke.png",

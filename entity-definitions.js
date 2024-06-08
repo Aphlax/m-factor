@@ -131,4 +131,19 @@ export const ENTITIES = new Map([
     
     processingSpeed: 2,
   }],
+  [NAME.lab,
+  {
+    label: "Wind up lab",
+    type: TYPE.lab,
+    width: 3,
+    height: 3,
+    sprites: {
+      [DIRECTION.north]: [S.lab, S.labShadow],
+      [DIRECTION.east]: [S.lab, S.labShadow],
+      [DIRECTION.south]: [S.lab, S.labShadow],
+      [DIRECTION.west]: [S.lab, S.labShadow],
+    },
+    animationLength: 33,
+    noShadowAnimation: true,
+  }],
 ]);

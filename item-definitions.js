@@ -8,6 +8,7 @@ export const I = {
   ironPlate: 5,
   copperPlate: 6,
   ironGear: 7,
+  redScience: 8,
 };
 
 export const ITEMS = new Map([
@@ -45,5 +46,10 @@ export const ITEMS = new Map([
   {
     sprite: S.ironGearItem,
     stackSize: 100,
+  }],
+  [I.redScience,
+  {
+    sprite: S.redScienceItem,
+    stackSize: 200,
   }],
 ]);

@@ -47,9 +47,9 @@ SpritePool.prototype.draw = function(ctx, time) {
   if (this.current == this.total) {
     ctx.fillStyle = "lightgrey";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    let sprite = S.assemblingMachine1;
-    let shadow = S.assemblingMachine1Shadow;
-    let size = [96, 96], xlen = 8, ylen = 4;
+    let sprite = S.lab;
+    let shadow = S.labShadow;
+    let size = [96, 96], xlen = 11, ylen = 3;
     for (let i = 0; i < xlen; i++) {
       for (let j = 0; j < ylen; j++) {
         let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(sprite+i*ylen+j)};
@@ -58,7 +58,7 @@ SpritePool.prototype.draw = function(ctx, time) {
         let xScale = rect[2] / (s.width - s.left - s.right);
         let yScale = rect[3] / (s.height - s.top - s.bottom);
         if (shadow) {
-          let ss = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(shadow+i*ylen+j)};
+          let ss = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(shadow/*+i*ylen+j*/)};
           let sxScale = rect[2] / (ss.width - ss.left - ss.right);
           let syScale = rect[3] / (ss.height - ss.top - ss.bottom);
           ctx.strokeStyle="blue";
@@ -91,14 +91,14 @@ SpritePool.prototype.draw = function(ctx, time) {
     }
     
     //return;
-    let a = 8*4;
+    let a = xlen*ylen;
     
     let s = this.get(sprite + (Math.floor(time / 120) % a));
     if(!s) return;
     let r = s.rect;
     let rect = [10, 570, ...size];
     if (shadow) {
-      let ss = this.get(shadow + (Math.floor(time / 60) % a));
+      let ss = this.get(shadow /*+ (Math.floor(time / 60) % a)*/);
       let rs = ss.rect;
       let sxScale = rect[2] / (ss.width - (ss.left ?? 0) - (ss.right ?? 0));
       let syScale = rect[3] / (ss.height - (ss.top ?? 0) - (ss.bottom ?? 0));

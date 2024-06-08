@@ -7,6 +7,7 @@ export const TYPE = {
   inserter: 4,
   furnace: 5,
   assembler: 6,
+  lab: 7,
 };
 
 /** Never value for next update. */
@@ -75,6 +76,10 @@ export const INSERTER_PICKUP_BEND = {
   [DIRECTION.south]: 0,
   [DIRECTION.west]: 0.22 * 0.9,
 };
+
+export const LAB_FILTERS = [
+  {item: I.redScience, amount: 1},
+];
 
 export function rectOverlap(x, y, width, height, entity) {
   return x + width > entity.x && x < entity.x + entity.width &&

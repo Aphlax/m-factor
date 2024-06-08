@@ -46,8 +46,8 @@ export function drawShadow(ctx, view, time) {
     return;
   if (this.y * view.scale > view.y + view.height)
     return;
-  let animation = this.animation;
-  if (this.animationLength && this.state == STATE.running) {
+  let animation = this.spriteShadowAnimation ? this.animation : 0;
+  if (this.animationLength && this.state == STATE.running && this.spriteShadowAnimation) {
     animation = Math.floor(animation +
         (time - this.taskStart) * this.animationSpeed / 60) %
         this.animationLength;
