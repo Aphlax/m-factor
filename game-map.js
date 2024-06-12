@@ -135,6 +135,11 @@ GameMap.prototype.draw = function(ctx, time) {
       for (let entity of chunk.entities) {
         if (entity.type != TYPE.belt) {
           entity.draw(ctx, this.view, time);
+          if ((entity.type == TYPE.furnace ||
+              entity.type == TYPE.assembler) &&
+              entity.data.recipe) {
+            entity.drawRecipe(ctx, this.view, entity.data.recipe);
+          }
         }
       }
     }
@@ -162,9 +167,9 @@ GameMap.prototype.draw = function(ctx, time) {
     }
   }
   if (this.selectedEntity) {
-    this.ui.drawSelection(ctx, this.view, this.selectedEntity);
+    Entity.prototype.drawSelection.call(this.selectedEntity, ctx, this.view);
     if (this.selectedEntity.type) {
-      this.selectedEntity.drawIO(ctx, this.view, time);
+      this.selectedEntity.drawIO(ctx, this.view);
     }
   }
   this.ui.draw(ctx, time);

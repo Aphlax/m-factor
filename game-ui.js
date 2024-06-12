@@ -11,8 +11,6 @@ const COLOR = {
   border1: "#282830",
   border2: "#555565",
   primary: "#FFFBF8",
-  yellowHighlight: "#EEEE00",
-  yellowHighlightBorder: "#FFAA00",
 };
 
 function GameUi(gameMap) {
@@ -26,38 +24,6 @@ GameUi.prototype.update = function(time) {
     this.extended = !!this.gameMap.selectedEntity;
     this.animationEnd = time + 100;
   }
-}
-
-GameUi.prototype.drawSelection = function(ctx, view, selection) {
-  const x = selection.x * view.scale - view.x;
-  const width = (selection.width ?? 1) * view.scale;
-  const y = selection.y * view.scale - view.y;
-  const height = (selection.height ?? 1) * view.scale;
-  if (x + width <= -2 || x > view.width + 2 ||
-      y + height <= -2 || y > view.height + 2)
-    return;
-  const d = 0.3 * view.scale;
-  ctx.beginPath();
-  ctx.moveTo(x, y + d);
-  ctx.lineTo(x, y);
-  ctx.lineTo(x + d, y);
-  ctx.moveTo(x + width, y + d);
-  ctx.lineTo(x + width, y);
-  ctx.lineTo(x + width - d, y);
-  ctx.moveTo(x, y + height - d);
-  ctx.lineTo(x, y + height);
-  ctx.lineTo(x + d, y + height);
-  ctx.moveTo(x + width, y + height - d);
-  ctx.lineTo(x + width, y + height);
-  ctx.lineTo(x + width - d, y + height);
-  ctx.lineJoin = "round";
-  ctx.lineCap = "round";
-  ctx.strokeStyle = COLOR.yellowHighlightBorder;
-  ctx.lineWidth = 4;
-  ctx.stroke();
-  ctx.strokeStyle = COLOR.yellowHighlight;
-  ctx.lineWidth = 2;
-  ctx.stroke();
 }
 
 GameUi.prototype.draw = function(ctx, time) {

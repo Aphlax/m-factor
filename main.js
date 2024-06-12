@@ -3,12 +3,11 @@
  */
 import {Game} from "./game.js";
 
-var STOP = false;
-
 (function() {
   "use strict";
   let canvas, ctx, game;
   let lastFrame, nextFps, frameCount, frameRate;
+  let updateTime, drawTime;
   window.onload = onload;
 
   function onload() {
@@ -24,6 +23,7 @@ var STOP = false;
 
     nextFps = lastFrame = performance.now();
     frameCount = frameRate = 0;
+    updateTime = drawTime = 0;
     window.requestAnimationFrame(loop);
   }
 
@@ -36,9 +36,15 @@ var STOP = false;
   	nextFps = time + 500;
     }
     
+    const timestampStart = performance.now();
     game.update(time);
+    const timestampUpdate = performance.now();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     game.draw(ctx, time);
+    const timestampDraw = performance.now();
+    updateTime = (timestampUpdate - timestampStart) / 11.11 * 0.4 + updateTime * 0.6;
+    drawTime = (timestampDraw - timestampUpdate) / 11.11 * 0.4 + drawTime * 0.6;
+    
     ctx.font = "24px Arial";
     ctx.fillStyle = "black";
     ctx.textBaseline = "alphabetic";
@@ -49,7 +55,23 @@ var STOP = false;
       ctx.fillText(game.debug, 4, 28);
     }
     
-    if (!window.STOP)
-      window.requestAnimationFrame(loop);
+    ctx.beginPath();
+    ctx.arc(20, 50, 15, 0, 2 * Math.PI, false);
+    ctx.fillStyle = "lightgray";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(20, 50);
+    ctx.arc(20, 50, 15, 0, 2 * Math.PI * updateTime, false);
+    ctx.lineTo(20, 50);
+    ctx.fillStyle = "green";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(20, 50);
+    ctx.arc(20, 50, 15, 2 * Math.PI * updateTime, 2 * Math.PI * (drawTime + updateTime), false);
+    ctx.lineTo(20, 50);
+    ctx.fillStyle = "orange";
+    ctx.fill();
+    
+    window.requestAnimationFrame(loop);
   }
 })();

@@ -5,10 +5,12 @@ import {ITEMS} from './item-definitions.js';
 const COLOR = {
   greenHighlight: "#33EE00",
   greenHighlightBorder: "#44AA00",
+  yellowHighlight: "#EEEE00",
+  yellowHighlightBorder: "#FFAA00",
 };
 
 export function draw(ctx, view, time) {
-  if ((this.x + this.width) * view.scale <= view.x)
+  if ((this.x + this.width + 1) * view.scale <= view.x)
     return;
   if (this.x * view.scale > view.x + view.width)
     return;
@@ -68,7 +70,7 @@ export function drawShadow(ctx, view, time) {
 };
 
 export function drawBelt(ctx, view, time) {
-  if ((this.x + this.width) * view.scale <= view.x)
+  if ((this.x + this.width + 0.1) * view.scale <= view.x)
     return;
   if (this.x * view.scale > view.x + view.width)
     return;
@@ -200,7 +202,40 @@ export function drawInserterHand(ctx, view, time) {
   ctx.setTransform();
 }
 
-export function drawIO(ctx, view, time) {
+
+export function drawSelection(ctx, view) {
+  const x = this.x * view.scale - view.x;
+  const width = (this.width ?? 1) * view.scale;
+  const y = this.y * view.scale - view.y;
+  const height = (this.height ?? 1) * view.scale;
+  if (x + width <= -2 || x > view.width + 2 ||
+      y + height <= -2 || y > view.height + 2)
+    return;
+  const d = 0.3 * view.scale;
+  ctx.beginPath();
+  ctx.moveTo(x, y + d);
+  ctx.lineTo(x, y);
+  ctx.lineTo(x + d, y);
+  ctx.moveTo(x + width, y + d);
+  ctx.lineTo(x + width, y);
+  ctx.lineTo(x + width - d, y);
+  ctx.moveTo(x, y + height - d);
+  ctx.lineTo(x, y + height);
+  ctx.lineTo(x + d, y + height);
+  ctx.moveTo(x + width, y + height - d);
+  ctx.lineTo(x + width, y + height);
+  ctx.lineTo(x + width - d, y + height);
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+  ctx.strokeStyle = COLOR.yellowHighlightBorder;
+  ctx.lineWidth = 4;
+  ctx.stroke();
+  ctx.strokeStyle = COLOR.yellowHighlight;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+export function drawIO(ctx, view) {
   const s = view.scale * 0.25;
   for (let entity of this.inputEntities) {
     const direction = this.type == TYPE.inserter ?
@@ -208,8 +243,19 @@ export function drawIO(ctx, view, time) {
     const dx = -s * ((direction - 2) % 2),
       dy = s * ((direction - 1) % 2),
       px = -dy, py = dx; // Perpendicular vector.
-    const x = (entity.x + 0.5) * view.scale - view.x + dx * 0.75,
-          y = (entity.y + 0.5) * view.scale - view.y + dy * 0.75;
+    let x = entity.x, y = entity.y;
+    for (let i = 1; i < entity.width; i++) {
+      if (Math.abs(entity.x + i - this.x) < Math.abs(x - this.x)) {
+        x = entity.x + i;
+      }
+    }
+    for (let i = 1; i < entity.height; i++) {
+      if (Math.abs(entity.y + i - this.y) < Math.abs(y - this.y)) {
+        y = entity.y + i;
+      }
+    }
+    x = (x + 0.5) * view.scale - view.x + dx * 0.75;
+    y = (y + 0.5) * view.scale - view.y + dy * 0.75;
     ctx.beginPath();
     ctx.moveTo(x + px + dx * 0.75, y + py + dy * 0.75);
     ctx.lineTo(x + dx * 1.25, y + dy * 1.25);
@@ -233,8 +279,19 @@ export function drawIO(ctx, view, time) {
     const dx = -s * ((direction - 2) % 2),
       dy = s * ((direction - 1) % 2),
       px = -dy, py = dx; // Perpendicular vector.
-    const x = (entity.x + 0.5) * view.scale - view.x - 1.75 * dx,
-          y = (entity.y + 0.5) * view.scale - view.y - 1.75 * dy;
+    let x = entity.x, y = entity.y;
+    for (let i = 1; i < entity.width; i++) {
+      if (Math.abs(entity.x + i - this.x) < Math.abs(x - this.x)) {
+        x = entity.x + i;
+      }
+    }
+    for (let i = 1; i < entity.height; i++) {
+      if (Math.abs(entity.y + i - this.y) < Math.abs(y - this.y)) {
+        y = entity.y + i;
+      }
+    }
+    x = (x + 0.5) * view.scale - view.x - 1.75 * dx;
+    y = (y + 0.5) * view.scale - view.y - 1.75 * dy;
     ctx.beginPath();
     ctx.moveTo(x + px, y + py);
     ctx.lineTo(x + dx * 0.5, y + dy * 0.5);
@@ -246,4 +303,21 @@ export function drawIO(ctx, view, time) {
     ctx.lineWidth = 2;
     ctx.stroke();
   }
+}
+
+export function drawRecipe(ctx, view, recipe) {
+  const itemDef = ITEMS.get(recipe.outputs[0].item);
+  const sprite = SPRITES.get(itemDef.sprite);
+  const x = this.x * view.scale - view.x;
+  const width = this.width * view.scale;
+  const y = this.y * view.scale - view.y;
+  const height = this.height * view.scale;
+  ctx.shadowColor = "#000000";
+  ctx.shadowBlur = 8;
+  ctx.drawImage(sprite.image,
+      sprite.x, sprite.y,
+      sprite.width, sprite.height,
+      x + width / 2 - 16, y + height / 2 - 16, 32, 32);
+  ctx.shadowColor = undefined;
+  ctx.shadowBlur = 0;
 }

@@ -94,6 +94,11 @@ Chunk.prototype.drawParticles = function(ctx, view, time) {
         (time - p.startTime) * p.animationSpeed / 60) %
         p.animationLength;
     const sprite = SPRITES.get(p.sprite + animation);
+    if ((x + sprite.width * size) * view.scale <= view.x) continue;
+    if (x * view.scale > view.x + view.width) continue;
+    if ((y + sprite.height * size) * view.scale <= view.y) continue;
+    if (y * view.scale > view.y + view.height) continue;
+    
     ctx.globalAlpha = Math.min((time - p.startTime) / 200,
         (1 - e) * p.alphaStart + e * p.alphaEnd);
     ctx.drawImage(

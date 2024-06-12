@@ -396,12 +396,15 @@ Entity.prototype.update = function(gameMap, time) {
   } else if (this.type == TYPE.lab) {
     if (this.state == STATE.running ||
         this.state == STATE.missingItem) {
-      this.animation = Math.floor(this.animation +
-          (time - this.taskStart) * this.animationSpeed / 60) %
-          this.animationLength;
+      if (this.state == STATE.running) {
+        this.animation = Math.floor(this.animation +
+            (time - this.taskStart) * this.animationSpeed / 60) %
+            this.animationLength;
+      }
       if (!this.inputInventory.extractFilters()) {
         this.state = STATE.missingItem;
         this.nextUpdate = NEVER;
+        this.animation = 0;
         return;
       }
       this.state = STATE.running;
@@ -455,6 +458,12 @@ Entity.prototype.beltInsert = function(item, time, positionForBelt) {
 Entity.prototype.insertWants = function() {
   if (this.type == TYPE.belt) {
     return -1;
+  } else if (this.type == TYPE.assembler) {
+    const wants = this.outputInventory.insertWants();
+    if (wants != -1 && !wants.length) {
+      return wants;
+    }
+    return this.inputInventory.insertWants();
   } else if (this.inputInventory) {
     return this.inputInventory.insertWants();
   }
@@ -465,14 +474,16 @@ Entity.prototype.extract = function(item, amount, time) {
   if (this.outputInventory) {
     const count = this.outputInventory.extract(item, amount);
     if (count) {
-      if (this.type == TYPE.chest) {
+      if (this.type == TYPE.chest ||
+          this.type == TYPE.assembler) {
         for (let inputEntity of this.inputEntities) {
           if (inputEntity.state == STATE.outputFull ||
               inputEntity.state == STATE.itemReady) {
             inputEntity.nextUpdate = time;
           }
         }
-      } else if (this.state == STATE.outputFull ||
+      }
+      if (this.state == STATE.outputFull ||
           this.state == STATE.itemReady) {
         this.nextUpdate = time;
       }
