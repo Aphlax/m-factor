@@ -7,6 +7,11 @@ export function scenario(gameMap, time) {
 }
 
 function inserterTest(gameMap, time) {
+  gameMap.generateChunk(0, 0);
+  gameMap.generateChunk(0, -1);
+  gameMap.generateChunk(-1, 0);
+  gameMap.generateChunk(-1, -1);
+  
   const s = {};
   gameMap.createEntity(NAME.burnerDrill, 6, 0, 3, time);
   s.chest = gameMap.createEntity(NAME.woodenChest, -18, -9, 0, time);
@@ -148,6 +153,10 @@ function inserterTest(gameMap, time) {
       1, 8, 2, time);
   gameMap.createEntity(NAME.inserter,
       -3, 8, 2, time);
+  gameMap.createEntity(NAME.inserter,
+      -2, 5, 2, time);
+  gameMap.createEntity(NAME.inserter,
+      0, 4, 3, time);
   
   s.assembler = gameMap.createEntity(NAME.assemblingMachine1,
       -6, 11, 0, time);

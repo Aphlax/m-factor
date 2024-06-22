@@ -1,7 +1,6 @@
 import {MapGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {GameMapInput} from './game-map-input.js';
-import {GameUi} from './game-ui.js';
 import {S} from './sprite-definitions.js';
 import {TYPE, MAX_SIZE, rectOverlap} from './entity-properties.js';
 import {Entity} from './entity.js';
@@ -18,10 +17,8 @@ function GameMap(game, canvas) {
     scale: 24,
   };
   this.input = new GameMapInput(this, this.view);
-  this.ui = new GameUi(this);
   this.chunks = new Map(); // 2-D map of coordinate -> chunk
   this.transportNetwork = new TransportNetwork(this);
-  this.selectedEntity = undefined;
   this.particles = []; // Expired particles.
 }
 
@@ -55,7 +52,6 @@ GameMap.prototype.update = function(time) {
       }
     }
   }
-  this.ui.update(time);
   
   // Generate missing chunks.
   const size = SIZE * this.view.scale;
@@ -63,16 +59,7 @@ GameMap.prototype.update = function(time) {
       viewY = Math.floor(this.view.y / size);
   for (let x = 0; x <= Math.ceil(this.view.width / size); x++) {
 	for (let y = 0; y <= Math.ceil(this.view.height / size); y++) {
-      const cx = viewX + x;
-      const cy = viewY + y;
-      if (!this.chunks.has(cx)) {
-        this.chunks.set(cx, new Map());
-      }
-      if (!this.chunks.get(cx).has(cy)) {
-        this.chunks.get(cx).set(cy,
-            new Chunk(cx, cy)
-                .generate(this.mapGenerator));
-      }
+      this.generateChunk(viewX + x, viewY + y);
     }
   }
   this.input.update(time);
@@ -158,21 +145,14 @@ GameMap.prototype.draw = function(ctx, time) {
     }
   }
   for (let [x, chunks] of this.chunks.entries()) {
-    if ((x + 1) * size <= this.view.x - this.view.scale * MAX_SIZE) continue;
+    if ((x + 1) * size <= this.view.x - this.view.scale * 7) continue;
     if (x * size > this.view.width + this.view.x) continue;
     for (let [y, chunk] of chunks.entries()) {
-  	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
-      if (y * size > this.view.height + this.view.y) continue;
+  	if ((y + 1) * size <= this.view.y - this.view.scale * 7) continue;
+      if (y * size > this.view.height + this.view.y + this.view.scale * 7) continue;
       chunk.drawParticles(ctx, this.view, time);
     }
   }
-  if (this.selectedEntity) {
-    Entity.prototype.drawSelection.call(this.selectedEntity, ctx, this.view);
-    if (this.selectedEntity.type) {
-      this.selectedEntity.drawIO(ctx, this.view);
-    }
-  }
-  this.ui.draw(ctx, time);
 };
 
 GameMap.prototype.createEntity = function(name, x, y, direction, time) {
@@ -190,7 +170,6 @@ GameMap.prototype.createEntity = function(name, x, y, direction, time) {
   const i = entities.findIndex(e => e.y >= y && (e.y > y || e.x > x));
   entities.splice(i, 0, entity);
   
-  // TODO: check if connected machines were blocked & unblock them, use time
   return entity;
 }
 
@@ -300,7 +279,7 @@ GameMap.prototype.connectEntity = function(entity, time) {
   if (entity.type == TYPE.belt) {
     this.transportNetwork.addBelt(entity);
   }
-}
+};
 
 GameMap.prototype.disconnectEntity = function(entity) {
   entity.inputEntities.forEach(other =>
@@ -327,7 +306,18 @@ GameMap.prototype.disconnectEntity = function(entity) {
       }
     }
   }
-}
+};
+
+GameMap.prototype.generateChunk = function(cx, cy) {
+  if (!this.chunks.has(cx)) {
+    this.chunks.set(cx, new Map());
+  }
+  if (!this.chunks.get(cx).has(cy)) {
+    this.chunks.get(cx).set(cy,
+        new Chunk(cx, cy)
+            .generate(this.mapGenerator));
+  }
+};
 
 GameMap.prototype.getTerrainAt = function(x, y) {
   const cx = Math.floor(x / SIZE);
@@ -336,7 +326,7 @@ GameMap.prototype.getTerrainAt = function(x, y) {
   if (!this.chunks.get(cx).has(cy)) return;
   const chunk = this.chunks.get(cx).get(cy);
   return chunk.tiles[x - cx][y - cy];
-}
+};
 
 GameMap.prototype.getResourceAt = function(x, y, remove) {
   const cx = Math.floor(x / SIZE);
@@ -351,15 +341,14 @@ GameMap.prototype.getResourceAt = function(x, y, remove) {
     return res;
   }
   return chunk.resources[x - cx * SIZE][y - cy * SIZE];
-}
+};
 
-GameMap.prototype.selectEntity = function(screenX, screenY) {
+GameMap.prototype.getSelectedEntity = function(screenX, screenY) {
   const x = (this.view.x + screenX) / this.view.scale;
   const y = (this.view.y + screenY) / this.view.scale;
-  this.selectedEntity = this.getEntityAt(x, y);
-  if (this.selectedEntity) return;
-  this.selectedEntity = this.getResourceAt(Math.floor(x), Math.floor(y));
-}
+  return this.getEntityAt(x, y) ||
+      this.getResourceAt(Math.floor(x), Math.floor(y));
+};
 
 GameMap.prototype.createSmoke = function(x, y, time, duration) {
   const cx = Math.floor(x / SIZE);

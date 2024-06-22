@@ -1,6 +1,7 @@
 "use strict";
 
 import {GameMap} from './game-map.js';
+import {GameUi} from './game-ui.js';
 import {SPRITES} from './sprite-pool.js';
 import {scenario} from './scenario.js';
 import {STATE} from './entity-properties.js';
@@ -13,10 +14,12 @@ const MODE = {
 function Game(canvas) {
   this.seed = 114;
   this.mode = MODE.loading;
-  this.gameMap = new GameMap(this, canvas);
   this.spritePool = SPRITES;
-  this.gameMap.initialize(this.seed);
   this.spritePool.load();
+  this.gameMap = new GameMap(this, canvas);
+  this.gameMap.initialize(this.seed);
+  this.ui = new GameUi(this, canvas);
+  
   this.setupScenario = true;
 }
 
@@ -27,13 +30,14 @@ Game.prototype.update = function(time) {
         ", " + this.entity.nextUpdate;
   if (this.mode == MODE.playing) {
     this.gameMap.update(time);
+    this.ui.update(time);
     if (this.setupScenario) {
       const s = scenario(this.gameMap, time);
       this.entity = s.lab;
       this.setupScenario = false;
     }
   } else if (this.mode == MODE.loading) {
-    if (this.spritePool.isLoaded() && time > 1000) {
+    if (this.spritePool.isLoaded()) {
       this.mode = MODE.playing;
     }
   }
@@ -42,6 +46,7 @@ Game.prototype.update = function(time) {
 Game.prototype.draw = function(ctx, time) {
   if (this.mode == MODE.playing) {
     this.gameMap.draw(ctx, time);
+    this.ui.draw(ctx, time, this.gameMap.view);
   } else if (this.mode == MODE.loading) {
     this.spritePool.draw(ctx, time);
   }

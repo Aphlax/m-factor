@@ -312,12 +312,15 @@ export function drawRecipe(ctx, view, recipe) {
   const width = this.width * view.scale;
   const y = this.y * view.scale - view.y;
   const height = this.height * view.scale;
+  const size = Math.min(16, view.scale / 8 * 5);
   ctx.shadowColor = "#000000";
   ctx.shadowBlur = 8;
   ctx.drawImage(sprite.image,
       sprite.x, sprite.y,
       sprite.width, sprite.height,
-      x + width / 2 - 16, y + height / 2 - 16, 32, 32);
+      x + width / 2 - size,
+      y + height / 2 - size,
+      size * 2, size * 2);
   ctx.shadowColor = undefined;
   ctx.shadowBlur = 0;
 }

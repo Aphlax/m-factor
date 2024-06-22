@@ -74,7 +74,9 @@ GameMapInput.prototype.touchMove = function(e) {
 
 GameMapInput.prototype.touchEnd = function(e) {
   if (this.shortTouch) {
-    this.gameMap.selectEntity(this.touches[0].x, this.touches[0].y);
+    this.gameMap.game.ui.window.set(
+        this.gameMap.getSelectedEntity(
+        this.touches[0].x, this.touches[0].y));
   }
   if (this.longTouchEnd) {
     this.longTouchEnd = 0;
