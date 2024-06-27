@@ -91,7 +91,7 @@ GameMap.prototype.draw = function(ctx, time) {
     if (x * size > this.view.width + this.view.x) continue;
     for (let [y, chunk] of chunks.entries()) {
   	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
-      if (y * size > this.view.height + this.view.y) continue;
+      if (y * size > this.view.height + this.view.y + 1 * this.view.scale) continue;
       for (let entity of chunk.entities) {
         if (!entity.spriteShadow) continue;
         entity.drawShadow(ctx, this.view, time);
@@ -118,7 +118,7 @@ GameMap.prototype.draw = function(ctx, time) {
     if (x * size > this.view.width + this.view.x) continue;
     for (let [y, chunk] of chunks.entries()) {
   	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
-      if (y * size > this.view.height + this.view.y) continue;
+      if (y * size > this.view.height + this.view.y + 1 * this.view.scale) continue;
       for (let entity of chunk.entities) {
         if (entity.type != TYPE.belt) {
           entity.draw(ctx, this.view, time);
@@ -132,11 +132,11 @@ GameMap.prototype.draw = function(ctx, time) {
     }
   }
   for (let [x, chunks] of this.chunks.entries()) {
-    if ((x + 1) * size <= this.view.x - this.view.scale * MAX_SIZE) continue;
-    if (x * size > this.view.width + this.view.x) continue;
+    if ((x + 1) * size <= this.view.x - 1 * this.view.scale) continue;
+    if (x * size > this.view.width + this.view.x + 1 * this.view.scale) continue;
     for (let [y, chunk] of chunks.entries()) {
-  	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
-      if (y * size > this.view.height + this.view.y) continue;
+  	if ((y + 1) * size <= this.view.y - 1 * this.view.scale) continue;
+      if (y * size > this.view.height + this.view.y + 1 * this.view.scale) continue;
       for (let entity of chunk.entities) {
         if (entity.type == TYPE.inserter) {
           entity.drawInserterHand(ctx, this.view, time);

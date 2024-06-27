@@ -206,6 +206,8 @@ function inserterTest(gameMap, time) {
   s.lab = gameMap.createEntity(NAME.lab,
       -12, 18, 0, time);
   
+  gameMap.createEntity(NAME.assemblingMachine1,
+      -8, 16, 0, time);
   
   
   return s;

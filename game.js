@@ -18,7 +18,7 @@ function Game(canvas) {
   this.spritePool.load();
   this.gameMap = new GameMap(this, canvas);
   this.gameMap.initialize(this.seed);
-  this.ui = new GameUi(this, canvas);
+  this.ui = new GameUi(this, this.gameMap.input, canvas);
   
   this.setupScenario = true;
 }
@@ -54,7 +54,7 @@ Game.prototype.draw = function(ctx, time) {
 
 Game.prototype.touchStart = function(e) {
   if (this.mode == MODE.playing) {
-    this.gameMap.input.touchStart(e);
+    this.ui.touchStart(e)
     if (e.touches[0].clientY < 50) {
       this.seed = Math.floor(Math.random() * 1000);
       this.setupScenario = true;
@@ -64,12 +64,12 @@ Game.prototype.touchStart = function(e) {
 }
 Game.prototype.touchMove = function(e) {
   if (this.mode == MODE.playing) {
-    this.gameMap.input.touchMove(e);
+    this.ui.touchMove(e);
   }
 }
 Game.prototype.touchEnd = function(e) {
   if (this.mode == MODE.playing) {
-    this.gameMap.input.touchEnd(e);
+    this.ui.touchEnd(e);
   }
 }
 

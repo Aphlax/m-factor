@@ -5,6 +5,7 @@ import {TYPE, RESOURCE_LABELS} from './entity-properties.js';
 
 const OPEN_HEIGHT = 44 + 2 * 46;
 const ANIMATION_SPEED = OPEN_HEIGHT / 100;
+const MIN_Y = 150;
 
 function UiWindow(ui, canvas) {
   this.ui = ui;
@@ -17,6 +18,9 @@ function UiWindow(ui, canvas) {
   this.yTarget = this.y;
   this.lastUpdate = 0;
   
+  this.headerDrag = 0;
+  this.animationSpeed = ANIMATION_SPEED;
+  
   this.selectedEntity = undefined;
   this.entityUis = new Map();
   this.entityUi = undefined;
@@ -26,23 +30,26 @@ UiWindow.prototype.update = function(time) {
   const dt = time - this.lastUpdate;
   if (this.x != this.xTarget) {
     let diff = this.xTarget - this.x;
-    if (Math.abs(diff) > ANIMATION_SPEED * dt) {
-      diff *= ANIMATION_SPEED * dt / Math.abs(diff);
+    if (Math.abs(diff) > 3 * dt) {
+      diff = 3 * dt * Math.sign(diff);
     }
     this.x += diff;
   }
   if (this.y != this.yTarget) {
     let diff = this.yTarget - this.y;
-    if (Math.abs(diff) > ANIMATION_SPEED * dt) {
-      diff *= ANIMATION_SPEED * dt / Math.abs(diff);
+    if (Math.abs(diff) > Math.abs(this.animationSpeed) * dt) {
+      diff = this.animationSpeed * dt;
     }
     this.y += diff;
+    if (this.y == this.canvasHeight && this.selectedEntity) {
+      this.set();
+    }
   }
   this.lastUpdate = time;
 };
 
 UiWindow.prototype.draw = function(ctx, time) {
-  if (this.y == this.canvasHeight) return;
+  if (this.y >= this.canvasHeight - 1) return;
   
   const width = this.canvasWidth;
   const y = this.y;
@@ -64,8 +71,8 @@ UiWindow.prototype.draw = function(ctx, time) {
   }
   
   ctx.beginPath();
-  ctx.moveTo(width / 2 - 22, y + 16);
-  ctx.lineTo(width / 2 + 22, y + 16);
+  ctx.moveTo(width / 2 - 12, y + 16);
+  ctx.lineTo(width / 2 + 12, y + 16);
   ctx.strokeStyle = COLOR.primary;
   ctx.lineWidth = 4;
   ctx.lineCaps = "round";
@@ -73,6 +80,49 @@ UiWindow.prototype.draw = function(ctx, time) {
   
   if (this.entityUi) {
     this.entityUi.all.forEach(c => c.draw(ctx, time));
+  }
+};
+
+UiWindow.prototype.touchStart = function(e) {
+  if (e.touches[0].clientY < this.y + 32) {
+    this.headerDrag = e.touches[0].clientY;
+    this.animationSpeed = 0;
+  }
+};
+
+UiWindow.prototype.touchMove = function(e) {
+  if (this.headerDrag) {
+    this.y = this.yTarget += e.touches[0].clientY - this.headerDrag;
+    this.animationSpeed = (e.touches[0].clientY - this.headerDrag) / 11;
+    this.headerDrag = e.touches[0].clientY;
+    if (this.y < MIN_Y) {
+      this.y = this.yTarget = MIN_Y;
+    }
+    if (this.y >= this.canvasHeight - 50) {
+      this.headerDrag = 0;
+      this.animationSpeed = 2;
+      this.set();
+    }
+  }
+};
+
+UiWindow.prototype.touchEnd = function(e) {
+  if (this.headerDrag && !e.touches.length) {
+    this.headerDrag = 0;
+    if (Math.abs(this.animationSpeed) > 0.8) {
+      this.yTarget = this.y + this.animationSpeed * 120;
+      this.animationSpeed *= 0.8;
+      if (this.yTarget < MIN_Y + 100) {
+        this.yTarget = MIN_Y;
+      }
+      if (this.yTarget >= this.canvasHeight - 100) {
+        this.yTarget = this.canvasHeight;
+      }
+      if (this.yTarget >= this.canvasHeight - OPEN_HEIGHT - 50 &&
+          this.yTarget < this.canvasHeight - OPEN_HEIGHT + 50) {
+        this.yTarget = this.canvasHeight - OPEN_HEIGHT;
+      }
+    }
   }
 };
 
@@ -118,12 +168,18 @@ UiWindow.prototype.initialize = function() {
 
 UiWindow.prototype.set = function(selectedEntity) {
   this.selectedEntity = selectedEntity;
-  if (!this.selectedEntity) {
+  if (!selectedEntity) {
     this.yTarget = this.canvasHeight;
+    this.animationSpeed = (this.yTarget - this.y) / 100;
     return;
   }
-  this.yTarget = this.canvasHeight - OPEN_HEIGHT;
+  if (this.yTarget == this.canvasHeight) {
+    this.yTarget = this.canvasHeight - OPEN_HEIGHT;
+    this.animationSpeed = (this.yTarget - this.y) / 100;
+  }
+  this.x = this.xTarget = 0;
   this.entityUi = this.entityUis.get(selectedEntity.type);
+  
   if (!selectedEntity.type) { // Resource.
     this.entityUi = this.entityUis.get(-1);
     this.entityUi.resource.set(selectedEntity);
@@ -136,6 +192,11 @@ UiWindow.prototype.set = function(selectedEntity) {
     this.entityUi.output.set(selectedEntity.outputInventory);
     this.entityUi.progress.set(selectedEntity);
   } else if (selectedEntity.type == TYPE.assembler) {
+    if (!selectedEntity.data.recipe) {
+      this.x = this.xTarget = -this.canvasWidth;
+      this.yTarget = 200;
+      this.animationSpeed = (this.yTarget - this.y) / 100;
+    }
     this.entityUi.input.set(selectedEntity.inputInventory);
     this.entityUi.output.set(selectedEntity.outputInventory);
     this.entityUi.output.x = this.canvasWidth - 4 -

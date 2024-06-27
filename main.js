@@ -17,9 +17,9 @@ import {Game} from "./game.js";
     ctx = canvas.getContext('2d');
     
     game = new Game(canvas);
-    canvas.addEventListener("touchstart", e => game.touchStart(e), false);
-    canvas.addEventListener("touchend", e => game.touchEnd(e), false);
-    canvas.addEventListener("touchmove", e => game.touchMove(e), false);
+    canvas.addEventListener("touchstart", game.touchStart.bind(game), false);
+    canvas.addEventListener("touchend", game.touchEnd.bind(game), false);
+    canvas.addEventListener("touchmove", game.touchMove.bind(game), false);
 
     nextFps = lastFrame = performance.now();
     frameCount = frameRate = 0;
@@ -71,6 +71,8 @@ import {Game} from "./game.js";
     ctx.lineTo(20, 50);
     ctx.fillStyle = "orange";
     ctx.fill();
+    ctx.strokeStyle = "black";
+    ctx.stroke();
     
     window.requestAnimationFrame(loop);
   }

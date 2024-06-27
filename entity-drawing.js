@@ -136,6 +136,14 @@ export function drawBelt(ctx, view, time) {
 }
 
 export function drawInserterHand(ctx, view, time) {
+  if ((this.x + 2) * view.scale <= view.x)
+    return;
+  if ((this.x - 1) * view.scale > view.x + view.width)
+    return;
+  if ((this.y + 2) * view.scale <= view.y)
+    return;
+  if ((this.y - 1) * view.scale > view.y + view.height)
+    return;
   const base = SPRITES.get(this.data.inserterHandSprites);
   const hand = SPRITES.get(this.data.inserterHandSprites +
       (this.data.inserterItem ? 2 : 1));
@@ -306,20 +314,21 @@ export function drawIO(ctx, view) {
 }
 
 export function drawRecipe(ctx, view, recipe) {
+  const x = (this.x + this.width * 0.5) * view.scale - view.x;
+  const y = (this.y + this.height * 0.5) * view.scale - view.y;
+  const size = Math.min(16, 0.625 * view.scale);
+  if (x + size <= 0 || x - size > view.width)
+    return;
+  if (y + size <= 0 || y - size > view.height)
+    return;
   const itemDef = ITEMS.get(recipe.outputs[0].item);
   const sprite = SPRITES.get(itemDef.sprite);
-  const x = this.x * view.scale - view.x;
-  const width = this.width * view.scale;
-  const y = this.y * view.scale - view.y;
-  const height = this.height * view.scale;
-  const size = Math.min(16, view.scale / 8 * 5);
   ctx.shadowColor = "#000000";
   ctx.shadowBlur = 8;
   ctx.drawImage(sprite.image,
       sprite.x, sprite.y,
       sprite.width, sprite.height,
-      x + width / 2 - size,
-      y + height / 2 - size,
+      x - size, y - size,
       size * 2, size * 2);
   ctx.shadowColor = undefined;
   ctx.shadowBlur = 0;
