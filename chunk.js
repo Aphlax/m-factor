@@ -105,10 +105,10 @@ Chunk.prototype.drawParticles = function(ctx, view, time) {
         sprite.image,
         sprite.x, sprite.y,
         sprite.width, sprite.height,
-        x * view.scale - view.x,
-        y * view.scale - view.y,
-        sprite.width * size * view.scale / 64,
-        sprite.height * size * view.scale / 64);
+        (x * view.scale - view.x),
+        (y * view.scale - view.y),
+        (sprite.width * size * view.scale / 64),
+        (sprite.height * size * view.scale / 64));
   }
   ctx.globalAlpha = 1;
 };

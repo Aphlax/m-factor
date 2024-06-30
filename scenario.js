@@ -160,7 +160,7 @@ function inserterTest(gameMap, time) {
   
   s.assembler = gameMap.createEntity(NAME.assemblingMachine1,
       -6, 11, 0, time);
-  s.inserter = gameMap.createEntity(NAME.inserter,
+  gameMap.createEntity(NAME.inserter,
       -5, 10, 2, time);
   s.inserter = gameMap.createEntity(NAME.inserter,
       -4, 10, 2, time);

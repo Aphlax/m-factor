@@ -20,8 +20,8 @@ UiProgress.prototype.setWidth = function(width) {
 };
 
 UiProgress.prototype.draw = function(ctx, time) {
-  const x = this.parent.x + this.x,
-        y = this.parent.y + this.y;
+  const x = Math.floor(this.parent.x + this.x),
+        y = Math.floor(this.parent.y + this.y);
   
   let progress = 0;
   if (this.entity.state == STATE.running) {
@@ -60,8 +60,8 @@ UiResource.prototype.set = function(resource) {
 };
 
 UiResource.prototype.draw = function(ctx) {
-  const x = this.parent.x + this.x,
-        y = this.parent.y + this.y;
+  const x = Math.floor(this.parent.x + this.x),
+        y = Math.floor(this.parent.y + this.y);
   
   ctx.fillStyle = COLOR.background3;
   ctx.fillRect(x, y, 40, 40);
@@ -73,7 +73,7 @@ UiResource.prototype.draw = function(ctx) {
   ctx.drawImage(sprite.image,
       sprite.x, sprite.y,
       sprite.width, sprite.height,
-      x - 4, y -4, 48, 48);
+      x - 4, y - 4, 48, 48);
   ctx.restore();
   ctx.lineWidth = 1;
   ctx.strokeStyle = COLOR.border2;

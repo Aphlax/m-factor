@@ -7,14 +7,15 @@ import {Game} from "./game.js";
   "use strict";
   let canvas, ctx, game;
   let lastFrame, nextFps, frameCount, frameRate;
-  let updateTime, drawTime;
+  let updateTime, totalUpdateTime, avgUpdateTime, maxUpdateTime,
+      drawTime, totalDrawTime, avgDrawTime, maxDrawTime;
   window.onload = onload;
 
   function onload() {
     canvas = document.getElementById('canvas');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    ctx = canvas.getContext('2d');
+    ctx = canvas.getContext('2d', {alpha: false});
     
     game = new Game(canvas);
     canvas.addEventListener("touchstart", game.touchStart.bind(game), false);
@@ -23,7 +24,8 @@ import {Game} from "./game.js";
 
     nextFps = lastFrame = performance.now();
     frameCount = frameRate = 0;
-    updateTime = drawTime = 0;
+    updateTime = totalUpdateTime = avgUpdateTime = maxUpdateTime = 0;
+    drawTime = totalDrawTime = avgDrawTime = maxDrawTime = 0;
     window.requestAnimationFrame(loop);
   }
 
@@ -32,7 +34,13 @@ import {Game} from "./game.js";
     frameCount++;
     if (time >= nextFps) {
   	frameRate = Math.round(frameCount / (time - nextFps + 500) * 1000);
+      avgUpdateTime = Math.round(totalUpdateTime / frameCount);
+      avgDrawTime = Math.round(totalDrawTime / frameCount);
+      maxUpdateTime = updateTime;
+      maxDrawTime = drawTime;
       frameCount = 0;
+      updateTime = totalUpdateTime = 0;
+      drawTime = totalDrawTime = 0;
   	nextFps = time + 500;
     }
     
@@ -42,8 +50,12 @@ import {Game} from "./game.js";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     game.draw(ctx, time);
     const timestampDraw = performance.now();
-    updateTime = (timestampUpdate - timestampStart) / 11.11 * 0.4 + updateTime * 0.6;
-    drawTime = (timestampDraw - timestampUpdate) / 11.11 * 0.4 + drawTime * 0.6;
+    const update = timestampUpdate - timestampStart;
+    totalUpdateTime += update;
+    if (update > updateTime) updateTime = update;
+    const draw = timestampDraw - timestampUpdate;
+    totalDrawTime += draw;
+    if (draw > drawTime) drawTime = draw;
     
     ctx.font = "24px Arial";
     ctx.fillStyle = "black";
@@ -51,6 +63,8 @@ import {Game} from "./game.js";
     ctx.fillText(frameRate + "", canvas.width - 48, 24);
     ctx.fillText(Math.round(game.gameMap.view.scale * 10) / 10, canvas.width - 48, 48);
     ctx.fillText(game.seed, canvas.width - 48, 72);
+    ctx.fillText((Math.round(maxUpdateTime * 10) / 10) + "/" +
+        (Math.round(maxDrawTime * 10) / 10), 40, 55);
     if (game.debug !== undefined) {
       ctx.fillText(game.debug, 4, 28);
     }
@@ -61,16 +75,17 @@ import {Game} from "./game.js";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(20, 50);
-    ctx.arc(20, 50, 15, 0, 2 * Math.PI * updateTime, false);
+    ctx.arc(20, 50, 15, 0, 2 * Math.PI * avgUpdateTime / 11.1, false);
     ctx.lineTo(20, 50);
     ctx.fillStyle = "green";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(20, 50);
-    ctx.arc(20, 50, 15, 2 * Math.PI * updateTime, 2 * Math.PI * (drawTime + updateTime), false);
+    ctx.arc(20, 50, 15, 2 * Math.PI * avgUpdateTime / 11.1, 2 * Math.PI * (avgDrawTime + avgUpdateTime) / 11.1, false);
     ctx.lineTo(20, 50);
     ctx.fillStyle = "orange";
     ctx.fill();
+    ctx.lineWidth = 1;
     ctx.strokeStyle = "black";
     ctx.stroke();
     

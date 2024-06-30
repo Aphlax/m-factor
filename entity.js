@@ -119,12 +119,12 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
 
 Entity.prototype.update = function(gameMap, time) {
   if (this.type == TYPE.inserter) {
-    if (this.state == STATE.inserterCoolDown) {
-      this.state = STATE.missingItem;
-    }
-    if (this.state == STATE.missingItem ||
+    if (this.state == STATE.inserterCoolDown ||
+        this.state == STATE.missingItem ||
         this.state == STATE.outputFull) {
       if (!this.outputEntities.length || !this.inputEntities.length) {
+        this.state = !this.outputEntities.length ?
+            STATE.noOutput : STATE.missingItem;
         this.nextUpdate = NEVER;
         return;
       }
@@ -154,6 +154,7 @@ Entity.prototype.update = function(gameMap, time) {
       } else if (outputEntity.type == TYPE.belt) {
         const [item] = inputEntity.outputInventory.items;
         if (!inputEntity.extract(item, 1, this.nextUpdate)) {
+          this.state = STATE.missingItem;
           this.nextUpdate = NEVER;
           return;
         }
@@ -185,10 +186,12 @@ Entity.prototype.update = function(gameMap, time) {
             return;
           }
         }
+        this.state = STATE.missingItem;
         this.nextUpdate = NEVER;
         return;
       }
-    } else if (this.state == STATE.running) {
+    } else if (this.state == STATE.running ||
+        this.state == STATE.itemReady) {
       // We arrived at the target with the hand holding an item.
       if (!this.outputEntities.length) {
         this.state = STATE.noOutput;
@@ -215,6 +218,7 @@ Entity.prototype.update = function(gameMap, time) {
       
       const amount = outputEntity.insert(this.data.inserterItem, 1, this.nextUpdate);
       if (!amount) {
+        this.state = STATE.itemReady;
         this.nextUpdate = NEVER;
         return;
       }

@@ -21,19 +21,24 @@ function Game(canvas) {
   this.ui = new GameUi(this, this.gameMap.input, canvas);
   
   this.setupScenario = true;
+  this.playTime = 0;
 }
 
 Game.prototype.update = function(time) {
-  if (this.entity)
+  if (this.ui.window.selectedEntity?.type) {
+    const entity = this.ui.window.selectedEntity;
     this.debug = Object.keys(STATE)
-        .filter(s => STATE[s] == this.entity.state)[0] +
-        ", " + this.entity.nextUpdate;
+        .filter(s => STATE[s] == entity.state)[0] +
+        ", " + entity.nextUpdate;
+  } else {
+    this.debug = "";
+  }
   if (this.mode == MODE.playing) {
-    this.gameMap.update(time);
-    this.ui.update(time);
+    this.playTime = time;
+    this.gameMap.update(this.playTime);
+    this.ui.update(this.playTime);
     if (this.setupScenario) {
-      const s = scenario(this.gameMap, time);
-      this.entity = s.lab;
+      scenario(this.gameMap, this.playTime);
       this.setupScenario = false;
     }
   } else if (this.mode == MODE.loading) {

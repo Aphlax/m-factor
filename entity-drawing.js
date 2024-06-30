@@ -31,12 +31,12 @@ export function draw(ctx, view, time) {
       (sprite.height - sprite.top - sprite.bottom);
   ctx.drawImage(sprite.image,
       sprite.x, sprite.y, sprite.width, sprite.height,
-      this.x * view.scale - view.x -
-          sprite.left * xScale,
-      this.y * view.scale - view.y -
-          sprite.top * yScale,
-      sprite.width * xScale,
-      sprite.height * yScale);
+      Math.floor(this.x * view.scale - view.x -
+          sprite.left * xScale),
+      Math.floor(this.y * view.scale - view.y -
+          sprite.top * yScale),
+      Math.ceil(sprite.width * xScale),
+      Math.ceil(sprite.height * yScale));
 };
 
 export function drawShadow(ctx, view, time) {
@@ -61,12 +61,12 @@ export function drawShadow(ctx, view, time) {
       (sprite.height - sprite.top - sprite.bottom);
   ctx.drawImage(sprite.image,
       sprite.x, sprite.y, sprite.width, sprite.height,
-      this.x * view.scale - view.x -
-          sprite.left * xScale,
-      this.y * view.scale - view.y -
-          sprite.top * yScale,
-      sprite.width * xScale,
-      sprite.height * yScale);
+      Math.floor(this.x * view.scale - view.x -
+          sprite.left * xScale),
+      Math.floor(this.y * view.scale - view.y -
+          sprite.top * yScale),
+      Math.ceil(sprite.width * xScale),
+      Math.ceil(sprite.height * yScale));
 };
 
 export function drawBelt(ctx, view, time) {
@@ -87,22 +87,22 @@ export function drawBelt(ctx, view, time) {
       (sprite.height - sprite.top - sprite.bottom);
   ctx.drawImage(sprite.image,
       sprite.x, sprite.y, sprite.width, sprite.height,
-      this.x * view.scale - view.x -
-          sprite.left * xScale,
-      this.y * view.scale - view.y -
-          sprite.top * yScale,
-      sprite.width * xScale,
-      sprite.height * yScale);
+      Math.floor(this.x * view.scale - view.x -
+          sprite.left * xScale),
+      Math.floor(this.y * view.scale - view.y -
+          sprite.top * yScale),
+      Math.ceil(sprite.width * xScale),
+      Math.ceil(sprite.height * yScale));
   if (this.data.beltEndSprite) {
     const s = SPRITES.get(this.data.beltEndSprite + animation);
     const x = this.x - (this.direction - 2) % 2;
     const y = this.y + (this.direction - 1) % 2;
     ctx.drawImage(s.image,
         s.x, s.y, s.width, s.height,
-        x * view.scale - view.x - s.left * xScale,
-        y * view.scale - view.y - s.top * yScale,
-        s.width * xScale,
-        s.height * yScale);
+        Math.floor(x * view.scale - view.x - s.left * xScale),
+        Math.floor(y * view.scale - view.y - s.top * yScale),
+        Math.ceil(s.width * xScale),
+        Math.ceil(s.height * yScale));
   }
   if (this.data.beltBeginSprite) {
     const s = SPRITES.get(this.data.beltBeginSprite + animation);
@@ -110,28 +110,28 @@ export function drawBelt(ctx, view, time) {
     const y = this.y - (this.direction - 1) % 2;
     ctx.drawImage(s.image,
         s.x, s.y, s.width, s.height,
-        x * view.scale - view.x - s.left * xScale,
-        y * view.scale - view.y - s.top * yScale,
-        s.width * xScale,
-        s.height * yScale);
+        Math.floor(x * view.scale - view.x - s.left * xScale),
+        Math.floor(y * view.scale - view.y - s.top * yScale),
+        Math.ceil(s.width * xScale),
+        Math.ceil(s.height * yScale));
   }
   if (this.data.beltExtraRightSprite) {
     const s = SPRITES.get(this.data.beltExtraRightSprite + animation);
     ctx.drawImage(s.image,
         s.x, s.y, s.width, s.height,
-        this.x * view.scale - view.x - s.left * xScale,
-        this.y * view.scale - view.y - s.top * yScale,
-        s.width * xScale,
-        s.height * yScale);
+        Math.floor(this.x * view.scale - view.x - s.left * xScale),
+        Math.floor(this.y * view.scale - view.y - s.top * yScale),
+        Math.ceil(s.width * xScale),
+        Math.ceil(s.height * yScale));
   }
   if (this.data.beltExtraLeftSprite) {
     const s = SPRITES.get(this.data.beltExtraLeftSprite + animation);
     ctx.drawImage(s.image,
         s.x, s.y, s.width, s.height,
-        this.x * view.scale - view.x - s.left * xScale,
-        this.y * view.scale - view.y - s.top * yScale,
-        s.width * xScale,
-        s.height * yScale);
+        Math.floor(this.x * view.scale - view.x - s.left * xScale),
+        Math.floor(this.y * view.scale - view.y - s.top * yScale),
+        Math.ceil(s.width * xScale),
+        Math.ceil(s.height * yScale));
   }
 }
 
@@ -328,8 +328,8 @@ export function drawRecipe(ctx, view, recipe) {
   ctx.drawImage(sprite.image,
       sprite.x, sprite.y,
       sprite.width, sprite.height,
-      x - size, y - size,
-      size * 2, size * 2);
+      Math.floor(x - size), Math.floor(y - size),
+      Math.ceil(size * 2), Math.ceil(size * 2));
   ctx.shadowColor = undefined;
   ctx.shadowBlur = 0;
 }

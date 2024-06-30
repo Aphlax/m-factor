@@ -77,7 +77,10 @@ export const S = {
   ironGearItem: 16000 + 6,
   redScienceItem: 16000 + 7,
   
+  gearIcon: 16508,
+  
   smoke: 17000,
+  
 };
 
 export const SPRITES = [
@@ -304,6 +307,10 @@ export const SPRITES = [
   {
     path: "graphics/decoratives/smoke.png",
     sprites: sprites(S.smoke, 152, 120, 5, 12),
+  },
+  {
+    path: "graphics/icons/gear.png",
+    sprites: sprites(S.gearIcon, 32, 32, 1, 1),
   },
 ];
 

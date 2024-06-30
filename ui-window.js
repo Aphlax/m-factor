@@ -1,7 +1,10 @@
 import {UiInventory} from './ui-inventory.js';
 import {UiProgress, UiResource} from './ui-components.js';
+import {UiButton, BUTTON} from './ui-button.js';
+import {UiChoice, CHOICE} from './ui-choice.js';
 import {COLOR} from './ui-properties.js';
 import {TYPE, RESOURCE_LABELS} from './entity-properties.js';
+import {S} from './sprite-pool.js';
 
 const OPEN_HEIGHT = 44 + 2 * 46;
 const ANIMATION_SPEED = OPEN_HEIGHT / 100;
@@ -30,17 +33,17 @@ UiWindow.prototype.update = function(time) {
   const dt = time - this.lastUpdate;
   if (this.x != this.xTarget) {
     let diff = this.xTarget - this.x;
-    if (Math.abs(diff) > 3 * dt) {
-      diff = 3 * dt * Math.sign(diff);
+    if (Math.abs(diff) > 2 * dt) {
+      diff = 2 * dt * Math.sign(diff);
     }
-    this.x += diff;
+    this.x = Math.floor(this.x + diff);
   }
   if (this.y != this.yTarget) {
     let diff = this.yTarget - this.y;
     if (Math.abs(diff) > Math.abs(this.animationSpeed) * dt) {
       diff = this.animationSpeed * dt;
     }
-    this.y += diff;
+    this.y = Math.floor(this.y + diff);
     if (this.y == this.canvasHeight && this.selectedEntity) {
       this.set();
     }
@@ -52,10 +55,10 @@ UiWindow.prototype.draw = function(ctx, time) {
   if (this.y >= this.canvasHeight - 1) return;
   
   const width = this.canvasWidth;
-  const y = this.y;
+  const y = Math.floor(this.y);
   ctx.fillStyle = COLOR.background2;
   ctx.fillRect(0, y + 32, width, this.canvasHeight - y - 32);
-  ctx.fillStyle = COLOR.background1;
+  ctx.fillStyle = this.headerDrag ? COLOR.backgroundDrag : COLOR.background1;
   ctx.fillRect(0, y, width, 32);
   ctx.strokeStyle = COLOR.border1;
   ctx.lineWidth = 1;
@@ -79,7 +82,9 @@ UiWindow.prototype.draw = function(ctx, time) {
   ctx.stroke();
   
   if (this.entityUi) {
-    this.entityUi.all.forEach(c => c.draw(ctx, time));
+    for (let c of this.entityUi.all) {
+      c.draw(ctx, time);
+    }
   }
 };
 
@@ -88,11 +93,15 @@ UiWindow.prototype.touchStart = function(e) {
     this.headerDrag = e.touches[0].clientY;
     this.animationSpeed = 0;
   }
+  for (let c of this.entityUi.all) {
+    c.touchStart?.(e);
+  }
 };
 
 UiWindow.prototype.touchMove = function(e) {
   if (this.headerDrag) {
-    this.y = this.yTarget += e.touches[0].clientY - this.headerDrag;
+    this.y = this.yTarget =
+        this.y + e.touches[0].clientY - this.headerDrag;
     this.animationSpeed = (e.touches[0].clientY - this.headerDrag) / 11;
     this.headerDrag = e.touches[0].clientY;
     if (this.y < MIN_Y) {
@@ -103,6 +112,9 @@ UiWindow.prototype.touchMove = function(e) {
       this.animationSpeed = 2;
       this.set();
     }
+  }
+  for (let c of this.entityUi.all) {
+    c.touchMove?.(e);
   }
 };
 
@@ -123,6 +135,9 @@ UiWindow.prototype.touchEnd = function(e) {
         this.yTarget = this.canvasHeight - OPEN_HEIGHT;
       }
     }
+  }
+  for (let c of this.entityUi.all) {
+    c.touchEnd?.(e);
   }
 };
 
@@ -145,16 +160,21 @@ UiWindow.prototype.initialize = function() {
   
   this.entityUis.set(TYPE.furnace, {
     input: new UiInventory(this, 10, 40),
-    output: new UiInventory(this, this.canvasWidth - 50, 40),
+    output: new UiInventory(this, this.canvasWidth - 50, 40)
+        .setIsOutput(true),
     progress: new UiProgress(this, 56, 40)
         .setWidth(this.canvasWidth - 112),
   });
   
   this.entityUis.set(TYPE.assembler, {
     input: new UiInventory(this, 10, 40),
-    output: new UiInventory(this, this.canvasWidth - 50, 40),
+    output: new UiInventory(this, this.canvasWidth - 96, 40)
+        .setIsOutput(true),
     progress: new UiProgress(this, 56, 40)
-        .setWidth(this.canvasWidth - 112),
+        .setWidth(this.canvasWidth - 158),
+    recipe: new UiButton(this, this.canvasWidth - 50, 40)
+        .setButton(BUTTON.assemblerRecipe, S.gearIcon),
+    recipeChoice: new UiChoice(this, this.canvasWidth + 10, 40),
   });
   
   this.entityUis.set(TYPE.lab, {
@@ -192,21 +212,24 @@ UiWindow.prototype.set = function(selectedEntity) {
     this.entityUi.output.set(selectedEntity.outputInventory);
     this.entityUi.progress.set(selectedEntity);
   } else if (selectedEntity.type == TYPE.assembler) {
-    if (!selectedEntity.data.recipe) {
-      this.x = this.xTarget = -this.canvasWidth;
-      this.yTarget = 200;
-      this.animationSpeed = (this.yTarget - this.y) / 100;
-    }
     this.entityUi.input.set(selectedEntity.inputInventory);
     this.entityUi.output.set(selectedEntity.outputInventory);
-    this.entityUi.output.x = this.canvasWidth - 4 -
+    this.entityUi.output.x = this.canvasWidth - 50 -
         selectedEntity.outputInventory.capacity * 46;
     this.entityUi.progress.set(selectedEntity);
     this.entityUi.progress.x = 10 +
         selectedEntity.inputInventory.capacity * 46;
-    this.entityUi.progress.width = this.canvasWidth - 20 -
+    this.entityUi.progress.width = this.canvasWidth - 66 -
         46 * (selectedEntity.inputInventory.capacity +
         selectedEntity.outputInventory.capacity);
+    this.entityUi.recipeChoice.setChoice(
+        CHOICE.assemblerRecipe, selectedEntity);
+    if (!selectedEntity.data.recipe) {
+      this.x = this.xTarget = -this.canvasWidth;
+      this.yTarget = Math.max(MIN_Y, this.canvasHeight - 50 -
+          46 * Math.ceil(this.entityUi.recipeChoice.choices.length / 8));
+      this.animationSpeed = (this.yTarget - this.y) / 100;
+    }
   } else if (selectedEntity.type == TYPE.lab) {
     this.entityUi.inventory.set(selectedEntity.inputInventory);
   }

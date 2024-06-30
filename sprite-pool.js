@@ -34,6 +34,8 @@ SpritePool.prototype.isLoaded = function() {
 
 SpritePool.prototype.draw = function(ctx, time) {
   // Loading bar.
+  ctx.fillStyle = "#EEEEEE";
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctx.fillStyle = "black";
   ctx.fillRect(Math.floor(ctx.canvas.width * 0.2),
       Math.floor(ctx.canvas.height * 0.5 - 30),
