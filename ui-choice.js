@@ -97,6 +97,8 @@ UiChoice.prototype.touchEnd = function(e) {
     this.entity.setRecipe(
         this.choices[this.pressedIndex].value,
         this.parent.ui.game.playTime);
+    // This extends the window to default height.
+    this.parent.yTarget = this.parent.canvasHeight;
     this.parent.set(this.entity);
     this.parent.x = -this.parent.canvasWidth;
   }

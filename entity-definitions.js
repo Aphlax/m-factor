@@ -9,6 +9,7 @@ export const NAME = {
   inserter: 4,
   stoneFurnace: 5,
   assemblingMachine1: 6,
+  lab: 7,
 };
 
 export const ENTITIES = new Map([
@@ -18,6 +19,7 @@ export const ENTITIES = new Map([
     type: TYPE.mine,
     width: 2,
     height: 2,
+    icon: S.burnerDrillIcon,
     sprites: {
       [DIRECTION.north]: [S.burnerDrillN, S.burnerDrillShadowN],
       [DIRECTION.east]: [S.burnerDrillE, S.burnerDrillShadowE],
@@ -40,6 +42,7 @@ export const ENTITIES = new Map([
     type: TYPE.chest,
     width: 1,
     height: 1,
+    icon: S.woodenChestIcon,
     sprites: {
       [DIRECTION.north]: [S.woodenChest, S.woodenChestShadow],
       [DIRECTION.east]: [S.woodenChest, S.woodenChestShadow],
@@ -56,6 +59,7 @@ export const ENTITIES = new Map([
     type: TYPE.belt,
     width: 1,
     height: 1,
+    icon: S.transportBeltIcon,
     sprites: {
       [DIRECTION.north]: [S.transportBeltN],
       [DIRECTION.east]: [S.transportBeltE],
@@ -85,6 +89,7 @@ export const ENTITIES = new Map([
     type: TYPE.inserter,
     width: 1,
     height: 1,
+    icon: S.inserterIcon,
     sprites: {
       [DIRECTION.north]: [S.inserter],
       [DIRECTION.east]: [S.inserter + 1],
@@ -102,6 +107,7 @@ export const ENTITIES = new Map([
     type: TYPE.furnace,
     width: 2,
     height: 2,
+    icon: S.stoneFurnaceIcon,
     sprites: {
       [DIRECTION.north]: [S.stoneFurnaceWorking],
       [DIRECTION.east]: [S.stoneFurnaceWorking],
@@ -120,6 +126,7 @@ export const ENTITIES = new Map([
     type: TYPE.assembler,
     width: 3,
     height: 3,
+    icon: S.assemblingMachine1Icon,
     sprites: {
       [DIRECTION.north]: [S.assemblingMachine1, S.assemblingMachine1Shadow],
       [DIRECTION.east]: [S.assemblingMachine1, S.assemblingMachine1Shadow],
@@ -137,6 +144,7 @@ export const ENTITIES = new Map([
     type: TYPE.lab,
     width: 3,
     height: 3,
+    icon: S.labIcon,
     sprites: {
       [DIRECTION.north]: [S.lab, S.labShadow],
       [DIRECTION.east]: [S.lab, S.labShadow],

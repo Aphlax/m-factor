@@ -1,5 +1,6 @@
 import {COLOR} from './ui-properties.js';
 import {SPRITES} from './sprite-pool.js';
+import {CHOICE} from './ui-choice.js';
 
 const BUTTON = {
   assemblerRecipe: 1,
@@ -69,6 +70,8 @@ UiButton.prototype.touchEnd = function(e) {
   this.pressed = false;
   
   if (this.name == BUTTON.assemblerRecipe) {
+    this.parent.entityUi.recipeChoice.setChoice(
+        CHOICE.assemblerRecipe, this.parent.selectedEntity);
     this.parent.xTarget = -this.parent.canvasWidth;
     this.parent.yTarget = Math.max(150, this.parent.canvasHeight - 50 -
           46 * Math.ceil(this.parent.entityUi.recipeChoice.choices.length / 8));

@@ -19,7 +19,6 @@ function UiWindow(ui, canvas) {
   this.y = this.canvasHeight;
   this.xTarget = this.x;
   this.yTarget = this.y;
-  this.lastUpdate = 0;
   
   this.headerDrag = 0;
   this.animationSpeed = ANIMATION_SPEED;
@@ -29,8 +28,7 @@ function UiWindow(ui, canvas) {
   this.entityUi = undefined;
 }
 
-UiWindow.prototype.update = function(time) {
-  const dt = time - this.lastUpdate;
+UiWindow.prototype.update = function(time, dt) {
   if (this.x != this.xTarget) {
     let diff = this.xTarget - this.x;
     if (Math.abs(diff) > 2 * dt) {
@@ -48,7 +46,6 @@ UiWindow.prototype.update = function(time) {
       this.set();
     }
   }
-  this.lastUpdate = time;
 };
 
 UiWindow.prototype.draw = function(ctx, time) {
@@ -98,7 +95,7 @@ UiWindow.prototype.touchStart = function(e) {
   }
 };
 
-UiWindow.prototype.touchMove = function(e) {
+UiWindow.prototype.touchMove = function(e, longTouch) {
   if (this.headerDrag) {
     this.y = this.yTarget =
         this.y + e.touches[0].clientY - this.headerDrag;
@@ -114,11 +111,11 @@ UiWindow.prototype.touchMove = function(e) {
     }
   }
   for (let c of this.entityUi.all) {
-    c.touchMove?.(e);
+    c.touchMove?.(e, longTouch);
   }
 };
 
-UiWindow.prototype.touchEnd = function(e) {
+UiWindow.prototype.touchEnd = function(e, shortTouch) {
   if (this.headerDrag && !e.touches.length) {
     this.headerDrag = 0;
     if (Math.abs(this.animationSpeed) > 0.8) {
@@ -137,9 +134,18 @@ UiWindow.prototype.touchEnd = function(e) {
     }
   }
   for (let c of this.entityUi.all) {
-    c.touchEnd?.(e);
+    c.touchEnd?.(e, shortTouch);
   }
 };
+
+UiWindow.prototype.touchLong = function(e) {
+  if (this.headerDrag) {
+    this.headerDrag = 0;
+  }
+  for (let c of this.entityUi.all) {
+    c.touchLong?.(e);
+  }
+}
 
 UiWindow.prototype.initialize = function() {
   this.entityUis.set(-1, { // Resource.
@@ -222,9 +228,9 @@ UiWindow.prototype.set = function(selectedEntity) {
     this.entityUi.progress.width = this.canvasWidth - 66 -
         46 * (selectedEntity.inputInventory.capacity +
         selectedEntity.outputInventory.capacity);
-    this.entityUi.recipeChoice.setChoice(
-        CHOICE.assemblerRecipe, selectedEntity);
     if (!selectedEntity.data.recipe) {
+      this.entityUi.recipeChoice.setChoice(
+          CHOICE.assemblerRecipe, selectedEntity);
       this.x = this.xTarget = -this.canvasWidth;
       this.yTarget = Math.max(MIN_Y, this.canvasHeight - 50 -
           46 * Math.ceil(this.entityUi.recipeChoice.choices.length / 8));

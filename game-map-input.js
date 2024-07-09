@@ -1,40 +1,18 @@
-const LONG_TOUCH_DURATION = 500;
+
 const MIN_SCALE = 16;
 const MAX_SCALE = 32;
 
 function GameMapInput(gameMap, view) {
   this.gameMap = gameMap;
   this.view = view;
-  this.touches = new Array(3).fill(0).map(() => ({x: 0, y: 0}));
-  this.longTouchStarted = false;
-  this.longTouchEnd = 0;
-  this.longTouch = false;
-  this.shortTouch = false;
+  this.touches = new Array(3).fill(0).map(() => ({x: 0, y: 0}));;
 }
 
 GameMapInput.prototype.update = function(time) {
-  // Long tap detection.
-  if (this.longTouchStarted) {
-    this.longTouchStarted = false;
-    this.longTouchEnd = time + LONG_TOUCH_DURATION;
-  } else if (this.longTouchEnd && time >= this.longTouchEnd) {
-    this.longTouchEnd = 0;
-    this.longTouch = true;
-    this.shortTouch = false;
-    navigator.vibrate(200);
-  }
+  
 };
 
 GameMapInput.prototype.touchStart = function(e) {
-  if (e.touches.length == 1) {
-    this.longTouchStarted = true;
-    this.shortTouch = true;
-  } else {
-    this.shortTouch = false;
-    if (this.longTouchEnd) {
-      this.longTouchEnd = 0;
-    }
-  }
   this.setTouches(e);
 };
 
@@ -42,8 +20,8 @@ GameMapInput.prototype.touchStart = function(e) {
   exactly 1 move update per update
   move happens only after significant move.
 */
-GameMapInput.prototype.touchMove = function(e) {
-  if (!this.longTouch) {
+GameMapInput.prototype.touchMove = function(e, longTouch) {
+  if (!longTouch) {
     if (e.touches.length > 1) {
       const emx = (e.touches[0].clientX + e.touches[1].clientX);
       const emy = (e.touches[0].clientY + e.touches[1].clientY);
@@ -63,29 +41,21 @@ GameMapInput.prototype.touchMove = function(e) {
       this.view.y = Math.round(this.view.y - dy);
     }
   }
-  if (this.shortTouch) {
-    this.shortTouch = false;
-  }
-  if (this.longTouchEnd) {
-    this.longTouchEnd = 0;
-  }
   this.setTouches(e);
 };
 
-GameMapInput.prototype.touchEnd = function(e) {
-  if (this.shortTouch) {
+GameMapInput.prototype.touchEnd = function(e, shortTouch) {
+  if (shortTouch) {
     const entity = this.gameMap.getSelectedEntity(
         this.touches[0].x, this.touches[0].y);
     this.gameMap.game.ui.window.set(entity);
   }
-  if (this.longTouchEnd) {
-    this.longTouchEnd = 0;
-  }
-  if (this.longTouch) {
-    this.longTouch = false;
-  }
   this.setTouches(e);
 };
+
+GameMapInput.prototype.touchLong = function(e) {
+  
+}
 
 GameMapInput.prototype.setTouches = function(e) {
   for (let i = 0; i < 3; i++) {

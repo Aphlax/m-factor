@@ -77,7 +77,22 @@ export const S = {
   ironGearItem: 16000 + 6,
   redScienceItem: 16000 + 7,
   
-  gearIcon: 16508,
+  burnerDrillItem: 16000 + 8,
+  woodenChestItem: 16000 + 9,
+  transportBeltItem: 16000 + 10,
+  inserterItem: 16000 + 11,
+  stoneFurnaceItem: 16000 + 12,
+  assemblingMachine1Item: 16000 + 13,
+  labItem: 16000 + 14,
+  
+  gearIcon: 16500,
+  burnerDrillIcon: 16500 + 1,
+  woodenChestIcon: 16500 + 2,
+  transportBeltIcon: 16500 + 3,
+  inserterIcon: 16500 + 4,
+  stoneFurnaceIcon: 16500 + 5,
+  assemblingMachine1Icon: 16500 + 6,
+  labIcon: 16500 + 7,
   
   smoke: 17000,
   
@@ -305,6 +320,34 @@ export const SPRITES = [
     sprites: itemSprites(S.redScienceItem),
   },
   {
+    path: "graphics/items/burner-mining-drill.png",
+    sprites: itemSprites(S.burnerDrillItem, S.burnerDrillIcon),
+  },
+  {
+    path: "graphics/items/wooden-chest.png",
+    sprites: itemSprites(S.woodenChestItem, S.woodenChestIcon),
+  },
+  {
+    path: "graphics/items/transport-belt.png",
+    sprites: itemSprites(S.transportBeltItem, S.transportBeltIcon),
+  },
+  {
+    path: "graphics/items/inserter.png",
+    sprites: itemSprites(S.inserterItem, S.inserterIcon),
+  },
+  {
+    path: "graphics/items/stone-furnace.png",
+    sprites: itemSprites(S.stoneFurnaceItem, S.stoneFurnaceIcon),
+  },
+  {
+    path: "graphics/items/assembling-machine-1.png",
+    sprites: itemSprites(S.assemblingMachine1Item, S.assemblingMachine1Icon),
+  },
+  {
+    path: "graphics/items/lab.png",
+    sprites: itemSprites(S.labItem, S.labIcon),
+  },
+  {
     path: "graphics/decoratives/smoke.png",
     sprites: sprites(S.smoke, 152, 120, 5, 12),
   },
@@ -342,8 +385,11 @@ function entitySprites(id, width, height, xCount, yCount,
   return res;
 }
 
-function itemSprites(id) {
-  return [{id: id, ...rect(64)}];
+function itemSprites(id, iconId) {
+  return [
+    {id, ...rect(64)},
+    ...(iconId ? [{id: iconId, ...rect(0, 0, 64, 64)}] : []),
+  ];
 }
 
 /*
