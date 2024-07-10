@@ -78,7 +78,7 @@ export function drawBelt(ctx, view, time) {
     return;
   if ((this.y - 1) * view.scale > view.y + view.height)
     return;
-  let animation = Math.floor(this.animation +
+  let animation = Math.floor(
       time * this.animationSpeed / 60) % this.animationLength;
   const sprite = SPRITES.get(this.sprite + animation);
   const xScale = this.width * view.scale /
@@ -151,6 +151,7 @@ export function drawInserterHand(ctx, view, time) {
   let p = Math.min((time - this.taskStart) / this.taskDuration, 1);
   if (this.state == STATE.inserterCoolDown ||
       this.state == STATE.missingItem ||
+      this.state == STATE.noOutput ||
       this.state == STATE.outputFull) {
     p = 1 - p;
   }

@@ -20,6 +20,7 @@ function GameUi(game, gameMapInput, canvas) {
   this.window = new UiWindow(this, canvas);
   this.window.initialize();
   this.buildMenu = new UiBuildMenu(this, canvas);
+  this.gameMapInput.buildMenu = this.buildMenu;
   
   this.mode = MODE.none;
   this.lastUpdate = 0;

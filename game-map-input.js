@@ -5,11 +5,14 @@ const MAX_SCALE = 32;
 function GameMapInput(gameMap, view) {
   this.gameMap = gameMap;
   this.view = view;
-  this.touches = new Array(3).fill(0).map(() => ({x: 0, y: 0}));;
+  this.lastUpdate = 0;
+  this.touches = new Array(3).fill(0).map(() => ({x: 0, y: 0}));
+  
+  this.buildMenu = undefined; // Set in GameUi.
 }
 
 GameMapInput.prototype.update = function(time) {
-  
+  this.lastUpdate = time;
 };
 
 GameMapInput.prototype.touchStart = function(e) {
@@ -46,9 +49,18 @@ GameMapInput.prototype.touchMove = function(e, longTouch) {
 
 GameMapInput.prototype.touchEnd = function(e, shortTouch) {
   if (shortTouch) {
-    const entity = this.gameMap.getSelectedEntity(
-        this.touches[0].x, this.touches[0].y);
-    this.gameMap.game.ui.window.set(entity);
+    const entityDef = this.buildMenu.getSelectedEntity();
+    if (entityDef) {
+      if (this.gameMap.tryCreateEntity(
+          this.touches[0].x, this.touches[0].y,
+          entityDef, this.lastUpdate)) {
+        this.buildMenu.entityBuilt();
+      }
+    } else {
+      const entity = this.gameMap.getSelectedEntity(
+          this.touches[0].x, this.touches[0].y);
+      this.gameMap.game.ui.window.set(entity);
+    }
   }
   this.setTouches(e);
 };

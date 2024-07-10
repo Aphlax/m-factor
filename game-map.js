@@ -187,7 +187,7 @@ GameMap.prototype.canPlace = function(x, y, width, height, ignoredEntity) {
   for (let i = 0; i < width; i++) {
     for (let j = 0; j < height; j++) {
       if (this.getTerrainAt(x + i, y + j) >= S.water)
-        return [false, x + i, y + j];
+        return false;
     }
   }
   const cx1 = Math.floor((x - MAX_SIZE) / SIZE);
@@ -198,23 +198,23 @@ GameMap.prototype.canPlace = function(x, y, width, height, ignoredEntity) {
     if (!this.chunks.has(i)) {
       if (i == cx1 && cx1 != Math.floor(x / SIZE))
         continue;
-      return [false, i * SIZE, y];
+      return false;
     }
     for (let j = cy1; j <= cy2; j++) {
       if (!this.chunks.get(i).has(j)) {
         if (j == cy1 && cy1 != Math.floor(y / SIZE))
           continue;
-        return [false, x, j * SIZE];
+        return false;
       }
       for (let entity of this.chunks.get(i).get(j).entities) {
         if (entity == ignoredEntity) continue;
         if (x + width > entity.x && x < entity.x + entity.width &&
             y + height > entity.y && y < entity.y + entity.height)
-          return [false, entity.x, entity.y];
+          return false;
       }
     }
   }
-  return [true];
+  return true;
 }
 
 GameMap.prototype.getEntityAt = function(x, y) {
@@ -325,7 +325,7 @@ GameMap.prototype.getTerrainAt = function(x, y) {
   const cy = Math.floor(y / SIZE);
   if (!this.chunks.get(cx).has(cy)) return;
   const chunk = this.chunks.get(cx).get(cy);
-  return chunk.tiles[x - cx][y - cy];
+  return chunk.tiles[x - cx * SIZE][y - cy * SIZE];
 };
 
 GameMap.prototype.getResourceAt = function(x, y, remove) {
@@ -348,6 +348,18 @@ GameMap.prototype.getSelectedEntity = function(screenX, screenY) {
   const y = (this.view.y + screenY) / this.view.scale;
   return this.getEntityAt(x, y) ||
       this.getResourceAt(Math.floor(x), Math.floor(y));
+};
+
+GameMap.prototype.tryCreateEntity = function(screenX, screenY, entity, time) {
+  const x = Math.round((this.view.x + screenX) /
+      this.view.scale - entity.width / 2);
+  const y = Math.round((this.view.y + screenY) /
+      this.view.scale - entity.height / 2);
+  if (this.canPlace(x, y, entity.width, entity.height)) {
+    this.createEntity(entity.name, x, y, 0, time);
+    return true;
+  }
+  return false;
 };
 
 GameMap.prototype.createSmoke = function(x, y, time, duration) {

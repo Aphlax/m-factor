@@ -10,6 +10,14 @@ const OPEN_HEIGHT = 44 + 2 * 46;
 const ANIMATION_SPEED = OPEN_HEIGHT / 100;
 const MIN_Y = 150;
 
+/*
+  default buttons:
+  delete
+  pippette
+  move/rotate menu
+  inventory
+*/
+
 function UiWindow(ui, canvas) {
   this.ui = ui;
   

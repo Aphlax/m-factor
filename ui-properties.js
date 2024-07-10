@@ -12,6 +12,8 @@ export const COLOR = {
   buttonBackgroundPressed: "#808588",
   buttonBorder: "#9095A8",
   buildBackground: "#C0E0FF",
+  buildSingleBackground: "#C0FFEE",
   buildBorder: "#EEEEEE",
+  buildSingleBorder: "#00FF80",
   longTouchIndicator: "#EFEFFF",
 };

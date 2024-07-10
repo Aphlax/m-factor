@@ -57,7 +57,6 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   this.outputEntities.length = 0;
   
   if (this.type == TYPE.belt) {
-    this.animation = (time * this.animationSpeed / 60) % def.animationLength;
     this.animationSpeed *= def.beltSpeed;
     this.data.beltSpeed = def.beltSpeed;
     this.data.beltSprites = def.beltSprites[direction];
@@ -121,6 +120,7 @@ Entity.prototype.update = function(gameMap, time) {
   if (this.type == TYPE.inserter) {
     if (this.state == STATE.inserterCoolDown ||
         this.state == STATE.missingItem ||
+        this.state == STATE.noOutput ||
         this.state == STATE.outputFull) {
       if (!this.outputEntities.length || !this.inputEntities.length) {
         this.state = !this.outputEntities.length ?
@@ -619,7 +619,7 @@ Entity.prototype.updateBeltSprites = function() {
   }
 };
 
-Entity.prototype.connectInserter = function(other) {
+Entity.prototype.connectInserter = function(other, time) {
   const dx = -(this.direction - 2) % 2;
   const dy = (this.direction - 1) % 2;
   if (other.x <= this.x + dx &&
@@ -629,7 +629,11 @@ Entity.prototype.connectInserter = function(other) {
     if (other.inputInventory || other.type == TYPE.belt) {
       this.outputEntities.push(other);
       other.inputEntities.push(this);
-      // TODO: update state.
+      if (this.state == STATE.noOutput ||
+          this.state == STATE.outputFull ||
+          this.state == STATE.itemReady) {
+        this.nextUpdate = time;
+      }
     }
   } else if (other.x <= this.x - dx &&
       other.x + other.width > this.x - dx &&
@@ -638,7 +642,9 @@ Entity.prototype.connectInserter = function(other) {
     if (other.outputInventory || other.type == TYPE.belt) {
       this.inputEntities.push(other);
       other.outputEntities.push(this);
-      // TODO: update state.
+      if (this.state == STATE.missingItem) {
+        this.nextUpdate = time;
+      }
     }
   }
 };
@@ -652,8 +658,10 @@ Entity.prototype.connectMine = function(other, time) {
   }
   this.outputEntities.push(other);
   other.inputEntities.push(this);
-  if (this.state == STATE.mineNoOutput) {
-    this.state == STATE.itemReady;
+  if (this.state == STATE.noOutput ||
+      this.state == STATE.outputFull ||
+      this.state == STATE.itemReady) {
+    this.state = STATE.itemReady;
     this.nextUpdate = time;
   }
 };

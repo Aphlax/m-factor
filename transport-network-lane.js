@@ -278,6 +278,7 @@ Lane.prototype.draw = function(ctx, view) {
     const item = flowSign == FLOW.minus ? this.minusItem : this.plusItem;
     if (flow.length) {
       const itemDef = ITEMS.get(item);
+      if (!itemDef) console.log(this);
       const sprite = SPRITES.get(itemDef.sprite);
       let dte = 0, n = this.nodes.length - 1;
       for (let distanceToPrevious of flow) {
@@ -476,6 +477,8 @@ Lane.prototype.appendLaneEnd = function(other) {
     flow.unshift(...otherFlow);
     otherFlow.length = 0;
   }
+  this.minusItem = this.minusItem ?? other.minusItem;
+  this.plusItem = this.plusItem ?? other.plusItem;
   if (this.nodes[this.nodes.length - 1].direction == other.nodes[0].direction) {
     this.nodes[this.nodes.length - 1].length += other.nodes[0].length;
     for (let i = 1; i < other.nodes.length; i++) {
@@ -533,9 +536,23 @@ Lane.prototype.split = function(belt) {
     if (i < flow.length && laneLength < flow[i] + 0.25) {
       laneFlow.push(...flow.splice(0, i));
       flow[0] -= laneLength;
+      if (i) {
+        if (flowSign == FLOW.minus) {
+          lane.minusItem = this.minusItem;
+        } else {
+          lane.plusItem = this.plusItem;
+        }
+      }
     } else {
       laneFlow.push(...flow);
       flow.length = 0;
+      if (flowSign == FLOW.minus) {
+        lane.minusItem = this.minusItem;
+        this.minusItem = undefined;
+      } else {
+        lane.plusItem = this.plusItem;
+        this.plusItem = undefined;
+      }
     }
   }
   

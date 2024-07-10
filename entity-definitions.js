@@ -155,3 +155,6 @@ export const ENTITIES = new Map([
     noShadowAnimation: true,
   }],
 ]);
+
+ENTITIES.keys().forEach(name =>
+    ENTITIES.get(name).name = name);

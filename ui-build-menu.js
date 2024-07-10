@@ -25,8 +25,11 @@ function UiBuildMenu(ui, canvas) {
   
   this.menu = BUILD_MENU.map(name => {
     const entity = ENTITIES.get(name);
-    return {sprite: entity.icon, entity};
+    const x = 0, y = 0, size = 0;
+    return {sprite: entity.icon, entity, x, y, size};
   });
+  
+  this.selectedIndex = -1;
 }
 
 UiBuildMenu.prototype.update = function(time, dt) {
@@ -77,14 +80,17 @@ UiBuildMenu.prototype.update = function(time, dt) {
 };
 
 UiBuildMenu.prototype.draw = function(ctx) {
-  ctx.fillStyle = COLOR.buildBackground;
-  ctx.strokeStyle = COLOR.buildBorder;
   for (let i = 0; i < this.menu.length; i++) {
     const size = this.menu[i].size;
     if (!size || this.menu[i].y >= this.canvasHeight) continue;
     ctx.globalAlpha = 0.5;
+    ctx.fillStyle = i == this.selectedIndex ?
+        COLOR.buildSingleBackground : COLOR.buildBackground;
     ctx.fillRect(this.menu[i].x, this.menu[i].y, size, size);
     ctx.globalAlpha = 0.7;
+    ctx.strokeStyle = i == this.selectedIndex ?
+        COLOR.buildSingleBorder : COLOR.buildBorder;
+    ctx.lineWidth = i == this.selectedIndex ? 2 : 1;
     ctx.strokeRect(this.menu[i].x, this.menu[i].y, size, size);
     ctx.globalAlpha = 1;
     const sprite = SPRITES.get(this.menu[i].sprite);
@@ -94,11 +100,11 @@ UiBuildMenu.prototype.draw = function(ctx) {
           this.menu[i].x + 4, this.menu[i].y + 4,
           size - 8, size - 8);
   }
-  return;
+  // return;
   ctx.beginPath();
   ctx.moveTo(0, this.canvasHeight - 30);
-  ctx.lineTo(this.canvasWidth / 2,
-      this.canvasHeight- this.canvasWidth / 2 - 30);
+  ctx.lineTo(150, this.canvasHeight - 180);
+  ctx.lineTo(243, this.canvasHeight - 180);
   ctx.lineTo(this.canvasWidth, this.canvasHeight - 30);
   ctx.stroke();
 };
@@ -106,9 +112,9 @@ UiBuildMenu.prototype.draw = function(ctx) {
 UiBuildMenu.prototype.inBounds = function(t) {
   const w = this.canvasWidth, h = this.canvasHeight;
   const a = Math.abs(t.clientX - w / 2) + Math.abs(t.clientY - (h - 30));
-  const b1 = Math.abs(t.clientX) + Math.abs(t.clientY - (h - w / 2 - 30));
-  const b2 = Math.abs(t.clientX - w) + Math.abs(t.clientY - (h - w / 2 - 30));
-  return a < b1 && a < b2;
+  const b1 = Math.abs(t.clientX - (w / 2 - 197)) + Math.abs(t.clientY - (h - 197 - 30));
+  const b2 = Math.abs(t.clientX - (w / 2 + 197)) + Math.abs(t.clientY - (h - 197 - 30));
+  return a < b1 && a < b2 && t.clientY > h - 180;
 };
 
 UiBuildMenu.prototype.touchStart = function(e) {
@@ -123,6 +129,18 @@ UiBuildMenu.prototype.touchMove = function(e, longTouch) {
 };
 
 UiBuildMenu.prototype.touchEnd = function(e, shortTouch) {
+  if (shortTouch) {
+    const t = e.changedTouches[0];
+    for (let i = 0; i < this.menu.length; i++) {
+      const r = this.menu[i];
+      if (!r.size) continue;
+      if (r.x <= t.clientX && t.clientX <= r.x + r.size &&
+          r.y <= t.clientY && t.clientY <= r.y + r.size) {
+        this.selectedIndex = i;
+        break;
+      }
+    }
+  }
   if (this.dragX) {
     this.dragX = 0;
   }
@@ -130,6 +148,14 @@ UiBuildMenu.prototype.touchEnd = function(e, shortTouch) {
 
 UiBuildMenu.prototype.touchLong = function(e) {
   
+};
+
+UiBuildMenu.prototype.getSelectedEntity = function() {
+  return this.menu[this.selectedIndex]?.entity;
+};
+
+UiBuildMenu.prototype.entityBuilt = function() {
+  this.selectedIndex = -1;
 };
 
 export {UiBuildMenu};
