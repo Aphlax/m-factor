@@ -12,10 +12,12 @@ const MIN_Y = 150;
 
 /*
   default buttons:
-  delete
-  pippette
   move/rotate menu
+  pippette
   inventory
+  upgrade
+  downgrade
+  delete
 */
 
 function UiWindow(ui, canvas) {
@@ -34,6 +36,7 @@ function UiWindow(ui, canvas) {
   this.selectedEntity = undefined;
   this.entityUis = new Map();
   this.entityUi = undefined;
+  this.defaultUi = {};
 }
 
 UiWindow.prototype.update = function(time, dt) {
@@ -91,6 +94,9 @@ UiWindow.prototype.draw = function(ctx, time) {
       c.draw(ctx, time);
     }
   }
+  for (let c of this.defaultUi.all) {
+    c.draw(ctx, time);
+  }
 };
 
 UiWindow.prototype.touchStart = function(e) {
@@ -99,6 +105,9 @@ UiWindow.prototype.touchStart = function(e) {
     this.animationSpeed = 0;
   }
   for (let c of this.entityUi.all) {
+    c.touchStart?.(e);
+  }
+  for (let c of this.defaultUi.all) {
     c.touchStart?.(e);
   }
 };
@@ -120,6 +129,9 @@ UiWindow.prototype.touchMove = function(e, longTouch) {
   }
   for (let c of this.entityUi.all) {
     c.touchMove?.(e, longTouch);
+  }
+  for (let c of this.defaultUi.all) {
+    c.touchMove?.(e);
   }
 };
 
@@ -144,6 +156,9 @@ UiWindow.prototype.touchEnd = function(e, shortTouch) {
   for (let c of this.entityUi.all) {
     c.touchEnd?.(e, shortTouch);
   }
+  for (let c of this.defaultUi.all) {
+    c.touchEnd?.(e);
+  }
 };
 
 UiWindow.prototype.touchLong = function(e) {
@@ -153,9 +168,18 @@ UiWindow.prototype.touchLong = function(e) {
   for (let c of this.entityUi.all) {
     c.touchLong?.(e);
   }
+  for (let c of this.defaultUi.all) {
+    c.touchLong?.(e);
+  }
 }
 
 UiWindow.prototype.initialize = function() {
+  this.defaultUi = {
+    deleteEntity: new UiButton(this, this.canvasWidth - 50, 40)
+        .setButton(BUTTON.deleteEntity, S.crossIcon),
+  };
+  this.defaultUi.all = Object.values(this.defaultUi);
+  
   this.entityUis.set(-1, { // Resource.
     resource: new UiResource(this, 10, 40),
   });
@@ -246,6 +270,10 @@ UiWindow.prototype.set = function(selectedEntity) {
     }
   } else if (selectedEntity.type == TYPE.lab) {
     this.entityUi.inventory.set(selectedEntity.inputInventory);
+  }
+  
+  for (let c of this.defaultUi.all) {
+    c.y = this.entityUi.all.length ? 86 : 40;
   }
 };
 

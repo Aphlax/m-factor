@@ -106,4 +106,11 @@ UiChoice.prototype.touchEnd = function(e) {
   this.pressedIndex = -1;
 };
 
+UiChoice.prototype.touchLong = function(e) {
+  if (this.pressedIndex != -1) {
+    this.pressedIndex = -1;
+  }
+};
+
+
 export {UiChoice, CHOICE};

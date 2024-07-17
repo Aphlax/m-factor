@@ -110,8 +110,8 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   } else if (this.type == TYPE.lab) {
     this.state = STATE.missingItem;
     this.nextUpdate = NEVER;
-    this.inputInventory = new Inventory(1)
-        .setFilters(LAB_FILTERS);
+    this.inputInventory = this.outputInventory =
+        new Inventory(1).setFilters(LAB_FILTERS);
   }
   return this;
 };
@@ -411,6 +411,12 @@ Entity.prototype.update = function(gameMap, time) {
         this.animation = 0;
         return;
       }
+      for (let inputEntity of this.inputEntities) {
+        if (inputEntity.state == STATE.outputFull ||
+            inputEntity.state == STATE.itemReady) {
+          inputEntity.nextUpdate = this.nextUpdate;
+        }
+      }
       this.state = STATE.running;
       this.taskStart = this.nextUpdate;
       this.nextUpdate = this.taskStart + 10000;
@@ -422,13 +428,15 @@ Entity.prototype.insert = function(item, amount, time) {
   if (this.inputInventory) {
     const count = this.inputInventory.insert(item, amount);
     if (count) {
-      if (this.type == TYPE.chest) {
+      if (this.type == TYPE.chest ||
+          this.type == TYPE.lab) {
         for (let outputEntity of this.outputEntities) {
           if (outputEntity.state == STATE.missingItem) {
             outputEntity.nextUpdate = time;
           }
         }
-      } else if (this.state == STATE.missingItem) {
+      }
+      if (this.state == STATE.missingItem) {
         this.nextUpdate = time;
       }
     }
@@ -505,7 +513,15 @@ Entity.prototype.extract = function(item, amount, time) {
  * returns a positive wait time in ms if no item.
  */
 Entity.prototype.beltExtract = function(items, time, positionForBelt) {
-  return this.data.lane.extractItem(items, this, time, positionForBelt);
+  const wait = this.data.lane.extractItem(items, this, time, positionForBelt);
+  if (wait > 0) {
+    for (let inputEntity of this.inputEntities) {
+      if (inputEntity.state == STATE.itemReady) {
+        inputEntity.nextUpdate = time;
+      }
+    }
+  }
+  return wait;
 };
 
 Entity.prototype.connectBelt = function(other, time, transportNetwork) {

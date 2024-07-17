@@ -1,6 +1,7 @@
 import {Entity} from './entity.js';
 import {UiWindow} from './ui-window.js';
 import {UiBuildMenu} from './ui-build-menu.js';
+import {UiRotateButton} from './ui-rotate-button.js';
 import {TYPE, RESOURCE_LABELS} from './entity-properties.js';
 import {SPRITES} from './sprite-pool.js';
 import {ITEMS} from './item-definitions.js';
@@ -11,6 +12,7 @@ const MODE = {
   map: 1,
   window: 2,
   buildMenu: 3,
+  rotateButton: 4,
 };
 const LONG_TOUCH_DURATION = 500;
 
@@ -20,7 +22,9 @@ function GameUi(game, gameMapInput, canvas) {
   this.window = new UiWindow(this, canvas);
   this.window.initialize();
   this.buildMenu = new UiBuildMenu(this, canvas);
+  this.rotateButton = new UiRotateButton(this, canvas);
   this.gameMapInput.buildMenu = this.buildMenu;
+  this.gameMapInput.rotateButton = this.rotateButton;
   
   this.mode = MODE.none;
   this.lastUpdate = 0;
@@ -50,6 +54,8 @@ GameUi.prototype.update = function(time) {
       this.gameMapInput.touchLong(this.longTouchEvent);
     } else if (this.mode == MODE.buildMenu) {
       this.buildMenu.touchLong(this.longTouchEvent);
+    } else if (this.mode == MODE.rotateButton) {
+      this.rotateButton.touchLong(this.longTouchEvent);
     }
   }
   
@@ -71,6 +77,7 @@ GameUi.prototype.draw = function(ctx, time, view) {
   }
   
   this.buildMenu.draw(ctx);
+  this.rotateButton.draw(ctx);
   this.window.draw(ctx, time);
   
   if (time < this.longTouchIndicator) {
@@ -104,6 +111,8 @@ GameUi.prototype.touchStart = function(e) {
       this.mode = MODE.window;
     } else if (this.buildMenu.inBounds(e.touches[0])) {
       this.mode = MODE.buildMenu;
+    } else if (this.rotateButton.inBounds(e.touches[0])) {
+      this.mode = MODE.rotateButton;
     } else {
       this.mode = MODE.map;
     }
@@ -114,6 +123,8 @@ GameUi.prototype.touchStart = function(e) {
     this.gameMapInput.touchStart(e);
   } else if (this.mode == MODE.buildMenu) {
     this.buildMenu.touchStart(e);
+  } else if (this.mode == MODE.rotateButton) {
+    this.rotateButton.touchStart(e);
   }
 }
 
@@ -130,6 +141,8 @@ GameUi.prototype.touchMove = function(e) {
     this.gameMapInput.touchMove(e, this.longTouch);
   } else if (this.mode == MODE.buildMenu) {
     this.buildMenu.touchMove(e, this.longTouch);
+  } else if (this.mode == MODE.rotateButton) {
+    this.rotateButton.touchMove(e, this.longTouch);
   }
 }
 
@@ -140,6 +153,8 @@ GameUi.prototype.touchEnd = function(e) {
     this.gameMapInput.touchEnd(e, this.shortTouch);
   } else if (this.mode == MODE.buildMenu) {
     this.buildMenu.touchEnd(e, this.shortTouch);
+  } else if (this.mode == MODE.rotateButton) {
+    this.rotateButton.touchEnd(e, this.shortTouch);
   }
   if (this.longTouchEnd) {
     this.longTouchEnd = 0;

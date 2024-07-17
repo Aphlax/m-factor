@@ -14,7 +14,6 @@ const BUILD_MENU = [
 
 function UiBuildMenu(ui, canvas) {
   this.ui = ui;
-  
   this.canvasWidth = canvas.width;
   this.canvasHeight = canvas.height;
   
@@ -83,16 +82,13 @@ UiBuildMenu.prototype.draw = function(ctx) {
   for (let i = 0; i < this.menu.length; i++) {
     const size = this.menu[i].size;
     if (!size || this.menu[i].y >= this.canvasHeight) continue;
-    ctx.globalAlpha = 0.5;
     ctx.fillStyle = i == this.selectedIndex ?
         COLOR.buildSingleBackground : COLOR.buildBackground;
     ctx.fillRect(this.menu[i].x, this.menu[i].y, size, size);
-    ctx.globalAlpha = 0.7;
     ctx.strokeStyle = i == this.selectedIndex ?
         COLOR.buildSingleBorder : COLOR.buildBorder;
     ctx.lineWidth = i == this.selectedIndex ? 2 : 1;
     ctx.strokeRect(this.menu[i].x, this.menu[i].y, size, size);
-    ctx.globalAlpha = 1;
     const sprite = SPRITES.get(this.menu[i].sprite);
     ctx.drawImage(sprite.image,
           sprite.x, sprite.y,

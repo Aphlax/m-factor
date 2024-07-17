@@ -278,7 +278,6 @@ Lane.prototype.draw = function(ctx, view) {
     const item = flowSign == FLOW.minus ? this.minusItem : this.plusItem;
     if (flow.length) {
       const itemDef = ITEMS.get(item);
-      if (!itemDef) console.log(this);
       const sprite = SPRITES.get(itemDef.sprite);
       let dte = 0, n = this.nodes.length - 1;
       for (let distanceToPrevious of flow) {
@@ -292,10 +291,12 @@ Lane.prototype.draw = function(ctx, view) {
           n--;
         }
         let x, y;
-        if (n && dte > this.nodes[n].length - 1) {
+        if ((n || (this.circular &&
+            this.belts[this.belts.length - 1].direction != this.belts[0].direction)) &&
+            dte > this.nodes[n].length - 1) {
+          const prevDir = this.nodes[n ? n - 1 : this.nodes.length - 1].direction;
           const largeTurn = ((this.nodes[n].direction -
-              this.nodes[n - 1].direction + 4) % 4) ==
-              2 + flowSign;
+              prevDir + 4) % 4) == 2 + flowSign;
           const angle =
               ((1 - (dte - this.nodes[n].length + 1) /
               (largeTurn ? 1.5 : 0.5)) *
@@ -304,11 +305,11 @@ Lane.prototype.draw = function(ctx, view) {
               Math.PI / 2;
           x = this.nodes[n].x + 0.5 +
               ((this.nodes[n].direction - 2) % 2) * -0.5 +
-              ((this.nodes[n - 1].direction - 2) % 2) * 0.5 +
+              ((prevDir - 2) % 2) * 0.5 +
               (largeTurn ? 0.73 : 0.27) * Math.cos(angle);
           y = this.nodes[n].y + 0.5 +
               ((this.nodes[n].direction - 1) % 2) * 0.5 +
-              ((this.nodes[n - 1].direction - 1) % 2) * -0.5 +
+              ((prevDir - 1) % 2) * -0.5 +
               (largeTurn ? 0.73 : 0.27) * Math.sin(angle);
         } else {
           x = this.nodes[n].x + 0.5 - flowSign *
@@ -353,11 +354,9 @@ Lane.prototype.draw = function(ctx, view) {
   ctx.lineTo(
       (x + 0.5) * view.scale - view.x,
       (y + 0.5) * view.scale - view.y);
-  ctx.strokeStyle = this.circular ? "#FF00FF" : "#00FFFF";
-  ctx.globalAlpha = 0.3;
+  ctx.strokeStyle = this.circular ? "#FF00FF88" : "#00FFFF88";
   ctx.lineWidth = 2;
   ctx.stroke();
-  ctx.globalAlpha = 1;
 };
 
 Lane.prototype.extendEnd = function(belt) {
@@ -394,10 +393,17 @@ Lane.prototype.extendBegin = function(belt) {
 };
 
 Lane.prototype.removeEnd = function() {
-  this.belts.pop().data.lane = undefined;
+  const belt = this.belts.pop();
+  const turnBelt = (belt.direction -
+      (belt.data.beltInput?.direction ??
+      belt.direction) + 4) % 4;
+  belt.data.lane = undefined;
   for (let flowSign of FLOWS) {
     const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
     let removal = 1, i = 0;
+    if (turnBelt) {
+      removal += (turnBelt == 1 ? -0.5 : 0.5) * flowSign;
+    }
     while (i < flow.length && removal > flow[i]) {
       removal -= flow[i++] + 0.25;
     }
@@ -514,8 +520,11 @@ Lane.prototype.split = function(belt) {
   
   const b = this.belts.indexOf(belt);
   const belts = this.belts.splice(b);
+  // lane is the end half of the original.
   const lane = new Lane(belts, nodes);
-  lane.belts.forEach(b => b.data.lane = lane);
+  for (let b of lane.belts) {
+    b.data.lane = lane;
+  }
   
   for (let flowSign of FLOWS) {
     const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
@@ -523,14 +532,15 @@ Lane.prototype.split = function(belt) {
     let laneLength = 0;
     for (let n = 0; n < lane.nodes.length; n++) {
       laneLength += lane.nodes[n].length;
-      if (n) {
+      if (n || (this.circular && lane.nodes[0].direction !=
+            this.nodes[this.nodes.length - 1].direction)) {
         const turn = ((lane.nodes[n].direction -
-            lane.nodes[n - 1].direction + 4) % 4) - 2;
+            (n ? lane.nodes[n - 1] : this.nodes[this.nodes.length - 1]).direction + 4) % 4) - 2;
         laneLength += flowSign * turn * 0.5;
       }
     }
     let i = 0;
-    while (i < flow.length && laneLength >= flow[i] + 0.25) {
+    while (i < flow.length && laneLength >= flow[i]) {
       laneLength -= flow[i++] + 0.25;
     }
     if (i < flow.length && laneLength < flow[i] + 0.25) {

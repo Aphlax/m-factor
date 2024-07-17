@@ -9,6 +9,7 @@ function GameMapInput(gameMap, view) {
   this.touches = new Array(3).fill(0).map(() => ({x: 0, y: 0}));
   
   this.buildMenu = undefined; // Set in GameUi.
+  this.rotateButton = undefined;
 }
 
 GameMapInput.prototype.update = function(time) {
@@ -53,6 +54,7 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
     if (entityDef) {
       if (this.gameMap.tryCreateEntity(
           this.touches[0].x, this.touches[0].y,
+          this.rotateButton.direction,
           entityDef, this.lastUpdate)) {
         this.buildMenu.entityBuilt();
       }

@@ -209,7 +209,13 @@ function inserterTest(gameMap, time) {
   gameMap.createEntity(NAME.assemblingMachine1,
       -8, 16, 0, time);
   
-  
+  createLane(gameMap, -12, -5, 0, 1, time);
+  createLane(gameMap, -12, -6, 1, 1, time);
+  createLane(gameMap, -11, -6, 2, 1, time);
+  const lane = createLane(gameMap, -11, -5, 3, 1, time);
+  gameMap.createEntity(NAME.burnerDrill, -12, -8, 2, time);
+  lane.minusItem = I.ironOre;
+  lane.minusFlow = new Array(4 * 6).fill(0);
   return s;
 }
 
@@ -217,7 +223,10 @@ function createLane(gameMap, x, y, direction, length, time) {
   for (let i = 0; i < length; i++) {
     const dx = -((direction - 2) % 2) * i;
     const dy = ((direction - 1) % 2) * i;
-    gameMap.createEntity(NAME.transportBelt,
+    const b = gameMap.createEntity(NAME.transportBelt,
         x + dx, y + dy, direction, time);
+    if (i == length - 1) {
+      return b.data.lane;
+    }
   }
 }

@@ -4,6 +4,7 @@ import {CHOICE} from './ui-choice.js';
 
 const BUTTON = {
   assemblerRecipe: 1,
+  deleteEntity: 2,
 };
 
 function UiButton(parent, x, y) {
@@ -76,6 +77,9 @@ UiButton.prototype.touchEnd = function(e) {
     this.parent.yTarget = Math.max(150, this.parent.canvasHeight - 50 -
           46 * Math.ceil(this.parent.entityUi.recipeChoice.choices.length / 8));
     this.parent.animationSpeed = (this.parent.yTarget - this.parent.y) / 100;
+  } else if(this.name == BUTTON.deleteEntity) {
+    this.parent.ui.game.gameMap.deleteEntity(this.parent.selectedEntity);
+    this.parent.set();
   }
   
 };

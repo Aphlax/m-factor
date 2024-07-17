@@ -19,6 +19,7 @@ export const ENTITIES = new Map([
     type: TYPE.mine,
     width: 2,
     height: 2,
+    rotable: true,
     icon: S.burnerDrillIcon,
     sprites: {
       [DIRECTION.north]: [S.burnerDrillN, S.burnerDrillShadowN],
@@ -42,6 +43,7 @@ export const ENTITIES = new Map([
     type: TYPE.chest,
     width: 1,
     height: 1,
+    rotable: false,
     icon: S.woodenChestIcon,
     sprites: {
       [DIRECTION.north]: [S.woodenChest, S.woodenChestShadow],
@@ -59,6 +61,7 @@ export const ENTITIES = new Map([
     type: TYPE.belt,
     width: 1,
     height: 1,
+    rotable: true,
     icon: S.transportBeltIcon,
     sprites: {
       [DIRECTION.north]: [S.transportBeltN],
@@ -89,6 +92,7 @@ export const ENTITIES = new Map([
     type: TYPE.inserter,
     width: 1,
     height: 1,
+    rotable: true,
     icon: S.inserterIcon,
     sprites: {
       [DIRECTION.north]: [S.inserter],
@@ -107,6 +111,7 @@ export const ENTITIES = new Map([
     type: TYPE.furnace,
     width: 2,
     height: 2,
+    rotable: false,
     icon: S.stoneFurnaceIcon,
     sprites: {
       [DIRECTION.north]: [S.stoneFurnaceWorking],
@@ -126,6 +131,7 @@ export const ENTITIES = new Map([
     type: TYPE.assembler,
     width: 3,
     height: 3,
+    rotable: false,
     icon: S.assemblingMachine1Icon,
     sprites: {
       [DIRECTION.north]: [S.assemblingMachine1, S.assemblingMachine1Shadow],
@@ -144,6 +150,7 @@ export const ENTITIES = new Map([
     type: TYPE.lab,
     width: 3,
     height: 3,
+    rotable: false,
     icon: S.labIcon,
     sprites: {
       [DIRECTION.north]: [S.lab, S.labShadow],

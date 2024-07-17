@@ -93,6 +93,7 @@ export const S = {
   stoneFurnaceIcon: 16500 + 5,
   assemblingMachine1Icon: 16500 + 6,
   labIcon: 16500 + 7,
+  crossIcon: 16500 + 8,
   
   smoke: 17000,
   
@@ -354,6 +355,10 @@ export const SPRITES = [
   {
     path: "graphics/icons/gear.png",
     sprites: sprites(S.gearIcon, 32, 32, 1, 1),
+  },
+  {
+    path: "graphics/icons/cross.png",
+    sprites: sprites(S.crossIcon, 32, 32, 1, 1),
   },
 ];
 

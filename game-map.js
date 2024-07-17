@@ -350,13 +350,14 @@ GameMap.prototype.getSelectedEntity = function(screenX, screenY) {
       this.getResourceAt(Math.floor(x), Math.floor(y));
 };
 
-GameMap.prototype.tryCreateEntity = function(screenX, screenY, entity, time) {
+GameMap.prototype.tryCreateEntity = function(screenX, screenY, direction, entity, time) {
   const x = Math.round((this.view.x + screenX) /
       this.view.scale - entity.width / 2);
   const y = Math.round((this.view.y + screenY) /
       this.view.scale - entity.height / 2);
+  direction = entity.rotable ? direction : 0;
   if (this.canPlace(x, y, entity.width, entity.height)) {
-    this.createEntity(entity.name, x, y, 0, time);
+    this.createEntity(entity.name, x, y, direction, time);
     return true;
   }
   return false;
