@@ -11,16 +11,25 @@ const BUILD_MENU = [
   NAME.assemblingMachine1,
   NAME.lab,
 ];
+const DEACC = 50;
+
+/*
+  chests, logistic chests, roboport 9
+  belts, splitters, underground 9
+  inserters, powerpoles 10
+  assemblers, refinery, chem, lab, rocket silo 7
+  pipes, pump, offshore pump 4
+  rails, rail signals, train stop, loc, wagons 7
+  mines, furnaces 5
+  turbines, solars, boilers, accumulator, light, powerpoles 9
+  atomic reactor & co 4
+  walls, gate, turrets 7
+*/
 
 function UiBuildMenu(ui, canvas) {
   this.ui = ui;
   this.canvasWidth = canvas.width;
   this.canvasHeight = canvas.height;
-  
-  this.x = 2;
-  this.oldX = -1;
-  this.dx = 0;
-  this.dragX = 2;
   
   this.menu = BUILD_MENU.map(name => {
     const entity = ENTITIES.get(name);
@@ -28,19 +37,32 @@ function UiBuildMenu(ui, canvas) {
     return {sprite: entity.icon, entity, x, y, size};
   });
   
+  this.x = 2;
+  this.oldX = -1;
+  this.dx = 0;
+  this.dragX = 2;
+  
   this.selectedIndex = -1;
 }
 
 UiBuildMenu.prototype.update = function(time, dt) {
-  const target = Math.max(0, Math.min(this.menu.length - 1,
-      Math.round(this.x + this.dx * 200)));
-  if (this.x != target && !this.dragX) {
-    const dx = target - this.x;
-    this.x += Math.abs(dx) > 0.005 * dt ? dx / Math.abs(dx) * 0.005 * dt : dx;
-    if (this.dx) {
-      this.dx = Math.abs(this.dx) > 0.005 ? this.dx - Math.sign(this.dx) * 0.001 : 0;
+  if (!this.dragX && this.dx) {
+    const pos = this.x + this.dx * 0.5 * Math.abs(this.dx) / DEACC;
+    const target = Math.max(0, Math.min(this.menu.length - 1,
+        Math.round(pos)));
+    if (Math.abs(pos - target) > 0.001) {
+      this.dx = Math.sign(target - this.x) *
+          Math.sqrt(Math.abs(target - this.x) * 2 * DEACC);
+    }
+    this.x += this.dx * dt * 0.001;
+    if (Math.abs(this.dx) < DEACC * 0.05) {
+      this.x = Math.round(this.x);
+      this.dx = 0;
+    } else {
+      this.dx -= Math.sign(this.dx) * DEACC * dt * 0.001;
     }
   }
+  
   if (this.x != this.oldX) {
     const x = this.canvasWidth * 0.5,
         y = this.canvasHeight - 96;
@@ -72,7 +94,7 @@ UiBuildMenu.prototype.update = function(time, dt) {
       this.menu[i].size = size * 2 + 8;
     }
     if (this.dragX) {
-      this.dx = (this.x - this.oldX) / dt;
+      this.dx = (this.x - this.oldX) / (dt * 0.001);
     }
     this.oldX = this.x;
   }
@@ -133,6 +155,9 @@ UiBuildMenu.prototype.touchEnd = function(e, shortTouch) {
       if (r.x <= t.clientX && t.clientX <= r.x + r.size &&
           r.y <= t.clientY && t.clientY <= r.y + r.size) {
         this.selectedIndex = i;
+        if (this.x != i) {
+          this.dx = Math.sign(i - this.x) * Math.sqrt(Math.abs(i - this.x) * 2 * DEACC);
+        }
         break;
       }
     }
