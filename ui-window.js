@@ -37,6 +37,7 @@ function UiWindow(ui, canvas) {
   this.entityUis = new Map();
   this.entityUi = undefined;
   this.defaultUi = {};
+  this.showDefaultUi = true;
 }
 
 UiWindow.prototype.update = function(time, dt) {
@@ -94,8 +95,10 @@ UiWindow.prototype.draw = function(ctx, time) {
       c.draw(ctx, time);
     }
   }
-  for (let c of this.defaultUi.all) {
-    c.draw(ctx, time);
+  if (this.showDefaultUi) {
+    for (let c of this.defaultUi.all) {
+      c.draw(ctx, time);
+    }
   }
 };
 
@@ -107,8 +110,10 @@ UiWindow.prototype.touchStart = function(e) {
   for (let c of this.entityUi.all) {
     c.touchStart?.(e);
   }
-  for (let c of this.defaultUi.all) {
-    c.touchStart?.(e);
+  if (this.showDefaultUi) {
+    for (let c of this.defaultUi.all) {
+      c.touchStart?.(e);
+    }
   }
 };
 
@@ -130,8 +135,10 @@ UiWindow.prototype.touchMove = function(e, longTouch) {
   for (let c of this.entityUi.all) {
     c.touchMove?.(e, longTouch);
   }
-  for (let c of this.defaultUi.all) {
-    c.touchMove?.(e);
+  if (this.showDefaultUi) {
+    for (let c of this.defaultUi.all) {
+      c.touchMove?.(e);
+    }
   }
 };
 
@@ -156,8 +163,10 @@ UiWindow.prototype.touchEnd = function(e, shortTouch) {
   for (let c of this.entityUi.all) {
     c.touchEnd?.(e, shortTouch);
   }
-  for (let c of this.defaultUi.all) {
-    c.touchEnd?.(e);
+  if (this.showDefaultUi) {
+    for (let c of this.defaultUi.all) {
+      c.touchEnd?.(e, shortTouch);
+    }
   }
 };
 
@@ -168,8 +177,10 @@ UiWindow.prototype.touchLong = function(e) {
   for (let c of this.entityUi.all) {
     c.touchLong?.(e);
   }
-  for (let c of this.defaultUi.all) {
-    c.touchLong?.(e);
+  if (this.showDefaultUi) {
+    for (let c of this.defaultUi.all) {
+      c.touchLong?.(e);
+    }
   }
 }
 
@@ -272,6 +283,7 @@ UiWindow.prototype.set = function(selectedEntity) {
     this.entityUi.inventory.set(selectedEntity.inputInventory);
   }
   
+  this.showDefaultUi = !!selectedEntity.type;
   for (let c of this.defaultUi.all) {
     c.y = this.entityUi.all.length ? 86 : 40;
   }

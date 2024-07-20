@@ -144,6 +144,7 @@ GameMap.prototype.draw = function(ctx, time) {
       }
     }
   }
+  this.input.draw(ctx);
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x - this.view.scale * 7) continue;
     if (x * size > this.view.width + this.view.x) continue;
@@ -301,6 +302,11 @@ GameMap.prototype.disconnectEntity = function(entity) {
       if (other.type == TYPE.belt) {
         if (other.beltInputOutput()) {
           this.transportNetwork.beltInputChanged(other);
+          for (let other2 of other.inputEntities) {
+            if (other2.type == TYPE.belt) {
+              other2.updateBeltSprites();
+            }
+          }
         }
         other.updateBeltSprites();
       }

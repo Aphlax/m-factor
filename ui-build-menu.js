@@ -3,26 +3,28 @@ import {S, SPRITES} from './sprite-pool.js';
 import {NAME, ENTITIES} from './entity-definitions.js';
 
 const BUILD_MENU = [
-  NAME.burnerDrill,
   NAME.woodenChest,
   NAME.transportBelt,
   NAME.inserter,
-  NAME.stoneFurnace,
   NAME.assemblingMachine1,
   NAME.lab,
+  NAME.burnerDrill,
+  NAME.stoneFurnace,
 ];
 const DEACC = 50;
 
 /*
+  create blueprint, copy, paste, delete, upgrade, downgrade 6
   chests, logistic chests, roboport 9
   belts, splitters, underground 9
   inserters, powerpoles 10
   assemblers, refinery, chem, lab, rocket silo 7
   pipes, pump, offshore pump 4
   rails, rail signals, train stop, loc, wagons 7
-  mines, furnaces 5
+  mines, furnaces, pumpjack 6
   turbines, solars, boilers, accumulator, light, powerpoles 9
   atomic reactor & co 4
+  logic, speaker, light, wire 7
   walls, gate, turrets 7
 */
 
@@ -37,12 +39,13 @@ function UiBuildMenu(ui, canvas) {
     return {sprite: entity.icon, entity, x, y, size};
   });
   
-  this.x = 2;
-  this.oldX = -1;
+  this.x = 3;
+  this.oldX = 0;
   this.dx = 0;
-  this.dragX = 2;
+  this.dragX = 0;
   
   this.selectedIndex = -1;
+  this.multiBuild = false;
 }
 
 UiBuildMenu.prototype.update = function(time, dt) {
@@ -105,10 +108,12 @@ UiBuildMenu.prototype.draw = function(ctx) {
     const size = this.menu[i].size;
     if (!size || this.menu[i].y >= this.canvasHeight) continue;
     ctx.fillStyle = i == this.selectedIndex ?
-        COLOR.buildSingleBackground : COLOR.buildBackground;
+        (this.multiBuild ? COLOR.buildMultiBackground :
+        COLOR.buildSingleBackground) : COLOR.buildBackground;
     ctx.fillRect(this.menu[i].x, this.menu[i].y, size, size);
     ctx.strokeStyle = i == this.selectedIndex ?
-        COLOR.buildSingleBorder : COLOR.buildBorder;
+        (this.multiBuild ? COLOR.buildMultiBorder :
+        COLOR.buildSingleBorder) : COLOR.buildBorder;
     ctx.lineWidth = i == this.selectedIndex ? 2 : 1;
     ctx.strokeRect(this.menu[i].x, this.menu[i].y, size, size);
     const sprite = SPRITES.get(this.menu[i].sprite);
@@ -154,12 +159,19 @@ UiBuildMenu.prototype.touchEnd = function(e, shortTouch) {
       if (!r.size) continue;
       if (r.x <= t.clientX && t.clientX <= r.x + r.size &&
           r.y <= t.clientY && t.clientY <= r.y + r.size) {
+        if (this.selectedIndex == i) {
+          this.selectedIndex = -1;
+          break;
+        }
         this.selectedIndex = i;
         if (this.x != i) {
           this.dx = Math.sign(i - this.x) * Math.sqrt(Math.abs(i - this.x) * 2 * DEACC);
         }
         break;
       }
+    }
+    if (this.multiBuild) {
+      this.multiBuild = false;
     }
   }
   if (this.dragX) {
@@ -168,7 +180,20 @@ UiBuildMenu.prototype.touchEnd = function(e, shortTouch) {
 };
 
 UiBuildMenu.prototype.touchLong = function(e) {
-  
+  const t = e.touches[0];
+  for (let i = 0; i < this.menu.length; i++) {
+    const r = this.menu[i];
+    if (!r.size) continue;
+    if (r.x <= t.clientX && t.clientX <= r.x + r.size &&
+        r.y <= t.clientY && t.clientY <= r.y + r.size) {
+      this.multiBuild = true;
+      this.selectedIndex = i;
+      if (this.x != i) {
+        this.dx = Math.sign(i - this.x) * Math.sqrt(Math.abs(i - this.x) * 2 * DEACC);
+      }
+      break;
+    }
+  }
 };
 
 UiBuildMenu.prototype.getSelectedEntity = function() {
@@ -176,7 +201,9 @@ UiBuildMenu.prototype.getSelectedEntity = function() {
 };
 
 UiBuildMenu.prototype.entityBuilt = function() {
-  this.selectedIndex = -1;
+  if (!this.multiBuild) {
+    this.selectedIndex = -1;
+  }
 };
 
 export {UiBuildMenu};

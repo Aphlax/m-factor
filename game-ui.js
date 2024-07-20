@@ -14,7 +14,7 @@ const MODE = {
   buildMenu: 3,
   rotateButton: 4,
 };
-const LONG_TOUCH_DURATION = 500;
+const LONG_TOUCH_DURATION = 400;
 
 function GameUi(game, gameMapInput, canvas) {
   this.game = game;
@@ -34,6 +34,7 @@ function GameUi(game, gameMapInput, canvas) {
   this.longTouch = false;
   this.longTouchIndicator = 0;
   this.longTouchEvent = {touches: [{}]};
+  this.longTouchEvent.changedTouches = this.longTouchEvent.touches;
   this.shortTouch = false;
 }
 

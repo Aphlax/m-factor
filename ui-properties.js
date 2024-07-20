@@ -13,7 +13,10 @@ export const COLOR = {
   buttonBorder: "#9095A8",
   buildBackground: "#C0E0FF88",
   buildSingleBackground: "#C0FFEE88",
+  buildMultiBackground: "#FFCCDD88",
   buildBorder: "#EEEEEEB0",
   buildSingleBorder: "#00FF80B0",
+  buildMultiBorder: "#FF4080B0",
   longTouchIndicator: "#EFEFFF",
+  buildPlanner: "#00FF88",
 };
