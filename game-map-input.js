@@ -12,11 +12,11 @@ function GameMapInput(gameMap, view) {
   this.gameMap = gameMap;
   this.view = view;
   this.lastUpdate = 0;
-  this.touches = new Array(3).fill(0).map(() => ({x: 0, y: 0}));
   
   this.buildMenu = undefined; // Set in GameUi.
   this.rotateButton = undefined;
   
+  this.touches = new Array(3).fill(0).map(() => ({id: 0, x: 0, y: 0}));
   this.mode = MODE.none;
   this.currentBuild = {
     x: 0, y: 0,
@@ -79,23 +79,29 @@ GameMapInput.prototype.touchStart = function(e) {
   Move happens only after significant move.
 */
 GameMapInput.prototype.touchMove = function(e, longTouch) {
-  if (!longTouch) {
-    if (e.touches.length > 1) {
-      const emx = (e.touches[0].clientX + e.touches[1].clientX);
-      const emy = (e.touches[0].clientY + e.touches[1].clientY);
-      const omx = (this.touches[0].x + this.touches[1].x) / 2;
-      const omy = (this.touches[0].y + this.touches[1].y) / 2;
-      const oldDist = Math.sqrt((this.touches[0].x - this.touches[1].x)**2 + (this.touches[0].y - this.touches[1].y)**2);
-      const newDist = Math.sqrt((e.touches[0].clientX - e.touches[1].clientX)**2 + (e.touches[0].clientY - e.touches[1].clientY)**2);
+  let i = -1;
+  if (this.mode == MODE.none && !longTouch) {
+    i = 0;
+  } else if (this.mode != MODE.none) {
+    i = 1;
+  }
+  if (e.touches[i]) {
+    if (e.touches[i + 1]) {
+      const emx = (e.touches[i].clientX + e.touches[i + 1].clientX);
+      const emy = (e.touches[i].clientY + e.touches[i + 1].clientY);
+      const omx = (this.touches[i].x + this.touches[i + 1].x) / 2;
+      const omy = (this.touches[i].y + this.touches[i + 1].y) / 2;
+      const oldDist = Math.sqrt((this.touches[i].x - this.touches[i + 1].x)**2 + (this.touches[i].y - this.touches[i + 1].y)**2);
+      const newDist = Math.sqrt((e.touches[i].clientX - e.touches[i + 1].clientX)**2 + (e.touches[i].clientY - e.touches[i + 1].clientY)**2);
       let scale = this.view.scale * newDist / oldDist;
       scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale)) / this.view.scale;
       this.view.scale *= scale;
       this.view.x = Math.round((this.view.x + emx / 2) * scale - emx + omx);
       this.view.y = Math.round((this.view.y + emy / 2) * scale - emy + omy);
     } else {
-      const dx = e.touches[0].clientX - this.touches[0].x;
+      const dx = e.touches[i].clientX - this.touches[i].x;
       this.view.x = Math.round(this.view.x - dx);
-      const dy = e.touches[0].clientY - this.touches[0].y;
+      const dy = e.touches[i].clientY - this.touches[i].y;
       this.view.y = Math.round(this.view.y - dy);
     }
   }
@@ -135,7 +141,7 @@ GameMapInput.prototype.touchMove = function(e, longTouch) {
 };
 
 GameMapInput.prototype.touchEnd = function(e, shortTouch) {
-  if (this.mode == MODE.buildBelt) {
+  if (this.mode == MODE.buildBelt && !e.touches.length) {
     this.mode = MODE.none;
     for (let i = 0; i < this.currentBuild.length; i++) {
       const x = this.currentBuild.x -
@@ -151,18 +157,21 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
     }
   }
   if (shortTouch) {
+    const entity = this.gameMap.getSelectedEntity(
+        this.touches[0].x, this.touches[0].y);
     const entityDef = this.buildMenu.getSelectedEntity();
-    if (entityDef) {
+    if (entity?.type || !entityDef) {
+      this.gameMap.game.ui.window.set(entity);
+      if (entityDef) {
+        this.buildMenu.reset();
+      }
+    } else {
       if (this.gameMap.tryCreateEntity(
           this.touches[0].x, this.touches[0].y,
           this.rotateButton.direction,
           entityDef, this.lastUpdate)) {
         this.buildMenu.entityBuilt();
       }
-    } else {
-      const entity = this.gameMap.getSelectedEntity(
-          this.touches[0].x, this.touches[0].y);
-      this.gameMap.game.ui.window.set(entity);
     }
   }
   this.setTouches(e);
@@ -186,9 +195,11 @@ GameMapInput.prototype.touchLong = function(e) {
 GameMapInput.prototype.setTouches = function(e) {
   for (let i = 0; i < 3; i++) {
     if (e.touches[i]) {
+      this.touches[i].id = e.touches[i].identifier;
       this.touches[i].x = e.touches[i].clientX;
       this.touches[i].y = e.touches[i].clientY;
     } else if (this.touches[i].x || this.touches[i].y) {
+      this.touches[i].id = 0;
       this.touches[i].x = 0;
       this.touches[i].y = 0;
     }

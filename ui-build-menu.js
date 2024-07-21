@@ -206,4 +206,9 @@ UiBuildMenu.prototype.entityBuilt = function() {
   }
 };
 
+UiBuildMenu.prototype.reset = function() {
+  this.selectedIndex = -1;
+  this.multiBuild = false;
+};
+
 export {UiBuildMenu};

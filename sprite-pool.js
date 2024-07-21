@@ -45,6 +45,17 @@ SpritePool.prototype.draw = function(ctx, time) {
       Math.floor(ctx.canvas.height * 0.5 - 20),
       Math.floor((ctx.canvas.width * 0.6 - 30) * this.current / this.total + 10), 40);
       
+  if (this.current > this.total * 0.95) {
+    for (let imageDef of SPRITES) {
+      const id = imageDef.sprites[0].id;
+      if (!this.sprites.has(id)) {
+        ctx.fillStyle = "black";
+        ctx.fillText(id, ctx.canvas.width * 0.5 - 40,
+            ctx.canvas.height - 60);
+      }
+    }
+  }
+      
   // Debug.
   if (this.current == this.total) {
     ctx.fillStyle = "lightgrey";

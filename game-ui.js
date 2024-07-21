@@ -29,7 +29,6 @@ function GameUi(game, gameMapInput, canvas) {
   this.mode = MODE.none;
   this.lastUpdate = 0;
   
-  this.longTouchStarted = false;
   this.longTouchEnd = 0;
   this.longTouch = false;
   this.longTouchIndicator = 0;
@@ -39,10 +38,7 @@ function GameUi(game, gameMapInput, canvas) {
 }
 
 GameUi.prototype.update = function(time) {
-  if (this.longTouchStarted) {
-    this.longTouchStarted = false;
-    this.longTouchEnd = time + LONG_TOUCH_DURATION;
-  } else if (this.longTouchEnd && time >= this.longTouchEnd) {
+  if (this.longTouchEnd && time >= this.longTouchEnd) {
     this.longTouchEnd = 0;
     this.longTouch = true;
     this.shortTouch = false;
@@ -95,7 +91,7 @@ GameUi.prototype.draw = function(ctx, time, view) {
 
 GameUi.prototype.touchStart = function(e) {
   if (e.touches.length == 1) {
-    this.longTouchStarted = true;
+    this.longTouchEnd = this.lastUpdate + LONG_TOUCH_DURATION
     this.longTouchEvent.touches[0].clientX =
         e.touches[0].clientX;
     this.longTouchEvent.touches[0].clientY =
@@ -163,10 +159,10 @@ GameUi.prototype.touchEnd = function(e) {
   if (this.shortTouch) {
     this.shortTouch = false;
   }
-  if (this.longTouch) {
-    this.longTouch = false;
-  }
   if (!e.touches.length) {
+    if (this.longTouch) {
+      this.longTouch = false;
+    }
     this.mode = MODE.none;
   }
 }
