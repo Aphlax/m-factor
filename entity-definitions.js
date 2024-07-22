@@ -16,10 +16,11 @@ export const ENTITIES = new Map([
   [NAME.burnerDrill,
   {
     label: 'Wind up drill',
+    prototypeName: "burner-mining-drill",
     type: TYPE.mine,
     width: 2,
     height: 2,
-    rotable: true,
+    rotatable: true,
     icon: S.burnerDrillIcon,
     sprites: {
       [DIRECTION.north]: [S.burnerDrillN, S.burnerDrillShadowN],
@@ -40,10 +41,11 @@ export const ENTITIES = new Map([
   [NAME.woodenChest,
   {
     label: 'Wooden chest',
+    prototypeName: "wooden-chest",
     type: TYPE.chest,
     width: 1,
     height: 1,
-    rotable: false,
+    rotatable: false,
     icon: S.woodenChestIcon,
     sprites: {
       [DIRECTION.north]: [S.woodenChest, S.woodenChestShadow],
@@ -58,10 +60,11 @@ export const ENTITIES = new Map([
   [NAME.transportBelt,
   {
     label: 'Belt',
+    prototypeName: "transport-belt",
     type: TYPE.belt,
     width: 1,
     height: 1,
-    rotable: true,
+    rotatable: true,
     icon: S.transportBeltIcon,
     sprites: {
       [DIRECTION.north]: [S.transportBeltN],
@@ -89,10 +92,11 @@ export const ENTITIES = new Map([
   [NAME.inserter,
   {
     label: 'Inserter',
+    prototypeName: "burner-inserter",
     type: TYPE.inserter,
     width: 1,
     height: 1,
-    rotable: true,
+    rotatable: true,
     icon: S.inserterIcon,
     sprites: {
       [DIRECTION.north]: [S.inserter],
@@ -108,10 +112,11 @@ export const ENTITIES = new Map([
   [NAME.stoneFurnace,
   {
     label: "Stone Furnace",
+    prototypeName: "stone-furnace",
     type: TYPE.furnace,
     width: 2,
     height: 2,
-    rotable: false,
+    rotatable: false,
     icon: S.stoneFurnaceIcon,
     sprites: {
       [DIRECTION.north]: [S.stoneFurnaceWorking],
@@ -128,10 +133,11 @@ export const ENTITIES = new Map([
   [NAME.assemblingMachine1,
   {
     label: "Assembler 1",
+    prototypeName: "assembling-machine-1",
     type: TYPE.assembler,
     width: 3,
     height: 3,
-    rotable: false,
+    rotatable: false,
     icon: S.assemblingMachine1Icon,
     sprites: {
       [DIRECTION.north]: [S.assemblingMachine1, S.assemblingMachine1Shadow],
@@ -147,10 +153,11 @@ export const ENTITIES = new Map([
   [NAME.lab,
   {
     label: "Wind up lab",
+    prototypeName: "lab",
     type: TYPE.lab,
     width: 3,
     height: 3,
-    rotable: false,
+    rotatable: false,
     icon: S.labIcon,
     sprites: {
       [DIRECTION.north]: [S.lab, S.labShadow],
@@ -165,3 +172,7 @@ export const ENTITIES = new Map([
 
 ENTITIES.keys().forEach(name =>
     ENTITIES.get(name).name = name);
+
+export const PROTO_TO_NAME = new Map(
+    ENTITIES.values().map(def =>
+    [def.prototypeName, def.name]));

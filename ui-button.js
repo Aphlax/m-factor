@@ -5,6 +5,7 @@ import {CHOICE} from './ui-choice.js';
 const BUTTON = {
   assemblerRecipe: 1,
   deleteEntity: 2,
+  gameMenu: 3,
 };
 
 function UiButton(parent, x, y) {
@@ -40,6 +41,14 @@ UiButton.prototype.draw = function(ctx, time) {
           sprite.x, sprite.y,
           sprite.width, sprite.height,
           x + 4, y + 4, 32, 32)
+};
+
+UiButton.prototype.inBounds = function(t) {
+  const x = Math.floor(this.parent.x + this.x),
+        y = Math.floor(this.parent.y + this.y);
+ 
+  return !(x > t.clientX || t.clientX > x + 40 ||
+      y > t.clientY || t.clientY > y + 40);
 };
 
 UiButton.prototype.touchStart = function(e) {
@@ -80,8 +89,10 @@ UiButton.prototype.touchEnd = function(e) {
   } else if(this.name == BUTTON.deleteEntity) {
     this.parent.ui.game.gameMap.deleteEntity(this.parent.selectedEntity);
     this.parent.set();
+  } else if(this.name == BUTTON.gameMenu) {
+    //this.parent.ui.game.saveGame();
+    this.parent.ui.game.loadGame();
   }
-  
 };
 
 UiButton.prototype.touchLong = function() {

@@ -79,10 +79,12 @@ const lakeLimit = dist => dist <= 150 ? 2 :
     dist <= 2000 ? 0.6 - (dist - 1500) / 5000 :
     0.5;
 
-function MapGenerator() {}
+function MapGenerator(seed) {
+  this.seed = seed;
+}
 
-MapGenerator.prototype.initialize = function(seed) {
-  const randSeed = createSeedRand(...SEED, seed);
+MapGenerator.prototype.initialize = function() {
+  const randSeed = createSeedRand(...SEED, this.seed);
   this.lakeNoise = new PerlinNoise(randSeed(),
       0.00743, 5, 2, 0.5);
   this.terrainNoises = TERRAIN.map(t =>

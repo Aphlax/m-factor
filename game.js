@@ -2,6 +2,7 @@
 
 import {GameMap} from './game-map.js';
 import {GameUi} from './game-ui.js';
+import {Storage} from './storage.js';
 import {SPRITES} from './sprite-pool.js';
 import {scenario} from './scenario.js';
 import {STATE} from './entity-properties.js';
@@ -16,13 +17,25 @@ function Game(canvas) {
   this.mode = MODE.loading;
   this.spritePool = SPRITES;
   this.spritePool.load();
-  this.gameMap = new GameMap(this, canvas);
-  this.gameMap.initialize(this.seed);
-  this.ui = new GameUi(this, this.gameMap.input, canvas);
+  this.ui = new GameUi(this, canvas);
+  this.storage = new Storage(this);
+  this.gameMap = undefined;
+  
   
   this.setupScenario = true;
+  this.lastUpdate = 0;
   this.playTime = 0;
+  
+  this.storage.initialize();
+  this.loadMap(new GameMap(this.seed)
+      .centerView(canvas));
 }
+
+Game.prototype.loadMap = function(gameMap) {
+  this.gameMap = gameMap;
+  this.gameMap.initialize();
+  this.ui.setMap(this.gameMap);
+};
 
 Game.prototype.update = function(time) {
   if (this.ui.window.selectedEntity?.type) {
@@ -35,10 +48,11 @@ Game.prototype.update = function(time) {
   }
   if (this.mode == MODE.playing) {
     this.playTime = time;
-    this.gameMap.update(this.playTime);
-    this.ui.update(this.playTime);
+    const pt = Math.floor(this.playTime);
+    this.gameMap.update(pt);
+    this.ui.update(pt);
     if (this.setupScenario) {
-      scenario(this.gameMap, this.playTime);
+      scenario(this.gameMap, pt);
       this.setupScenario = false;
     }
   } else if (this.mode == MODE.loading) {
@@ -46,36 +60,42 @@ Game.prototype.update = function(time) {
       this.mode = MODE.playing;
     }
   }
+  this.lastUpdate = time;
 };
 
 Game.prototype.draw = function(ctx, time) {
   if (this.mode == MODE.playing) {
     this.gameMap.draw(ctx, time);
-    this.ui.draw(ctx, time, this.gameMap.view);
+    this.ui.draw(ctx, time);
   } else if (this.mode == MODE.loading) {
     this.spritePool.draw(ctx, time);
   }
 };
 
+Game.prototype.saveGame = function() {
+  this.storage.save("", this.playTime, this.gameMap);
+};
+
+Game.prototype.loadGame = function() {
+  this.storage.load("");
+};
+
 Game.prototype.touchStart = function(e) {
   if (this.mode == MODE.playing) {
     this.ui.touchStart(e)
-    if (e.touches[0].clientY < 50) {
-      this.seed = Math.floor(Math.random() * 1000);
-      this.setupScenario = true;
-      this.gameMap.initialize(this.seed);
-    }
   }
-}
+};
+
 Game.prototype.touchMove = function(e) {
   if (this.mode == MODE.playing) {
     this.ui.touchMove(e);
   }
-}
+};
+
 Game.prototype.touchEnd = function(e) {
   if (this.mode == MODE.playing) {
     this.ui.touchEnd(e);
   }
-}
+};
 
 export {Game};

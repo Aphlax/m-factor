@@ -567,7 +567,6 @@ Lane.prototype.split = function(belt) {
   }
   
   if (this.circular) {
-    this.circular = false;
     lane.appendLaneEnd(this);
   }
   

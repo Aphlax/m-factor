@@ -8,13 +8,12 @@ const MODE = {
   buildBelt: 1,
 };
 
-function GameMapInput(gameMap, view) {
-  this.gameMap = gameMap;
-  this.view = view;
+function GameMapInput(ui) {
+  this.gameMap = undefined;
+  this.view = undefined;
   this.lastUpdate = 0;
   
-  this.buildMenu = undefined; // Set in GameUi.
-  this.rotateButton = undefined;
+  this.ui = ui;
   
   this.touches = new Array(3).fill(0).map(() => ({id: 0, x: 0, y: 0}));
   this.mode = MODE.none;
@@ -23,6 +22,11 @@ function GameMapInput(gameMap, view) {
     direction: 0, length: 0
   };
 }
+
+GameMapInput.prototype.set = function(gameMap) {
+  this.gameMap = gameMap;
+  this.view = gameMap.view;
+};
 
 GameMapInput.prototype.update = function(time) {
   this.lastUpdate = time;
@@ -152,25 +156,25 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
         break;
       }
       this.gameMap.createEntity(
-          this.buildMenu.getSelectedEntity().name,
+          this.ui.buildMenu.getSelectedEntity().name,
           x, y, this.currentBuild.direction, this.lastUpdate);
     }
   }
   if (shortTouch) {
     const entity = this.gameMap.getSelectedEntity(
         this.touches[0].x, this.touches[0].y);
-    const entityDef = this.buildMenu.getSelectedEntity();
+    const entityDef = this.ui.buildMenu.getSelectedEntity();
     if (entity?.type || !entityDef) {
-      this.gameMap.game.ui.window.set(entity);
+      this.ui.window.set(entity);
       if (entityDef) {
-        this.buildMenu.reset();
+        this.ui.buildMenu.reset();
       }
     } else {
       if (this.gameMap.tryCreateEntity(
           this.touches[0].x, this.touches[0].y,
-          this.rotateButton.direction,
+          this.ui.rotateButton.direction,
           entityDef, this.lastUpdate)) {
-        this.buildMenu.entityBuilt();
+        this.ui.buildMenu.entityBuilt();
       }
     }
   }
@@ -178,7 +182,7 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
 };
 
 GameMapInput.prototype.touchLong = function(e) {
-  const entity = this.buildMenu.getSelectedEntity();
+  const entity = this.ui.buildMenu.getSelectedEntity();
   if (entity?.type == TYPE.belt) {
     this.currentBuild.x = Math.floor((e.touches[0].clientX +
         this.view.x) / this.view.scale);
@@ -190,7 +194,7 @@ GameMapInput.prototype.touchLong = function(e) {
       this.currentBuild.length = 1;
     }
   }
-}
+};
 
 GameMapInput.prototype.setTouches = function(e) {
   for (let i = 0; i < 3; i++) {

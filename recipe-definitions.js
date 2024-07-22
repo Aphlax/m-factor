@@ -3,6 +3,7 @@ import {NAME} from './entity-definitions.js';
 
 export const RECIPES = [
   {
+    prototypeName: "iron-plate",
     inputs: [
       {item: I.ironOre, amount: 1},
     ],
@@ -13,6 +14,7 @@ export const RECIPES = [
     duration: 3200,
   },
   {
+    prototypeName: "copper-plate",
     inputs: [
       {item: I.copperOre, amount: 1},
     ],
@@ -23,6 +25,7 @@ export const RECIPES = [
     duration: 3200,
   },
   {
+    prototypeName: "iron-gear-wheel",
     inputs: [
       {item: I.ironPlate, amount: 2},
     ],
@@ -33,6 +36,7 @@ export const RECIPES = [
     duration: 500,
   },
   {
+    prototypeName: "automation-science-pack",
     inputs: [
       {item: I.ironGear, amount: 1},
       {item: I.copperPlate, amount: 1},
@@ -49,3 +53,6 @@ export const FURNACE_FILTERS = RECIPES
     .filter(r => r.entities.includes(NAME.stoneFurnace))
     .map(r => r.inputs[0])
     .sort((a, b) => b - a);
+
+export const PROTO_TO_RECIPE = new Map(
+    RECIPES.map(r => [r.prototypeName, r]));

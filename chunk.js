@@ -53,7 +53,7 @@ Chunk.prototype.drawTerrain = function(ctx, view) {
   ctx.lineWidth = 1;
   ctx.strokeStyle = "red";
   ctx.stroke();
-}
+};
 
 Chunk.prototype.drawResources = function(ctx, view) {
   const xStart = Math.max(0, Math.floor(view.x / view.scale - this.x * SIZE - 1));

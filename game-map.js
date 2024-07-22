@@ -1,31 +1,35 @@
 import {MapGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
-import {GameMapInput} from './game-map-input.js';
 import {S} from './sprite-definitions.js';
 import {TYPE, MAX_SIZE, rectOverlap} from './entity-properties.js';
 import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
 
-function GameMap(game, canvas) {
-  this.game = game;
-  this.mapGenerator = new MapGenerator();
+function GameMap(seed) {
+  this.mapGenerator = new MapGenerator(seed);
   this.view = {
-    x: Math.floor(-canvas.width / 2),
-    y: Math.floor(-canvas.height / 2),
-    width: canvas.width,
-    height: canvas.height,
+    x: -50,
+    y: -50,
+    width: 100,
+    height: 100,
     scale: 24,
   };
-  this.input = new GameMapInput(this, this.view);
   this.chunks = new Map(); // 2-D map of coordinate -> chunk
   this.transportNetwork = new TransportNetwork(this);
   this.particles = []; // Expired particles.
 }
 
-GameMap.prototype.initialize = function(seed) {
-  this.chunks = new Map(); // Reset.
-  this.mapGenerator.initialize(seed);
-  this.transportNetwork.reset();
+GameMap.prototype.initialize = function() {
+  this.mapGenerator.initialize();
+};
+
+GameMap.prototype.centerView = function(canvas) {
+  this.view.x = Math.floor(-canvas.width / 2);
+  this.view.y = Math.floor(-canvas.height / 2);
+  this.view.width = canvas.width;
+  this.view.height = canvas.height;
+  this.view.scale = 24;
+  return this;
 };
 
 GameMap.prototype.update = function(time) {
@@ -62,7 +66,6 @@ GameMap.prototype.update = function(time) {
       this.generateChunk(viewX + x, viewY + y);
     }
   }
-  this.input.update(time);
 };
 
 GameMap.prototype.draw = function(ctx, time) {
@@ -144,7 +147,6 @@ GameMap.prototype.draw = function(ctx, time) {
       }
     }
   }
-  this.input.draw(ctx);
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x - this.view.scale * 7) continue;
     if (x * size > this.view.width + this.view.x) continue;
@@ -172,7 +174,7 @@ GameMap.prototype.createEntity = function(name, x, y, direction, time) {
   entities.splice(i, 0, entity);
   
   return entity;
-}
+};
 
 GameMap.prototype.deleteEntity = function(entity) {
   if (!entity) return;
@@ -216,7 +218,7 @@ GameMap.prototype.canPlace = function(x, y, width, height, ignoredEntity) {
     }
   }
   return true;
-}
+};
 
 GameMap.prototype.getEntityAt = function(x, y) {
   const cx1 = Math.floor(x / SIZE);
@@ -235,7 +237,7 @@ GameMap.prototype.getEntityAt = function(x, y) {
     }
   }
   return undefined;
-}
+};
 
 GameMap.prototype.connectEntity = function(entity, time) {
   const x = entity.x - 2, y = entity.y - 2,
@@ -361,7 +363,7 @@ GameMap.prototype.tryCreateEntity = function(screenX, screenY, direction, entity
       this.view.scale - entity.width / 2);
   const y = Math.round((this.view.y + screenY) /
       this.view.scale - entity.height / 2);
-  direction = entity.rotable ? direction : 0;
+  direction = entity.rotatable ? direction : 0;
   if (this.canPlace(x, y, entity.width, entity.height)) {
     this.createEntity(entity.name, x, y, direction, time);
     return true;

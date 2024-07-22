@@ -61,7 +61,7 @@ import {Game} from "./game.js";
     ctx.fillStyle = "black";
     ctx.textBaseline = "alphabetic";
     ctx.fillText(frameRate + "", canvas.width - 48, 24);
-    ctx.fillText(Math.round(game.gameMap.view.scale * 10) / 10, canvas.width - 48, 48);
+    ctx.fillText((game.playTime / 1000).toFixed(1), canvas.width - 48, 48);
     ctx.fillText(game.seed, canvas.width - 48, 72);
     ctx.fillText((Math.round(maxUpdateTime * 10) / 10) + "/" +
         (Math.round(maxDrawTime * 10) / 10), 40, 55);
