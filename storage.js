@@ -59,7 +59,7 @@ Storage.prototype.save = function(name, time, gameMap) {
   
   transaction.objectStore(SAVES).put({
     name,
-    maps: [this.serializeMap(gameMap)],
+    map: this.serializeMap(gameMap),
     time,
   });
   
@@ -80,11 +80,10 @@ Storage.prototype.load = function(name) {
       .get(name);
       
   request.onsuccess = e => {
-    const {maps, time} = request.result;
-    console.log(maps[0]);
+    const {map, time} = request.result;
     this.game.playTime = time;
-    const gameMap = this.deserializeMap(maps[0]);
-    this.game.loadMap(gameMap);
+    const gameMap = this.deserializeMap(map);
+    this.game.loadMap(time, gameMap);
     this.mode = MODE.ready;
   };
   
@@ -219,9 +218,6 @@ Storage.prototype.deserializeMap = function(map) {
 };
 
 Storage.prototype.deserializeEntity = function(e, entity) {
-  if (entity.type == TYPE.furnace && e.recipe) {
-    entity.data.recipe = PROTO_TO_RECIPE.get(e.recipe);
-  }
   if (entity.type == TYPE.inserter ||
       entity.type == TYPE.mine ||
       entity.type == TYPE.furnace ||
@@ -239,6 +235,10 @@ Storage.prototype.deserializeEntity = function(e, entity) {
   if (e.outputInventory) {
     entity.outputInventory.items.push(...e.outputInventory.items);
     entity.outputInventory.amounts.push(...e.outputInventory.amounts);
+  }
+  if (entity.type == TYPE.furnace && e.recipe) {
+    entity.data.recipe = PROTO_TO_RECIPE.get(e.recipe);
+    entity.sprite = entity.data.workingAnimation;
   }
   if (entity.type == TYPE.belt) {
     entity.data.beltSideLoadMinusWait = e.beltSideLoadMinusWait;

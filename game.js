@@ -27,11 +27,12 @@ function Game(canvas) {
   this.playTime = 0;
   
   this.storage.initialize();
-  this.loadMap(new GameMap(this.seed)
+  this.loadMap(0, new GameMap(this.seed)
       .centerView(canvas));
 }
 
-Game.prototype.loadMap = function(gameMap) {
+Game.prototype.loadMap = function(time, gameMap) {
+  this.playTime = time;
   this.gameMap = gameMap;
   this.gameMap.initialize();
   this.ui.setMap(this.gameMap);
@@ -47,7 +48,7 @@ Game.prototype.update = function(time) {
     this.debug = "";
   }
   if (this.mode == MODE.playing) {
-    this.playTime = time;
+    this.playTime += time - this.lastUpdate;
     const pt = Math.floor(this.playTime);
     this.gameMap.update(pt);
     this.ui.update(pt);
@@ -65,8 +66,8 @@ Game.prototype.update = function(time) {
 
 Game.prototype.draw = function(ctx, time) {
   if (this.mode == MODE.playing) {
-    this.gameMap.draw(ctx, time);
-    this.ui.draw(ctx, time);
+    this.gameMap.draw(ctx, this.playTime);
+    this.ui.draw(ctx, this.playTime);
   } else if (this.mode == MODE.loading) {
     this.spritePool.draw(ctx, time);
   }

@@ -25,6 +25,18 @@ export function draw(ctx, view, time) {
         this.animationSpeed / 60) % this.animationLength;
   }
   const sprite = SPRITES.get(this.sprite + animation);
+  if (!sprite) {
+    console.log({
+      animation,
+      time,
+      taskStart: this.taskStart,
+      thisAnimation: this.animation,
+      spriteBase: this.sprite,
+      spriteId: this.sprite + animation,
+      entity: this,
+    });
+    throw new Error("Missing sprite!");
+  }
   const xScale = this.width * view.scale /
       (sprite.width - sprite.left - sprite.right);
   const yScale = this.height * view.scale /
@@ -55,6 +67,18 @@ export function drawShadow(ctx, view, time) {
         this.animationLength;
   }
   const sprite = SPRITES.get(this.spriteShadow + animation);
+  if (!sprite) {
+    console.log({
+      animation,
+      time,
+      taskStart: this.taskStart,
+      thisAnimation: this.animation,
+      spriteBase: this.spriteShadow,
+      spriteId: this.spriteShadow + animation,
+      entity: this,
+    });
+    throw new Error("Missing shadow sprite!");
+  }
   const xScale = this.width * view.scale /
       (sprite.width - sprite.left - sprite.right);
   const yScale = this.height * view.scale /
