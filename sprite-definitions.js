@@ -94,6 +94,7 @@ export const S = {
   assemblingMachine1Icon: 16500 + 6,
   labIcon: 16500 + 7,
   crossIcon: 16500 + 8,
+  menuIcon: 16500 + 9,
   
   smoke: 17000,
   
@@ -359,6 +360,10 @@ export const SPRITES = [
   {
     path: "graphics/icons/cross.png",
     sprites: sprites(S.crossIcon, 32, 32, 1, 1),
+  },
+  {
+    path: "graphics/icons/menu.png",
+    sprites: sprites(S.menuIcon, 32, 32, 1, 1),
   },
 ];
 

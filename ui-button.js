@@ -90,8 +90,7 @@ UiButton.prototype.touchEnd = function(e) {
     this.parent.ui.game.gameMap.deleteEntity(this.parent.selectedEntity);
     this.parent.set();
   } else if(this.name == BUTTON.gameMenu) {
-    //this.parent.ui.game.saveGame();
-    this.parent.ui.game.loadGame();
+    this.parent.ui.game.openMenu();
   }
 };
 

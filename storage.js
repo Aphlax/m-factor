@@ -3,23 +3,25 @@ import {Chunk} from './chunk.js';
 import {ENTITIES, PROTO_TO_NAME} from './entity-definitions.js';
 import {TYPE} from './entity-properties.js';
 import {PROTO_TO_RECIPE} from './recipe-definitions.js';
+import {COLOR} from './ui-properties.js';
 
 const DB = "m-factor",
     VERSION = 1;
 const SAVES = "saves";
 
 const MODE = {
-  none: 0,
+  initial: 0,
   ready: 1,
   saving: 2,
   loading: 3,
+  error: 4,
 };
 
 function Storage(game) {
   this.game = game;
   this.db = undefined;
   
-  this.mode = MODE.none;
+  this.mode = MODE.initial;
   this.lastError = undefined;
 }
 
@@ -28,6 +30,7 @@ Storage.prototype.initialize = function() {
   
   request.onerror = e => {
     console.log(this.lastError = e.target);
+    this.mode = MODE.error;
   };
   
   request.onupgradeneeded = e => {
@@ -38,6 +41,7 @@ Storage.prototype.initialize = function() {
         
     transaction.onerror = e => {
       console.log(this.lastError = e.target);
+      this.mode = MODE.error;
     };
     
     transaction.oncomplete = () => {
@@ -57,14 +61,16 @@ Storage.prototype.save = function(name, time, gameMap) {
   this.mode = MODE.saving;
   const transaction = this.db.transaction([SAVES], "readwrite");
   
-  transaction.objectStore(SAVES).put({
+  const save = {
     name,
     map: this.serializeMap(gameMap),
     time,
-  });
+  };
+  transaction.objectStore(SAVES).put(save);
   
   transaction.onerror = e => {
     console.log(this.lastError = e.target);
+    this.mode = MODE.error;
   };
   
   transaction.oncomplete = e => {
@@ -89,7 +95,55 @@ Storage.prototype.load = function(name) {
   
   transaction.onerror = e => {
     console.log(this.lastError = e.target);
+    this.mode = MODE.error;
   };
+};
+
+Storage.prototype.draw = function(ctx, time) {
+  if (this.mode == MODE.ready) return;
+  
+  const x = ctx.canvas.width / 2;
+  const y = ctx.canvas.height - 110;
+  
+  ctx.beginPath();
+  ctx.arc(x + 55, y, 22, 3 / 2 * Math.PI, Math.PI / 2);
+  ctx.arc(x - 55, y, 22, Math.PI / 2, 3 / 2 * Math.PI);
+  ctx.fillStyle = COLOR.background2;
+  ctx.fill();
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = COLOR.border1;
+  ctx.stroke();
+  
+  let textCenter = 0;
+  if (this.mode == MODE.initial ||
+      this.mode == MODE.saving ||
+      this.mode == MODE.loading) {
+    const a = time / 300,
+        l = 0.5 * Math.sin(time / 250) + 1.5;
+    ctx.beginPath();
+    ctx.arc(x - 55, y, 13, a - l, a + l);
+    ctx.strokeStyle = COLOR.progressBar;
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    textCenter = 16;
+  }
+  
+  let text = "";
+  if (this.mode == MODE.initial) {
+    text = "Connecting";
+  } else if (this.mode == MODE.saving) {
+    text = "Saving";
+  } else if (this.mode == MODE.loading) {
+    text = "Loading";
+  } else if (this.mode == MODE.error) {
+    text = "Error";
+  }
+  ctx.font = "18px monospace";
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "center";
+  ctx.fillStyle = COLOR.primary;
+  ctx.fillText(text, x + textCenter, y);
+  ctx.textAlign = "start";
 };
 
 Storage.prototype.serializeMap = function(gameMap) {
@@ -176,7 +230,7 @@ Storage.prototype.serializeInventory = function(inventory) {
 };
 
 Storage.prototype.deserializeMap = function(map) {
-  const gameMap = new GameMap(this.game, map.seed);
+  const gameMap = new GameMap(map.seed);
   gameMap.initialize();
   Object.assign(gameMap.view, map.view);
   for (let c of map.chunks) {

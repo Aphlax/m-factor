@@ -28,7 +28,7 @@ function GameUi(game, canvas) {
   this.buildMenu = new UiBuildMenu(this, canvas);
   this.rotateButton = new UiRotateButton(this, canvas);
   this.menuButton = new UiButton({x: 0, y: 0, ui: this}, 300, 20);
-  this.menuButton.setButton(BUTTON.gameMenu, S.crossIcon);
+  this.menuButton.setButton(BUTTON.gameMenu, S.menuIcon);
   
   this.mode = MODE.none;
   this.lastUpdate = 0;
