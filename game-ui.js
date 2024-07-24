@@ -27,7 +27,7 @@ function GameUi(game, canvas) {
   this.window.initialize();
   this.buildMenu = new UiBuildMenu(this, canvas);
   this.rotateButton = new UiRotateButton(this, canvas);
-  this.menuButton = new UiButton({x: 0, y: 0, ui: this}, 300, 20);
+  this.menuButton = new UiButton({x: 0, y: 0, ui: this}, canvas.width - 55, 15);
   this.menuButton.setButton(BUTTON.gameMenu, S.menuIcon);
   
   this.mode = MODE.none;
@@ -43,6 +43,7 @@ function GameUi(game, canvas) {
 
 GameUi.prototype.setMap = function(gameMap) {
   this.gameMapInput.set(gameMap);
+  this.window.set();
 };
 
 GameUi.prototype.update = function(time) {

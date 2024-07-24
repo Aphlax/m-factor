@@ -60,9 +60,9 @@ import {Game} from "./game.js";
     ctx.font = "24px Arial";
     ctx.fillStyle = "black";
     ctx.textBaseline = "alphabetic";
-    ctx.fillText(frameRate + "", canvas.width - 48, 24);
-    ctx.fillText((game.playTime / 1000).toFixed(1), canvas.width - 48, 48);
-    ctx.fillText(game.seed, canvas.width - 48, 72);
+    ctx.fillText(frameRate + "", canvas.width - 118, 24);
+    ctx.fillText((game.playTime / 1000).toFixed(1), canvas.width - 118, 48);
+    ctx.fillText(game.seed, canvas.width - 118, 72);
     ctx.fillText((Math.round(maxUpdateTime * 10) / 10) + "/" +
         (Math.round(maxDrawTime * 10) / 10), 40, 55);
     if (game.debug !== undefined) {

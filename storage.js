@@ -86,6 +86,12 @@ Storage.prototype.load = function(name) {
       .get(name);
       
   request.onsuccess = e => {
+    if (!request.result) {
+      console.log(this.lastError =
+          "Error: Key (" + name + ") does not exist.");
+      this.mode = MODE.error;
+      return;
+    }
     const {map, time} = request.result;
     this.game.playTime = time;
     const gameMap = this.deserializeMap(map);
@@ -106,8 +112,8 @@ Storage.prototype.draw = function(ctx, time) {
   const y = ctx.canvas.height - 110;
   
   ctx.beginPath();
-  ctx.arc(x + 55, y, 22, 3 / 2 * Math.PI, Math.PI / 2);
-  ctx.arc(x - 55, y, 22, Math.PI / 2, 3 / 2 * Math.PI);
+  ctx.arc(x + 50, y, 22, 3 / 2 * Math.PI, Math.PI / 2);
+  ctx.arc(x - 50, y, 22, Math.PI / 2, 3 / 2 * Math.PI);
   ctx.fillStyle = COLOR.background2;
   ctx.fill();
   ctx.lineWidth = 1;
@@ -121,7 +127,7 @@ Storage.prototype.draw = function(ctx, time) {
     const a = time / 300,
         l = 0.5 * Math.sin(time / 250) + 1.5;
     ctx.beginPath();
-    ctx.arc(x - 55, y, 13, a - l, a + l);
+    ctx.arc(x - 50, y, 13, a - l, a + l);
     ctx.strokeStyle = COLOR.progressBar;
     ctx.lineWidth = 5;
     ctx.stroke();
@@ -130,7 +136,7 @@ Storage.prototype.draw = function(ctx, time) {
   
   let text = "";
   if (this.mode == MODE.initial) {
-    text = "Connecting";
+    text = "Setup";
   } else if (this.mode == MODE.saving) {
     text = "Saving";
   } else if (this.mode == MODE.loading) {
