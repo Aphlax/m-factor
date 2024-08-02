@@ -2,7 +2,6 @@ import {TYPE} from './entity-properties.js';
 import {Lane} from './transport-network-lane.js';
 
 function TransportNetwork() {
-  this.lastUpdate = 0;
   this.lanes = [];
 }
 
@@ -48,9 +47,7 @@ TransportNetwork.prototype.beltInputChanged = function(belt) {
   }
 };
 
-TransportNetwork.prototype.update = function(time) {
-  const dt = time - this.lastUpdate;
-  this.lastUpdate = time;
+TransportNetwork.prototype.update = function(time, dt) {
   let removedLanes = 0;
   for (let i = 0; i < this.lanes.length; i++) {
     if (!this.lanes[i].nodes.length) {

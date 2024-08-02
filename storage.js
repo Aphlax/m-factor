@@ -1,7 +1,7 @@
 import {GameMap} from './game-map.js';
 import {Chunk} from './chunk.js';
 import {ENTITIES, PROTO_TO_NAME} from './entity-definitions.js';
-import {TYPE} from './entity-properties.js';
+import {TYPE, ENERGY} from './entity-properties.js';
 import {PROTO_TO_RECIPE} from './recipe-definitions.js';
 import {COLOR} from './ui-properties.js';
 
@@ -210,12 +210,18 @@ Storage.prototype.serializeEntity = function(index, entity) {
           state: entity.state,
           nextUpdate: entity.nextUpdate,
           taskStart: entity.taskStart,
+          taskEnd: entity.taskEnd,
+        } : {}),
+    ...(entity.energySource == ENERGY.burner ? {
+          energyStored: entity.energyStored,
         } : {}),
     ...(entity.inputInventory ? {inputInventory:
         this.serializeInventory(entity.inputInventory)} : {}),
     ...(entity.outputInventory && (entity.inputInventory !=
         entity.outputInventory) ? {outputInventory:
         this.serializeInventory(entity.outputInventory)} : {}),
+    ...(entity.fuelInventory ? {fuelInventory:
+        this.serializeInventory(entity.fuelInventory)} : {}),
     
     ...(entity.type == TYPE.belt ? {
         beltSideLoadMinusWait: entity.data.beltSideLoadMinusWait,
@@ -287,6 +293,10 @@ Storage.prototype.deserializeEntity = function(e, entity) {
     entity.state = e.state;
     entity.nextUpdate = e.nextUpdate;
     entity.taskStart = e.taskStart;
+    entity.taskEnd = e.taskEnd;
+  }
+  if (entity.energySource == ENERGY.burner) {
+    entity.energyStored = e.energyStored;
   }
   if (e.inputInventory) {
     entity.inputInventory.items.push(...e.inputInventory.items);
@@ -295,6 +305,10 @@ Storage.prototype.deserializeEntity = function(e, entity) {
   if (e.outputInventory) {
     entity.outputInventory.items.push(...e.outputInventory.items);
     entity.outputInventory.amounts.push(...e.outputInventory.amounts);
+  }
+  if (e.fuelInventory) {
+    entity.fuelInventory.items.push(...e.fuelInventory.items);
+    entity.fuelInventory.amounts.push(...e.fuelInventory.amounts);
   }
   if (entity.type == TYPE.furnace && e.recipe) {
     entity.data.recipe = PROTO_TO_RECIPE.get(e.recipe);

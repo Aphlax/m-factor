@@ -1,4 +1,4 @@
-import {I} from './item-definitions.js';
+import {ITEMS, I} from './item-definitions.js';
 
 export const TYPE = {
   mine: 1,
@@ -11,7 +11,7 @@ export const TYPE = {
 };
 
 /** Never value for next update. */
-export const NEVER = Number.MAX_SAFE_INTEGER;
+export const NEVER = Math.floor(Number.MAX_SAFE_INTEGER / 1000);
 
 export const MAX_SIZE = 3;
 
@@ -19,7 +19,9 @@ export const STATE = {
   running: 0,
   missingItem: 1,
   outputFull: 2, // Inserter output does not want anything.
-  itemReady: 3, // Inserter or mine ready to drop item (but output entity does not accept it). Assembler & forge output yellow.
+  itemReady: 3, // Inserter or mine ready to drop item (but output entity does not accept it). Assembler output yellow.
+  outOfEnergy: 4, // Stopped mid task because there was no energy.
+  noEnergy: 5, // Did not start a task because there was no energy.
   
   noOutput: 11, // Inserter or mine has no output (after item is ready to drop).
   inserterCoolDown: 12, // Inserter moving back to initial position.
@@ -85,3 +87,13 @@ export function rectOverlap(x, y, width, height, entity) {
   return x + width > entity.x && x < entity.x + entity.width &&
       y + height > entity.y && y < entity.y + entity.height;
 }
+
+export const ENERGY = {
+  burner: 1,
+  windUp: 2,
+  electricity: 3,
+};
+
+export const FUEL_FILTERS =
+    [...ITEMS.entries().filter(([i, {fuelValue}]) => fuelValue)
+    .map(([item]) => ({item, amount: 1}))];

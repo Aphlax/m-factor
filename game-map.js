@@ -1,7 +1,7 @@
 import {MapGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {S} from './sprite-definitions.js';
-import {TYPE, MAX_SIZE, rectOverlap} from './entity-properties.js';
+import {TYPE, STATE, MAX_SIZE, ENERGY, rectOverlap} from './entity-properties.js';
 import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
 
@@ -32,13 +32,14 @@ GameMap.prototype.centerView = function(canvas) {
   return this;
 };
 
-GameMap.prototype.update = function(time) {
-  this.transportNetwork.update(time);
+GameMap.prototype.update = function(time, dt) {
+  this.transportNetwork.update(time, dt);
   for (let chunks of this.chunks.values()) {
     for (let chunk of chunks.values()) {
       for (let entity of chunk.entities) {
-        if (time < entity.nextUpdate ||
-            entity.type == TYPE.belt) continue;
+        if (entity.type == TYPE.belt ||
+            entity.type == TYPE.chest) continue;
+        if (time < entity.nextUpdate) continue;
         entity.update(this, time);
       }
       let expired = 0;

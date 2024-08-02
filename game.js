@@ -47,7 +47,10 @@ Game.prototype.update = function(time) {
     const entity = this.ui.window.selectedEntity;
     this.debug = Object.keys(STATE)
         .filter(s => STATE[s] == entity.state)[0] +
-        ", " + entity.nextUpdate;
+        ", " + (entity.nextUpdate < 1000000 ?
+        (entity.nextUpdate / 1000).toFixed(1) : "XXX") +
+        ", " + (entity.taskStart / 1000).toFixed(1) +
+        ", " + (entity.taskEnd / 1000).toFixed(1);
   } else {
     this.debug = "";
   }
@@ -55,7 +58,7 @@ Game.prototype.update = function(time) {
     const dt = time - this.lastUpdate;
     if (dt < 100) {
       this.playTime += dt;
-      this.gameMap.update(this.playTime);
+      this.gameMap.update(this.playTime, dt);
       this.ui.update(this.playTime);
       if (this.setupScenario) {
         scenario(this.gameMap, this.playTime);

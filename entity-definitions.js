@@ -1,5 +1,5 @@
 import {S} from './sprite-pool.js';
-import {DIRECTION, TYPE} from './entity-properties.js';
+import {DIRECTION, TYPE, ENERGY} from './entity-properties.js';
 
 
 export const NAME = {
@@ -30,7 +30,7 @@ export const ENTITIES = new Map([
     },
     animationLength: 32,
     
-    taskDuration: 1250,
+    taskDuration: 4000,
     mineOutput: {
       [DIRECTION.north]: {x: 0, y: -1},
       [DIRECTION.east]: {x: 2, y: 0},
@@ -129,6 +129,8 @@ export const ENTITIES = new Map([
     
     processingSpeed: 1,
     idleAnimation: S.stoneFurnace,
+    energySource: ENERGY.burner,
+    energyConsumption: 90, // kW
   }],
   [NAME.assemblingMachine1,
   {

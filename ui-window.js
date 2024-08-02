@@ -1,9 +1,9 @@
 import {UiInventory} from './ui-inventory.js';
-import {UiProgress, UiResource} from './ui-components.js';
+import {UiProgress, UiResource, UiFuel} from './ui-components.js';
 import {UiButton, BUTTON} from './ui-button.js';
 import {UiChoice, CHOICE} from './ui-choice.js';
 import {COLOR} from './ui-properties.js';
-import {TYPE, RESOURCE_LABELS} from './entity-properties.js';
+import {TYPE, RESOURCE_LABELS, ENERGY} from './entity-properties.js';
 import {S} from './sprite-pool.js';
 
 const OPEN_HEIGHT = 44 + 2 * 46;
@@ -188,6 +188,8 @@ UiWindow.prototype.initialize = function() {
   this.defaultUi = {
     deleteEntity: new UiButton(this, this.canvasWidth - 50, 40)
         .setButton(BUTTON.deleteEntity, S.crossIcon),
+    fuelInventory: new UiInventory(this, 10, 40),
+    fuel: new UiFuel(this, 54, 40),
   };
   this.defaultUi.all = Object.values(this.defaultUi);
   
@@ -286,6 +288,13 @@ UiWindow.prototype.set = function(selectedEntity) {
   this.showDefaultUi = !!selectedEntity.type;
   for (let c of this.defaultUi.all) {
     c.y = this.entityUi.all.length ? 86 : 40;
+  }
+  if (selectedEntity.energySource == ENERGY.burner) {
+    this.defaultUi.fuelInventory.set(selectedEntity.fuelInventory);
+    this.defaultUi.fuel.set(selectedEntity);
+  } else {
+    this.defaultUi.fuelInventory.set();
+    this.defaultUi.fuel.set();
   }
 };
 

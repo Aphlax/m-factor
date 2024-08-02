@@ -2,6 +2,18 @@ import {SPRITES} from './sprite-pool.js';
 import {TYPE, STATE, DIRECTION} from './entity-properties.js';
 import {ITEMS} from './item-definitions.js';
 
+/*
+  Optimizations
+  
+  - Draw terrain on separate canvas, only refresh when changed
+  - resources too
+  - water terrain?
+  - belt sprites chaining
+  - item sprites chaining
+  
+  
+*/
+
 const COLOR = {
   greenHighlight: "#33EE00",
   greenHighlightBorder: "#44AA00",

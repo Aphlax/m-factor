@@ -20,6 +20,7 @@ UiInventory.prototype.setIsOutput = function(isOutput) {
 };
 
 UiInventory.prototype.draw = function(ctx) {
+  if (!this.inventory) return;
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
   ctx.lineWidth = 1;

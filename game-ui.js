@@ -44,6 +44,7 @@ function GameUi(game, canvas) {
 GameUi.prototype.setMap = function(gameMap) {
   this.gameMapInput.set(gameMap);
   this.window.set();
+  this.window.y = this.window.canvasHeight;
 };
 
 GameUi.prototype.update = function(time) {

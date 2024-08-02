@@ -26,6 +26,7 @@ export const ITEMS = new Map([
   {
     sprite: S.coalItem,
     stackSize: 50,
+    fuelValue: 4000, // kJ
   }],
   [I.stone,
   {

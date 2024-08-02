@@ -1,8 +1,9 @@
 import {Inventory} from './inventory.js';
-import {S, SPRITES} from './sprite-pool.js';
 import {ENTITIES} from './entity-definitions.js';
-import {TYPE, MAX_SIZE, NEVER, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS} from './entity-properties.js';
+import {TYPE, MAX_SIZE, NEVER, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ENERGY} from './entity-properties.js';
+import {ITEMS} from './item-definitions.js';
 import {RECIPES, FURNACE_FILTERS} from './recipe-definitions.js';
+import {S, SPRITES} from './sprite-pool.js';
 import * as entityLogic from './entity-logic.js';
 import * as entityDrawing from './entity-drawing.js';
 
@@ -25,13 +26,18 @@ function Entity() {
   this.spriteShadowAnimation = true;
   
   this.taskStart = 0;
-  this.taskDuration = 0;
+  this.taskDuration = 0; // Move to data.taskDuration.
+  this.taskEnd = 0;
   this.nextUpdate = 0;
   this.state = 0;
   this.data = {};
+  this.energySource = 0;
+  this.energyStored = 0; // kJ.
+  this.energyConsumption = 0; // kW.
   // Inventories.
   this.inputInventory = undefined;
   this.outputInventory = undefined;
+  this.fuelInventory = undefined;
   // Connected entities.
   this.inputEntities = [];
   this.outputEntities = [];
@@ -47,6 +53,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   this.width = def.width;
   this.height = def.height;
   this.direction = direction;
+  this.energySource = 0;
   this.sprite = def.sprites[direction][0];
   this.spriteShadow = def.sprites[direction][1];
   this.animation = 0;
@@ -87,8 +94,9 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   } else if (this.type == TYPE.furnace) {
     this.state = STATE.missingItem;
     this.nextUpdate = NEVER;
-    this.taskStart = 0;
+    this.taskStart = -1;
     this.taskDuration = 0;
+    this.taskEnd = 0;
     this.sprite = def.idleAnimation;
     this.data.processingSpeed = def.processingSpeed;
     this.data.recipe = undefined;
@@ -97,6 +105,12 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.inputInventory = new Inventory(1)
         .setFilters(FURNACE_FILTERS);
     this.outputInventory = new Inventory(1);
+    this.energySource = def.energySource;
+    if (def.energySource == ENERGY.burner) {
+      this.energyConsumption = def.energyConsumption;
+      this.fuelInventory = new Inventory(1)
+          .setFilters(FUEL_FILTERS);
+    }
   } else if (this.type == TYPE.assembler) {
     this.state = STATE.noRecipe;
     this.nextUpdate = NEVER;
@@ -149,7 +163,8 @@ Entity.prototype.update = function(gameMap, time) {
         this.data.inserterItem = -waitOrItem;
         this.state = STATE.running;
         this.taskStart = this.nextUpdate;
-        this.nextUpdate = this.taskStart + this.taskDuration;
+        this.taskEnd = this.nextUpdate =
+            this.taskStart + this.taskDuration;
         return;
       } else if (outputEntity.type == TYPE.belt) {
         const [item] = inputEntity.outputInventory.items;
@@ -161,7 +176,8 @@ Entity.prototype.update = function(gameMap, time) {
         this.data.inserterItem = item;
         this.state = STATE.running;
         this.taskStart = this.nextUpdate;
-        this.nextUpdate = this.taskStart + this.taskDuration;
+        this.taskEnd = this.nextUpdate =
+            this.taskStart + this.taskDuration;
         return;
       } else {
         const wants = outputEntity.insertWants();
@@ -182,7 +198,8 @@ Entity.prototype.update = function(gameMap, time) {
             this.data.inserterItem = item;
             this.state = STATE.running;
             this.taskStart = this.nextUpdate;
-            this.nextUpdate = this.taskStart + this.taskDuration;
+            this.taskEnd = this.nextUpdate =
+                this.taskStart + this.taskDuration;
             return;
           }
         }
@@ -212,7 +229,8 @@ Entity.prototype.update = function(gameMap, time) {
         this.data.inserterItem = undefined;
         this.state = STATE.inserterCoolDown;
         this.taskStart = this.nextUpdate;
-        this.nextUpdate = this.taskStart + this.taskDuration;
+        this.taskEnd = this.nextUpdate =
+            this.taskStart + this.taskDuration;
         return;
       }
       
@@ -225,7 +243,8 @@ Entity.prototype.update = function(gameMap, time) {
       this.data.inserterItem = undefined;
       this.state = STATE.inserterCoolDown;
       this.taskStart = this.nextUpdate;
-      this.nextUpdate = this.taskStart + this.taskDuration;
+      this.taskEnd = this.nextUpdate =
+          this.taskStart + this.taskDuration;
       return;
     }
   } else if (this.type == TYPE.mine) {
@@ -281,23 +300,84 @@ Entity.prototype.update = function(gameMap, time) {
           this.nextUpdate += wait;
           return;
         }
-        this.state = STATE.running;
-        this.taskStart = this.nextUpdate;
-        this.nextUpdate = this.taskStart + this.taskDuration;
-        return;
-      }
-      if (!outputEntity.insert(item, 1, this.nextUpdate)) {
+      } else if (!outputEntity.insert(item, 1, this.nextUpdate)) {
         this.nextUpdate = NEVER;
         return;
       }
       this.state = STATE.running;
       this.taskStart = this.nextUpdate;
-      this.nextUpdate = this.taskStart + this.taskDuration;
+      this.taskEnd = this.nextUpdate =
+          this.taskStart + this.taskDuration;
       return;
     }
   } else if (this.type == TYPE.furnace) {
-    let continueNextItem = false;
-    if (this.state == STATE.running || this.state == STATE.itemReady) {
+    if (this.state == STATE.outOfEnergy) {
+      const item = this.fuelInventory.items[0];
+      if (item && this.fuelInventory.extract(item, 1, true)) {
+        this.state = STATE.running;
+        const p = (this.nextUpdate - this.taskStart) /
+            (this.taskEnd - this.taskStart);
+        this.taskStart = this.nextUpdate - p * this.data.recipe.duration;
+        this.taskEnd = this.nextUpdate + (1 - p) * this.data.recipe.duration;
+        this.energyStored = ITEMS.get(item).fuelValue +
+            (this.nextUpdate - this.taskStart) / 1000 *
+            this.energyConsumption;
+        this.sprite = this.data.workingAnimation;
+        gameMap.createSmoke(this.x + 1, this.y, this.nextUpdate,
+            this.taskEnd - this.nextUpdate);
+        for (let inputEntity of this.inputEntities) {
+          if (inputEntity.state == STATE.outputFull ||
+              inputEntity.state == STATE.itemReady) {
+            inputEntity.nextUpdate = this.nextUpdate;
+          }
+        }
+        this.nextUpdate = this.taskEnd;
+        return;
+      }
+      this.nextUpdate = NEVER;
+      return;
+    }
+    let taskFinished = false, continueNextItem = false;
+    if (this.state == STATE.running) {
+      if (this.energySource == ENERGY.burner) {
+        if (this.nextUpdate >= this.taskEnd) {
+          this.energyStored -=
+              (this.nextUpdate - this.taskStart) /
+              1000 * this.energyConsumption;
+          taskFinished = true;
+        } else {
+          const item = this.fuelInventory.items[0];
+          if (item && this.fuelInventory.extract(item, 1, true)) {
+            this.energyStored = ITEMS.get(item).fuelValue +
+                (this.nextUpdate - this.taskStart) / 1000 *
+                this.energyConsumption;
+            for (let inputEntity of this.inputEntities) {
+              if (inputEntity.state == STATE.outputFull ||
+                  inputEntity.state == STATE.itemReady) {
+                inputEntity.nextUpdate = this.nextUpdate;
+              }
+            }
+            this.nextUpdate = this.taskEnd;
+            return;
+          } else {
+            this.energyStored = 0;
+            this.state = STATE.outOfEnergy;
+            const p = (this.nextUpdate - this.taskStart) /
+                (this.taskEnd - this.taskStart);
+            this.taskStart = this.nextUpdate - p * NEVER;
+            this.taskEnd = this.nextUpdate + (1 - p) * NEVER;
+            this.nextUpdate = NEVER;
+            this.sprite = this.data.idleAnimation;
+            this.animation = 0;
+            return;
+          }
+        }
+      } else {
+        taskFinished = true;
+      }
+    }
+    if (taskFinished ||
+        this.state == STATE.itemReady) {
       const output = this.data.recipe.outputs[0];
       const amount = this.outputInventory.insert(output.item, output.amount);
       if (!amount) {
@@ -314,7 +394,20 @@ Entity.prototype.update = function(gameMap, time) {
       }
       continueNextItem = true;
     }
-    if (continueNextItem || this.state == STATE.missingItem) {
+    if (continueNextItem ||
+        this.state == STATE.missingItem ||
+        this.state == STATE.noEnergy) {
+      if (this.energySource == ENERGY.burner &&
+          this.energyStored <= 0) {
+        const item = this.fuelInventory.items[0];
+        if (item && this.fuelInventory.extract(item, 1, true)) {
+          this.energyStored = ITEMS.get(item).fuelValue;
+        } else {
+          this.state = STATE.noEnergy;
+          this.nextUpdate = NEVER;
+          return;
+        }
+      }
       const item = this.inputInventory.items[0];
       if (!this.data.recipe ||
           this.data.recipe.inputs[0].item != item) {
@@ -352,11 +445,17 @@ Entity.prototype.update = function(gameMap, time) {
       }
       this.state = STATE.running;
       this.taskStart = this.nextUpdate;
-      this.nextUpdate = this.taskStart +
+      this.taskEnd = this.nextUpdate = this.taskStart +
           this.data.processingSpeed * this.data.recipe.duration;
       this.sprite = this.data.workingAnimation;
       gameMap.createSmoke(this.x + 1, this.y, this.taskStart,
           this.nextUpdate - this.taskStart);
+      if (this.energySource == ENERGY.burner &&
+          this.nextUpdate > this.taskStart +
+          this.energyStored / this.energyConsumption * 1000) {
+        this.nextUpdate = this.taskStart +
+            this.energyStored / this.energyConsumption * 1000;
+      }
       return;
     }
   } else if (this.type == TYPE.assembler) {
@@ -393,7 +492,7 @@ Entity.prototype.update = function(gameMap, time) {
       }
       this.state = STATE.running;
       this.taskStart = this.nextUpdate;
-      this.nextUpdate = this.taskStart +
+      this.taskEnd = this.nextUpdate = this.taskStart +
           this.data.processingSpeed * this.data.recipe.duration;
       return;
     }
@@ -419,13 +518,21 @@ Entity.prototype.update = function(gameMap, time) {
       }
       this.state = STATE.running;
       this.taskStart = this.nextUpdate;
-      this.nextUpdate = this.taskStart + 10000;
+      this.taskEnd = this.nextUpdate =
+          this.taskStart + 9800;
     }
   }
 };
 
 Entity.prototype.insert = function(item, amount, time) {
-  if (this.inputInventory) {
+  if (this.fuelInventory && FUEL_FILTERS.some(filter => filter.item == item)) {
+    const count = this.fuelInventory.insert(item, amount);
+    if (count && (this.state == STATE.outOfEnergy ||
+        this.state == STATE.noEnergy)) {
+      this.nextUpdate = time;
+    }
+    return count;
+  } else if (this.inputInventory) {
     const count = this.inputInventory.insert(item, amount);
     if (count) {
       if (this.type == TYPE.chest ||
@@ -476,6 +583,15 @@ Entity.prototype.insertWants = function() {
       return wants;
     }
     return this.inputInventory.insertWants();
+  } else if (this.energySource == ENERGY.burner) {
+    if (!this.inputInventory) {
+      return this.fuelInventory.insertWants();
+    }
+    const wants = this.inputInventory.insertWants();
+    const fuel = this.fuelInventory.insertWants();
+    if (wants == -1 || fuel == -1 ) return -1;
+    return !fuel.length ? wants : !wants.length ? fuel :
+        [...wants, ...fuel];
   } else if (this.inputInventory) {
     return this.inputInventory.insertWants();
   }

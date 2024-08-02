@@ -1,6 +1,7 @@
 import {COLOR} from './ui-properties.js';
 import {STATE} from './entity-properties.js';
 import {SPRITES} from './sprite-pool.js';
+import {ITEMS, I} from './item-definitions.js';
 
 function UiProgress(parent, x, y) {
   this.parent = parent;
@@ -24,9 +25,10 @@ UiProgress.prototype.draw = function(ctx, time) {
         y = Math.floor(this.parent.y + this.y);
   
   let progress = 0;
-  if (this.entity.state == STATE.running) {
+  if (this.entity.state == STATE.running ||
+      this.entity.state == STATE.outOfEnergy) {
     progress = (time - this.entity.taskStart) /
-        (this.entity.nextUpdate - this.entity.taskStart)
+        (this.entity.taskEnd - this.entity.taskStart)
   } else if (this.entity.state == STATE.outputFull ||
       this.entity.state == STATE.itemReady) {
     progress = 1;
@@ -84,4 +86,39 @@ UiResource.prototype.draw = function(ctx) {
   ctx.fillText(this.resource.amount, x + 48, y + 21);
 };
 
-export {UiProgress, UiResource};
+function UiFuel(parent, x, y) {
+  this.parent = parent;
+  this.x = x;
+  this.y = y;
+  this.entity = undefined;
+}
+
+UiFuel.prototype.set = function(entity) {
+  this.entity = entity;
+};
+
+UiFuel.prototype.draw = function(ctx, time) {
+  if (!this.entity) return;
+  const x = Math.floor(this.parent.x + this.x),
+        y = Math.floor(this.parent.y + this.y);
+  
+  const fuelItem = this.entity.fuelInventory?.items[0];
+  const maxFuel = fuelItem ?
+      ITEMS.get(fuelItem).fuelValue : 
+      ITEMS.get(I.coal).fuelValue;
+  const current = this.entity.energyStored - 
+      (this.entity.state != STATE.running ? 0 :
+      Math.max(time - this.entity.taskStart, 0) /
+      1000 * this.entity.energyConsumption);
+  const height = Math.min(36, Math.max(0,
+      Math.ceil(current / maxFuel * 36)));
+  
+  ctx.fillStyle = COLOR.background3;
+  ctx.fillRect(x, y, 6, 40);
+  ctx.fillStyle = "#FF7700";
+  ctx.fillRect(x + 2, y + 40 - 2 - height, 2, height);
+  ctx.strokeStyle = COLOR.border2;
+  ctx.strokeRect(x, y, 6, 40);
+}
+  
+export {UiProgress, UiResource, UiFuel};
