@@ -525,14 +525,19 @@ Entity.prototype.update = function(gameMap, time) {
 };
 
 Entity.prototype.insert = function(item, amount, time) {
-  if (this.fuelInventory && FUEL_FILTERS.some(filter => filter.item == item)) {
-    const count = this.fuelInventory.insert(item, amount);
-    if (count && (this.state == STATE.outOfEnergy ||
-        this.state == STATE.noEnergy)) {
-      this.nextUpdate = time;
+  if (this.fuelInventory) {
+    for (let filter of FUEL_FILTERS) {
+      if (item == filter.item) {
+        const count = this.fuelInventory.insert(item, amount);
+        if (count && (this.state == STATE.outOfEnergy ||
+            this.state == STATE.noEnergy)) {
+          this.nextUpdate = time;
+        }
+        return count;
+      }
     }
-    return count;
-  } else if (this.inputInventory) {
+  }
+  if (this.inputInventory) {
     const count = this.inputInventory.insert(item, amount);
     if (count) {
       if (this.type == TYPE.chest ||
@@ -603,7 +608,8 @@ Entity.prototype.extract = function(item, amount, time) {
     const count = this.outputInventory.extract(item, amount);
     if (count) {
       if (this.type == TYPE.chest ||
-          this.type == TYPE.assembler) {
+          this.type == TYPE.assembler ||
+          this.type == TYPE.lab) {
         for (let inputEntity of this.inputEntities) {
           if (inputEntity.state == STATE.outputFull ||
               inputEntity.state == STATE.itemReady) {

@@ -3,8 +3,94 @@ import {I} from './item-definitions.js';
 import {RECIPES} from './recipe-definitions.js';
 
 export function scenario(gameMap, time) {
-  return inserterTest(gameMap, time);
+  return productionTest(gameMap, time);
 }
+
+function productionTest(gameMap, time) {
+  const chunks = [
+      [0, -1], [0, 0], [0, 1],
+      [-1, 0], [-1, -1], [-1, 1],
+      [-2, -1], [-2, 0], [-2, 1], [-2, 2], [-2, 3],
+      [-3, -1], [-3, 0], [-3, 1], [-3, 2]];
+  chunks.forEach(([x, y]) => gameMap.generateChunk(x, y));
+  gameMap.view.x = -550;
+  gameMap.view.y = 180;
+  
+  const e = (n, x, y, d) => gameMap.createEntity(n, x, y, d, time);
+  const l = (x, y, d, l) => createLane(gameMap, x, y, d, l, time);
+  
+  for (let i = 0; i < 5; i++) {
+    e(NAME.burnerDrill, -10, -7 + 2 * i, 3);
+    e(NAME.burnerDrill, -13, -6 + 2 * i, 1);
+  }
+  l(-11, -6, 2, 17);
+  l(-11, 11, 3, 1);
+  
+  for (let i = 0; i < 5; i++) {
+    e(NAME.burnerDrill, -20, -15 + 2 * i, 3);
+    e(NAME.burnerDrill, -23, -15 + 2 * i, 1);
+  }
+  l(-21, -15, 2, 26);
+  l(-21, 11, 1, 1);
+  
+  for (let i = 0; i < 8; i++) {
+    e(NAME.burnerDrill, -80, 34 + 2 * i, 1);
+  }
+  l(-78, 49, 0, 66);
+  l(-78, -17, 1, 63);
+  l(-15, -17, 2, 26);
+  const lane = l(-15, 9, 3, 2);
+  lane.minusItem = I.coal;
+  lane.minusFlow = new Array(140).fill(0.81);
+  lane.minusFlow[0] = 7;
+  
+  e(NAME.inserter, -16, 10, 2);
+  e(NAME.inserter, -15, 10, 2);
+  
+  l(-16, 11, 3, 4);
+  l(-20, 11, 2, 16);
+  l(-15, 11, 1, 3);
+  l(-12, 11, 2, 16);
+  
+  for (let i = 0; i < 8; i++) {
+    e(NAME.stoneFurnace, -23, 12 + 2 * i, 0);
+    e(NAME.inserter, -21, 12 + 2 * i, 3);
+    e(NAME.inserter, -24, 12 + 2 * i, 3);
+    e(NAME.stoneFurnace, -10, 12 + 2 * i, 0);
+    e(NAME.inserter, -11, 12 + 2 * i, 1);
+    e(NAME.inserter, -8, 12 + 2 * i, 1);
+  }
+  l(-7, 12, 2, 30);
+  l(-25, 12, 2, 18);
+  l(-25, 30, 1, 16);
+  l(-9, 30, 2, 15);
+  
+  l(-7, 42, 1, 2);l(-5, 42, 2, 2);
+  l(-1, 39, 1, 24);
+  l(-9, 45, 1, 26);
+  l(-3, 39, 1, 1);l(-2, 39, 2, 1);
+  l(-2, 40, 1, 2);l(0, 40, 0, 1);
+  e(NAME.inserter, -4, 42, 1);
+  e(NAME.inserter, -4, 43, 1);
+  e(NAME.inserter, -3, 40, 0);
+  e(NAME.assemblingMachine1, -3, 41, 0)
+      .setRecipe(RECIPES[2], time);
+  for (let i = 0; i < 6; i++) {
+    e(NAME.assemblingMachine1, 3 * i, 41, 0)
+        .setRecipe(RECIPES[3], time);
+    e(NAME.inserter, 1 + 3 * i, 40, 2);
+    e(NAME.inserter, 1 + 3 * i, 44, 0);
+    e(NAME.inserter, 2 + 3 * i, 40, 0);
+  }
+  
+  e(NAME.inserter, 23, 39, 1);
+  for (let i = 0; i < 6; i++) {
+    e(NAME.lab, 24, 38 - 4 * i, 0);
+    if (i) {
+      e(NAME.inserter, 25, 41 - 4 * i, 0);
+    }
+  }
+};
 
 function inserterTest(gameMap, time) {
   gameMap.generateChunk(0, 0);
@@ -226,7 +312,7 @@ function createLane(gameMap, x, y, direction, length, time) {
     const b = gameMap.createEntity(NAME.transportBelt,
         x + dx, y + dy, direction, time);
     if (i == length - 1) {
-      return b.data.lane;
+      return b?.data?.lane;
     }
   }
 }
