@@ -20,21 +20,26 @@ function productionTest(gameMap, time) {
   const l = (x, y, d, l) => createLane(gameMap, x, y, d, l, time);
   
   for (let i = 0; i < 5; i++) {
-    e(NAME.burnerDrill, -10, -7 + 2 * i, 3);
-    e(NAME.burnerDrill, -13, -6 + 2 * i, 1);
+    e(NAME.burnerDrill, -10, -7 + 2 * i, 3)
+        .energyStored = 50 + i * 8;
+    e(NAME.burnerDrill, -13, -6 + 2 * i, 1)
+        .energyStored = 36 + i * 12;
   }
   l(-11, -6, 2, 17);
   l(-11, 11, 3, 1);
   
   for (let i = 0; i < 5; i++) {
-    e(NAME.burnerDrill, -20, -15 + 2 * i, 3);
-    e(NAME.burnerDrill, -23, -15 + 2 * i, 1);
+    e(NAME.burnerDrill, -20, -15 + 2 * i, 3)
+        .energyStored = 60 + i * 9;
+    e(NAME.burnerDrill, -23, -15 + 2 * i, 1)
+        .energyStored = 46 + i * 18;
   }
   l(-21, -15, 2, 26);
   l(-21, 11, 1, 1);
   
   for (let i = 0; i < 8; i++) {
-    e(NAME.burnerDrill, -80, 34 + 2 * i, 1);
+    e(NAME.burnerDrill, -80, 34 + 2 * i, 1)
+        .energyStored = 100 + i * 5;
   }
   l(-78, 49, 0, 66);
   l(-78, -17, 1, 63);

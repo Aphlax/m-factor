@@ -95,6 +95,7 @@ export const S = {
   labIcon: 16500 + 7,
   crossIcon: 16500 + 8,
   menuIcon: 16500 + 9,
+  windUpIcon: 16500 + 10,
   
   smoke: 17000,
   
@@ -364,6 +365,10 @@ export const SPRITES = [
   {
     path: "graphics/icons/menu.png",
     sprites: sprites(S.menuIcon, 32, 32, 1, 1),
+  },
+  {
+    path: "graphics/icons/windUp.png",
+    sprites: sprites(S.windUpIcon, 32, 32, 1, 1),
   },
 ];
 

@@ -1,5 +1,5 @@
 import {UiInventory} from './ui-inventory.js';
-import {UiProgress, UiResource, UiFuel} from './ui-components.js';
+import {UiProgress, UiResource, UiFuel, UiWindUp} from './ui-components.js';
 import {UiButton, BUTTON} from './ui-button.js';
 import {UiChoice, CHOICE} from './ui-choice.js';
 import {COLOR} from './ui-properties.js';
@@ -18,6 +18,7 @@ const MIN_Y = 150;
   upgrade
   downgrade
   delete
+  info?
 */
 
 function UiWindow(ui, canvas) {
@@ -190,6 +191,9 @@ UiWindow.prototype.initialize = function() {
         .setButton(BUTTON.deleteEntity, S.crossIcon),
     fuelInventory: new UiInventory(this, 10, 40),
     fuel: new UiFuel(this, 54, 40),
+    windUpButton: new UiButton(this, 10, 40)
+        .setButton(BUTTON.none, S.windUpIcon),
+    windUp: new UiWindUp(this, 54, 40),
   };
   this.defaultUi.all = Object.values(this.defaultUi);
   
@@ -295,6 +299,13 @@ UiWindow.prototype.set = function(selectedEntity) {
   } else {
     this.defaultUi.fuelInventory.set();
     this.defaultUi.fuel.set();
+  }
+  if (selectedEntity.energySource == ENERGY.windUp) {
+    this.defaultUi.windUpButton.setButton(BUTTON.windUp);
+    this.defaultUi.windUp.set(selectedEntity);
+  } else {
+    this.defaultUi.windUpButton.setButton(BUTTON.none);
+    this.defaultUi.windUp.set();
   }
 };
 

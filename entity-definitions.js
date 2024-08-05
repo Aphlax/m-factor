@@ -29,6 +29,8 @@ export const ENTITIES = new Map([
       [DIRECTION.west]: [S.burnerDrillW, S.burnerDrillShadowW],
     },
     animationLength: 32,
+    energySource: ENERGY.windUp,
+    energyConsumption: 1 / 8, // 8 ops/wind.
     
     taskDuration: 4000,
     mineOutput: {
@@ -126,11 +128,11 @@ export const ENTITIES = new Map([
     },
     animationLength: 48,
     animationSpeed: 0.6,
+    energySource: ENERGY.burner,
+    energyConsumption: 90, // kW
     
     processingSpeed: 1,
     idleAnimation: S.stoneFurnace,
-    energySource: ENERGY.burner,
-    energyConsumption: 90, // kW
   }],
   [NAME.assemblingMachine1,
   {

@@ -75,7 +75,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.updateBeltSprites();
   } else if (this.type == TYPE.inserter) {
     this.state = STATE.missingItem;
-    this.nextUpdate = time;
+    this.taskEnd = this.nextUpdate = time;
     this.taskStart = time - def.taskDuration;
     this.taskDuration = def.taskDuration;
     this.data.inserterHandSprites = def.inserterHandSprites;
@@ -83,14 +83,17 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.inserterPickupBend =
         INSERTER_PICKUP_BEND[(direction + 2) % 4];
   } else if (this.type == TYPE.mine) {
-    this.state = STATE.running;
-    this.nextUpdate = time + def.taskDuration;
+    this.state = STATE.noEnergy;
     this.taskStart = time;
+    this.taskEnd = time;
+    this.nextUpdate = this.taskEnd;
     this.taskDuration = def.taskDuration;
     this.data.minePattern = 0;
     this.data.minedResource = 0;
     this.data.mineOutputX = def.mineOutput[direction].x;
     this.data.mineOutputY = def.mineOutput[direction].y;
+    this.energySource = def.energySource;
+    this.energyConsumption = def.energyConsumption;
   } else if (this.type == TYPE.furnace) {
     this.state = STATE.missingItem;
     this.nextUpdate = NEVER;
@@ -106,8 +109,8 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
         .setFilters(FURNACE_FILTERS);
     this.outputInventory = new Inventory(1);
     this.energySource = def.energySource;
+    this.energyConsumption = def.energyConsumption;
     if (def.energySource == ENERGY.burner) {
-      this.energyConsumption = def.energyConsumption;
       this.fuelInventory = new Inventory(1)
           .setFilters(FUEL_FILTERS);
     }
@@ -285,6 +288,7 @@ Entity.prototype.update = function(gameMap, time) {
       this.data.minedResource = resource.id;
       this.state = STATE.itemReady;
     }
+    let continueNextItem = false;
     if (this.state == STATE.itemReady) {
       const [outputEntity] = this.outputEntities;
       if (!outputEntity) {
@@ -304,6 +308,16 @@ Entity.prototype.update = function(gameMap, time) {
         this.nextUpdate = NEVER;
         return;
       }
+      continueNextItem = true;
+    }
+    if (continueNextItem ||
+        this.state == STATE.noEnergy) {
+      if (this.energyStored < 1) {
+        this.state = STATE.noEnergy;
+        this.nextUpdate = NEVER;
+        return;
+      }
+      this.energyStored--;
       this.state = STATE.running;
       this.taskStart = this.nextUpdate;
       this.taskEnd = this.nextUpdate =

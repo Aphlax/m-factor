@@ -119,6 +119,28 @@ UiFuel.prototype.draw = function(ctx, time) {
   ctx.fillRect(x + 2, y + 40 - 2 - height, 2, height);
   ctx.strokeStyle = COLOR.border2;
   ctx.strokeRect(x, y, 6, 40);
+};
+
+function UiWindUp(parent, x, y) {
+  this.parent = parent;
+  this.x = x;
+  this.y = y;
+  this.entity = undefined;
 }
+
+UiWindUp.prototype.set = function(entity) {
+  this.entity = entity;
+};
+
+UiWindUp.prototype.draw = function(ctx, time) {
+  if (!this.entity) return;
+  const x = Math.floor(this.parent.x + this.x),
+        y = Math.floor(this.parent.y + this.y);
   
-export {UiProgress, UiResource, UiFuel};
+  ctx.fillStyle = COLOR.primary;
+  ctx.font = "16px monospace";
+  ctx.textBaseline = "middle";
+  ctx.fillText(Math.floor(this.entity.energyStored), x, y + 21);
+};
+
+export {UiProgress, UiResource, UiFuel, UiWindUp};

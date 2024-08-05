@@ -1,11 +1,14 @@
 import {COLOR} from './ui-properties.js';
 import {SPRITES} from './sprite-pool.js';
 import {CHOICE} from './ui-choice.js';
+import {TYPE, STATE} from './entity-properties.js';
 
 const BUTTON = {
+  none: 0,
   assemblerRecipe: 1,
   deleteEntity: 2,
   gameMenu: 3,
+  windUp: 4,
 };
 
 function UiButton(parent, x, y) {
@@ -21,11 +24,12 @@ function UiButton(parent, x, y) {
 
 UiButton.prototype.setButton = function(name, sprite) {
   this.name = name;
-  this.sprite = sprite;
+  this.sprite = sprite ?? this.sprite;
   return this;
 };
 
 UiButton.prototype.draw = function(ctx, time) {
+  if (!this.name) return;
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
   
@@ -52,6 +56,7 @@ UiButton.prototype.inBounds = function(t) {
 };
 
 UiButton.prototype.touchStart = function(e) {
+  if (!this.name) return;
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
   const t = e.touches[0];
@@ -69,6 +74,7 @@ UiButton.prototype.touchMove = function(e) {
 };
 
 UiButton.prototype.touchEnd = function(e) {
+  if (!this.name) return;
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
   const t = e.changedTouches[0];
@@ -86,11 +92,21 @@ UiButton.prototype.touchEnd = function(e) {
     this.parent.yTarget = Math.max(150, this.parent.canvasHeight - 50 -
           46 * Math.ceil(this.parent.entityUi.recipeChoice.choices.length / 8));
     this.parent.animationSpeed = (this.parent.yTarget - this.parent.y) / 100;
-  } else if(this.name == BUTTON.deleteEntity) {
+  } else if (this.name == BUTTON.deleteEntity) {
     this.parent.ui.game.gameMap.deleteEntity(this.parent.selectedEntity);
     this.parent.set();
-  } else if(this.name == BUTTON.gameMenu) {
+  } else if (this.name == BUTTON.gameMenu) {
     this.parent.ui.game.openMenu();
+  } else if (this.name == BUTTON.windUp) {
+    const entity = this.parent.selectedEntity;
+    entity.energyStored += Math.round(1 / entity.energyConsumption);
+    const limit = entity.type == TYPE.mine ? 150 : 10;
+    if (entity.energyStored > limit) {
+      entity.energyStored = limit;
+    }
+    if (entity.state == STATE.noEnergy) {
+      entity.nextUpdate = this.parent.ui.game.playTime;
+    }
   }
 };
 
