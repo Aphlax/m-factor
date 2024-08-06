@@ -58,15 +58,22 @@ export const S = {
   stoneFurnaceWorking: 75*16, // 48
   assemblingMachine1: 78*16,
   assemblingMachine1Shadow: 80*16,
+  offshorePumpN: 82*16,
+  offshorePumpShadowN: 84*16,
+  offshorePumpE: 86*16,
+  offshorePumpShadowE: 88*16,
+  offshorePumpS: 90*16,
+  offshorePumpShadowS: 92*16,
+  offshorePumpW: 94*16,
+  offshorePumpShadowW: 96*16,
   
-  
-  woodenChest: 1600,
-  woodenChestShadow: 1601,
-  inserter: 1602,
-  inserterHand: 1606,
-  stoneFurnace: 1609,
-  lab: 1610,
-  labShadow: 1643,
+  woodenChest: 15000,
+  woodenChestShadow: 15001,
+  inserter: 15002,
+  inserterHand: 15006,
+  stoneFurnace: 15009,
+  lab: 15010,
+  labShadow: 15043,
   
   ironOreItem: 16000,
   copperOreItem: 16000 + 1,
@@ -290,6 +297,39 @@ export const SPRITES = [
     path: "graphics/entities/lab/lab-shadow.png",
     sprites: entitySprites(S.labShadow, 122, 68, 1, 1, 1, 25, -25, -3, true),
   },
+  {
+    path: "graphics/entities/offshore-pump/offshore-pump_North.png",
+    sprites: entitySprites(S.offshorePumpN, 60, 84, 8, 4, 17, 11, 12, 8, true),
+  },
+  {
+    path: "graphics/entities/offshore-pump/offshore-pump_North-shadow.png",
+    sprites: entitySprites(S.offshorePumpShadowN, 78, 70, 8, 4, 12, 34, 0, 6, true),
+  },
+  {
+    path: "graphics/entities/offshore-pump/offshore-pump_East.png",
+    sprites: entitySprites(S.offshorePumpE, 69, 56, 8, 4, 6, -1, 12, 12, true),
+  },
+  {
+    path: "graphics/entities/offshore-pump/offshore-pump_East-shadow.png",
+    sprites: entitySprites(S.offshorePumpShadowE, 88, 34, 8, 4, 1, 23, 0, 2, true),
+  },
+  {
+    path: "graphics/entities/offshore-pump/offshore-pump_West.png",
+    sprites: entitySprites(S.offshorePumpW, 69, 56, 8, 4, -1, 6, 8, 16, true),
+  },
+  {
+    path: "graphics/entities/offshore-pump/offshore-pump_West-shadow.png",
+    sprites: entitySprites(S.offshorePumpShadowW, 88, 34, 8, 4, -1, 25, -10, 12, true),
+  },
+  {
+    path: "graphics/entities/offshore-pump/offshore-pump_South.png",
+    sprites: entitySprites(S.offshorePumpS, 56, 78, 8, 4, 14, 10, 4, 10, true),
+  },
+  {
+    path: "graphics/entities/offshore-pump/offshore-pump_South-shadow.png",
+    sprites: entitySprites(S.offshorePumpShadowS, 80, 66, 8, 4, 8, 40, -8, 10, true),
+  },
+  
   {
     path: "graphics/items/iron-ore.png",
     sprites: itemSprites(S.ironOreItem),
