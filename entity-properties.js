@@ -8,6 +8,7 @@ export const TYPE = {
   furnace: 5,
   assembler: 6,
   lab: 7,
+  offshorePump: 8,
 };
 
 /** Never value for next update. */
@@ -35,6 +36,13 @@ export const DIRECTION = {
   south: 2,
   west: 3,
 }
+
+export const ADJACENT = [
+  {dx: 0, dy: -1},
+  {dx: 1, dy: 0},
+  {dx: 0, dy: 1},
+  {dx: -1, dy: 0},
+];
 
 export const RESOURCE_NAMES = {
   iron: 1,

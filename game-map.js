@@ -1,7 +1,7 @@
 import {MapGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {S} from './sprite-definitions.js';
-import {TYPE, STATE, MAX_SIZE, ENERGY, rectOverlap} from './entity-properties.js';
+import {TYPE, STATE, MAX_SIZE, ENERGY, rectOverlap, ADJACENT} from './entity-properties.js';
 import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
 
@@ -190,8 +190,9 @@ GameMap.prototype.deleteEntity = function(entity) {
 GameMap.prototype.canPlace = function(x, y, width, height, ignoredEntity) {
   for (let i = 0; i < width; i++) {
     for (let j = 0; j < height; j++) {
-      if (this.getTerrainAt(x + i, y + j) >= S.water)
+      if (this.getTerrainAt(x + i, y + j) >= S.water) {
         return false;
+      }
     }
   }
   const cx1 = Math.floor((x - MAX_SIZE) / SIZE);
@@ -359,17 +360,46 @@ GameMap.prototype.getSelectedEntity = function(screenX, screenY) {
       this.getResourceAt(Math.floor(x), Math.floor(y));
 };
 
-GameMap.prototype.tryCreateEntity = function(screenX, screenY, direction, entity, time) {
+GameMap.prototype.tryCreateEntity = function(screenX, screenY, direction, entityDef, time) {
+  direction = entityDef.rotatable ? direction : 0;
+  const {width, height} = !entityDef.size ? entityDef :
+      entityDef.size[direction];
   const x = Math.round((this.view.x + screenX) /
-      this.view.scale - entity.width / 2);
+      this.view.scale - width / 2);
   const y = Math.round((this.view.y + screenY) /
-      this.view.scale - entity.height / 2);
-  direction = entity.rotatable ? direction : 0;
-  if (this.canPlace(x, y, entity.width, entity.height)) {
-    this.createEntity(entity.name, x, y, direction, time);
+      this.view.scale - height / 2);
+  if (this.canPlace(x, y, width, height)) {
+    this.createEntity(entityDef.name, x, y, direction, time);
     return true;
   }
   return false;
+};
+
+/** Returns the direction it is possible to place, otherwise -1. */
+GameMap.prototype.canPlaceOffshorePump = function(x, y) {
+  if (this.getTerrainAt(x, y) < S.water) return -1;
+  let adjacent = 0, direction;
+  for (let i = 0; i < ADJACENT.length; i++) {
+    const {dx, dy} = ADJACENT[i];
+    if (this.getTerrainAt(x + dx, y + dy) >= S.water) continue;
+    direction = i;
+    adjacent++;
+  }
+  if (adjacent != 1) return -1;
+  const {dx, dy} = ADJACENT[direction];
+  const px = -dy, py = dx;
+  if (this.getTerrainAt(x - dx + px, y - dy + py) < S.water) return -1;
+  if (this.getTerrainAt(x - dx - px, y - dy - py) < S.water) return -1;
+  if (this.getTerrainAt(x + dx + px, y + dy + py) >= S.water) return -1;
+  if (this.getTerrainAt(x + dx - px, y + dy - py) >= S.water) return -1;
+  
+  if (!this.canPlace(
+      x + dx - Math.abs(px),
+      y + dy - Math.abs(py),
+      direction % 2 ? 1 : 3,
+      direction % 2 ? 3 : 1)) return -1;
+  
+  return direction;
 };
 
 GameMap.prototype.createSmoke = function(x, y, time, duration) {

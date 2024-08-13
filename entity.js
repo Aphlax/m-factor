@@ -50,8 +50,13 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   this.label = def.label;
   this.x = x;
   this.y = y;
-  this.width = def.width;
-  this.height = def.height;
+  if (!def.size) {
+    this.width = def.width;
+    this.height = def.height;
+  } else {
+    this.width = def.size[direction].width;
+    this.height = def.size[direction].height;
+  }
   this.direction = direction;
   this.energySource = 0;
   this.sprite = def.sprites[direction][0];

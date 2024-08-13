@@ -91,6 +91,7 @@ export const S = {
   stoneFurnaceItem: 16000 + 12,
   assemblingMachine1Item: 16000 + 13,
   labItem: 16000 + 14,
+  offshorePumpItem: 16000 + 15,
   
   gearIcon: 16500,
   burnerDrillIcon: 16500 + 1,
@@ -103,6 +104,7 @@ export const S = {
   crossIcon: 16500 + 8,
   menuIcon: 16500 + 9,
   windUpIcon: 16500 + 10,
+  offshorePumpIcon: 16500 + 11,
   
   smoke: 17000,
   
@@ -298,37 +300,38 @@ export const SPRITES = [
     sprites: entitySprites(S.labShadow, 122, 68, 1, 1, 1, 25, -25, -3, true),
   },
   {
-    path: "graphics/entities/offshore-pump/offshore-pump_North.png",
-    sprites: entitySprites(S.offshorePumpN, 60, 84, 8, 4, 17, 11, 12, 8, true),
-  },
-  {
-    path: "graphics/entities/offshore-pump/offshore-pump_North-shadow.png",
-    sprites: entitySprites(S.offshorePumpShadowN, 78, 70, 8, 4, 12, 34, 0, 6, true),
-  },
-  {
-    path: "graphics/entities/offshore-pump/offshore-pump_East.png",
-    sprites: entitySprites(S.offshorePumpE, 69, 56, 8, 4, 6, -1, 12, 12, true),
-  },
-  {
-    path: "graphics/entities/offshore-pump/offshore-pump_East-shadow.png",
-    sprites: entitySprites(S.offshorePumpShadowE, 88, 34, 8, 4, 1, 23, 0, 2, true),
-  },
-  {
-    path: "graphics/entities/offshore-pump/offshore-pump_West.png",
-    sprites: entitySprites(S.offshorePumpW, 69, 56, 8, 4, -1, 6, 8, 16, true),
-  },
-  {
-    path: "graphics/entities/offshore-pump/offshore-pump_West-shadow.png",
-    sprites: entitySprites(S.offshorePumpShadowW, 88, 34, 8, 4, -1, 25, -10, 12, true),
-  },
-  {
     path: "graphics/entities/offshore-pump/offshore-pump_South.png",
-    sprites: entitySprites(S.offshorePumpS, 56, 78, 8, 4, 14, 10, 4, 10, true),
+    sprites: entitySprites(S.offshorePumpN, 56, 78, 8, 4, 14, 10, 14, 0, true),
   },
   {
     path: "graphics/entities/offshore-pump/offshore-pump_South-shadow.png",
-    sprites: entitySprites(S.offshorePumpShadowS, 80, 66, 8, 4, 8, 40, -8, 10, true),
+    sprites: entitySprites(S.offshorePumpShadowN, 80, 66, 8, 4, 8, 40, 2, 0, true),
   },
+  {
+    path: "graphics/entities/offshore-pump/offshore-pump_West.png",
+    sprites: entitySprites(S.offshorePumpE, 69, 56, 8, 4, -1, 6, 8, 16, true),
+  },
+  {
+    path: "graphics/entities/offshore-pump/offshore-pump_West-shadow.png",
+    sprites: entitySprites(S.offshorePumpShadowE, 88, 34, 8, 4, -1, 25, -10, 12, true),
+  },
+  {
+    path: "graphics/entities/offshore-pump/offshore-pump_North.png",
+    sprites: entitySprites(S.offshorePumpS, 60, 84, 8, 4, 17, 11, 8, 12, true),
+  },
+  {
+    path: "graphics/entities/offshore-pump/offshore-pump_North-shadow.png",
+    sprites: entitySprites(S.offshorePumpShadowS, 78, 70, 8, 4, 12, 34, -4, 10, true),
+  },
+  {
+    path: "graphics/entities/offshore-pump/offshore-pump_East.png",
+    sprites: entitySprites(S.offshorePumpW, 69, 56, 8, 4, 6, -1, 12, 12, true),
+  },
+  {
+    path: "graphics/entities/offshore-pump/offshore-pump_East-shadow.png",
+    sprites: entitySprites(S.offshorePumpShadowW, 88, 34, 8, 4, 1, 23, 0, 2, true),
+  },
+  
   
   {
     path: "graphics/items/iron-ore.png",
@@ -390,6 +393,11 @@ export const SPRITES = [
     path: "graphics/items/lab.png",
     sprites: itemSprites(S.labItem, S.labIcon),
   },
+  {
+    path: "graphics/items/offshore-pump.png",
+    sprites: itemSprites(S.offshorePumpItem, S.offshorePumpIcon),
+  },
+  
   {
     path: "graphics/decoratives/smoke.png",
     sprites: sprites(S.smoke, 152, 120, 5, 12),

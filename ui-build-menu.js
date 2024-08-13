@@ -10,11 +10,13 @@ const BUILD_MENU = [
   NAME.lab,
   NAME.burnerDrill,
   NAME.stoneFurnace,
+  NAME.offshorePump,
 ];
 const DEACC = 50;
 
 /*
   create blueprint, copy, paste, delete, upgrade, downgrade 6
+  cliff explosives,
   chests, logistic chests, roboport 9
   belts, splitters, underground 9
   inserters, powerpoles 10
@@ -160,13 +162,10 @@ UiBuildMenu.prototype.touchEnd = function(e, shortTouch) {
       if (r.x <= t.clientX && t.clientX <= r.x + r.size &&
           r.y <= t.clientY && t.clientY <= r.y + r.size) {
         if (this.selectedIndex == i) {
-          this.selectedIndex = -1;
+          this.setSelectedEntity();
           break;
         }
-        this.selectedIndex = i;
-        if (this.x != i) {
-          this.dx = Math.sign(i - this.x) * Math.sqrt(Math.abs(i - this.x) * 2 * DEACC);
-        }
+        this.setSelectedEntity(r.entity);
         break;
       }
     }
@@ -187,12 +186,32 @@ UiBuildMenu.prototype.touchLong = function(e) {
     if (r.x <= t.clientX && t.clientX <= r.x + r.size &&
         r.y <= t.clientY && t.clientY <= r.y + r.size) {
       this.multiBuild = true;
-      this.selectedIndex = i;
-      if (this.x != i) {
-        this.dx = Math.sign(i - this.x) * Math.sqrt(Math.abs(i - this.x) * 2 * DEACC);
-      }
+      this.setSelectedEntity(r.entity);
       break;
     }
+  }
+};
+
+UiBuildMenu.prototype.setSelectedEntity = function(entity) {
+  if (!entity) {
+    this.selectedIndex = -1;
+    if (this.multiBuild) {
+      this.multiBuild = false;
+    }
+    this.ui.gameMapInput.resetMode();
+    return;
+  }
+  const i = this.menu.findIndex(r => r.entity == entity);
+  if (i == -1) return;
+  this.selectedIndex = i;
+  if (this.x != i) {
+    this.dx = Math.sign(i - this.x) * Math.sqrt(Math.abs(i - this.x) * 2 * DEACC);
+  }
+  
+  if (entity.name == NAME.offshorePump) {
+    this.ui.gameMapInput.setOffshorePumpMode();
+  } else {
+    this.ui.gameMapInput.resetMode();
   }
 };
 
@@ -202,13 +221,12 @@ UiBuildMenu.prototype.getSelectedEntity = function() {
 
 UiBuildMenu.prototype.entityBuilt = function() {
   if (!this.multiBuild) {
-    this.selectedIndex = -1;
+    this.setSelectedEntity();
   }
 };
 
 UiBuildMenu.prototype.reset = function() {
-  this.selectedIndex = -1;
-  this.multiBuild = false;
+  this.setSelectedEntity();
 };
 
 export {UiBuildMenu};
