@@ -11,6 +11,7 @@ export const NAME = {
   assemblingMachine1: 6,
   lab: 7,
   offshorePump: 8,
+  pipe: 9,
 };
 
 const {north, east, south, west} = DIRECTION;
@@ -186,7 +187,7 @@ export const ENTITIES = new Map([
       [south]: {width: 1, height: 2},
       [west]: {width: 2, height: 1},
     },
-    rotatable: true,
+    rotatable: false,
     icon: S.offshorePumpIcon,
     sprites: {
       [north]: [S.offshorePumpN, S.offshorePumpShadowN],
@@ -196,6 +197,41 @@ export const ENTITIES = new Map([
     },
     animationLength: 32,
     animationSpeed: 0.5,
+  }],
+  [NAME.pipe,
+  {
+    label: "Pipe",
+    prototypeName: "pipe",
+    type: TYPE.pipe,
+    width: 1,
+    height: 1,
+    rotatable: false,
+    icon: S.pipeIcon,
+    sprites: {
+      [north]: [S.pipeSingle],
+      [east]: [S.pipeSingle],
+      [south]: [S.pipeSingle],
+      [west]: [S.pipeSingle],
+    },
+    pipeSprites: [
+      S.pipeSingle,
+      S.pipeEndUp,
+      S.pipeEndRight,
+      S.pipeEndDown,
+      S.pipeEndLeft,
+      S.pipeStraightVertical,
+      S.pipeStraightHorizontal,
+      S.pipeCornerUpLeft,
+      S.pipeCornerUpRight,
+      S.pipeCornerDownRight,
+      S.pipeCornerDownLeft,
+      S.pipeTUp,
+      S.pipeTRight,
+      S.pipeTDown,
+      S.pipeTLeft,
+      S.pipeCross,
+    ],
+    animationLength: 0,
   }],
 ]);
 

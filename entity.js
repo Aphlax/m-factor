@@ -134,6 +134,9 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.nextUpdate = NEVER;
     this.inputInventory = this.outputInventory =
         new Inventory(1).setFilters(LAB_FILTERS);
+  } else if (this.type == TYPE.pipe) {
+    this.data.pipes = {};
+    this.data.pipeSprites = def.pipeSprites;
   }
   return this;
 };

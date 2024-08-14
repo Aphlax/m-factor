@@ -481,7 +481,7 @@ export const SPRITES = [
   },
   {
     path: "graphics/items/pipe.png",
-    sprites: itemSprites(S.PipeItem, S.PipeIcon),
+    sprites: itemSprites(S.pipeItem, S.pipeIcon),
   },
   
   // Misc.

@@ -277,6 +277,13 @@ GameMap.prototype.connectEntity = function(entity, time) {
               }
             }
           }
+          if (entity.type == TYPE.pipe && other.type == TYPE.pipe) {
+            if (Math.abs(entity.x - other.x) + Math.abs(entity.y - other.y) == 1) {
+              entity.connectPipe(other, time);
+              entity.updatePipeSprites();
+              other.updatePipeSprites();
+            }
+          }
         }
       }
     }
@@ -315,6 +322,9 @@ GameMap.prototype.disconnectEntity = function(entity) {
         other.updateBeltSprites();
       }
     }
+  }
+  if (entity.type == TYPE.pipe) {
+    entity.disconnectPipe();
   }
 };
 

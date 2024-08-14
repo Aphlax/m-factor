@@ -1,4 +1,4 @@
-import {TYPE, NEVER, STATE} from './entity-properties.js';
+import {TYPE, NEVER, STATE, ADJACENT} from './entity-properties.js';
 import {ITEMS} from './item-definitions.js';
 
 /**
@@ -224,5 +224,59 @@ export function setRecipe(recipe, time) {
         inputEntity.nextUpdate = time;
       }
     }
+  }
+}
+
+export function connectPipe(other, time) {
+  for (let direction = 0; direction < ADJACENT.length; direction++) {
+    const {dx, dy} = ADJACENT[direction];
+    if (this.x + dx == other.x && this.y + dy == other.y) {
+      this.data.pipes[direction] = other;
+      other.data.pipes[(direction + 2) % 4] = this;
+      break;
+    }
+  }
+}
+
+export function disconnectPipe() {
+  for (let direction = 0; direction < 4; direction++) {
+    const other = this.data.pipes[direction];
+    if (other) {
+      other.data.pipes[(direction + 2) % 4] = undefined;
+      this.data.pipes[direction] = undefined;
+      other.updatePipeSprites();
+    }
+  }
+}
+
+export function updatePipeSprites() {
+  let count = 0, direction, notdirection;
+  for (let i = 0; i < 4; i++) {
+    if (this.data.pipes[i]) {
+      count++;
+      direction = i;
+    } else {
+      notdirection = i;
+    }
+  }
+  if (!count) {
+    this.sprite = this.data.pipeSprites[0];
+  } else if (count == 1) {
+    this.sprite = this.data.pipeSprites[direction + 1];
+  } else if (count == 2) {
+    if (this.data.pipes[0] && this.data.pipes[2]) {
+      this.sprite = this.data.pipeSprites[5];
+    } else if (this.data.pipes[1] && this.data.pipes[3]) {
+      this.sprite = this.data.pipeSprites[6];
+    } else if (this.data.pipes[0] && this.data.pipes[3]) {
+      this.sprite = this.data.pipeSprites[7];
+    } else {
+      this.sprite = this.data.pipeSprites[direction + 7];
+    }
+  } else if (count == 3) {
+    this.sprite = this.data
+        .pipeSprites[((notdirection + 2) % 4) + 11];
+  } else {
+    this.sprite = this.data.pipeSprites[15];
   }
 }

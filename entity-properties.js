@@ -9,6 +9,7 @@ export const TYPE = {
   assembler: 6,
   lab: 7,
   offshorePump: 8,
+  pipe: 9,
 };
 
 /** Never value for next update. */
