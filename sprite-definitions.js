@@ -72,8 +72,24 @@ export const S = {
   inserter: 15002,
   inserterHand: 15006,
   stoneFurnace: 15009,
-  lab: 15010,
+  lab: 15010, // 33
   labShadow: 15043,
+  pipeSingle: 15044,
+  pipeEndUp: 15045,
+  pipeEndRight: 15046,
+  pipeEndDown: 15047,
+  pipeEndLeft: 15048,
+  pipeStraightVertical: 15049,
+  pipeStraightHorizontal: 15050,
+  pipeCornerUpLeft: 15051,
+  pipeCornerUpRight: 15052,
+  pipeCornerDownLeft: 15053,
+  pipeCornerDownRight: 15054,
+  pipeTUp: 15055,
+  pipeTRight: 15056,
+  pipeTDown: 15057,
+  pipeTLeft: 15058,
+  pipeCross: 15059,
   
   ironOreItem: 16000,
   copperOreItem: 16000 + 1,
@@ -92,6 +108,7 @@ export const S = {
   assemblingMachine1Item: 16000 + 13,
   labItem: 16000 + 14,
   offshorePumpItem: 16000 + 15,
+  pipeItem: 16000 + 16,
   
   gearIcon: 16500,
   burnerDrillIcon: 16500 + 1,
@@ -105,6 +122,7 @@ export const S = {
   menuIcon: 16500 + 9,
   windUpIcon: 16500 + 10,
   offshorePumpIcon: 16500 + 11,
+  pipeIcon: 16500 + 12,
   
   smoke: 17000,
   
@@ -331,8 +349,72 @@ export const SPRITES = [
     path: "graphics/entities/offshore-pump/offshore-pump_East-shadow.png",
     sprites: entitySprites(S.offshorePumpShadowW, 88, 34, 8, 4, 1, 23, 0, 2, true),
   },
+  {
+    path: "graphics/entities/pipe/pipe-straight-vertical-single.png",
+    sprites: entitySprites(S.pipeSingle, 80, 80, 1, 1, 24, 24, 24, 24, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-ending-up.png",
+    sprites: entitySprites(S.pipeEndUp, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-ending-right.png",
+    sprites: entitySprites(S.pipeEndRight, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-ending-down.png",
+    sprites: entitySprites(S.pipeEndDown, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-ending-left.png",
+    sprites: entitySprites(S.pipeEndLeft, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-straight-vertical.png",
+    sprites: entitySprites(S.pipeStraightVertical, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-straight-horizontal.png",
+    sprites: entitySprites(S.pipeStraightHorizontal, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-corner-up-left.png",
+    sprites: entitySprites(S.pipeCornerUpLeft, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-corner-up-right.png",
+    sprites: entitySprites(S.pipeCornerUpRight, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-corner-down-left.png",
+    sprites: entitySprites(S.pipeCornerDownLeft, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-corner-down-right.png",
+    sprites: entitySprites(S.pipeCornerDownRight, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-t-up.png",
+    sprites: entitySprites(S.pipeTUp, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-t-right.png",
+    sprites: entitySprites(S.pipeTRight, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-t-down.png",
+    sprites: entitySprites(S.pipeTDown, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-t-left.png",
+    sprites: entitySprites(S.pipeTLeft, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-cross.png",
+    sprites: entitySprites(S.pipeCross, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
   
-  
+  // Items.
   {
     path: "graphics/items/iron-ore.png",
     sprites: itemSprites(S.ironOreItem),
@@ -397,7 +479,12 @@ export const SPRITES = [
     path: "graphics/items/offshore-pump.png",
     sprites: itemSprites(S.offshorePumpItem, S.offshorePumpIcon),
   },
+  {
+    path: "graphics/items/pipe.png",
+    sprites: itemSprites(S.PipeItem, S.PipeIcon),
+  },
   
+  // Misc.
   {
     path: "graphics/decoratives/smoke.png",
     sprites: sprites(S.smoke, 152, 120, 5, 12),

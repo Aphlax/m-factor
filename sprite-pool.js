@@ -52,6 +52,7 @@ SpritePool.prototype.draw = function(ctx, time) {
         ctx.fillStyle = "black";
         ctx.fillText(id, ctx.canvas.width * 0.5 - 40,
             ctx.canvas.height - 60);
+        break;
       }
     }
   }
@@ -60,9 +61,9 @@ SpritePool.prototype.draw = function(ctx, time) {
   if (this.current == this.total) {
     ctx.fillStyle = "lightgrey";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    let sprite = S.offshorePumpS;
-    let shadow = S.offshorePumpShadowS;
-    let size = [32, 64], xlen = 8, ylen = 4;
+    let sprite = S.pipeSingle;
+    let shadow = 0;
+    let size = [32, 32], xlen = 8, ylen = 4;
     for (let i = 0; i < xlen; i++) {
       for (let j = 0; j < ylen; j++) {
         let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(sprite+i*ylen+j)};
@@ -114,7 +115,7 @@ SpritePool.prototype.draw = function(ctx, time) {
     ctx.fillStyle = "black";
     ctx.fillText(txt, 10, 570);
     
-    //return;
+    return;
     let a = xlen*ylen;
     const animShad = 1;
     
