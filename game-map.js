@@ -4,6 +4,7 @@ import {S} from './sprite-definitions.js';
 import {TYPE, STATE, MAX_SIZE, ENERGY, rectOverlap, ADJACENT} from './entity-properties.js';
 import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
+import {FluidNetwork} from './fluid-network.js';
 
 function GameMap(seed) {
   this.mapGenerator = new MapGenerator(seed);
@@ -15,7 +16,8 @@ function GameMap(seed) {
     scale: 24,
   };
   this.chunks = new Map(); // 2-D map of coordinate -> chunk
-  this.transportNetwork = new TransportNetwork(this);
+  this.transportNetwork = new TransportNetwork();
+  this.fluidNetwork = new FluidNetwork(this);
   this.particles = []; // Expired particles.
 }
 
@@ -34,6 +36,7 @@ GameMap.prototype.centerView = function(canvas) {
 
 GameMap.prototype.update = function(time, dt) {
   this.transportNetwork.update(time, dt);
+  this.fluidNetwork.update(time, dt);
   for (let chunks of this.chunks.values()) {
     for (let chunk of chunks.values()) {
       for (let entity of chunk.entities) {
@@ -148,6 +151,7 @@ GameMap.prototype.draw = function(ctx, time) {
       }
     }
   }
+  this.fluidNetwork.draw(ctx, this.view);
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x - this.view.scale * 7) continue;
     if (x * size > this.view.width + this.view.x) continue;
@@ -290,6 +294,8 @@ GameMap.prototype.connectEntity = function(entity, time) {
   }
   if (entity.type == TYPE.belt) {
     this.transportNetwork.addBelt(entity);
+  } else if (entity.type == TYPE.pipe) {
+    this.fluidNetwork.addPipe(entity);
   }
 };
 
@@ -324,6 +330,7 @@ GameMap.prototype.disconnectEntity = function(entity) {
     }
   }
   if (entity.type == TYPE.pipe) {
+    this.fluidNetwork.removePipe(entity);
     entity.disconnectPipe();
   }
 };
