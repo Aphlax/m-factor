@@ -9,6 +9,7 @@ export const I = {
   copperPlate: 6,
   ironGear: 7,
   redScience: 8,
+  water: 9, // Fluid.
 };
 
 export const ITEMS = new Map([
@@ -53,4 +54,11 @@ export const ITEMS = new Map([
     sprite: S.redScienceItem,
     stackSize: 200,
   }],
+]);
+
+export const FLUIDS = new Map([
+  [I.water,
+  {
+    sprite: S.waterFluid,
+  }]
 ]);

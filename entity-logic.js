@@ -242,9 +242,11 @@ export function disconnectPipe() {
   for (let direction = 0; direction < 4; direction++) {
     const other = this.data.pipes[direction];
     if (other) {
-      other.data.pipes[(direction + 2) % 4] = undefined;
       this.data.pipes[direction] = undefined;
-      other.updatePipeSprites();
+      if (other.type == TYPE.pipe) {
+        other.data.pipes[(direction + 2) % 4] = undefined;
+        other.updatePipeSprites();
+      }
     }
   }
 }
@@ -278,5 +280,20 @@ export function updatePipeSprites() {
         .pipeSprites[((notdirection + 2) % 4) + 11];
   } else {
     this.sprite = this.data.pipeSprites[15];
+  }
+}
+
+export function connectFluidOutput(pipe) {
+  for (let p of this.outputFluidTank.connectionPoints) {
+    if (pipe.x == this.x + p.x &&
+        pipe.y == this.y + p.y) {
+      pipe.inputEntities.push(this);
+      this.outputEntities.push(pipe);
+      pipe.data.pipes[(p.direction + 2) % 4] = this;
+      pipe.updatePipeSprites();
+      if (pipe.data.channel) {
+        pipe.data.channel.addInputEntity(this, pipe);
+      }
+    }
   }
 }

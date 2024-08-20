@@ -8,13 +8,14 @@ export function scenario(gameMap, time) {
 
 function productionTest(gameMap, time) {
   const chunks = [
+      [1, 0], [1, 1],
       [0, -1], [0, 0], [0, 1],
       [-1, 0], [-1, -1], [-1, 1],
       [-2, -1], [-2, 0], [-2, 1], [-2, 2], [-2, 3],
       [-3, -1], [-3, 0], [-3, 1], [-3, 2]];
   chunks.forEach(([x, y]) => gameMap.generateChunk(x, y));
-  gameMap.view.x = -550;
-  gameMap.view.y = 180;
+  gameMap.view.x = 750;
+  gameMap.view.y = 480;
   
   const e = (n, x, y, d) => gameMap.createEntity(n, x, y, d, time);
   const l = (x, y, d, l) => createLane(gameMap, x, y, d, l, time);
@@ -95,6 +96,9 @@ function productionTest(gameMap, time) {
       e(NAME.inserter, 25, 41 - 4 * i, 0);
     }
   }
+  
+  e(NAME.offshorePump, 41, 35, 3);
+  e(NAME.pipe, 40, 35, 0);
 };
 
 function inserterTest(gameMap, time) {

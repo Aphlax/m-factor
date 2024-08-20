@@ -92,7 +92,7 @@ GameMap.prototype.draw = function(ctx, time) {
       chunk.drawResources(ctx, this.view);
     }
   }
-  ctx.globalAlpha = 0.7;
+  ctx.globalAlpha = 0.5;
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x - this.view.scale * (MAX_SIZE + 2)) continue;
     if (x * size > this.view.width + this.view.x) continue;
@@ -261,18 +261,6 @@ GameMap.prototype.connectEntity = function(entity, time) {
             rectOverlap(entity.x + entity.width, entity.y, 2, entity.height, other) ||
             rectOverlap(entity.x, entity.y + entity.height, entity.width, 2, other) ||
             rectOverlap(x, entity.y, 2, entity.height, other)) {
-          if (entity.type == TYPE.inserter) {
-            entity.connectInserter(other, time);
-          }
-          if (other.type == TYPE.inserter) {
-            other.connectInserter(entity, time);
-          }
-          if (entity.type == TYPE.mine) {
-            entity.connectMine(other, time);
-          }
-          if (other.type == TYPE.mine) {
-            other.connectMine(entity, time);
-          }
           if (entity.type == TYPE.belt && other.type == TYPE.belt) {
             if (Math.abs(entity.x - other.x) + Math.abs(entity.y - other.y) == 1) {
               if (entity.connectBelt(other, time, this.transportNetwork)) {
@@ -287,6 +275,25 @@ GameMap.prototype.connectEntity = function(entity, time) {
               entity.updatePipeSprites();
               other.updatePipeSprites();
             }
+          }
+          if (entity.type == TYPE.inserter) {
+            entity.connectInserter(other, time);
+          }
+          if (other.type == TYPE.inserter) {
+            other.connectInserter(entity, time);
+          }
+          if (entity.type == TYPE.mine) {
+            entity.connectMine(other, time);
+          }
+          if (other.type == TYPE.mine) {
+            other.connectMine(entity, time);
+          }
+          
+          if (entity.type == TYPE.pipe && other.outputFluidTank) {
+            other.connectFluidOutput(entity);
+          }
+          if (other.type == TYPE.pipe && entity.outputFluidTank) {
+            entity.connectFluidOutput(other);
           }
         }
       }
@@ -332,6 +339,19 @@ GameMap.prototype.disconnectEntity = function(entity) {
   if (entity.type == TYPE.pipe) {
     this.fluidNetwork.removePipe(entity);
     entity.disconnectPipe();
+  }
+  if (entity.outputFluidTank) {
+    for (let other of entity.outputEntities) {
+      if (other.type == TYPE.pipe) {
+        for (let i = 0; i < 4; i++) {
+          if (other.data.pipes[i] == entity) {
+            other.data.pipes[i] = undefined;
+            other.updatePipeSprites();
+            break;
+          }
+        }
+      }
+    }
   }
 };
 

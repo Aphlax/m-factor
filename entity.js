@@ -1,7 +1,8 @@
 import {Inventory} from './inventory.js';
+import {FluidTank} from './fluid-tank.js';
 import {ENTITIES} from './entity-definitions.js';
 import {TYPE, MAX_SIZE, NEVER, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ENERGY} from './entity-properties.js';
-import {ITEMS} from './item-definitions.js';
+import {ITEMS, I} from './item-definitions.js';
 import {RECIPES, FURNACE_FILTERS} from './recipe-definitions.js';
 import {S, SPRITES} from './sprite-pool.js';
 import * as entityLogic from './entity-logic.js';
@@ -38,6 +39,8 @@ function Entity() {
   this.inputInventory = undefined;
   this.outputInventory = undefined;
   this.fuelInventory = undefined;
+  this.inputFluidTank = undefined;
+  this.outputFluidTank = undefined;
   // Connected entities.
   this.inputEntities = [];
   this.outputEntities = [];
@@ -137,6 +140,11 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   } else if (this.type == TYPE.pipe) {
     this.data.pipes = {};
     this.data.pipeSprites = def.pipeSprites;
+  } else if (this.type == TYPE.offshorePump) {
+    this.state = STATE.running;
+    this.outputFluidTank = new FluidTank()
+        .setConnectionPoints(def.fluidOutputs[direction])
+        .setConstantProduction(I.water, 1200);
   }
   return this;
 };

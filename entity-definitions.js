@@ -197,6 +197,13 @@ export const ENTITIES = new Map([
     },
     animationLength: 32,
     animationSpeed: 0.5,
+    
+    fluidOutputs: {
+      [north]: [{x: 0, y: -1, direction: north}],
+      [east]: [{x: 2, y: 0, direction: east}],
+      [south]: [{x: 0, y: 2, direction: south}],
+      [west]: [{x: -1, y: 0, direction: west}],
+    },
   }],
   [NAME.pipe,
   {

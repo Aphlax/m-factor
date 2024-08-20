@@ -319,6 +319,7 @@ export function drawIO(ctx, view) {
   for (let entity of this.outputEntities) {
     const direction = this.type == TYPE.inserter ||
         this.type == TYPE.mine ||
+        this.type == TYPE.offshorePump ||
         (this.type == TYPE.belt && entity.type == TYPE.belt) ?
         this.direction : entity.direction;
     const dx = -s * ((direction - 2) % 2),
