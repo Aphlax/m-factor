@@ -227,10 +227,10 @@ GameMap.prototype.canPlace = function(x, y, width, height, ignoredEntity) {
 };
 
 GameMap.prototype.getEntityAt = function(x, y) {
-  const cx1 = Math.floor(x / SIZE);
-  const cx2 = Math.floor((x + MAX_SIZE) / SIZE);
-  const cy1 = Math.floor(y / SIZE);
-  const cy2 = Math.floor((y + MAX_SIZE) / SIZE);
+  const cx1 = Math.floor((x - MAX_SIZE) / SIZE);
+  const cx2 = Math.floor(x / SIZE);
+  const cy1 = Math.floor((y - MAX_SIZE) / SIZE);
+  const cy2 = Math.floor(y / SIZE);
   for (let i = cx1; i <= cx2; i++) {
     if (!this.chunks.has(i)) continue;
     for (let j = cy1; j <= cy2; j++) {

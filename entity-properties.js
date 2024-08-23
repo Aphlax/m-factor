@@ -15,6 +15,7 @@ export const TYPE = {
 /** Never value for next update. */
 export const NEVER = Math.floor(Number.MAX_SAFE_INTEGER / 1000);
 
+/** Maximal width/length of any entity. */
 export const MAX_SIZE = 3;
 
 export const STATE = {

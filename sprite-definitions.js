@@ -98,8 +98,12 @@ export const S = {
   ironPlateItem: 16000 + 4,
   copperPlateItem: 16000 + 5,
   ironGearItem: 16000 + 6,
-  redScienceItem: 16000 + 7,
-  waterFluid: 16000 + 8,
+  copperCableItem: 16000 + 7,
+  electronicCircuitItem: 16000 + 8,
+  redScienceItem: 16000 + 9,
+  woodItem: 16000 + 10,
+  
+  waterFluid: 16050 + 0,
   
   burnerDrillItem: 16100 + 8,
   woodenChestItem: 16100 + 9,
@@ -433,6 +437,10 @@ export const SPRITES = [
     sprites: itemSprites(S.stoneItem),
   },
   {
+    path: "graphics/items/wood.png",
+    sprites: itemSprites(S.woodItem),
+  },
+  {
     path: "graphics/items/iron-plate.png",
     sprites: itemSprites(S.ironPlateItem),
   },
@@ -445,9 +453,19 @@ export const SPRITES = [
     sprites: itemSprites(S.ironGearItem),
   },
   {
+    path: "graphics/items/wood.png",
+    sprites: itemSprites(S.electronicCircuitItem),
+  },
+  {
+    path: "graphics/items/wood.png",
+    sprites: itemSprites(S.copperCableItem),
+  },
+  {
     path: "graphics/items/automation-science-pack.png",
     sprites: itemSprites(S.redScienceItem),
   },
+  
+  
   {
     path: "graphics/items/burner-mining-drill.png",
     sprites: itemSprites(S.burnerDrillItem, S.burnerDrillIcon),
