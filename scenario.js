@@ -1,6 +1,6 @@
 import {NAME} from './entity-definitions.js';
 import {I} from './item-definitions.js';
-import {RECIPES} from './recipe-definitions.js';
+import {PROTO_TO_RECIPE} from './recipe-definitions.js';
 
 export function scenario(gameMap, time) {
   return productionTest(gameMap, time);
@@ -8,7 +8,7 @@ export function scenario(gameMap, time) {
 
 function productionTest(gameMap, time) {
   const chunks = [
-      [1, 0], [1, 1],
+      [1, -2], [1, -1], [1, 0], [1, 1],
       [0, -1], [0, 0], [0, 1],
       [-1, 0], [-1, -1], [-1, 1],
       [-2, -1], [-2, 0], [-2, 1], [-2, 2], [-2, 3],
@@ -19,6 +19,7 @@ function productionTest(gameMap, time) {
   
   const e = (n, x, y, d) => gameMap.createEntity(n, x, y, d, time);
   const l = (x, y, d, l) => createLane(gameMap, x, y, d, l, time);
+  const p = (x, y, d, l) => createPipe(gameMap, x, y, d, l, time);
   
   for (let i = 0; i < 5; i++) {
     e(NAME.burnerDrill, -10, -7 + 2 * i, 3)
@@ -80,10 +81,10 @@ function productionTest(gameMap, time) {
   e(NAME.inserter, -4, 43, 1);
   e(NAME.inserter, -3, 40, 0);
   e(NAME.assemblingMachine1, -3, 41, 0)
-      .setRecipe(RECIPES[2], time);
+      .setRecipe(PROTO_TO_RECIPE.get("iron-gear-wheel"), time);
   for (let i = 0; i < 6; i++) {
     e(NAME.assemblingMachine1, 3 * i, 41, 0)
-        .setRecipe(RECIPES[3], time);
+        .setRecipe(PROTO_TO_RECIPE.get("automation-science-pack"), time);
     e(NAME.inserter, 1 + 3 * i, 40, 2);
     e(NAME.inserter, 1 + 3 * i, 44, 0);
     e(NAME.inserter, 2 + 3 * i, 40, 0);
@@ -98,7 +99,8 @@ function productionTest(gameMap, time) {
   }
   
   e(NAME.offshorePump, 41, 35, 3);
-  e(NAME.pipe, 40, 35, 0);
+  p(40, 35, 3, 5);
+  p(35, 35, 0, 90);
 };
 
 function inserterTest(gameMap, time) {
@@ -259,7 +261,7 @@ function inserterTest(gameMap, time) {
       -5, 10, 2, time);
   s.inserter = gameMap.createEntity(NAME.inserter,
       -4, 10, 2, time);
-  s.assembler.setRecipe(RECIPES[2], time);
+  s.assembler.setRecipe(PROTO_TO_RECIPE.get("iron-gear-wheel"), time);
   gameMap.createEntity(NAME.inserter,
       -7, 12, 3, time);
   createLane(gameMap, -8, 12, 2, 2, time);
@@ -288,7 +290,7 @@ function inserterTest(gameMap, time) {
       -17, 9, 1, time);
   
   gameMap.createEntity(NAME.assemblingMachine1,
-      -12, 11, 0, time).setRecipe(RECIPES[3], time);
+      -12, 11, 0, time).setRecipe(PROTO_TO_RECIPE.get("automation-science-pack"), time);
   gameMap.createEntity(NAME.inserter,
       -9, 13, 3, time);
   gameMap.createEntity(NAME.inserter,
@@ -322,6 +324,18 @@ function createLane(gameMap, x, y, direction, length, time) {
         x + dx, y + dy, direction, time);
     if (i == length - 1) {
       return b?.data?.lane;
+    }
+  }
+}
+
+function createPipe(gameMap, x, y, direction, length, time) {
+  for (let i = 0; i < length; i++) {
+    const dx = -((direction - 2) % 2) * i;
+    const dy = ((direction - 1) % 2) * i;
+    const b = gameMap.createEntity(NAME.pipe,
+        x + dx, y + dy, 0, time);
+    if (i == length - 1) {
+      return b?.data?.channel;
     }
   }
 }

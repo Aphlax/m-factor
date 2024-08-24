@@ -178,11 +178,24 @@ Storage.prototype.serializeMap = function(gameMap) {
         plusFlow: lane.plusFlow,
         plusItem: lane.plusItem,
       }));
+  const fluidNetworkChannels =
+      gameMap.fluidNetwork.channels
+      .filter(channel => channel.pipes.size)
+      .map(channel => {
+        const [pipe] = channel.pipes;
+        return {
+          x: pipe.x,
+          y: pipe.y,
+          fluid: channel.fluid,
+          amount: channel.amount,
+        };
+      });
   return {
     seed: gameMap.mapGenerator.seed,
     entities,
     chunks,
     transportNetworkLanes,
+    fluidNetworkChannels,
     view: gameMap.view,
   };
 };
@@ -196,7 +209,8 @@ Storage.prototype.serializeEntity = function(index, entity) {
       x: Math.floor(entity.x + entity.width / 2),
       y: Math.floor(entity.y + entity.height / 2),
     },
-    ...(def.rotatable ? {direction: entity.direction * 2} : {}),
+    ...(def.rotatable || entity.type == TYPE.offshorePump ?
+        {direction: entity.direction * 2} : {}),
     ...(entity.data.recipe ?
         {recipe: entity.data.recipe.prototypeName} : {}),
     
@@ -222,6 +236,8 @@ Storage.prototype.serializeEntity = function(index, entity) {
         this.serializeInventory(entity.outputInventory)} : {}),
     ...(entity.fuelInventory ? {fuelInventory:
         this.serializeInventory(entity.fuelInventory)} : {}),
+    ...(entity.outputFluidTank ? {outputFluidTank:
+        this.serializeFluidTank(entity.outputFluidTank)} : {}),
     
     ...(entity.type == TYPE.belt ? {
         beltSideLoadMinusWait: entity.data.beltSideLoadMinusWait,
@@ -241,6 +257,14 @@ Storage.prototype.serializeInventory = function(inventory) {
   };
 };
 
+Storage.prototype.serializeFluidTank = function(fluidTank) {
+  return fluidTank.tanklets.map(tanklet => ({
+    fluid: tanklet.fluid,
+    amount: tanklet.amount,
+    constantProduction: tanklet.constantProduction,
+  }));
+};
+
 Storage.prototype.deserializeMap = function(map) {
   const gameMap = new GameMap(map.seed);
   gameMap.initialize();
@@ -256,9 +280,10 @@ Storage.prototype.deserializeMap = function(map) {
   for (let e of map.entities) {
     const name = PROTO_TO_NAME.get(e.name);
     const def = ENTITIES.get(name);
-    const x = e.position.x - Math.floor(def.width / 2),
-        y = e.position.y - Math.floor(def.height / 2),
-        direction = (e.direction ?? 0) / 2;
+    const direction = (e.direction ?? 0) / 2;
+    const {width, height} = def.size ? def.size[direction] : def;
+    const x = e.position.x - Math.floor(width / 2),
+        y = e.position.y - Math.floor(height / 2);
     const entity = gameMap.createEntity(name, x, y, direction, 0);
     if (entity.type == TYPE.assembler && e.recipe) {
       entity.setRecipe(PROTO_TO_RECIPE.get(e.recipe));
@@ -279,6 +304,11 @@ Storage.prototype.deserializeMap = function(map) {
     belt.data.lane.minusItem = lane.minusItem;
     belt.data.lane.plusFlow.push(...lane.plusFlow);
     belt.data.lane.plusItem = lane.plusItem;
+  }
+  for (let channel of map.fluidNetworkChannels) {
+    const pipe = gameMap.getEntityAt(channel.x, channel.y);
+    pipe.data.channel.fluid = channel.fluid;
+    pipe.data.channel.amount = channel.amount;
   }
   return gameMap;
 };
@@ -309,6 +339,16 @@ Storage.prototype.deserializeEntity = function(e, entity) {
   if (e.fuelInventory) {
     entity.fuelInventory.items.push(...e.fuelInventory.items);
     entity.fuelInventory.amounts.push(...e.fuelInventory.amounts);
+  }
+  if (e.outputFluidTank) {
+    for (let i = 0; i < e.outputFluidTank.length; i++) {
+      entity.outputFluidTank.tanklets[i].fluid =
+          e.outputFluidTank[i].fluid;
+      entity.outputFluidTank.tanklets[i].amount =
+          e.outputFluidTank[i].amount;
+      entity.outputFluidTank.tanklets[i].constantProduction =
+          e.outputFluidTank[i].constantProduction;
+    }
   }
   if (entity.type == TYPE.furnace && e.recipe) {
     entity.data.recipe = PROTO_TO_RECIPE.get(e.recipe);

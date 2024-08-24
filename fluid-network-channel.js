@@ -1,4 +1,6 @@
-import {TYPE} from './entity-properties.js';
+import {TYPE, STATE} from './entity-properties.js';
+
+const DEFAULT_TRANSFER = 1200;
 
 function Channel(pipes) {
   this.pipes = pipes;
@@ -20,7 +22,25 @@ Channel.fromPipe = function(pipe) {
 };
 
 Channel.prototype.update = function(time, dt) {
-  
+  for (let [entity, tanklet] of this.inputTanklets.entries()) {
+    if (tanklet.constantProduction && entity.state == STATE.running) {
+      if (tanklet.constantProduction < 0) continue;
+      const amount = Math.round(tanklet.constantProduction * dt / 1000);
+      if (tanklet.amount < amount) {
+        tanklet.amount += amount;
+      } else {
+        const transfer = Math.min(amount,
+            this.capacity - this.amount);
+        this.amount += transfer;
+      }
+    } else {
+      const amount = Math.round(DEFAULT_TRANSFER * dt / 1000);
+      const transfer = Math.min(tanklet.amount, amount,
+          this.capacity - this.amount);
+      tanklet.amount -= transfer;
+      this.amount += transfer;
+    }
+  }
 };
 
 Channel.prototype.draw = function(ctx, view) {
@@ -39,8 +59,8 @@ Channel.prototype.draw = function(ctx, view) {
 Channel.prototype.addInputEntity = function(entity, pipe) {
   for (let i = 0; i < entity.outputFluidTank.connectionPoints.length; i++) {
     const p = entity.outputFluidTank.connectionPoints[i];
-    if (pipe.x == this.x + p.x &&
-        pipe.y == this.y + p.y) {
+    if (pipe.x == entity.x + p.x &&
+        pipe.y == entity.y + p.y) {
       const tanklet = entity.outputFluidTank.tanklets[i] ??
           entity.outputFluidTank.tanklets[0];
       this.inputTanklets.set(entity, tanklet);
@@ -68,7 +88,14 @@ Channel.prototype.remove = function(pipe) {
     this.amount = this.capacity;
   }
   
+  inputLoop:
   for (let entity of pipe.inputEntities) {
+    for (let output of entity.outputEntities) {
+      if (output.type == TYPE.pipe && output != pipe &&
+          output.data.channel == this) {
+        continue inputLoop;
+      }
+    }
     this.inputTanklets.delete(entity);
   }
 };
@@ -115,11 +142,11 @@ Channel.prototype.split = function(pipe, not, a, b, c) {
     p.data.channel = segment;
     this.pipes.delete(p);
     
-    this.capacity -= p.capacity;
-    segment.capacity += p.capacity;
+    this.capacity -= p.data.capacity;
+    segment.capacity += p.data.capacity;
     
     for (let entity of p.inputEntities) {
-      segment.set(entity, this.inputTanklets.get(entity));
+      segment.inputTanklets.set(entity, this.inputTanklets.get(entity));
       this.inputTanklets.delete(entity);
     }
   }

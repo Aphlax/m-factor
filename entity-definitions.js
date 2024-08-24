@@ -239,6 +239,8 @@ export const ENTITIES = new Map([
       S.pipeCross,
     ],
     animationLength: 0,
+    
+    capacity: 100,
   }],
 ]);
 

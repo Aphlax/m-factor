@@ -139,6 +139,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
         new Inventory(1).setFilters(LAB_FILTERS);
   } else if (this.type == TYPE.pipe) {
     this.data.pipes = {};
+    this.data.capacity = def.capacity;
     this.data.pipeSprites = def.pipeSprites;
   } else if (this.type == TYPE.offshorePump) {
     this.state = STATE.running;

@@ -166,7 +166,6 @@ GameMap.prototype.draw = function(ctx, time) {
 GameMap.prototype.createEntity = function(name, x, y, direction, time) {
   // Create should not do any checks if there is enough space etc.
   const entity = new Entity().setup(name, x, y, direction, time);
-  
   const cx = Math.floor(x / SIZE);
   const cy = Math.floor(y / SIZE);
   if (!this.chunks.has(cx) || !this.chunks.get(cx).has(cy))

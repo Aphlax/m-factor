@@ -143,4 +143,34 @@ UiWindUp.prototype.draw = function(ctx, time) {
   ctx.fillText(Math.floor(this.entity.energyStored), x, y + 21);
 };
 
-export {UiProgress, UiResource, UiFuel, UiWindUp};
+function UiFluidIndicator(parent, x, y) {
+  this.parent = parent;
+  this.x = x;
+  this.y = y;
+  this.entity = undefined;
+}
+
+UiFluidIndicator.prototype.set = function(entity) {
+  this.entity = entity;
+};
+
+UiFluidIndicator.prototype.draw = function(ctx, time) {
+  if (!this.entity?.data.channel) return;
+  const x = Math.floor(this.parent.x + this.x),
+        y = Math.floor(this.parent.y + this.y);
+  
+  ctx.fillStyle = COLOR.background3;
+  ctx.fillRect(x, y, 40, 40);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = COLOR.border2;
+  ctx.strokeRect(x, y, 40, 40);
+  
+  ctx.fillStyle = COLOR.primary;
+  ctx.font = "16px monospace";
+  ctx.textBaseline = "middle";
+  const text = this.entity.data.channel.amount +
+      "/" + this.entity.data.channel.capacity;
+  ctx.fillText(text, x + 46, y + 21);
+};
+
+export {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator};
