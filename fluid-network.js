@@ -5,7 +5,19 @@ function FluidNetwork() {
   this.channels = [];
 }
 
+/** Returns true if this is an invalid connection and it should be removed. */
 FluidNetwork.prototype.addPipe = function(pipe) {
+  let fluid = 0;
+  for (let i = 0; i < 4; i++) {
+    const other = pipe.data.pipes[i];
+    if (other && other.type == TYPE.pipe) {
+      if (fluid && other.data.channel.fluid &&
+          fluid != other.data.channel.fluid) {
+        return true;
+      }
+      fluid = other.data.channel.fluid;
+    }
+  }
   let connected = false;
   for (let i = 0; i < 4; i++) {
     const other = pipe.data.pipes[i];

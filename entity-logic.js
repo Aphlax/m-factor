@@ -241,12 +241,11 @@ export function connectPipe(other, time) {
 export function disconnectPipe() {
   for (let direction = 0; direction < 4; direction++) {
     const other = this.data.pipes[direction];
-    if (other) {
-      this.data.pipes[direction] = undefined;
-      if (other.type == TYPE.pipe) {
-        other.data.pipes[(direction + 2) % 4] = undefined;
-        other.updatePipeSprites();
-      }
+    if (!other) continue;
+    this.data.pipes[direction] = undefined;
+    if (other.type == TYPE.pipe) {
+      other.data.pipes[(direction + 2) % 4] = undefined;
+      other.updatePipeSprites();
     }
   }
 }
@@ -283,17 +282,19 @@ export function updatePipeSprites() {
   }
 }
 
+/** Returns true if this is an invalid connection and it should be removed. */
 export function connectFluidOutput(pipe) {
   for (let p of this.outputFluidTank.connectionPoints) {
-    if (pipe.x == this.x + p.x &&
-        pipe.y == this.y + p.y) {
-      pipe.inputEntities.push(this);
-      this.outputEntities.push(pipe);
-      pipe.data.pipes[(p.direction + 2) % 4] = this;
-      pipe.updatePipeSprites();
-      if (pipe.data.channel) {
-        pipe.data.channel.addInputEntity(this, pipe);
-      }
+    if (pipe.x != this.x + p.x ||
+        pipe.y != this.y + p.y) continue;
+    pipe.inputEntities.push(this);
+    this.outputEntities.push(pipe);
+    pipe.data.pipes[(p.direction + 2) % 4] = this;
+    pipe.updatePipeSprites();
+    if (pipe.data.channel) {
+      // After a pipe is created, we first add
+      // input/output before it gets its channel.
+      return pipe.data.channel.addInputEntity(this, pipe);
     }
   }
 }

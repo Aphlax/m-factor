@@ -1,7 +1,7 @@
 import {COLOR} from './ui-properties.js';
 import {STATE} from './entity-properties.js';
 import {SPRITES} from './sprite-pool.js';
-import {ITEMS, I} from './item-definitions.js';
+import {ITEMS, FLUIDS, I} from './item-definitions.js';
 
 function UiProgress(parent, x, y) {
   this.parent = parent;
@@ -171,6 +171,14 @@ UiFluidIndicator.prototype.draw = function(ctx, time) {
   const text = this.entity.data.channel.amount +
       "/" + this.entity.data.channel.capacity;
   ctx.fillText(text, x + 46, y + 21);
+  
+  if (!this.entity.data.channel.fluid) return;
+  const fluid = FLUIDS.get(this.entity.data.channel.fluid);
+  const sprite = fluid && SPRITES.get(fluid.sprite);
+  ctx.drawImage(sprite.image,
+      sprite.x, sprite.y,
+      sprite.width, sprite.height,
+      x + 5, y + 5, 32, 32);
 };
 
 export {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator};

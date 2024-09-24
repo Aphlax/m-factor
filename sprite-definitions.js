@@ -453,16 +453,20 @@ export const SPRITES = [
     sprites: itemSprites(S.ironGearItem),
   },
   {
-    path: "graphics/items/wood.png",
+    path: "graphics/items/electronic-circuit.png",
     sprites: itemSprites(S.electronicCircuitItem),
   },
   {
-    path: "graphics/items/wood.png",
+    path: "graphics/items/copper-cable.png",
     sprites: itemSprites(S.copperCableItem),
   },
   {
     path: "graphics/items/automation-science-pack.png",
     sprites: itemSprites(S.redScienceItem),
+  },
+  {
+    path: "graphics/items/water.png",
+    sprites: itemSprites(S.waterFluid),
   },
   
   

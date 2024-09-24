@@ -11,7 +11,7 @@ function Channel(pipes) {
   
   this.inputTanklets = new Map();
   
-  const c = Math.floor(Math.random() * 255 * 2 + 1);
+  const c = Math.ceil(Math.random() * 255 * 2);
   this.color = `rgb(${Math.abs(c-255)}, ${Math.abs((c+170)%510-255)}, ${Math.abs((c+340)%510-255)})`;
 }
 
@@ -22,6 +22,7 @@ Channel.fromPipe = function(pipe) {
 };
 
 Channel.prototype.update = function(time, dt) {
+  let inlet = 0;
   for (let [entity, tanklet] of this.inputTanklets.entries()) {
     if (tanklet.constantProduction && entity.state == STATE.running) {
       if (tanklet.constantProduction < 0) continue;
@@ -29,22 +30,35 @@ Channel.prototype.update = function(time, dt) {
       if (tanklet.amount < amount) {
         tanklet.amount += amount;
       } else {
-        const transfer = Math.min(amount,
-            this.capacity - this.amount);
-        this.amount += transfer;
+        inlet += amount;
       }
     } else {
-      const amount = Math.round(DEFAULT_TRANSFER * dt / 1000);
-      const transfer = Math.min(tanklet.amount, amount,
-          this.capacity - this.amount);
-      tanklet.amount -= transfer;
+      const amount = DEFAULT_TRANSFER * dt / 1000;
+      const transfer = Math.min(tanklet.amount, amount);
+      inlet += transfer;
+    }
+  }
+  const p = Math.min((this.capacity - this.amount) / inlet, 1);
+  for (let [entity, tanklet] of this.inputTanklets.entries()) {
+    if (tanklet.constantProduction && entity.state == STATE.running) {
+      if (tanklet.constantProduction < 0) continue;
+      const amount = Math.round(tanklet.constantProduction * dt / 1000);
+      if (tanklet.amount < amount) {
+        tanklet.amount += amount;
+      } else {
+        this.amount += Math.round(amount * p);
+      }
+    } else {
+      const amount = DEFAULT_TRANSFER * dt / 1000;
+      const transfer = Math.round(p * Math.min(tanklet.amount, amount));
       this.amount += transfer;
+      tanklet.amount -= transfer;
     }
   }
 };
 
 Channel.prototype.draw = function(ctx, view) {
-  return;
+  // return;
   ctx.strokeStyle = this.color;
   ctx.lineWidth = 1;
   for (let pipe of this.pipes) {
@@ -56,15 +70,20 @@ Channel.prototype.draw = function(ctx, view) {
   }
 };
 
+/** Returns true if this is an invalid connection and it should be removed. */
 Channel.prototype.addInputEntity = function(entity, pipe) {
   for (let i = 0; i < entity.outputFluidTank.connectionPoints.length; i++) {
     const p = entity.outputFluidTank.connectionPoints[i];
-    if (pipe.x == entity.x + p.x &&
-        pipe.y == entity.y + p.y) {
-      const tanklet = entity.outputFluidTank.tanklets[i] ??
-          entity.outputFluidTank.tanklets[0];
-      this.inputTanklets.set(entity, tanklet);
+    if (pipe.x != entity.x + p.x ||
+        pipe.y != entity.y + p.y) continue;
+    const tanklet = entity.outputFluidTank.tanklets[i] ??
+        entity.outputFluidTank.tanklets[0];
+    if (this.fluid && tanklet.fluid != this.fluid) {
+      return true;
+    } else if (!this.fluid) {
+      this.fluid = tanklet.fluid;
     }
+    this.inputTanklets.set(entity, tanklet);
   }
 };
 
@@ -101,9 +120,7 @@ Channel.prototype.remove = function(pipe) {
 };
 
 Channel.prototype.join = function(other) {
-  if (other == this) return true;
-  if (other.fluid && this.fluid &&
-      other.fluid != this.fluid) return false;
+  if (other == this) return;
   
   for (let pipe of other.pipes) {
     this.pipes.add(pipe);
@@ -118,8 +135,6 @@ Channel.prototype.join = function(other) {
   for (let [entity, tanklet] of other.inputTanklets.entries()) {
     this.inputTanklets.set(entity, tanklet);
   }
-  
-  return true;
 };
 
 Channel.prototype.split = function(pipe, not, a, b, c) {

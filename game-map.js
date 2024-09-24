@@ -171,11 +171,11 @@ GameMap.prototype.createEntity = function(name, x, y, direction, time) {
   if (!this.chunks.has(cx) || !this.chunks.get(cx).has(cy))
     return;
   
-  this.connectEntity(entity, time);
-  
   const entities = this.chunks.get(cx).get(cy).entities;
   const i = entities.findIndex(e => e.y >= y && (e.y > y || e.x > x));
   entities.splice(i, 0, entity);
+  
+  this.connectEntity(entity, time);
   
   return entity;
 };
@@ -289,10 +289,16 @@ GameMap.prototype.connectEntity = function(entity, time) {
           }
           
           if (entity.type == TYPE.pipe && other.outputFluidTank) {
-            other.connectFluidOutput(entity);
+            if (other.connectFluidOutput(entity)) {
+              this.deleteEntity(entity);
+              return;
+            }
           }
           if (other.type == TYPE.pipe && entity.outputFluidTank) {
-            entity.connectFluidOutput(other);
+            if (entity.connectFluidOutput(other)) {
+              this.deleteEntity(entity);
+              return;
+            }
           }
         }
       }
@@ -301,7 +307,10 @@ GameMap.prototype.connectEntity = function(entity, time) {
   if (entity.type == TYPE.belt) {
     this.transportNetwork.addBelt(entity);
   } else if (entity.type == TYPE.pipe) {
-    this.fluidNetwork.addPipe(entity);
+    if (this.fluidNetwork.addPipe(entity)) {
+      this.deleteEntity(entity);
+      return;
+    }
   }
 };
 
