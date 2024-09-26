@@ -66,6 +66,14 @@ export const S = {
   offshorePumpShadowS: 92*16,
   offshorePumpW: 94*16,
   offshorePumpShadowW: 96*16,
+  boilerFireN: 98*16, // 64
+  boilerWorkingN: 102*16,
+  boilerFireE: 104*16, // 64
+  boilerWorkingE: 108*16,
+  boilerFireS: 110*16, // 64
+  boilerWorkingS: 114*16,
+  boilerFireW: 116*16, // 64
+  boilerWorkingW: 120*16,
   
   woodenChest: 15000,
   woodenChestShadow: 15001,
@@ -90,6 +98,18 @@ export const S = {
   pipeTDown: 15057,
   pipeTLeft: 15058,
   pipeCross: 15059,
+  boilerN: 15060,
+  boilerShadowN: 15061,
+  boilerLightN: 15062,
+  boilerE: 15063,
+  boilerShadowE: 15064,
+  boilerLightE: 15065,
+  boilerS: 15066,
+  boilerShadowS: 15067,
+  boilerLightS: 15068,
+  boilerW: 15069,
+  boilerShadowW: 15070,
+  boilerLightW: 15071,
   
   ironOreItem: 16000,
   copperOreItem: 16000 + 1,
@@ -417,6 +437,86 @@ export const SPRITES = [
   {
     path: "graphics/entities/pipe/pipe-cross.png",
     sprites: entitySprites(S.pipeCross, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-N-idle.png",
+    sprites: entitySprites(S.boilerN, 131, 108, 1, 1, 18, 17, 22, 22, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-N-fire.png",
+    sprites: entitySprites(S.boilerFireN, 12, 13, 8, 8, -42, -42, -13, -38, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-N-light.png",
+    sprites: entitySprites(S.boilerLightN, 100, 87, 1, 1, 3, 1, 22, 1, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-N-shadow.png",
+    sprites: entitySprites(S.boilerShadowN, 137, 82, 1, 1, 4, 37, 8, 10, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-N-working.png",
+    sprites: entitySprites(S.boilerWorkingN, 131, 108, 8, 4, 18, 17, 22, 22, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-E-idle.png",
+    sprites: entitySprites(S.boilerE, 105, 147, 1, 1, 26, 17, 27, 24, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-E-fire.png",
+    sprites: entitySprites(S.boilerFireE, 14, 14, 8, 8, -14, -36, -18, -64, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-E-light.png",
+    sprites: entitySprites(S.boilerLightE, 70, 122, 1, 1, 4, 2, 27, -1, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-E-shadow.png",
+    sprites: entitySprites(S.boilerShadowE, 92, 97, 1, 1, -11, 39, 3, -2, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-E-working.png",
+    sprites: entitySprites(S.boilerWorkingE, 105, 147, 8, 4, 26, 17, 27, 24, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-S-idle.png",
+    sprites: entitySprites(S.boilerS, 128, 95, 1, 1, 13, 19, 2, 29, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-S-fire.png",
+    sprites: entitySprites(S.boilerFireS, 12, 9, 8, 8, -41, -43, -2, -53, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-S-light.png",
+    sprites: entitySprites(S.boilerLightS, 100, 81, 1, 1, 1, 3, 2, 15, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-S-shadow.png",
+    sprites: entitySprites(S.boilerShadowS, 156, 66, 1, 1, 1, 59, -7, 9, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-S-working.png",
+    sprites: entitySprites(S.boilerWorkingS, 128, 95, 8, 4, 13, 19, 2, 29, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-W-idle.png",
+    sprites: entitySprites(S.boilerW, 96, 132, 1, 1, 15, 15, 13, 23, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-W-fire.png",
+    sprites: entitySprites(S.boilerFireW, 14, 14, 8, 8, -36, -14, -18, -64, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-W-light.png",
+    sprites: entitySprites(S.boilerLightW, 68, 109, 1, 1, 0, 2, 13, 0, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-W-shadow.png",
+    sprites: entitySprites(S.boilerShadowW, 103, 109, 1, 1, 2, 37, 11, 2, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-W-working.png",
+    sprites: entitySprites(S.boilerWorkingW, 96, 132, 8, 4, 15, 15, 13, 23, true),
   },
   
   // Items.

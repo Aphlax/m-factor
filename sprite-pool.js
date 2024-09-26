@@ -45,12 +45,12 @@ SpritePool.prototype.draw = function(ctx, time) {
       Math.floor(ctx.canvas.height * 0.5 - 20),
       Math.floor((ctx.canvas.width * 0.6 - 30) * this.current / this.total + 10), 40);
       
-  if (this.current > this.total * 0.95) {
+  if (this.current > this.total * 0.85) {
     for (let imageDef of SPRITES) {
       const id = imageDef.sprites[0].id;
       if (!this.sprites.has(id)) {
         ctx.fillStyle = "black";
-        ctx.fillText(id, ctx.canvas.width * 0.5 - 40,
+        ctx.fillText("#" + id, ctx.canvas.width * 0.5 - 40,
             ctx.canvas.height - 60);
         break;
       }
@@ -58,106 +58,85 @@ SpritePool.prototype.draw = function(ctx, time) {
   }
       
   // Debug.
-  if (this.current == this.total) {
-    ctx.fillStyle = "lightgrey";
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    let sprite = S.pipeSingle;
-    let shadow = 0;
-    let size = [32, 32], xlen = 8, ylen = 4;
-    for (let i = 0; i < xlen; i++) {
-      for (let j = 0; j < ylen; j++) {
-        let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(sprite+i*ylen+j)};
-        if (!s.image) continue;
-        let rect = [10+i*(size[0]+15), 100+ j*(size[1]+15), ...size];
-        let xScale = rect[2] / (s.width - s.left - s.right);
-        let yScale = rect[3] / (s.height - s.top - s.bottom);
-        if (shadow) {
-          let ss = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(shadow/*+i*ylen+j*/)};
-          let sxScale = rect[2] / (ss.width - ss.left - ss.right);
-          let syScale = rect[3] / (ss.height - ss.top - ss.bottom);
-          ctx.strokeStyle="blue";
-          ctx.strokeRect(rect[0] - ss.left * sxScale - 1,
-              rect[1] - ss.top * syScale - 1,
-              ss.width * sxScale + 2,
-              ss.height * syScale + 2);
-          ctx.drawImage(ss.image,
-              ss.x, ss.y, ss.width, ss.height,
-              rect[0] - ss.left * sxScale,
-              rect[1] - ss.top * syScale,
-              ss.width * sxScale,
-              ss.height * syScale);
-        }
-        ctx.strokeStyle="yellow";
-        ctx.strokeRect(
-            rect[0] - s.left * xScale,
-            rect[1] - s.top * yScale,
-            s.width * xScale,
-            s.height * yScale);
-        ctx.drawImage(s.image,
-            s.x, s.y, s.width, s.height,
-            rect[0] - s.left * xScale,
-            rect[1] - s.top * yScale,
-            s.width * xScale,
-            s.height * yScale);
-        ctx.strokeStyle="red";
-        ctx.strokeRect(...rect);
+  if (this.current != this.total) return;
+  ctx.fillStyle = "lightgrey";
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  
+  let sprite = S.boilerWorkingW;
+  let shadow = S.boilerShadowW;
+  let light = 0; // S.boilerLightW;
+  let size = [32*2, 32*3], xlen = 8, ylen = 4;
+  for (let i = 0; i < xlen; i++) {
+    for (let j = 0; j < ylen; j++) {
+      let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(sprite+i*ylen+j)};
+      if (!s.image) continue;
+      let rect = [10+i*(size[0]+15), 100+ j*(size[1]+15), ...size];
+      let xScale = rect[2] / (s.width - s.left - s.right);
+      let yScale = rect[3] / (s.height - s.top - s.bottom);
+      if (shadow) {
+        let ss = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(shadow/*+i*ylen+j*/)};
+        strokeSprite(ctx, ss, rect, "blue");
+        drawSprite(ctx, ss, rect);
       }
-    }
-    
-    const imgs = [this.get(sprite).image, shadow ? this.get(shadow).image : 0];
-    let txt = "";
-    for (let img of imgs) {
-      if (!img) continue;
-      txt += img.naturalWidth + "x" + img.naturalHeight;
-      txt += " ("+(img.naturalWidth /xlen).toFixed(0) + "x" +
-           (img.naturalHeight/ylen).toFixed(0) + "), ";
-    }
-    ctx.fillStyle = "black";
-    ctx.fillText(txt, 10, 570);
-    
-    return;
-    let a = xlen*ylen;
-    const animShad = 1;
-    
-    let s = this.get(sprite + (Math.floor(time / 120) % a));
-    if(!s) return;
-    let r = s.rect;
-    let rect = [30, 580, ...size];
-    if (shadow) {
-      let ss = this.get(shadow + (animShad ? (Math.floor(time / 60) % a) : 0));
-      let rs = ss.rect;
-      let sxScale = rect[2] / (ss.width - (ss.left ?? 0) - (ss.right ?? 0));
-      let syScale = rect[3] / (ss.height - (ss.top ?? 0) - (ss.bottom ?? 0));
-      ctx.drawImage(ss.image,
-        ss.x, ss.y, ss.width, ss.height,
-        rect[0] - (ss.left ?? 0) * sxScale,
-        rect[1] - (ss.top ?? 0) * syScale,
-        ss.width * sxScale,
-        ss.height * syScale);
-    }
-    let xScale = rect[2] / (s.width - (s.left ?? 0) - (s.right ?? 0));
-    let yScale = rect[3] / (s.height - (s.top ?? 0) - (s.bottom ?? 0));
-    ctx.drawImage(s.image,
-        s.x, s.y, s.width, s.height,
-        rect[0] - (s.left ?? 0) * xScale,
-        rect[1] - (s.top ?? 0) * yScale,
-        s.width * xScale,
-        s.height * yScale);
-    ctx.strokeStyle="red";
-    //ctx.strokeRect(...rect);
-    
-    return;
-    if (!this.spriteSheetExported) {
-      this.spriteSheetExported = this.exportSpriteSheet();
-    } else {
-      const canvas = this.spriteSheetExported;
-      ctx.fillStyle="white";
-      ctx.fillRect(10, 10, canvas.width, canvas.height);
-      ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height,
-          10, 10, canvas.width, canvas.height);
+      if (light) {
+        let ls = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(light)};
+        strokeSprite(ctx, ls, rect, "lime");
+        ctx.globalCompositeOperation = "screen";
+        drawSprite(ctx, ls, rect);
+        ctx.globalCompositeOperation = "source-over";
+      }
+      // strokeSprite(ctx, s, rect, "yellow");
+      drawSprite(ctx, s, rect);
       ctx.strokeStyle="red";
-      ctx.strokeRect(9, 9, canvas.width + 2, canvas.height + 2);
+      ctx.strokeRect(...rect);
     }
+  }
+  
+  const imgs = [this.get(sprite).image,
+      shadow ? this.get(shadow).image : 0,
+      light ? this.get(light).image : 0];
+  let txt = "";
+  for (let img of imgs) {
+    if (!img) continue;
+    txt += img.naturalWidth + "x" + img.naturalHeight;
+    txt += " ("+(img.naturalWidth /xlen).toFixed(0) + "x" +
+         (img.naturalHeight/ylen).toFixed(0) + "), ";
+  }
+  ctx.fillStyle = "black";
+  ctx.font = "18px arial";
+  ctx.fillText(txt, 10, 570);
+  
+  //return;
+  let a = xlen*ylen;
+  const animShad = 0;
+  
+  let s = this.get(sprite + (Math.floor(time / 120) % a));
+  if(!s) return;
+  let r = s.rect;
+  let rect = [30, 580, ...size];
+  if (shadow) {
+    let ss = this.get(shadow + (animShad ? (Math.floor(time / 60) % a) : 0));
+    drawSprite(ctx, ss, rect);
+  }
+  if (light) {
+    let ls = this.get(light);
+    ctx.globalCompositeOperation = "screen";
+    drawSprite(ctx, ls, rect);
+    ctx.globalCompositeOperation = "source-over";
+  }
+  drawSprite(ctx, s, rect);
+  
+  return;
+  if (!this.spriteSheetExported) {
+    this.spriteSheetExported = this.exportSpriteSheet();
+  } else {
+    const canvas = this.spriteSheetExported;
+    ctx.fillStyle="white";
+    ctx.fillRect(10, 10, canvas.width, canvas.height);
+    ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height,
+        10, 10, canvas.width, canvas.height);
+    ctx.strokeStyle="red";
+    ctx.strokeRect(9, 9, canvas.width + 2, canvas.height + 2);
   }
 };
 
@@ -207,8 +186,40 @@ SpritePool.prototype.exportSpriteSheet = function() {
     name: "offshore-pump_West",
     path: "graphics/entities/offshore-pump/offshore-pump_West-legs.png",
     sprites: 0//entitySprites(-1, 54, 32, 1, 1, -16, 6, -16, 16, true),
+  },{
+    sprite: S.boilerFireN,
+    shadow: S.boilerN,
+    light: S.boilerLightN,
+    size: [96, 64], xlen: 8, ylen: 4,
+    tile: [131, 108], xoff: 18, yoff: 22,
+    animShadow: false,
+    name: "boiler-N-working",
+  },{
+    sprite: S.boilerFireE,
+    shadow: S.boilerE,
+    light: S.boilerLightE,
+    size: [32*2, 32*3], xlen: 8, ylen: 4,
+    tile: [105, 147], xoff: 26, yoff: 27,
+    animShadow: false,
+    name: "boiler-E-working",
+  },{
+    sprite: S.boilerFireS,
+    shadow: S.boilerS,
+    light: S.boilerLightS,
+    size: [32*3, 32*2], xlen: 8, ylen: 4,
+    tile: [128, 95], xoff: 13, yoff: 2,
+    animShadow: false,
+    name: "boiler-S-working",
+  },{
+    sprite: S.boilerFireW,
+    shadow: S.boilerW,
+    light: S.boilerLightW,
+    size: [32*2, 32*3], xlen: 8, ylen: 4,
+    tile: [96, 132], xoff: 15, yoff: 13,
+    animShadow: false,
+    name: "boiler-W-working",
   }];
-  const cfg = cfgs[3];
+  const cfg = cfgs[cfgs.length - 1];
   
   const canvas = document.createElement("canvas");
   canvas.width = cfg.tile[0] * cfg.xlen;
@@ -220,29 +231,35 @@ SpritePool.prototype.exportSpriteSheet = function() {
       let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(cfg.sprite+i*cfg.ylen+j)};
       if (!s.image) continue;
       let rect = [i * cfg.tile[0] + cfg.xoff, j * cfg.tile[1] + cfg.yoff, ...cfg.size];
-      let xScale = rect[2] / (s.width - s.left - s.right);
-      let yScale = rect[3] / (s.height - s.top - s.bottom);
       if (cfg.shadow) {
         let ss = {left: 0, right: 0, top: 0, bottom: 0,
             ...this.get(cfg.shadow +(cfg.animShadow ? i*cfg.ylen+j : 0))};
-        let sxScale = rect[2] / (ss.width - ss.left - ss.right);
-        let syScale = rect[3] / (ss.height - ss.top - ss.bottom);
-        
-        ctx.drawImage(ss.image,
-            ss.x, ss.y, ss.width, ss.height,
-            rect[0] - ss.left * sxScale,
-            rect[1] - ss.top * syScale,
-            ss.width * sxScale,
-            ss.height * syScale);
+        drawSprite(ctx, ss, rect);
       }
-      ctx.drawImage(s.image,
-          s.x, s.y, s.width, s.height,
-          rect[0] - s.left * xScale,
-          rect[1] - s.top * yScale,
-          s.width * xScale,
-          s.height * yScale);
+      if (cfg.light) {
+        let ls = {left: 0, right: 0, top: 0, bottom: 0,
+            ...this.get(cfg.light)};
+        /*ctx.save();
+        ctx.beginPath();
+        ctx.rect(i * cfg.tile[0], j * cfg.tile[1], cfg.tile[0], 66);
+        ctx.clip();*/
+        ctx.globalCompositeOperation = "screen";
+        drawSprite(ctx, ls, rect);
+        ctx.globalCompositeOperation = "source-over";
+        // ctx.restore();
+      }
+      drawSprite(ctx, s, rect);
     }
   }
+  
+  /*
+  const p = [62, 70];
+  const pixel = ctx.getImageData(...p, 1, 1).data;
+  const text = pixel[0] + ", " + pixel[1] + ", " + pixel[2] + ", " + pixel[3];
+  ctx.strokeStyle = "yellow";
+  ctx.strokeRect(p[0] - 1, p[1] - 1, 4, 4);
+  ctx.fillText(text, p[0] + 4, p[1] + 4)
+  */
   
   // Open in web browser to download.
   let a = document.createElement('a');
@@ -255,6 +272,27 @@ SpritePool.prototype.exportSpriteSheet = function() {
   a.innerText = "download spritesheet\n";
   document.body.appendChild(a);
   return canvas;
+}
+
+function drawSprite(ctx, s, rect) {
+  const xScale = rect[2] / (s.width - s.left - s.right);
+  const yScale = rect[3] / (s.height - s.top - s.bottom);
+  ctx.drawImage(s.image,
+      s.x, s.y, s.width, s.height,
+      rect[0] - s.left * xScale,
+      rect[1] - s.top * yScale,
+      s.width * xScale,
+      s.height * yScale);
+}
+
+function strokeSprite(ctx, s, rect, color) {
+  const xScale = rect[2] / (s.width - s.left - s.right);
+  const yScale = rect[3] / (s.height - s.top - s.bottom);
+  ctx.strokeStyle = color;
+  ctx.strokeRect(rect[0] - s.left * xScale - 1,
+      rect[1] - s.top * yScale - 1,
+      s.width * xScale + 2,
+      s.height * yScale + 2);
 }
 
 const INSTANCE = new SpritePool();
