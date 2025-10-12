@@ -10,6 +10,7 @@ export const TYPE = {
   lab: 7,
   offshorePump: 8,
   pipe: 9,
+  boiler: 10,
 };
 
 /** Never value for next update. */
@@ -30,6 +31,7 @@ export const STATE = {
   inserterCoolDown: 12, // Inserter moving back to initial position.
   mineEmpty: 13,
   noRecipe: 14,
+  boiling: 15,
 };
 
 export const DIRECTION = {
@@ -39,7 +41,7 @@ export const DIRECTION = {
   west: 3,
 }
 
-export const ADJACENT = [
+export const DIRECTIONS = [
   {dx: 0, dy: -1},
   {dx: 1, dy: 0},
   {dx: 0, dy: 1},
@@ -99,6 +101,7 @@ export function rectOverlap(x, y, width, height, entity) {
 }
 
 export const ENERGY = {
+  none: 0,
   burner: 1,
   windUp: 2,
   electricity: 3,

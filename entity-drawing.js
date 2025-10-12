@@ -31,7 +31,8 @@ export function draw(ctx, view, time) {
   if ((this.y - 1) * view.scale > view.y + view.height)
     return;
   let animation = this.animation;
-  if (this.animationLength && this.state == STATE.running) {
+  if (this.animationLength && (this.state == STATE.running ||
+      this.state == STATE.boiling)) {
     animation = Math.floor(animation +
         (time - this.taskStart) *
         this.animationSpeed / 60) % this.animationLength;

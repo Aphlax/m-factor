@@ -1,4 +1,5 @@
 import {TYPE, STATE} from './entity-properties.js';
+import {BOILER_RECIPE} from './recipe-definitions.js';
 
 const DEFAULT_TRANSFER = 1200;
 
@@ -10,6 +11,7 @@ function Channel(pipes) {
   this.capacity = 0;
   
   this.inputTanklets = new Map();
+  this.outputTanklets = new Map();
   
   const c = Math.ceil(Math.random() * 255 * 2);
   this.color = `rgb(${Math.abs(c-255)}, ${Math.abs((c+170)%510-255)}, ${Math.abs((c+340)%510-255)})`;
@@ -22,43 +24,56 @@ Channel.fromPipe = function(pipe) {
 };
 
 Channel.prototype.update = function(time, dt) {
-  let inlet = 0;
-  for (let [entity, tanklet] of this.inputTanklets.entries()) {
-    if (tanklet.constantProduction && entity.state == STATE.running) {
-      if (tanklet.constantProduction < 0) continue;
-      const amount = Math.round(tanklet.constantProduction * dt / 1000);
-      if (tanklet.amount < amount) {
-        tanklet.amount += amount;
-      } else {
-        inlet += amount;
+  // Output to tanklets.
+  const maxOutputAmount = DEFAULT_TRANSFER *
+      Math.max(this.amount / this.capacity, 0.05) * dt / 1000;
+  let outputAmount = 0;
+  for (let [entity, tanklet] of this.outputTanklets.entries()) {
+    outputAmount += Math.min(tanklet.capacity -
+        tanklet.amount, maxOutputAmount);
+  }
+  if (outputAmount) {
+    const pOut = Math.min(this.amount / outputAmount, 1);
+    if (pOut) {
+      for (let [entity, tanklet] of this.outputTanklets.entries()) {
+        const transfer = Math.round(pOut *
+            Math.min(tanklet.capacity - tanklet.amount,
+            maxOutputAmount));
+        
+        tanklet.amount += transfer;
+        this.amount -= transfer;
+        if (entity.state == STATE.missingItem) {
+          entity.nextUpdate = time;
+        }
       }
-    } else {
-      const amount = DEFAULT_TRANSFER * dt / 1000;
-      const transfer = Math.min(tanklet.amount, amount);
-      inlet += transfer;
     }
   }
-  const p = Math.min((this.capacity - this.amount) / inlet, 1);
+  
+  // Input from tanklets.
+  let maxInputAmount = DEFAULT_TRANSFER *
+      Math.max(1 - this.amount / this.capacity, 0.05) * dt / 1000;
+  if (maxInputAmount > this.capacity - this.amount)
+    maxInputAmount = this.capacity - this.amount;
+  let inputAmount = 0;
   for (let [entity, tanklet] of this.inputTanklets.entries()) {
-    if (tanklet.constantProduction && entity.state == STATE.running) {
-      if (tanklet.constantProduction < 0) continue;
-      const amount = Math.round(tanklet.constantProduction * dt / 1000);
-      if (tanklet.amount < amount) {
-        tanklet.amount += amount;
-      } else {
-        this.amount += Math.round(amount * p);
-      }
-    } else {
-      const amount = DEFAULT_TRANSFER * dt / 1000;
-      const transfer = Math.round(p * Math.min(tanklet.amount, amount));
-      this.amount += transfer;
-      tanklet.amount -= transfer;
+    const transfer = Math.min(tanklet.amount, maxInputAmount);
+    inputAmount += transfer;
+  }
+  const pIn = inputAmount ? Math.min((this.capacity - this.amount) / inputAmount, 1) : 0;
+  for (let [entity, tanklet] of this.inputTanklets.entries()) {
+    const transfer = Math.round(pIn *
+        Math.min(tanklet.amount, maxInputAmount));
+    this.amount += transfer;
+    tanklet.amount -= transfer;
+    
+    if (entity.state == STATE.itemReady) {
+      entity.nextUpdate = time;
     }
   }
 };
 
 Channel.prototype.draw = function(ctx, view) {
-  // return;
+  //return;
   ctx.strokeStyle = this.color;
   ctx.lineWidth = 1;
   for (let pipe of this.pipes) {
@@ -71,20 +86,27 @@ Channel.prototype.draw = function(ctx, view) {
 };
 
 /** Returns true if this is an invalid connection and it should be removed. */
-Channel.prototype.addInputEntity = function(entity, pipe) {
-  for (let i = 0; i < entity.outputFluidTank.connectionPoints.length; i++) {
-    const p = entity.outputFluidTank.connectionPoints[i];
-    if (pipe.x != entity.x + p.x ||
-        pipe.y != entity.y + p.y) continue;
-    const tanklet = entity.outputFluidTank.tanklets[i] ??
-        entity.outputFluidTank.tanklets[0];
-    if (this.fluid && tanklet.fluid != this.fluid) {
-      return true;
-    } else if (!this.fluid) {
-      this.fluid = tanklet.fluid;
-    }
-    this.inputTanklets.set(entity, tanklet);
+Channel.prototype.addInputEntity = function(entity, index) {
+  const tanklet = entity.outputFluidTank.tanklets[index] ??
+      entity.outputFluidTank.tanklets[0];
+  if (this.fluid && tanklet.fluid != this.fluid) {
+    return true;
+  } else if (!this.fluid) {
+    this.fluid = tanklet.fluid;
   }
+  this.inputTanklets.set(entity, tanklet);
+};
+
+/** Returns true if this is an invalid connection and it should be removed. */
+Channel.prototype.addOutputEntity = function(entity, index) {
+  const tanklet = entity.inputFluidTank.tanklets[index] ??
+      entity.inputFluidTank.tanklets[0];
+  if (this.fluid && tanklet.fluid != this.fluid) {
+    return true;
+  } else if (!this.fluid) {
+    this.fluid = tanklet.fluid;
+  }
+  this.outputTanklets.set(entity, tanklet);
 };
 
 Channel.prototype.add = function(pipe) {
@@ -94,7 +116,13 @@ Channel.prototype.add = function(pipe) {
   this.capacity += pipe.data.capacity;
   
   for (let entity of pipe.inputEntities) {
-    this.addInputEntity(entity, pipe);
+    this.addInputEntity(entity, 0);
+  }
+  for (let entity of pipe.outputEntities) {
+    this.addOutputEntity(entity, 0);
+  }
+  if (pipe.inputFluidTank?.internalInlet) {
+    this.addOutputEntity(pipe, -1);
   }
 };
 
@@ -110,12 +138,24 @@ Channel.prototype.remove = function(pipe) {
   inputLoop:
   for (let entity of pipe.inputEntities) {
     for (let output of entity.outputEntities) {
-      if (output.type == TYPE.pipe && output != pipe &&
+      if (output.data.pipeConnections &&
+          output != pipe &&
           output.data.channel == this) {
         continue inputLoop;
       }
     }
     this.inputTanklets.delete(entity);
+  }
+  outputLoop:
+  for (let entity of pipe.outputEntities) {
+    for (let input of entity.inputEntities) {
+      if (input.data.pipeConnections &&
+          input != pipe &&
+          input.data.channel == this) {
+        continue outputLoop;
+      }
+    }
+    this.outputTanklets.delete(entity);
   }
 };
 
@@ -135,6 +175,9 @@ Channel.prototype.join = function(other) {
   for (let [entity, tanklet] of other.inputTanklets.entries()) {
     this.inputTanklets.set(entity, tanklet);
   }
+  for (let [entity, tanklet] of other.outputTanklets.entries()) {
+    this.outputTanklets.set(entity, tanklet);
+  }
 };
 
 Channel.prototype.split = function(pipe, not, a, b, c) {
@@ -143,12 +186,17 @@ Channel.prototype.split = function(pipe, not, a, b, c) {
     const p = stack.pop();
     if (p == a || p == b || p == c) return;
     pipes.add(p);
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < p.data.pipeConnections.length; i++) {
       if (p.data.pipes[i] &&
           p.data.pipes[i] != not &&
-          p.data.pipes[i].type == TYPE.pipe &&
+          p.data.pipes[i].data.pipeConnections &&
           !pipes.has(p.data.pipes[i])) {
-        stack.push(p.data.pipes[i]);
+        for (let j = 0; j < p.data.pipes[i].data.pipeConnections.length; j ++) {
+          if (p.data.pipes[i].data.pipes[j] == p) {
+            stack.push(p.data.pipes[i]);
+            break;
+          }
+        }
       }
     }
   }
@@ -163,6 +211,10 @@ Channel.prototype.split = function(pipe, not, a, b, c) {
     for (let entity of p.inputEntities) {
       segment.inputTanklets.set(entity, this.inputTanklets.get(entity));
       this.inputTanklets.delete(entity);
+    }
+    for (let entity of p.outputEntities) {
+      segment.outputTanklets.set(entity, this.outputTanklets.get(entity));
+      this.outputTanklets.delete(entity);
     }
   }
   

@@ -180,12 +180,37 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1],
     duration: 500,
   },
+  {
+    prototypeName: "water-pumping",
+    inputs: [],
+    outputs: [
+      {item: I.water, amount: 1200 / 6},
+    ],
+    entities: [NAME.offshorePump],
+    duration: 1000 / 6,
+  },
+  {
+    prototypeName: "steam",
+    inputs: [
+      {item: I.water, amount: 6 / 6},
+    ],
+    outputs: [
+      {item: I.steam, amount: 60 / 6},
+    ],
+    entities: [NAME.boiler],
+    duration: 1000 / 6,
+  },
 ];
 
 export const FURNACE_FILTERS = RECIPES
     .filter(r => r.entities.includes(NAME.stoneFurnace))
     .map(r => r.inputs[0])
     .sort((a, b) => b - a);
+
+export const WATER_PUMPING_RECIPE = RECIPES
+    .find(r => r.entities.includes(NAME.offshorePump));
+export const BOILER_RECIPE = RECIPES
+    .find(r => r.entities.includes(NAME.boiler));
 
 export const PROTO_TO_RECIPE = new Map(
     RECIPES.map(r => [r.prototypeName, r]));

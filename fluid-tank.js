@@ -2,24 +2,32 @@
 
 function FluidTank() {
   this.tanklets = [];
-  this.connectionPoints = undefined;
+  this.pipeConnections = undefined;
+  this.internalInlet = false;
 }
 
-FluidTank.prototype.setConnectionPoints = function(points) {
-  this.connectionPoints = points;
+FluidTank.prototype.setPipeConnections = function(points) {
+  this.pipeConnections = points;
   return this;
 };
 
-FluidTank.prototype.setConstantProduction = function(fluid, amount) {
-  this.tanklets[0] = new Tanklet(fluid);
-  this.tanklets[0].constantProduction = amount;
+FluidTank.prototype.setInternalInlet = function(internalInlet) {
+  this.internalInlet = internalInlet;
+  return this;
+};
+
+FluidTank.prototype.setTanklets = function(fluids) {
+  this.tanklets = [];
+  for (let fluid of fluids) {
+    this.tanklets.push(new Tanklet(fluid));
+  }
   return this;
 };
 
 function Tanklet(fluid) {
   this.fluid = fluid;
   this.amount = 0;
-  this.constantProduction = 0;
+  this.capacity = 200;
 }
 
 export {FluidTank};

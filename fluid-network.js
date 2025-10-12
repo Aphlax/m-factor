@@ -8,18 +8,18 @@ function FluidNetwork() {
 /** Returns true if this is an invalid connection and it should be removed. */
 FluidNetwork.prototype.addPipe = function(pipe) {
   let fluid = 0;
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < pipe.data.pipeConnections.length; i++) {
     const other = pipe.data.pipes[i];
-    if (other && other.type == TYPE.pipe) {
+    if (other && other.data.pipeConnections) {
       if (fluid && other.data.channel.fluid &&
           fluid != other.data.channel.fluid) {
-        return true;
+        return true; // Invalid connection.
       }
       fluid = other.data.channel.fluid;
     }
   }
   let connected = false;
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < pipe.data.pipeConnections.length; i++) {
     const other = pipe.data.pipes[i];
     if (other && other.type == TYPE.pipe) {
       if (connected) {
@@ -36,13 +36,14 @@ FluidNetwork.prototype.addPipe = function(pipe) {
 };
 
 FluidNetwork.prototype.removePipe = function(pipe) {
+  if (!pipe.data.channel) return;
   let previous1 = undefined,
       previous2 = undefined,
       previous3 = undefined;
   pipe.data.channel.remove(pipe);
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < pipe.data.pipeConnections.length; i++) {
     const other = pipe.data.pipes[i];
-    if (other && other.type == TYPE.pipe) {
+    if (other && other.data.pipeConnections) {
       if (previous1) {
         const segment = other.data.channel.split(
             other, pipe, previous1, previous2, previous3);

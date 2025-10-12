@@ -12,6 +12,7 @@ const BUILD_MENU = [
   NAME.stoneFurnace,
   NAME.pipe,
   NAME.offshorePump,
+  NAME.boiler,
 ];
 const DEACC = 50;
 

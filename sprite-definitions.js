@@ -124,6 +124,7 @@ export const S = {
   woodItem: 16000 + 10,
   
   waterFluid: 16050 + 0,
+  steamFluid: 16050 + 1,
   
   burnerDrillItem: 16100 + 8,
   woodenChestItem: 16100 + 9,
@@ -134,6 +135,7 @@ export const S = {
   labItem: 16100 + 14,
   offshorePumpItem: 16100 + 15,
   pipeItem: 16100 + 16,
+  boilerItem: 16100 + 17,
   
   gearIcon: 16500,
   burnerDrillIcon: 16500 + 1,
@@ -148,6 +150,7 @@ export const S = {
   windUpIcon: 16500 + 10,
   offshorePumpIcon: 16500 + 11,
   pipeIcon: 16500 + 12,
+  boilerIcon: 16500 + 13,
   
   smoke: 17000,
   
@@ -440,43 +443,43 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/boiler/boiler-N-idle.png",
-    sprites: entitySprites(S.boilerN, 131, 108, 1, 1, 18, 17, 22, 22, true),
+    sprites: entitySprites(S.boilerN, 131, 108, 1, 1, 18, 17, 18, 26, true),
   },
   {
     path: "graphics/entities/boiler/boiler-N-fire.png",
-    sprites: entitySprites(S.boilerFireN, 12, 13, 8, 8, -42, -42, -13, -38, true),
+    sprites: entitySprites(S.boilerFireN, 12, 13, 8, 8, -42, -42, -17, -34, true),
   },
   {
     path: "graphics/entities/boiler/boiler-N-light.png",
-    sprites: entitySprites(S.boilerLightN, 100, 87, 1, 1, 3, 1, 22, 1, true),
+    sprites: entitySprites(S.boilerLightN, 100, 87, 1, 1, 3, 1, 18, 5, true),
   },
   {
     path: "graphics/entities/boiler/boiler-N-shadow.png",
-    sprites: entitySprites(S.boilerShadowN, 137, 82, 1, 1, 4, 37, 8, 10, true),
+    sprites: entitySprites(S.boilerShadowN, 137, 82, 1, 1, 2, 39, 0, 18, true),
   },
   {
     path: "graphics/entities/boiler/boiler-N-working.png",
-    sprites: entitySprites(S.boilerWorkingN, 131, 108, 8, 4, 18, 17, 22, 22, true),
+    sprites: entitySprites(S.boilerWorkingN, 131, 108, 8, 4, 18, 17, 18, 26, true),
   },
   {
     path: "graphics/entities/boiler/boiler-E-idle.png",
-    sprites: entitySprites(S.boilerE, 105, 147, 1, 1, 26, 17, 27, 24, true),
+    sprites: entitySprites(S.boilerE, 105, 147, 1, 1, 24, 19, 26, 25, true),
   },
   {
     path: "graphics/entities/boiler/boiler-E-fire.png",
-    sprites: entitySprites(S.boilerFireE, 14, 14, 8, 8, -14, -36, -18, -64, true),
+    sprites: entitySprites(S.boilerFireE, 14, 14, 8, 8, -16, -34, -19, -63, true),
   },
   {
     path: "graphics/entities/boiler/boiler-E-light.png",
-    sprites: entitySprites(S.boilerLightE, 70, 122, 1, 1, 4, 2, 27, -1, true),
+    sprites: entitySprites(S.boilerLightE, 70, 122, 1, 1, 2, 4, 26, 0, true),
   },
   {
     path: "graphics/entities/boiler/boiler-E-shadow.png",
-    sprites: entitySprites(S.boilerShadowE, 92, 97, 1, 1, -11, 39, 3, -2, true),
+    sprites: entitySprites(S.boilerShadowE, 92, 97, 1, 1, -13, 41, -1, 2, true),
   },
   {
     path: "graphics/entities/boiler/boiler-E-working.png",
-    sprites: entitySprites(S.boilerWorkingE, 105, 147, 8, 4, 26, 17, 27, 24, true),
+    sprites: entitySprites(S.boilerWorkingE, 105, 147, 8, 4, 24, 17, 26, 25, true),
   },
   {
     path: "graphics/entities/boiler/boiler-S-idle.png",
@@ -512,7 +515,7 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/boiler/boiler-W-shadow.png",
-    sprites: entitySprites(S.boilerShadowW, 103, 109, 1, 1, 2, 37, 11, 2, true),
+    sprites: entitySprites(S.boilerShadowW, 103, 109, 1, 1, 6, 33, 9, 4, true),
   },
   {
     path: "graphics/entities/boiler/boiler-W-working.png",
@@ -568,6 +571,10 @@ export const SPRITES = [
     path: "graphics/items/water.png",
     sprites: itemSprites(S.waterFluid),
   },
+  {
+    path: "graphics/items/steam.png",
+    sprites: itemSprites(S.steamFluid),
+  },
   
   
   {
@@ -605,6 +612,10 @@ export const SPRITES = [
   {
     path: "graphics/items/pipe.png",
     sprites: itemSprites(S.pipeItem, S.pipeIcon),
+  },
+  {
+    path: "graphics/items/boiler.png",
+    sprites: itemSprites(S.boilerItem, S.boilerIcon),
   },
   
   // Misc.

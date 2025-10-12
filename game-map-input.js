@@ -1,4 +1,4 @@
-import {TYPE, DIRECTION, ADJACENT} from './entity-properties.js';
+import {TYPE, DIRECTION, DIRECTIONS} from './entity-properties.js';
 import {COLOR} from './ui-properties.js';
 import {S} from './sprite-pool.js';
 
@@ -190,8 +190,8 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
     let x = Math.floor((this.touches[0].x + this.view.x) / this.view.scale);
     let y = Math.floor((this.touches[0].y + this.view.y) / this.view.scale);
     if (this.gameMap.getTerrainAt(x, y) < S.water) {
-      for (let i = 0; i < ADJACENT.length; i++) {
-        const {dx, dy} = ADJACENT[i];
+      for (let i = 0; i < DIRECTIONS.length; i++) {
+        const {dx, dy} = DIRECTIONS[i];
         if (this.gameMap.getTerrainAt(x + dx, y + dy) >= S.water) {
           x += dx;
           y += dy;

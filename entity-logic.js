@@ -1,4 +1,4 @@
-import {TYPE, NEVER, STATE, ADJACENT} from './entity-properties.js';
+import {TYPE, NEVER, STATE} from './entity-properties.js';
 import {ITEMS} from './item-definitions.js';
 
 /**
@@ -154,7 +154,8 @@ export function connectInserter(other, time) {
       other.x + other.width > this.x + dx &&
       other.y <= this.y + dy &&
       other.y + other.height > this.y + dy) {
-    if (other.inputInventory || other.type == TYPE.belt) {
+    if (other.inputInventory || other.fuelInventory ||
+        other.type == TYPE.belt) {
       this.outputEntities.push(other);
       other.inputEntities.push(this);
       if (this.state == STATE.noOutput ||
@@ -227,30 +228,45 @@ export function setRecipe(recipe, time) {
   }
 }
 
-export function connectPipe(other, time) {
-  for (let direction = 0; direction < ADJACENT.length; direction++) {
-    const {dx, dy} = ADJACENT[direction];
-    if (this.x + dx == other.x && this.y + dy == other.y) {
-      this.data.pipes[direction] = other;
-      other.data.pipes[(direction + 2) % 4] = this;
-      break;
+export function connectPipe(other) {
+  for (let i = 0; i < this.data.pipeConnections.length; i++) {
+    const p1 = this.data.pipeConnections[i];
+    if (this.x + p1.x < other.x ||
+        this.x + p1.x >= other.x + other.width ||
+        this.y + p1.y < other.y ||
+        this.y + p1.y >= other.y + other.height) continue;
+    for (let j = 0; j < other.data.pipeConnections.length; j++) {
+      const p2 = other.data.pipeConnections[j];
+      if (other.x + p2.x < this.x ||
+          other.x + p2.x >= this.x + this.width ||
+          other.y + p2.y < this.y ||
+          other.y + p2.y >= this.y + this.height ||
+          (other.x + p2.x != this.x + p1.x &&
+          other.y + p2.y != this.y + p1.y)) continue;
+      this.data.pipes[i] = other;
+      other.data.pipes[j] = this;
+      return true;
     }
   }
 }
 
 export function disconnectPipe() {
-  for (let direction = 0; direction < 4; direction++) {
-    const other = this.data.pipes[direction];
+  for (let i = 0; i < this.data.pipeConnections.length; i++) {
+    const other = this.data.pipes[i];
     if (!other) continue;
-    this.data.pipes[direction] = undefined;
-    if (other.type == TYPE.pipe) {
-      other.data.pipes[(direction + 2) % 4] = undefined;
-      other.updatePipeSprites();
+    this.data.pipes[i] = undefined;
+    if (other.data.pipeConnections) {
+      for (let j = 0; j < other.data.pipeConnections.length; j++) {
+        if (other.data.pipes[j] != this) continue;
+        other.data.pipes[j] = undefined;
+        other.updatePipeSprites();
+      }
     }
   }
 }
 
 export function updatePipeSprites() {
+  if (this.type != TYPE.pipe) return;
   let count = 0, direction, notdirection;
   for (let i = 0; i < 4; i++) {
     if (this.data.pipes[i]) {
@@ -284,17 +300,61 @@ export function updatePipeSprites() {
 
 /** Returns true if this is an invalid connection and it should be removed. */
 export function connectFluidOutput(pipe) {
-  for (let p of this.outputFluidTank.connectionPoints) {
-    if (pipe.x != this.x + p.x ||
-        pipe.y != this.y + p.y) continue;
-    pipe.inputEntities.push(this);
-    this.outputEntities.push(pipe);
-    pipe.data.pipes[(p.direction + 2) % 4] = this;
-    pipe.updatePipeSprites();
-    if (pipe.data.channel) {
-      // After a pipe is created, we first add
-      // input/output before it gets its channel.
-      return pipe.data.channel.addInputEntity(this, pipe);
+  for (let i = 0; i < this.outputFluidTank.pipeConnections.length; i++) {
+    const p1 = this.outputFluidTank.pipeConnections[i];
+    if (this.x + p1.x < pipe.x ||
+        this.x + p1.x >= pipe.x + pipe.width ||
+        this.y + p1.y < pipe.y ||
+        this.y + p1.y >= pipe.y + pipe.height) continue;
+    for (let j = 0; j < pipe.data.pipeConnections.length; j++) {
+      const p2 = pipe.data.pipeConnections[j];
+      if (pipe.x + p2.x < this.x ||
+          pipe.x + p2.x >= this.x + this.width ||
+          pipe.y + p2.y < this.y ||
+          pipe.y + p2.y >= this.y + this.height ||
+          (this.x + p1.x != pipe.x + p2.x &&
+          this.y + p1.y != pipe.y + p2.y)) continue;
+      pipe.inputEntities.push(this);
+      this.outputEntities.push(pipe);
+      pipe.data.pipes[j] = this;
+      pipe.updatePipeSprites();
+      if (pipe.data.channel) {
+        // After a pipe is created, we first add
+        // input/output before it gets its channel.
+        return pipe.data.channel.addInputEntity(this, i);
+      }
     }
+    
+  }
+}
+
+/** Returns true if this is an invalid connection and it should be removed. */
+export function connectFluidInput(pipe) {
+  if (this.inputFluidTank.internalInlet) return;
+  for (let i = 0; i < this.inputFluidTank.pipeConnections.length; i++) {
+    const p1 = this.inputFluidTank.pipeConnections[i];
+    if (this.x + p1.x < pipe.x ||
+        this.x + p1.x >= pipe.x + pipe.width ||
+        this.y + p1.y < pipe.y ||
+        this.y + p1.y >= pipe.y + pipe.height) continue;
+    for (let j = 0; j < pipe.data.pipeConnections.length; j++) {
+      const p2 = pipe.data.pipeConnections[j];
+      if (pipe.x + p2.x < this.x ||
+          pipe.x + p2.x >= this.x + this.width ||
+          pipe.y + p2.y < this.y ||
+          pipe.y + p2.y >= this.y + this.height ||
+          (this.x + p1.x != pipe.x + p2.x &&
+          this.y + p1.y != pipe.y + p2.y)) continue;
+      pipe.outputEntities.push(this);
+      this.inputEntities.push(pipe);
+      pipe.data.pipes[j] = this;
+      pipe.updatePipeSprites();
+      if (pipe.data.channel) {
+        // After a pipe is created, we first add
+        // input/output before it gets its channel.
+        return pipe.data.channel.addOutputEntity(this, i);
+      }
+    }
+    
   }
 }

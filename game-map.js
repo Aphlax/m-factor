@@ -1,7 +1,7 @@
 import {MapGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {S} from './sprite-definitions.js';
-import {TYPE, STATE, MAX_SIZE, ENERGY, rectOverlap, ADJACENT} from './entity-properties.js';
+import {TYPE, STATE, MAX_SIZE, ENERGY, rectOverlap, DIRECTIONS} from './entity-properties.js';
 import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
 import {FluidNetwork} from './fluid-network.js';
@@ -41,7 +41,8 @@ GameMap.prototype.update = function(time, dt) {
     for (let chunk of chunks.values()) {
       for (let entity of chunk.entities) {
         if (entity.type == TYPE.belt ||
-            entity.type == TYPE.chest) continue;
+            entity.type == TYPE.chest ||
+            entity.type == TYPE.pipe) continue;
         if (time < entity.nextUpdate) continue;
         entity.update(this, time);
       }
@@ -268,9 +269,8 @@ GameMap.prototype.connectEntity = function(entity, time) {
               }
             }
           }
-          if (entity.type == TYPE.pipe && other.type == TYPE.pipe) {
-            if (Math.abs(entity.x - other.x) + Math.abs(entity.y - other.y) == 1) {
-              entity.connectPipe(other, time);
+          if (entity.data.pipeConnections && other.data.pipeConnections) {
+            if (entity.connectPipe(other, time)) {
               entity.updatePipeSprites();
               other.updatePipeSprites();
             }
@@ -288,14 +288,26 @@ GameMap.prototype.connectEntity = function(entity, time) {
             other.connectMine(entity, time);
           }
           
-          if (entity.type == TYPE.pipe && other.outputFluidTank) {
+          if (entity.data.pipeConnections && other.outputFluidTank) {
             if (other.connectFluidOutput(entity)) {
               this.deleteEntity(entity);
               return;
             }
           }
-          if (other.type == TYPE.pipe && entity.outputFluidTank) {
+          if (other.data.pipeConnections && entity.outputFluidTank) {
             if (entity.connectFluidOutput(other)) {
+              this.deleteEntity(entity);
+              return;
+            }
+          }
+          if (entity.data.pipeConnections && other.inputFluidTank) {
+            if (other.connectFluidInput(entity)) {
+              this.deleteEntity(entity);
+              return;
+            }
+          }
+          if (other.data.pipeConnections && entity.inputFluidTank) {
+            if (entity.connectFluidInput(other)) {
               this.deleteEntity(entity);
               return;
             }
@@ -306,7 +318,7 @@ GameMap.prototype.connectEntity = function(entity, time) {
   }
   if (entity.type == TYPE.belt) {
     this.transportNetwork.addBelt(entity);
-  } else if (entity.type == TYPE.pipe) {
+  } else if (entity.data.pipeConnections) {
     if (this.fluidNetwork.addPipe(entity)) {
       this.deleteEntity(entity);
       return;
@@ -344,7 +356,7 @@ GameMap.prototype.disconnectEntity = function(entity) {
       }
     }
   }
-  if (entity.type == TYPE.pipe) {
+  if (entity.data.pipeConnections) {
     this.fluidNetwork.removePipe(entity);
     entity.disconnectPipe();
   }
@@ -424,14 +436,14 @@ GameMap.prototype.tryCreateEntity = function(screenX, screenY, direction, entity
 GameMap.prototype.canPlaceOffshorePump = function(x, y) {
   if (this.getTerrainAt(x, y) < S.water) return -1;
   let adjacent = 0, direction;
-  for (let i = 0; i < ADJACENT.length; i++) {
-    const {dx, dy} = ADJACENT[i];
+  for (let i = 0; i < DIRECTIONS.length; i++) {
+    const {dx, dy} = DIRECTIONS[i];
     if (this.getTerrainAt(x + dx, y + dy) >= S.water) continue;
     direction = i;
     adjacent++;
   }
   if (adjacent != 1) return -1;
-  const {dx, dy} = ADJACENT[direction];
+  const {dx, dy} = DIRECTIONS[direction];
   const px = -dy, py = dx;
   if (this.getTerrainAt(x - dx + px, y - dy + py) < S.water) return -1;
   if (this.getTerrainAt(x - dx - px, y - dy - py) < S.water) return -1;
@@ -452,7 +464,8 @@ GameMap.prototype.createSmoke = function(x, y, time, duration) {
   if (!this.chunks.has(cx)) return;
   const cy = Math.floor(y / SIZE);
   if (!this.chunks.get(cx).has(cy)) return;
-  const count = Math.floor(duration * 0.005);
+  let count = Math.floor(duration * 0.005);
+  if (!count && time % 200 < duration) count++;
   for (let i = 0; i < count; i++) {
     let p;
     if (this.particles.length) {

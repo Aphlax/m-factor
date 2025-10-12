@@ -3,7 +3,7 @@ import {FluidTank} from './fluid-tank.js';
 import {ENTITIES} from './entity-definitions.js';
 import {TYPE, MAX_SIZE, NEVER, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ENERGY} from './entity-properties.js';
 import {ITEMS, I} from './item-definitions.js';
-import {RECIPES, FURNACE_FILTERS} from './recipe-definitions.js';
+import {RECIPES, FURNACE_FILTERS, WATER_PUMPING_RECIPE, BOILER_RECIPE} from './recipe-definitions.js';
 import {S, SPRITES} from './sprite-pool.js';
 import * as entityLogic from './entity-logic.js';
 import * as entityDrawing from './entity-drawing.js';
@@ -61,7 +61,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.height = def.size[direction].height;
   }
   this.direction = direction;
-  this.energySource = 0;
+  this.energySource = ENERGY.none;
   this.sprite = def.sprites[direction][0];
   this.spriteShadow = def.sprites[direction][1];
   this.animation = 0;
@@ -72,6 +72,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   this.outputEntities.length = 0;
   
   if (this.type == TYPE.belt) {
+    this.nextUpdate = NEVER;
     this.animationSpeed *= def.beltSpeed;
     this.data.beltSpeed = def.beltSpeed;
     this.data.beltSprites = def.beltSprites[direction];
@@ -108,10 +109,10 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.taskStart = -1;
     this.taskDuration = 0;
     this.taskEnd = 0;
-    this.sprite = def.idleAnimation;
+    this.sprite = def.idleAnimation[direction][0];
     this.data.processingSpeed = def.processingSpeed;
     this.data.recipe = undefined;
-    this.data.idleAnimation = def.idleAnimation;
+    this.data.idleAnimation = def.idleAnimation[direction][0];
     this.data.workingAnimation = def.sprites[direction][0];
     this.inputInventory = new Inventory(1)
         .setFilters(FURNACE_FILTERS);
@@ -138,14 +139,48 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.inputInventory = this.outputInventory =
         new Inventory(1).setFilters(LAB_FILTERS);
   } else if (this.type == TYPE.pipe) {
+    this.data.pipeConnections = def.pipeConnections[direction];
     this.data.pipes = {};
     this.data.capacity = def.capacity;
     this.data.pipeSprites = def.pipeSprites;
   } else if (this.type == TYPE.offshorePump) {
     this.state = STATE.running;
+    this.nextUpdate = time;
+    this.taskDuration = WATER_PUMPING_RECIPE.duration;
+    this.data.outputAmount = WATER_PUMPING_RECIPE.outputs[0].amount;
     this.outputFluidTank = new FluidTank()
-        .setConnectionPoints(def.fluidOutputs[direction])
-        .setConstantProduction(I.water, 1200);
+        .setTanklets([I.water])
+        .setPipeConnections(def.fluidOutputs[direction]);
+    this.outputFluidTank.tanklets[0].capacity =
+        WATER_PUMPING_RECIPE.outputs[0].amount *
+        1000 / WATER_PUMPING_RECIPE.duration;
+  } else if (this.type == TYPE.boiler) {
+    this.state = STATE.missingItem;
+    this.nextUpdate = NEVER;
+    this.energySource = def.energySource;
+    this.energyConsumption = def.energyConsumption;
+    this.data.pipeConnections = def.pipeConnections[direction];
+    this.data.pipes = {};
+    this.data.capacity = def.capacity;
+    this.data.processingSpeed = 1;
+    this.data.inputAmount = BOILER_RECIPE.inputs[0].amount;
+    this.data.outputAmount = BOILER_RECIPE.outputs[0].amount;
+    this.taskDuration = BOILER_RECIPE.duration;
+    this.energySource = def.energySource;
+    this.energyConsumption = def.energyConsumption;
+    this.data.workingAnimation = def.sprites[direction][0];
+    this.data.idleAnimation = def.idleAnimation[direction][0];
+    this.sprite = this.data.idleAnimation;
+    this.outputFluidTank = new FluidTank()
+        .setTanklets([I.steam])
+        .setPipeConnections(def.fluidOutputs[direction]);
+    this.inputFluidTank = new FluidTank()
+        .setTanklets([I.water])
+        .setInternalInlet(true);
+    if (def.energySource == ENERGY.burner) {
+      this.fuelInventory = new Inventory(1)
+          .setFilters(FUEL_FILTERS);
+    }
   }
   return this;
 };
@@ -343,6 +378,7 @@ Entity.prototype.update = function(gameMap, time) {
     }
   } else if (this.type == TYPE.furnace) {
     if (this.state == STATE.outOfEnergy) {
+      // fuel up.
       const item = this.fuelInventory.items[0];
       if (item && this.fuelInventory.extract(item, 1, true)) {
         this.state = STATE.running;
@@ -551,6 +587,78 @@ Entity.prototype.update = function(gameMap, time) {
       this.taskStart = this.nextUpdate;
       this.taskEnd = this.nextUpdate =
           this.taskStart + 9800;
+    }
+  } else if (this.type == TYPE.offshorePump) {
+    this.outputFluidTank.tanklets[0].amount =
+        Math.min(this.outputFluidTank.tanklets[0].capacity,
+        this.outputFluidTank.tanklets[0].amount + this.data.outputAmount);
+    this.nextUpdate = this.nextUpdate + this.taskDuration;
+  } else if (this.type == TYPE.boiler) {
+    // return;
+    
+    
+   
+    let continueNextItem = false;
+    if (this.state == STATE.running ||
+        this.state == STATE.itemReady) {
+      if (this.state == STATE.running)
+        this.energyStored -= this.taskDuration / 1000 * this.energyConsumption;
+      const outputTanklet = this.outputFluidTank.tanklets[0];
+      if (outputTanklet.amount + this.data.outputAmount > outputTanklet.capacity) {
+        this.state = STATE.itemReady;
+        this.nextUpdate = NEVER;
+        this.sprite = this.data.idleAnimation;
+        this.animation = 0;
+        return;
+      }
+      outputTanklet.amount += this.data.outputAmount;
+      continueNextItem = true;
+    }
+    if (this.state == STATE.missingItem ||
+        this.state == STATE.outOfEnergy ||
+        continueNextItem) {
+      const inputTanklet = this.inputFluidTank.tanklets[0];
+      if (inputTanklet.amount < this.data.inputAmount) {
+        this.state = STATE.missingItem;
+        this.nextUpdate = NEVER;
+        this.sprite = this.data.idleAnimation;
+        this.animation = 0;
+        return;
+      }
+      while (this.energyStored < this.taskDuration / 1000 * this.energyConsumption) {
+        if (this.energySource == ENERGY.burner) {
+          const item = this.fuelInventory.items[0];
+          if (!item || !this.fuelInventory.extract(item, 1, true)) {
+            this.state = STATE.outOfEnergy;
+            this.nextUpdate = NEVER;
+            this.sprite = this.data.idleAnimation;
+            this.animation = 0;
+            return;
+          }
+          this.energyStored += ITEMS.get(item).fuelValue;
+          for (let inputEntity of this.inputEntities) {
+            if (inputEntity.state == STATE.outputFull ||
+                inputEntity.state == STATE.itemReady) {
+              inputEntity.nextUpdate = this.nextUpdate;
+            }
+          }
+        } else {
+          this.state = STATE.outOfEnergy;
+          this.nextUpdate = NEVER;
+          this.sprite = this.data.idleAnimation;
+          this.animation = 0;
+          return;
+        }
+      }
+      inputTanklet.amount -= this.data.inputAmount;
+      this.state = STATE.running;
+      this.taskStart = this.nextUpdate;
+      this.taskEnd = this.taskStart + this.taskDuration;
+      this.sprite = this.data.workingAnimation;
+      gameMap.createSmoke(this.x + 1, this.y, this.nextUpdate,
+          this.taskEnd - this.nextUpdate);
+      this.nextUpdate = this.taskEnd;
+      return;
     }
   }
 };

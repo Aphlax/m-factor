@@ -14,6 +14,7 @@ export const I = {
   wood: 11,
   
   water: 50, // Fluid.
+  steam: 51, // Fluid.
   
   transportBelt: 100,
   inserter: 101,
@@ -135,5 +136,9 @@ export const FLUIDS = new Map([
   [I.water,
   {
     sprite: S.waterFluid,
-  }]
+  }],
+  [I.steam,
+  {
+    sprite: S.steamFluid,
+  }],
 ]);

@@ -8,11 +8,13 @@ export function scenario(gameMap, time) {
 
 function productionTest(gameMap, time) {
   const chunks = [
+      [2, -2], [2, -1], [2, 0], [2, 1],
       [1, -2], [1, -1], [1, 0], [1, 1],
       [0, -1], [0, 0], [0, 1],
       [-1, 0], [-1, -1], [-1, 1],
       [-2, -1], [-2, 0], [-2, 1], [-2, 2], [-2, 3],
-      [-3, -1], [-3, 0], [-3, 1], [-3, 2]];
+      [-3, -1], [-3, 0], [-3, 1], [-3, 2],
+      [-4, -1]];
   chunks.forEach(([x, y]) => gameMap.generateChunk(x, y));
   gameMap.view.x = 750;
   gameMap.view.y = 480;
@@ -23,25 +25,25 @@ function productionTest(gameMap, time) {
   
   for (let i = 0; i < 5; i++) {
     e(NAME.burnerDrill, -10, -7 + 2 * i, 3)
-        .energyStored = 50 + i * 8;
+        .energyStored = 150;
     e(NAME.burnerDrill, -13, -6 + 2 * i, 1)
-        .energyStored = 36 + i * 12;
+        .energyStored = 150;
   }
   l(-11, -6, 2, 17);
   l(-11, 11, 3, 1);
   
   for (let i = 0; i < 5; i++) {
     e(NAME.burnerDrill, -20, -15 + 2 * i, 3)
-        .energyStored = 60 + i * 9;
+        .energyStored = 150;
     e(NAME.burnerDrill, -23, -15 + 2 * i, 1)
-        .energyStored = 46 + i * 18;
+        .energyStored = 150;
   }
   l(-21, -15, 2, 26);
   l(-21, 11, 1, 1);
   
   for (let i = 0; i < 8; i++) {
     e(NAME.burnerDrill, -80, 34 + 2 * i, 1)
-        .energyStored = 100 + i * 5;
+        .energyStored = 150;
   }
   l(-78, 49, 0, 66);
   l(-78, -17, 1, 63);
@@ -100,7 +102,20 @@ function productionTest(gameMap, time) {
   
   e(NAME.offshorePump, 41, 35, 3);
   p(40, 35, 3, 5);
-  p(35, 35, 0, 90);
+  p(35, 35, 0, 10);
+  e(NAME.boiler, 35, 23, 1);
+  e(NAME.boiler, 35, 20, 1);
+  
+  e(NAME.inserter, -14, -14, 1);
+  l(-13, -14, 1, 46);
+  const lane2 = l(33, -14, 2, 39);
+  lane2.plusItem = I.coal;
+  lane2.plusFlow = new Array(4 * 85 - 7).fill(0);
+  e(NAME.inserter, 34, 21, 1);
+  e(NAME.inserter, 34, 24, 1);
+  
+  p(37, 24, 0, 1);
+  [0,1,2,3,4,5].map(i => p(38, 19 + i, 1, 6));
 };
 
 function inserterTest(gameMap, time) {

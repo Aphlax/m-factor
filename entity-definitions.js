@@ -12,6 +12,7 @@ export const NAME = {
   lab: 7,
   offshorePump: 8,
   pipe: 9,
+  boiler: 10,
 };
 
 const {north, east, south, west} = DIRECTION;
@@ -136,7 +137,12 @@ export const ENTITIES = new Map([
     energyConsumption: 90, // kW
     
     processingSpeed: 1,
-    idleAnimation: S.stoneFurnace,
+    idleAnimation: {
+      [north]: [S.stoneFurnace],
+      [east]: [S.stoneFurnace],
+      [south]: [S.stoneFurnace],
+      [west]: [S.stoneFurnace],
+    },
   }],
   [NAME.assemblingMachine1,
   {
@@ -199,10 +205,10 @@ export const ENTITIES = new Map([
     animationSpeed: 0.5,
     
     fluidOutputs: {
-      [north]: [{x: 0, y: -1, direction: north}],
-      [east]: [{x: 2, y: 0, direction: east}],
-      [south]: [{x: 0, y: 2, direction: south}],
-      [west]: [{x: -1, y: 0, direction: west}],
+      [north]: [{x: 0, y: -1}],
+      [east]: [{x: 2, y: 0}],
+      [south]: [{x: 0, y: 2}],
+      [west]: [{x: -1, y: 0}],
     },
   }],
   [NAME.pipe,
@@ -216,9 +222,6 @@ export const ENTITIES = new Map([
     icon: S.pipeIcon,
     sprites: {
       [north]: [S.pipeSingle],
-      [east]: [S.pipeSingle],
-      [south]: [S.pipeSingle],
-      [west]: [S.pipeSingle],
     },
     pipeSprites: [
       S.pipeSingle,
@@ -240,7 +243,56 @@ export const ENTITIES = new Map([
     ],
     animationLength: 0,
     
+    pipeConnections: {
+      [north]: [{x: 0, y: -1}, {x: 1, y: 0}, {x: 0, y: 1}, {x: -1, y: 0}],
+    },
     capacity: 100,
+  }],
+  [NAME.boiler,
+  {
+    label: "Boiler",
+    prototypeName: "boiler",
+    type: TYPE.boiler,
+    size: {
+      [north]: {width: 3, height: 2},
+      [east]: {width: 2, height: 3},
+      [south]: {width: 3, height: 2},
+      [west]: {width: 2, height: 3},
+    },
+    rotatable: true,
+    icon: S.boilerIcon,
+    sprites: {
+      [north]: [S.boilerWorkingN, S.boilerShadowN],
+      [east]: [S.boilerWorkingE, S.boilerShadowE],
+      [south]: [S.boilerWorkingS, S.boilerShadowS],
+      [west]: [S.boilerWorkingW, S.boilerShadowW],
+    },
+    idleAnimation: {
+      [north]: [S.boilerN],
+      [east]: [S.boilerE],
+      [south]: [S.boilerS],
+      [west]: [S.boilerW],
+    },
+    animationLength: 32,
+    noShadowAnimation: true,
+    animationSpeed: 0.6,
+    energySource: ENERGY.burner,
+    energyConsumption: 1800, // kW
+    processingSpeed: 1,
+    
+    pipeConnections: {
+      [north]: [{x: -1, y: 1}, {x: 3, y: 1}],
+      [east]: [{x: 0, y: -1}, {x: 0, y: 3}],
+      [south]: [{x: 3, y: 0}, {x: -1, y: 0}],
+      [west]: [{x: 1, y: 3}, {x: 1, y: -1}],
+    },
+    capacity: 100,
+    fluidOutputs: {
+      [north]: [{x: 1, y: -1}],
+      [east]: [{x: 2, y: 1}],
+      [south]: [{x: 1, y: 2}],
+      [west]: [{x: -1, y: 1}],
+    },
   }],
 ]);
 

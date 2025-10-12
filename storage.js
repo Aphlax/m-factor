@@ -226,7 +226,8 @@ Storage.prototype.serializeEntity = function(index, entity) {
           taskStart: entity.taskStart,
           taskEnd: entity.taskEnd,
         } : {}),
-    ...(entity.energySource == ENERGY.burner ? {
+    ...(entity.energySource == ENERGY.burner ||
+        entity.energySource == ENERGY.windUp ? {
           energyStored: entity.energyStored,
         } : {}),
     ...(entity.inputInventory ? {inputInventory:
@@ -238,6 +239,8 @@ Storage.prototype.serializeEntity = function(index, entity) {
         this.serializeInventory(entity.fuelInventory)} : {}),
     ...(entity.outputFluidTank ? {outputFluidTank:
         this.serializeFluidTank(entity.outputFluidTank)} : {}),
+    ...(entity.inputFluidTank ? {inputFluidTank:
+        this.serializeFluidTank(entity.inputFluidTank)} : {}),
     
     ...(entity.type == TYPE.belt ? {
         beltSideLoadMinusWait: entity.data.beltSideLoadMinusWait,
@@ -259,9 +262,7 @@ Storage.prototype.serializeInventory = function(inventory) {
 
 Storage.prototype.serializeFluidTank = function(fluidTank) {
   return fluidTank.tanklets.map(tanklet => ({
-    fluid: tanklet.fluid,
     amount: tanklet.amount,
-    constantProduction: tanklet.constantProduction,
   }));
 };
 
@@ -325,7 +326,8 @@ Storage.prototype.deserializeEntity = function(e, entity) {
     entity.taskStart = e.taskStart;
     entity.taskEnd = e.taskEnd;
   }
-  if (entity.energySource == ENERGY.burner) {
+  if (entity.energySource == ENERGY.burner ||
+      entity.energySource == ENERGY.windUp) {
     entity.energyStored = e.energyStored;
   }
   if (e.inputInventory) {
@@ -342,12 +344,16 @@ Storage.prototype.deserializeEntity = function(e, entity) {
   }
   if (e.outputFluidTank) {
     for (let i = 0; i < e.outputFluidTank.length; i++) {
-      entity.outputFluidTank.tanklets[i].fluid =
-          e.outputFluidTank[i].fluid;
       entity.outputFluidTank.tanklets[i].amount =
           e.outputFluidTank[i].amount;
-      entity.outputFluidTank.tanklets[i].constantProduction =
-          e.outputFluidTank[i].constantProduction;
+    }
+  }
+  if (e.inputFluidTank) {
+    for (let i = 0; i < e.inputFluidTank.length; i++) {
+      entity.inputFluidTank.tanklets[i].amount =
+          e.inputFluidTank[i].amount;
+      entity.inputFluidTank.tanklets[i].constantProduction =
+          e.inputFluidTank[i].constantProduction;
     }
   }
   if (entity.type == TYPE.furnace && e.recipe) {
