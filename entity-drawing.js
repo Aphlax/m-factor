@@ -31,8 +31,7 @@ export function draw(ctx, view, time) {
   if ((this.y - 1) * view.scale > view.y + view.height)
     return;
   let animation = this.animation;
-  if (this.animationLength && (this.state == STATE.running ||
-      this.state == STATE.boiling)) {
+  if (this.animationLength && (this.state == STATE.running)) {
     animation = Math.floor(animation +
         (time - this.taskStart) *
         this.animationSpeed / 60) % this.animationLength;
@@ -321,6 +320,7 @@ export function drawIO(ctx, view) {
     const direction = this.type == TYPE.inserter ||
         this.type == TYPE.mine ||
         this.type == TYPE.offshorePump ||
+        this.type == TYPE.boiler ||
         (this.type == TYPE.belt && entity.type == TYPE.belt) ?
         this.direction : entity.direction;
     const dx = -s * ((direction - 2) % 2),

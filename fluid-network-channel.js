@@ -1,6 +1,5 @@
 import {TYPE, STATE} from './entity-properties.js';
-import {BOILER_RECIPE} from './recipe-definitions.js';
-
+ 
 const DEFAULT_TRANSFER = 1200;
 
 function Channel(pipes) {
@@ -116,9 +115,11 @@ Channel.prototype.add = function(pipe) {
   this.capacity += pipe.data.capacity;
   
   for (let entity of pipe.inputEntities) {
+    if (!entity.outputFluidTank) continue;
     this.addInputEntity(entity, 0);
   }
   for (let entity of pipe.outputEntities) {
+    if (!entity.inputFluidTank) continue;
     this.addOutputEntity(entity, 0);
   }
   if (pipe.inputFluidTank?.internalInlet) {

@@ -8,26 +8,42 @@ function FluidNetwork() {
 /** Returns true if this is an invalid connection and it should be removed. */
 FluidNetwork.prototype.addPipe = function(pipe) {
   let fluid = 0;
+  if (pipe.inputFluidTank?.internalInlet) {
+    fluid = pipe.inputFluidTank.tanklets[0].fluid;
+  }
   for (let i = 0; i < pipe.data.pipeConnections.length; i++) {
     const other = pipe.data.pipes[i];
-    if (other && other.data.pipeConnections) {
-      if (fluid && other.data.channel.fluid &&
-          fluid != other.data.channel.fluid) {
-        return true; // Invalid connection.
-      }
-      fluid = other.data.channel.fluid;
+    if (!other || !other.data.pipeConnections)
+      continue;
+    let isPipeConnection = false;
+    for (let j = 0; j < other.data.pipeConnections.length; j++) {
+      if (other.data.pipes[j] == pipe)
+        isPipeConnection = true;
     }
+    if (!isPipeConnection) continue;
+    if (fluid && other.data.channel.fluid &&
+        fluid != other.data.channel.fluid) {
+      return true; // Invalid connection.
+    }
+    fluid = other.data.channel.fluid;
   }
   let connected = false;
   for (let i = 0; i < pipe.data.pipeConnections.length; i++) {
     const other = pipe.data.pipes[i];
-    if (other && other.type == TYPE.pipe) {
-      if (connected) {
-        pipe.data.channel.join(other.data.channel);
-      } else {
-        other.data.channel.add(pipe);
-        connected = true;
-      }
+    if (!other || !other.data.pipeConnections)
+      continue;
+    let isPipeConnection = false;
+    for (let j = 0; j < other.data.pipeConnections.length; j++) {
+      if (other.data.pipes[j] == pipe)
+        isPipeConnection = true;
+    }
+    if (!isPipeConnection) continue;
+    
+    if (connected) {
+      pipe.data.channel.join(other.data.channel);
+    } else {
+      other.data.channel.add(pipe);
+      connected = true;
     }
   }
   if (!connected) {

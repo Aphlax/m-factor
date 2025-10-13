@@ -31,7 +31,6 @@ export const STATE = {
   inserterCoolDown: 12, // Inserter moving back to initial position.
   mineEmpty: 13,
   noRecipe: 14,
-  boiling: 15,
 };
 
 export const DIRECTION = {
