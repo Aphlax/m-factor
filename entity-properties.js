@@ -11,6 +11,8 @@ export const TYPE = {
   offshorePump: 8,
   pipe: 9,
   boiler: 10,
+  steamEngine: 11,
+  electricPole: 12,
 };
 
 /** Never value for next update. */

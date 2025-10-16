@@ -13,6 +13,8 @@ export const NAME = {
   offshorePump: 8,
   pipe: 9,
   boiler: 10,
+  steamEngine: 11,
+  smallElectricPole: 12,
 };
 
 const {north, east, south, west} = DIRECTION;
@@ -293,6 +295,58 @@ export const ENTITIES = new Map([
       [south]: [{x: 1, y: 2}],
       [west]: [{x: -1, y: 1}],
     },
+  }],
+  [NAME.steamEngine,
+  {
+    label: "Steam Engine",
+    prototypeName: "steam-engine",
+    type: TYPE.steamEngine,
+    size: {
+      [north]: {width: 3, height: 5},
+      [east]: {width: 5, height: 3},
+      [south]: {width: 3, height: 5},
+      [west]: {width: 5, height: 3},
+    },
+    rotatable: true,
+    icon: S.steamEngineIcon,
+    sprites: {
+      [north]: [S.steamEngineV, S.steamEngineShadowV],
+      [east]: [S.steamEngineH, S.steamEngineShadowH],
+      [south]: [S.steamEngineV, S.steamEngineShadowV],
+      [west]: [S.steamEngineH, S.steamEngineShadowH],
+    },
+    animationLength: 32,
+    animationSpeed: 1,
+    
+    pipeConnections: {
+      [north]: [{x: 1, y: -1}, {x: 1, y: 5}],
+      [east]: [{x: -1, y: 1}, {x: 5, y: 1}],
+      [south]: [{x: 1, y: -1}, {x: 1, y: 5}],
+      [west]: [{x: -1, y: 1}, {x: 5, y: 1}],
+    },
+    capacity: 500,
+    fluidConsumption: 30,
+    powerOutput: 900, // kW
+  }],
+  [NAME.smallElectricPole,
+  {
+    label: "Small Pole",
+    prototypeName: "small-electric-pole",
+    type: TYPE.electricPole,
+    width: 1,
+    height: 1,
+    rotatable: false,
+    icon: S.smallElectricPoleIcon,
+    sprites: {
+      [north]: [S.smallElectricPoleN, S.smallElectricPoleShadowN],
+      [east]: [S.smallElectricPoleE, S.smallElectricPoleShadowE],
+      [south]: [S.smallElectricPoleS, S.smallElectricPoleShadowS],
+      [west]: [S.smallElectricPoleW, S.smallElectricPoleShadowW],
+    },
+    animationLength: 0,
+    
+    wireReach: 7,
+    supplyArea: 2,
   }],
 ]);
 

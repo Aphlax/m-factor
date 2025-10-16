@@ -214,6 +214,8 @@ UiWindow.prototype.initialize = function() {
   this.entityUis.set(TYPE.inserter, {});
   this.entityUis.set(TYPE.offshorePump, {});
   this.entityUis.set(TYPE.boiler, {});
+  this.entityUis.set(TYPE.steamEngine, {});
+  this.entityUis.set(TYPE.electricPole, {});
   
   this.entityUis.set(TYPE.furnace, {
     input: new UiInventory(this, 10, 40),

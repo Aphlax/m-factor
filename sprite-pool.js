@@ -29,6 +29,7 @@ SpritePool.prototype.loadImage = function(imageDef) {
 };
 
 SpritePool.prototype.isLoaded = function() {
+  //return false;
   return this.current == this.total;
 };
 
@@ -62,10 +63,10 @@ SpritePool.prototype.draw = function(ctx, time) {
   ctx.fillStyle = "lightgrey";
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   
-  let sprite = S.boilerWorkingW;
-  let shadow = S.boilerShadowW;
+  let sprite = S.steamEngineH;
+  let shadow = S.steamEngineShadowH;
   let light = 0; // S.boilerLightW;
-  let size = [32*2, 32*3], xlen = 8, ylen = 4;
+  let size = [32*5, 32*3], xlen = 8, ylen = 4;
   for (let i = 0; i < xlen; i++) {
     for (let j = 0; j < ylen; j++) {
       let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(sprite+i*ylen+j)};
@@ -104,19 +105,24 @@ SpritePool.prototype.draw = function(ctx, time) {
   }
   ctx.fillStyle = "black";
   ctx.font = "18px arial";
-  ctx.fillText(txt, 10, 570);
+  ctx.fillText(txt, 10, 20);
   
   //return;
   let a = xlen*ylen;
-  const animShad = 0;
+  const animShad = true;
   
-  let s = this.get(sprite + (Math.floor(time / 120) % a));
+  ctx.fillStyle = "orange";
+  ctx.fillRect(0, 560, 210, 250);
+  
+  let s = this.get(sprite + (Math.floor(time / 60) % a));
   if(!s) return;
   let r = s.rect;
   let rect = [30, 580, ...size];
   if (shadow) {
     let ss = this.get(shadow + (animShad ? (Math.floor(time / 60) % a) : 0));
+    ctx.globalAlpha = 0.7;
     drawSprite(ctx, ss, rect);
+    ctx.globalAlpha = 1;
   }
   if (light) {
     let ls = this.get(light);

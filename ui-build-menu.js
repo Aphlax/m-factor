@@ -13,6 +13,8 @@ const BUILD_MENU = [
   NAME.pipe,
   NAME.offshorePump,
   NAME.boiler,
+  NAME.steamEngine,
+  NAME.smallElectricPole,
 ];
 const DEACC = 50;
 

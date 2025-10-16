@@ -74,6 +74,11 @@ export const S = {
   boilerWorkingS: 114*16,
   boilerFireW: 116*16, // 64
   boilerWorkingW: 120*16,
+  steamEngineV: 124*16, // 32
+  steamEngineShadowV: 126*16,
+  steamEngineH: 128*16, // 32
+  steamEngineShadowH: 130*16,
+  
   
   woodenChest: 15000,
   woodenChestShadow: 15001,
@@ -110,6 +115,14 @@ export const S = {
   boilerW: 15069,
   boilerShadowW: 15070,
   boilerLightW: 15071,
+  smallElectricPoleN: 15072,
+  smallElectricPoleE: 15073,
+  smallElectricPoleS: 15074,
+  smallElectricPoleW: 15075,
+  smallElectricPoleShadowN: 15076,
+  smallElectricPoleShadowE: 15077,
+  smallElectricPoleShadowS: 15078,
+  smallElectricPoleShadowW: 15079,
   
   ironOreItem: 16000,
   copperOreItem: 16000 + 1,
@@ -136,6 +149,8 @@ export const S = {
   offshorePumpItem: 16100 + 15,
   pipeItem: 16100 + 16,
   boilerItem: 16100 + 17,
+  steamEngineItem: 16100 + 18,
+  smallElectricPoleItem: 16100 + 19,
   
   gearIcon: 16500,
   burnerDrillIcon: 16500 + 1,
@@ -151,6 +166,8 @@ export const S = {
   offshorePumpIcon: 16500 + 11,
   pipeIcon: 16500 + 12,
   boilerIcon: 16500 + 13,
+  steamEngineIcon: 16500 + 14,
+  smallElectricPoleIcon: 16500 + 15,
   
   smoke: 17000,
   
@@ -521,6 +538,31 @@ export const SPRITES = [
     path: "graphics/entities/boiler/boiler-W-working.png",
     sprites: entitySprites(S.boilerWorkingW, 96, 132, 8, 4, 15, 15, 13, 23, true),
   },
+  {
+    path: "graphics/entities/steam-engine/steam-engine-V.png",
+    sprites: entitySprites(S.steamEngineV, 112, 195, 8, 4, 4, 12, 23, 12, true),
+  },
+  {
+    path: "graphics/entities/steam-engine/steam-engine-V-shadow.png",
+    sprites: entitySprites(S.steamEngineShadowV, 165, 153, 8, 4, -4, 73, -13, 6, true),
+  },
+  {
+    path: "graphics/entities/steam-engine/steam-engine-H.png",
+    sprites: entitySprites(S.steamEngineH, 176, 128, 8, 4, 8, 8, 22, 10, true),
+  },
+  {
+    path: "graphics/entities/steam-engine/steam-engine-H-shadow.png",
+    sprites: entitySprites(S.steamEngineShadowH, 254, 80, 8, 4, 4, 90, -20, 4, true),
+  },
+  {
+    path: "graphics/entities/small-electric-pole/small-electric-pole.png",
+    sprites: entitySprites(S.smallElectricPoleN, 32, 80, 4, 1, 0, 0, 50, 0, true),
+  },
+  {
+    path: "graphics/entities/small-electric-pole/small-electric-pole-shadow.png",
+    sprites: entitySprites(S.smallElectricPoleShadowN, 80, 30, 4, 1, 0, 50, 0, 0, true),
+  },
+  
   
   // Items.
   {
@@ -616,6 +658,14 @@ export const SPRITES = [
   {
     path: "graphics/items/boiler.png",
     sprites: itemSprites(S.boilerItem, S.boilerIcon),
+  },
+  {
+    path: "graphics/items/steam-engine.png",
+    sprites: itemSprites(S.steamEngineItem, S.steamEngineIcon),
+  },
+  {
+    path: "graphics/items/small-electric-pole.png",
+    sprites: itemSprites(S.smallElectricPoleItem, S.smallElectricPoleIcon),
   },
   
   // Misc.
