@@ -19,6 +19,7 @@ const COLOR = {
   greenHighlightBorder: "#44AA00",
   yellowHighlight: "#EEEE00",
   yellowHighlightBorder: "#FFAA00",
+  wire: "#EEAA22",
 };
 
 export function draw(ctx, view, time) {
@@ -371,4 +372,34 @@ export function drawRecipe(ctx, view, recipe) {
       Math.ceil(size * 2), Math.ceil(size * 2));
   ctx.shadowColor = undefined;
   ctx.shadowBlur = 0;
+}
+
+export function drawWireConnections(ctx, view) {
+  for (let other of this.data.wires) {
+    if (other.y > this.y || (other.y == this.y && other.x > this.x))
+      continue;
+    
+    const slack = 0.5, dist = 0.6;
+    const tx = this.x + this.data.wireConnectionPointX;
+    const ty = this.y + this.data.wireConnectionPointY;
+    const ox = other.x + other.data.wireConnectionPointX;
+    const oy = other.y + other.data.wireConnectionPointY;
+    const tox = ox - tx, toy = oy - ty;
+    const l = Math.sqrt(tox * tox + toy * toy) / dist;
+    const cp1x = tx + tox / l,
+          cp1y = ty + toy / l + slack,
+          cp2x = ox - tox / l,
+          cp2y = oy - toy / l + slack;
+    
+    ctx.beginPath();
+    ctx.moveTo(tx * view.scale - view.x, ty * view.scale - view.y);
+    ctx.bezierCurveTo(
+        cp1x * view.scale - view.x, cp1y * view.scale - view.y,
+        cp2x * view.scale - view.x, cp2y * view.scale - view.y,
+        ox * view.scale - view.x, oy * view.scale - view.y);
+    ctx.lineCap = "round";
+    ctx.strokeStyle = COLOR.wire;
+    ctx.lineWidth = 0.03 * view.scale;
+    ctx.stroke();
+  }
 }

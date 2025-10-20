@@ -44,6 +44,8 @@ function productionTest(gameMap, time) {
   for (let i = 0; i < 8; i++) {
     e(NAME.burnerDrill, -80, 34 + 2 * i, 1)
         .energyStored = 150;
+    e(NAME.burnerDrill, -77, 34 + 2 * i, 3)
+        .energyStored = 150;
   }
   l(-78, 49, 0, 66);
   l(-78, -17, 1, 63);
@@ -52,6 +54,9 @@ function productionTest(gameMap, time) {
   lane.minusItem = I.coal;
   lane.minusFlow = new Array(140).fill(0.81);
   lane.minusFlow[0] = 7;
+  lane.plusItem = I.coal;
+  lane.plusFlow = new Array(135).fill(0.81);
+  lane.plusFlow[0] = 6.4;
   
   e(NAME.inserter, -16, 10, 2);
   e(NAME.inserter, -15, 10, 2);
@@ -115,7 +120,16 @@ function productionTest(gameMap, time) {
   e(NAME.boiler, 35, 20, 1);
   
   p(37, 24, 0, 1);
-  [0,1,2,3,4,5].map(i => p(38, 19 + i, 1, 6));
+  p(37, 21, 0, 1);
+  p(38, 24, 0, 6);
+  
+  e(NAME.steamEngine, 39, 18, 1);
+  e(NAME.steamEngine, 44, 18, 1);
+  e(NAME.steamEngine, 49, 18, 1);
+  e(NAME.steamEngine, 54, 18, 1);
+  e(NAME.smallElectricPole, 41, 17, 0);
+  e(NAME.smallElectricPole, 47, 17, 0);
+  e(NAME.smallElectricPole, 53, 17, 0);
 };
 
 function inserterTest(gameMap, time) {

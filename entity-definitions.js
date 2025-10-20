@@ -338,15 +338,16 @@ export const ENTITIES = new Map([
     rotatable: false,
     icon: S.smallElectricPoleIcon,
     sprites: {
-      [north]: [S.smallElectricPoleN, S.smallElectricPoleShadowN],
-      [east]: [S.smallElectricPoleE, S.smallElectricPoleShadowE],
-      [south]: [S.smallElectricPoleS, S.smallElectricPoleShadowS],
-      [west]: [S.smallElectricPoleW, S.smallElectricPoleShadowW],
+      [north]: [S.smallElectricPole, S.smallElectricPoleShadow],
+      [east]: [S.smallElectricPole, S.smallElectricPoleShadow],
+      [south]: [S.smallElectricPole, S.smallElectricPoleShadow],
+      [west]: [S.smallElectricPole, S.smallElectricPoleShadow],
     },
     animationLength: 0,
     
     wireReach: 7,
     supplyArea: 2,
+    wireConnectionPoint: {x: 0.5, y: -2},
   }],
 ]);
 

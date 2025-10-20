@@ -45,14 +45,15 @@ SpritePool.prototype.draw = function(ctx, time) {
   ctx.fillRect(Math.floor(ctx.canvas.width * 0.2 + 10),
       Math.floor(ctx.canvas.height * 0.5 - 20),
       Math.floor((ctx.canvas.width * 0.6 - 30) * this.current / this.total + 10), 40);
-      
+  
+  // For debugging the missing sprites on github.
   if (this.current > this.total * 0.85) {
     for (let imageDef of SPRITES) {
       const id = imageDef.sprites[0].id;
       if (!this.sprites.has(id)) {
         ctx.fillStyle = "black";
         ctx.fillText("#" + id, ctx.canvas.width * 0.5 - 40,
-            ctx.canvas.height - 60);
+            ctx.canvas.height - 100);
         break;
       }
     }
@@ -63,19 +64,21 @@ SpritePool.prototype.draw = function(ctx, time) {
   ctx.fillStyle = "lightgrey";
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   
-  let sprite = S.steamEngineH;
-  let shadow = S.steamEngineShadowH;
+  let sprite = S.smallElectricPole;
+  let shadow = S.smallElectricPoleShadow;
+  const animShad = true;
   let light = 0; // S.boilerLightW;
-  let size = [32*5, 32*3], xlen = 8, ylen = 4;
+  let size = [32*1, 32*1], xlen = 4, ylen = 1;
   for (let i = 0; i < xlen; i++) {
     for (let j = 0; j < ylen; j++) {
       let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(sprite+i*ylen+j)};
       if (!s.image) continue;
-      let rect = [10+i*(size[0]+15), 100+ j*(size[1]+15), ...size];
+      let rect = [10+i*(size[0]+15), 100+ i*(size[1]+15), ...size];
       let xScale = rect[2] / (s.width - s.left - s.right);
       let yScale = rect[3] / (s.height - s.top - s.bottom);
       if (shadow) {
-        let ss = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(shadow/*+i*ylen+j*/)};
+        let ss = {left: 0, right: 0, top: 0, bottom: 0,
+            ...this.get(shadow + (animShad ? i*ylen+j : 0))};
         strokeSprite(ctx, ss, rect, "blue");
         drawSprite(ctx, ss, rect);
       }
@@ -109,7 +112,6 @@ SpritePool.prototype.draw = function(ctx, time) {
   
   //return;
   let a = xlen*ylen;
-  const animShad = true;
   
   ctx.fillStyle = "orange";
   ctx.fillRect(0, 560, 210, 250);

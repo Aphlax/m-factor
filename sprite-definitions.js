@@ -115,14 +115,8 @@ export const S = {
   boilerW: 15069,
   boilerShadowW: 15070,
   boilerLightW: 15071,
-  smallElectricPoleN: 15072,
-  smallElectricPoleE: 15073,
-  smallElectricPoleS: 15074,
-  smallElectricPoleW: 15075,
-  smallElectricPoleShadowN: 15076,
-  smallElectricPoleShadowE: 15077,
-  smallElectricPoleShadowS: 15078,
-  smallElectricPoleShadowW: 15079,
+  smallElectricPole: 15072, // 4
+  smallElectricPoleShadow: 15076, // 4
   
   ironOreItem: 16000,
   copperOreItem: 16000 + 1,
@@ -544,7 +538,7 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/steam-engine/steam-engine-V-shadow.png",
-    sprites: entitySprites(S.steamEngineShadowV, 165, 153, 8, 4, -4, 73, -13, 6, true),
+    sprites: entitySprites(S.steamEngineShadowV, 165, 153, 8, 4, -4, 73, -11, 4, true),
   },
   {
     path: "graphics/entities/steam-engine/steam-engine-H.png",
@@ -556,11 +550,11 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/small-electric-pole/small-electric-pole.png",
-    sprites: entitySprites(S.smallElectricPoleN, 32, 80, 4, 1, 0, 0, 50, 0, true),
+    sprites: entitySprites(S.smallElectricPole, 36, 108, 4, 1, 1, 3, 80, -4, true),
   },
   {
     path: "graphics/entities/small-electric-pole/small-electric-pole-shadow.png",
-    sprites: entitySprites(S.smallElectricPoleShadowN, 80, 30, 4, 1, 0, 50, 0, 0, true),
+    sprites: entitySprites(S.smallElectricPoleShadow, 130, 28, 4, 1, 0, 98, -4, 0, true),
   },
   
   

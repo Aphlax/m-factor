@@ -181,6 +181,25 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
       this.fuelInventory = new Inventory(1)
           .setFilters(FUEL_FILTERS);
     }
+  } else if (this.type == TYPE.steamEngine) {
+    this.state = STATE.idle;
+    this.nextUpdate = NEVER;
+    this.data.pipeConnections = def.pipeConnections[direction];
+    this.data.pipes = {};
+    this.data.capacity = def.capacity;
+    this.data.fluidConsumption = def.fluidConsumption;
+    this.data.powerOutput = def.powerOutput;
+    this.inputFluidTank = new FluidTank()
+        .setTanklets([I.steam])
+        .setInternalInlet(true);
+  } else if (this.type == TYPE.electricPole) {
+    this.nextUpdate = NEVER;
+    this.data.wireReach = def.wireReach;
+    this.data.supplyArea = def.supplyArea;
+    this.data.grid = undefined;
+    this.data.wires = [];
+    this.data.wireConnectionPointX = def.wireConnectionPoint.x;
+    this.data.wireConnectionPointY = def.wireConnectionPoint.y;
   }
   return this;
 };
@@ -594,10 +613,6 @@ Entity.prototype.update = function(gameMap, time) {
         this.outputFluidTank.tanklets[0].amount + this.data.outputAmount);
     this.nextUpdate = this.nextUpdate + this.taskDuration;
   } else if (this.type == TYPE.boiler) {
-    // return;
-    
-    
-   
     let continueNextItem = false;
     if (this.state == STATE.running ||
         this.state == STATE.itemReady) {

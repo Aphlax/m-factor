@@ -72,7 +72,7 @@ Channel.prototype.update = function(time, dt) {
 };
 
 Channel.prototype.draw = function(ctx, view) {
-  //return;
+  return;
   ctx.strokeStyle = this.color;
   ctx.lineWidth = 1;
   for (let pipe of this.pipes) {

@@ -1,10 +1,11 @@
 import {MapGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {S} from './sprite-definitions.js';
-import {TYPE, STATE, MAX_SIZE, ENERGY, rectOverlap, DIRECTIONS} from './entity-properties.js';
+import {TYPE, STATE, MAX_SIZE, ENERGY, rectOverlap, DIRECTIONS, MAX_WIRE_REACH} from './entity-properties.js';
 import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
 import {FluidNetwork} from './fluid-network.js';
+import {ElectricNetwork} from './electric-network.js';
 
 function GameMap(seed) {
   this.mapGenerator = new MapGenerator(seed);
@@ -17,7 +18,8 @@ function GameMap(seed) {
   };
   this.chunks = new Map(); // 2-D map of coordinate -> chunk
   this.transportNetwork = new TransportNetwork();
-  this.fluidNetwork = new FluidNetwork(this);
+  this.fluidNetwork = new FluidNetwork();
+  this.electricNetwork = new ElectricNetwork(this);
   this.particles = []; // Expired particles.
 }
 
@@ -42,7 +44,9 @@ GameMap.prototype.update = function(time, dt) {
       for (let entity of chunk.entities) {
         if (entity.type == TYPE.belt ||
             entity.type == TYPE.chest ||
-            entity.type == TYPE.pipe) continue;
+            entity.type == TYPE.pipe ||
+            entity.type == TYPE.steamEngine ||
+            entity.type == TYPE.electricPole) continue;
         if (time < entity.nextUpdate) continue;
         entity.update(this, time);
       }
@@ -152,6 +156,19 @@ GameMap.prototype.draw = function(ctx, time) {
       }
     }
   }
+  for (let [x, chunks] of this.chunks.entries()) {
+    if ((x + 1) * size <= this.view.x - MAX_WIRE_REACH * this.view.scale) continue;
+    if (x * size > this.view.width + this.view.x + MAX_WIRE_REACH * this.view.scale) continue;
+    for (let [y, chunk] of chunks.entries()) {
+  	if ((y + 1) * size <= this.view.y - MAX_WIRE_REACH * this.view.scale) continue;
+      if (y * size > this.view.height + this.view.y + MAX_WIRE_REACH * this.view.scale) continue;
+      for (let entity of chunk.entities) {
+        if (entity.type == TYPE.electricPole) {
+          entity.drawWireConnections(ctx, this.view);
+        }
+      }
+    }
+  }
   this.fluidNetwork.draw(ctx, this.view);
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x - this.view.scale * 7) continue;
@@ -233,9 +250,10 @@ GameMap.prototype.getEntityAt = function(x, y) {
   const cy2 = Math.floor(y / SIZE);
   for (let i = cx1; i <= cx2; i++) {
     if (!this.chunks.has(i)) continue;
+    const chunks = this.chunks.get(i);
     for (let j = cy1; j <= cy2; j++) {
-      if (!this.chunks.get(i).has(j)) continue;
-      for (let entity of this.chunks.get(i).get(j).entities) {
+      if (!chunks.has(j)) continue;
+      for (let entity of chunks.get(j).entities) {
         if (x >= entity.x && x < entity.x + entity.width &&
             y >= entity.y && y < entity.y + entity.height)
           return entity;
@@ -245,7 +263,35 @@ GameMap.prototype.getEntityAt = function(x, y) {
   return undefined;
 };
 
+GameMap.prototype.getEntitiesIn = function(x, y, width, height, entityType) {
+  const cx1 = Math.floor((x - MAX_SIZE) / SIZE);
+  const cx2 = Math.floor((x + width) / SIZE);
+  const cy1 = Math.floor((y - MAX_SIZE) / SIZE);
+  const cy2 = Math.floor((y + height) / SIZE);
+  const result = [];
+  for (let i = cx1; i <= cx2; i++) {
+    if (!this.chunks.has(i)) continue;
+    const chunks = this.chunks.get(i);
+    for (let j = cy1; j <= cy2; j++) {
+      if (!chunks.has(j)) continue;
+      for (let entity of chunks.get(j).entities) {
+        if (x + width <= entity.x || x >= entity.x + entity.width ||
+            y + height <= entity.y || y >= entity.y + entity.height)
+          continue;
+        if (entityType && entity.type != entityType)
+          continue;
+        result.push(entity);
+      }
+    }
+  }
+  return result;
+};
+
 GameMap.prototype.connectEntity = function(entity, time) {
+  if (entity.type == TYPE.electricPole) {
+    this.electricNetwork.addPole(entity);
+    return;
+  }
   const x = entity.x - 2, y = entity.y - 2,
         width = entity.width + 4, height = entity.height + 4;
   const cx1 = Math.floor((x - MAX_SIZE) / SIZE);
@@ -254,9 +300,10 @@ GameMap.prototype.connectEntity = function(entity, time) {
   const cy2 = Math.floor((y + height - 1) / SIZE);
   for (let i = cx1; i <= cx2; i++) {
     if (!this.chunks.has(i)) continue;
+    const chunks = this.chunks.get(i);
     for (let j = cy1; j <= cy2; j++) {
-      if (!this.chunks.get(i).has(j)) continue;
-      for (let other of this.chunks.get(i).get(j).entities) {
+      if (!chunks.has(j)) continue;
+      for (let other of chunks.get(j).entities) {
         if (rectOverlap(entity.x, y, entity.width, 2, other) ||
             rectOverlap(entity.x + entity.width, entity.y, 2, entity.height, other) ||
             rectOverlap(entity.x, entity.y + entity.height, entity.width, 2, other) ||
@@ -323,6 +370,12 @@ GameMap.prototype.connectEntity = function(entity, time) {
       this.deleteEntity(entity);
       return;
     }
+  }
+  if (entity.energySource == ENERGY.electric) {
+    this.electricNetwork.addConsumer(entity);
+  }
+  if (entity.type == TYPE.steamEngine) {
+    this.electricNetwork.addGenerator(entity);
   }
 };
 

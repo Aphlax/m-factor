@@ -21,6 +21,10 @@ export const NEVER = Math.floor(Number.MAX_SAFE_INTEGER / 1000);
 /** Maximal width/length of any entity. */
 export const MAX_SIZE = 3;
 
+/** Maximal wire reach of any pole. */
+export const MAX_WIRE_REACH = 7;
+
+
 export const STATE = {
   running: 0,
   missingItem: 1,
@@ -33,6 +37,7 @@ export const STATE = {
   inserterCoolDown: 12, // Inserter moving back to initial position.
   mineEmpty: 13,
   noRecipe: 14,
+  idle: 1,
 };
 
 export const DIRECTION = {
