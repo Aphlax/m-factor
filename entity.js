@@ -200,6 +200,8 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.wires = [];
     this.data.wireConnectionPointX = def.wireConnectionPoint.x;
     this.data.wireConnectionPointY = def.wireConnectionPoint.y;
+    this.data.wireConnectionPointShadowX = def.wireConnectionPointShadow.x;
+    this.data.wireConnectionPointShadowY = def.wireConnectionPointShadow.y;
   }
   return this;
 };

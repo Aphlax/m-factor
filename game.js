@@ -127,4 +127,10 @@ Game.prototype.touchEnd = function(e) {
   }
 };
 
+Game.prototype.mouseWheel = function(e) {
+  if (this.mode == MODE.playing) {
+    this.ui.mouseWheel(e);
+  }
+};
+
 export {Game};

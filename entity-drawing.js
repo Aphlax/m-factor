@@ -1,5 +1,5 @@
 import {SPRITES} from './sprite-pool.js';
-import {TYPE, STATE, DIRECTION} from './entity-properties.js';
+import {TYPE, STATE, DIRECTION, MAX_SHADOW} from './entity-properties.js';
 import {ITEMS} from './item-definitions.js';
 
 /*
@@ -20,6 +20,7 @@ const COLOR = {
   yellowHighlight: "#EEEE00",
   yellowHighlightBorder: "#FFAA00",
   wire: "#EEAA22",
+  shadow: "#000000",
 };
 
 export function draw(ctx, view, time) {
@@ -65,7 +66,7 @@ export function draw(ctx, view, time) {
 };
 
 export function drawShadow(ctx, view, time) {
-  if ((this.x + this.width + 1) * view.scale <= view.x)
+  if ((this.x + this.width + MAX_SHADOW) * view.scale <= view.x)
     return;
   if (this.x * view.scale > view.x + view.width)
     return;
@@ -283,6 +284,8 @@ export function drawSelection(ctx, view) {
 
 export function drawIO(ctx, view) {
   const s = view.scale * 0.25;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
   for (let entity of this.inputEntities) {
     const direction = this.type == TYPE.inserter ?
         this.direction : entity.direction;
@@ -308,8 +311,6 @@ export function drawIO(ctx, view) {
     ctx.lineTo(x - px + dx * 0.75, y - py + dy * 0.75);
     ctx.moveTo(x + px, y + py);
     ctx.lineTo(x - px, y - py);
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
     ctx.strokeStyle = COLOR.greenHighlightBorder;
     ctx.lineWidth = 4;
     ctx.stroke();
@@ -374,22 +375,27 @@ export function drawRecipe(ctx, view, recipe) {
   ctx.shadowBlur = 0;
 }
 
-export function drawWireConnections(ctx, view) {
+export function drawWireConnections(ctx, view, shadow) {
+  ctx.lineCap = "round";
+  ctx.strokeStyle = !shadow ? COLOR.wire : COLOR.shadow;
+  ctx.lineWidth = 0.03 * view.scale;
+  const slack = 0.5, dist = 0.6;
+  const slackX = shadow ? slack : 0,
+        slackY = shadow ? 0 : slack;
   for (let other of this.data.wires) {
     if (other.y > this.y || (other.y == this.y && other.x > this.x))
       continue;
     
-    const slack = 0.5, dist = 0.6;
-    const tx = this.x + this.data.wireConnectionPointX;
-    const ty = this.y + this.data.wireConnectionPointY;
-    const ox = other.x + other.data.wireConnectionPointX;
-    const oy = other.y + other.data.wireConnectionPointY;
+    const tx = this.x + (!shadow ? this.data.wireConnectionPointX : this.data.wireConnectionPointShadowX);
+    const ty = this.y + (!shadow ? this.data.wireConnectionPointY : this.data.wireConnectionPointShadowY);
+    const ox = other.x + (!shadow ? other.data.wireConnectionPointX : other.data.wireConnectionPointShadowX);
+    const oy = other.y + (!shadow ? other.data.wireConnectionPointY : other.data.wireConnectionPointShadowY);
     const tox = ox - tx, toy = oy - ty;
     const l = Math.sqrt(tox * tox + toy * toy) / dist;
-    const cp1x = tx + tox / l,
-          cp1y = ty + toy / l + slack,
-          cp2x = ox - tox / l,
-          cp2y = oy - toy / l + slack;
+    const cp1x = tx + tox / l - slackX,
+          cp1y = ty + toy / l + slackY,
+          cp2x = ox - tox / l - slackX,
+          cp2y = oy - toy / l + slackY;
     
     ctx.beginPath();
     ctx.moveTo(tx * view.scale - view.x, ty * view.scale - view.y);
@@ -397,9 +403,6 @@ export function drawWireConnections(ctx, view) {
         cp1x * view.scale - view.x, cp1y * view.scale - view.y,
         cp2x * view.scale - view.x, cp2y * view.scale - view.y,
         ox * view.scale - view.x, oy * view.scale - view.y);
-    ctx.lineCap = "round";
-    ctx.strokeStyle = COLOR.wire;
-    ctx.lineWidth = 0.03 * view.scale;
     ctx.stroke();
   }
 }

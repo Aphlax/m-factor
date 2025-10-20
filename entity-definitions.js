@@ -348,6 +348,7 @@ export const ENTITIES = new Map([
     wireReach: 7,
     supplyArea: 2,
     wireConnectionPoint: {x: 0.5, y: -2},
+    wireConnectionPointShadow: {x: 3.68, y: 0.59},
   }],
 ]);
 

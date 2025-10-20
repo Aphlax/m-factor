@@ -189,4 +189,10 @@ GameUi.prototype.touchEnd = function(e) {
   }
 };
 
+GameUi.prototype.mouseWheel = function(e) {
+  if (this.mode == MODE.map) {
+    this.gameMapInput.mouseWheel(e);
+  }
+};
+
 export {GameUi};

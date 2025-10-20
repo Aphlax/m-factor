@@ -21,6 +21,7 @@ import {Game} from "./game.js";
     canvas.addEventListener("touchstart", game.touchStart.bind(game), false);
     canvas.addEventListener("touchend", game.touchEnd.bind(game), false);
     canvas.addEventListener("touchmove", game.touchMove.bind(game), false);
+    canvas.addEventListener("wheel", game.mouseWheel.bind(game), false);
 
     nextFps = lastFrame = performance.now();
     frameCount = frameRate = 0;

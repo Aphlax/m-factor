@@ -1,7 +1,7 @@
 import {MapGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {S} from './sprite-definitions.js';
-import {TYPE, STATE, MAX_SIZE, ENERGY, rectOverlap, DIRECTIONS, MAX_WIRE_REACH} from './entity-properties.js';
+import {TYPE, STATE, MAX_SIZE, ENERGY, rectOverlap, DIRECTIONS, MAX_WIRE_REACH, MAX_SHADOW} from './entity-properties.js';
 import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
 import {FluidNetwork} from './fluid-network.js';
@@ -99,7 +99,7 @@ GameMap.prototype.draw = function(ctx, time) {
   }
   ctx.globalAlpha = 0.5;
   for (let [x, chunks] of this.chunks.entries()) {
-    if ((x + 1) * size <= this.view.x - this.view.scale * (MAX_SIZE + 2)) continue;
+    if ((x + 1) * size <= this.view.x - this.view.scale * (MAX_SIZE + MAX_SHADOW)) continue;
     if (x * size > this.view.width + this.view.x) continue;
     for (let [y, chunk] of chunks.entries()) {
   	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
@@ -107,6 +107,19 @@ GameMap.prototype.draw = function(ctx, time) {
       for (let entity of chunk.entities) {
         if (!entity.spriteShadow) continue;
         entity.drawShadow(ctx, this.view, time);
+      }
+    }
+  }
+  for (let [x, chunks] of this.chunks.entries()) {
+    if ((x + 1) * size <= this.view.x - (MAX_WIRE_REACH + MAX_SHADOW) * this.view.scale) continue;
+    if (x * size > this.view.width + this.view.x + (MAX_WIRE_REACH - MAX_SHADOW) * this.view.scale) continue;
+    for (let [y, chunk] of chunks.entries()) {
+  	if ((y + 1) * size <= this.view.y - MAX_WIRE_REACH * this.view.scale) continue;
+      if (y * size > this.view.height + this.view.y + MAX_WIRE_REACH * this.view.scale) continue;
+      for (let entity of chunk.entities) {
+        if (entity.type == TYPE.electricPole) {
+          entity.drawWireConnections(ctx, this.view, /* shadow */ true);
+        }
       }
     }
   }

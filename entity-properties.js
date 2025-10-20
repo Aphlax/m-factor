@@ -21,6 +21,9 @@ export const NEVER = Math.floor(Number.MAX_SAFE_INTEGER / 1000);
 /** Maximal width/length of any entity. */
 export const MAX_SIZE = 3;
 
+/** Longest extra length of any shadow. */
+export const MAX_SHADOW = 3;
+
 /** Maximal wire reach of any pole. */
 export const MAX_WIRE_REACH = 7;
 

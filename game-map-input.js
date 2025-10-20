@@ -244,6 +244,12 @@ GameMapInput.prototype.touchLong = function(e) {
   }
 };
 
+GameMapInput.prototype.mouseWheel = function(e) {
+  let scale = this.view.scale * (e.deltaY > 0 ? 1.1 : 1 / 1.1);
+  scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale));
+  this.view.scale = scale;
+};
+
 GameMapInput.prototype.setOffshorePumpMode = function() {
   this.mode = MODE.buildOffshorePump;
 };
