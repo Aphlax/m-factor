@@ -76,6 +76,13 @@ GameUi.prototype.update = function(time) {
   }
 };
 
+GameUi.prototype.drawGroundIndicators = function(ctx) {
+  const entity = this.window.selectedEntity;
+  if (entity && entity.type == TYPE.electricPole) {
+    entity.drawPowerSupplyArea(ctx, this.gameMapInput.view);
+  }
+}
+
 GameUi.prototype.draw = function(ctx, time) {
   if (this.window.selectedEntity) {
     Entity.prototype.drawSelection.call(
@@ -190,9 +197,7 @@ GameUi.prototype.touchEnd = function(e) {
 };
 
 GameUi.prototype.mouseWheel = function(e) {
-  if (this.mode == MODE.map) {
-    this.gameMapInput.mouseWheel(e);
-  }
+  this.gameMapInput.mouseWheel(e);
 };
 
 export {GameUi};

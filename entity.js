@@ -195,7 +195,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   } else if (this.type == TYPE.electricPole) {
     this.nextUpdate = NEVER;
     this.data.wireReach = def.wireReach;
-    this.data.supplyArea = def.supplyArea;
+    this.data.powerSupplyArea = def.powerSupplyArea;
     this.data.grid = undefined;
     this.data.wires = [];
     this.data.wireConnectionPointX = def.wireConnectionPoint.x;

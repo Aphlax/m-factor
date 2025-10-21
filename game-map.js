@@ -77,7 +77,7 @@ GameMap.prototype.update = function(time, dt) {
   }
 };
 
-GameMap.prototype.draw = function(ctx, time) {
+GameMap.prototype.drawGround = function(ctx, time) {
   const size = SIZE * this.view.scale;
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x) continue;
@@ -97,6 +97,24 @@ GameMap.prototype.draw = function(ctx, time) {
       chunk.drawResources(ctx, this.view);
     }
   }
+}
+
+GameMap.prototype.draw = function(ctx, time) {
+  const size = SIZE * this.view.scale;
+  for (let [x, chunks] of this.chunks.entries()) {
+    if ((x + 1) * size <= this.view.x - this.view.scale * MAX_SIZE) continue;
+    if (x * size > this.view.width + this.view.x) continue;
+    for (let [y, chunk] of chunks.entries()) {
+  	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
+      if (y * size > this.view.height + this.view.y) continue;
+      for (let entity of chunk.entities) {
+        if (entity.type == TYPE.belt) {
+          entity.drawBelt(ctx, this.view, time);
+        }
+      }
+    }
+  }
+  this.transportNetwork.draw(ctx, this.view);
   ctx.globalAlpha = 0.5;
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x - this.view.scale * (MAX_SIZE + MAX_SHADOW)) continue;
@@ -124,20 +142,6 @@ GameMap.prototype.draw = function(ctx, time) {
     }
   }
   ctx.globalAlpha = 1;
-  for (let [x, chunks] of this.chunks.entries()) {
-    if ((x + 1) * size <= this.view.x - this.view.scale * MAX_SIZE) continue;
-    if (x * size > this.view.width + this.view.x) continue;
-    for (let [y, chunk] of chunks.entries()) {
-  	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
-      if (y * size > this.view.height + this.view.y) continue;
-      for (let entity of chunk.entities) {
-        if (entity.type == TYPE.belt) {
-          entity.drawBelt(ctx, this.view, time);
-        }
-      }
-    }
-  }
-  this.transportNetwork.draw(ctx, this.view);
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x - this.view.scale * MAX_SIZE) continue;
     if (x * size > this.view.width + this.view.x) continue;

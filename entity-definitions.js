@@ -346,7 +346,7 @@ export const ENTITIES = new Map([
     animationLength: 0,
     
     wireReach: 7,
-    supplyArea: 2,
+    powerSupplyArea: 2,
     wireConnectionPoint: {x: 0.5, y: -2},
     wireConnectionPointShadow: {x: 3.68, y: 0.59},
   }],

@@ -21,6 +21,7 @@ const COLOR = {
   yellowHighlightBorder: "#FFAA00",
   wire: "#EEAA22",
   shadow: "#000000",
+  powerSupplyArea: "#88AAFF40",
 };
 
 export function draw(ctx, view, time) {
@@ -405,4 +406,15 @@ export function drawWireConnections(ctx, view, shadow) {
         ox * view.scale - view.x, oy * view.scale - view.y);
     ctx.stroke();
   }
+}
+
+export function drawPowerSupplyArea(ctx, view) {
+  const x1 = (this.x - this.data.powerSupplyArea) * view.scale - view.x,
+        y1 = (this.y - this.data.powerSupplyArea) * view.scale - view.y,
+        x2 = (this.x + this.width + this.data.powerSupplyArea) * view.scale - view.x,
+        y2 = (this.y + this.height + this.data.powerSupplyArea) * view.scale - view.y;
+  if (x1 > view.width || y1 > view.height ||
+      x2 < 0 || y2 < 0) return;
+  ctx.fillStyle = COLOR.powerSupplyArea;
+  ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
 }

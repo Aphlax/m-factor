@@ -75,6 +75,8 @@ Game.prototype.update = function(time) {
 
 Game.prototype.draw = function(ctx, time) {
   if (this.mode == MODE.playing) {
+    this.gameMap.drawGround(ctx, this.playTime);
+    this.ui.drawGroundIndicators(ctx);
     this.gameMap.draw(ctx, this.playTime);
     this.ui.draw(ctx, this.playTime);
   } else if (this.mode == MODE.loading) {
