@@ -10,7 +10,7 @@ ElectricNetwork.prototype.addPole = function(entity) {
   const reach = entity.data.wireReach;
   const area = [entity.x - reach, entity.y - reach, reach * 2, reach * 2];
   const poles = this.gameMap.getEntitiesIn(...area, TYPE.electricPole);
-  let connected = false;
+  const distList = [];
   for (let pole of poles) {
     if (pole == entity) continue;
     const minReach = reach <= pole.data.wireReach ?
@@ -19,11 +19,23 @@ ElectricNetwork.prototype.addPole = function(entity) {
         (pole.x + pole.width / 2);
     const dy = entity.y + entity.height / 2 -
         (pole.y + pole.height / 2);
-    if (dx * dx + dy * dy > minReach * minReach)
+    const dist = dx * dx + dy * dy;
+    if (dist > minReach * minReach)
       continue;
-    
-    entity.data.wires.push(pole);
-    pole.data.wires.push(entity);
+    let i = 0;
+    while (dist > distList[i * 2]) i++;
+    distList.splice(i* 2, 0, dist, pole);
+  }
+  let connected = false;
+  distLoop:
+  for (let i = 0; i < distList.length; i += 2) {
+    const pole = distList[i + 1];
+    for (let other of pole.data.wires) {
+      if (entity.data.wires.has(other))
+        continue distLoop;
+    }
+    entity.data.wires.add(pole);
+    pole.data.wires.add(entity);
     if (!connected) {
       connected = true;
       pole.data.grid.add(entity);
