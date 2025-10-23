@@ -187,6 +187,7 @@ GameMap.prototype.draw = function(ctx, time) {
     }
   }
   this.fluidNetwork.draw(ctx, this.view);
+  this.electricNetwork.draw(ctx, this.view);
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x - this.view.scale * 7) continue;
     if (x * size > this.view.width + this.view.x) continue;
@@ -442,6 +443,9 @@ GameMap.prototype.disconnectEntity = function(entity) {
         }
       }
     }
+  }
+  if (entity.type == TYPE.electricPole) {
+    this.electricNetwork.removePole(entity);
   }
 };
 

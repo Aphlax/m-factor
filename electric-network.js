@@ -48,6 +48,51 @@ ElectricNetwork.prototype.addPole = function(entity) {
   }
 };
 
+ElectricNetwork.prototype.removePole = function(entity) {
+  for (let pole of entity.data.wires) {
+    otherLoop:
+    for (let other of entity.data.wires) {
+      if (pole == other) continue;
+      if (pole.data.wires.has(other))
+        continue;
+      // Could these two poles be connected?
+      const reach = pole.data.wireReach <= other.data.wireReach ?
+          pole.data.wireReach : other.data.wireReach;
+      const dx = pole.x + pole.width / 2 -
+          (other.x + other.width / 2);
+      const dy = pole.y + pole.height / 2 -
+          (other.y + other.height / 2);
+      const dist = dx * dx + dy * dy;
+      if (dist > reach * reach)
+        continue;
+      // Check if there is a common neighbor forming a triangle.
+      for (let neighbor of pole.data.wires) {
+        if (neighbor != entity &&
+            other.data.wires.has(neighbor))
+          continue otherLoop;
+      }
+      pole.data.wires.add(other);
+      other.data.wires.add(pole);
+    }
+  }
+  for (let pole of entity.data.wires) {
+    pole.data.wires.delete(entity);
+  }
+  entity.data.grid.poles.delete(entity);
+  
+  // split grid.
+  const previous = [];
+  for (let pole of entity.data.wires) {
+    if (previous.length) {
+      const segment = pole.data.grid.split(pole, entity, previous);
+      if (segment) {
+        this.grids.push(segment);
+      }
+    }
+    previous.push(pole);
+  }
+};
+
 ElectricNetwork.prototype.addConsumer = function(entity) {
   
 };

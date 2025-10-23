@@ -18,7 +18,14 @@ Grid.prototype.update = function(time, dt) {
 };
 
 Grid.prototype.draw = function(ctx, view) {
-  
+  ctx.fillStyle = this.color;
+  for (let pole of this.poles) {
+    ctx.fillRect(
+        (pole.x + 0.35) * view.scale - view.x,
+        (pole.y + 0.35) * view.scale - view.y,
+        (pole.width - 0.7) * view.scale,
+        (pole.height - 0.7) * view.scale);
+  }
 };
 
 Grid.prototype.add = function(pole) {
@@ -35,5 +42,26 @@ Grid.prototype.join = function(other) {
   }
   other.poles.clear();
 };
+
+Grid.prototype.split = function(entity, not, targets) {
+  const stack = [entity], poles = new Set();
+  while (stack.length) {
+    const pole = stack.pop();
+    if (targets.includes(pole))
+      return;
+    poles.add(pole);
+    for (let other of pole.data.wires) {
+      if (other == not || poles.has(other)) continue;
+      stack.push(other);
+    }
+  }
+  
+  const segment = new Grid(poles);
+  for (let pole of poles) {
+    pole.data.grid = segment;
+    this.poles.delete(pole);
+  }
+  return segment;
+}
 
 export {Grid};
