@@ -19,12 +19,22 @@ Grid.prototype.update = function(time, dt) {
 
 Grid.prototype.draw = function(ctx, view) {
   ctx.fillStyle = this.color;
+  ctx.strokeStyle = this.color;
+  ctx.lineWidth = 1;
   for (let pole of this.poles) {
     ctx.fillRect(
         (pole.x + 0.35) * view.scale - view.x,
         (pole.y + 0.35) * view.scale - view.y,
         (pole.width - 0.7) * view.scale,
         (pole.height - 0.7) * view.scale);
+    ctx.beginPath();
+    for (let consumer of pole.electricConnections) {
+      ctx.moveTo((pole.x + pole.width / 2) * view.scale - view.x,
+          (pole.y + pole.height / 2) * view.scale - view.y);
+      ctx.lineTo((consumer.x + consumer.width / 2) * view.scale - view.x,
+          (consumer.y + consumer.height / 2) * view.scale - view.y);
+    }
+    ctx.stroke();
   }
 };
 

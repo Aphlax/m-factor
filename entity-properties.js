@@ -21,11 +21,17 @@ export const NEVER = Math.floor(Number.MAX_SAFE_INTEGER / 1000);
 /** Maximal width/length of any entity. */
 export const MAX_SIZE = 3;
 
+/** Maximal length of inserter arm. */
+export const MAX_LOGISTIC_CONNECTION = 2;
+
 /** Longest extra length of any shadow. */
 export const MAX_SHADOW = 3;
 
 /** Maximal wire reach of any pole. */
 export const MAX_WIRE_REACH = 7;
+
+/** Maximal reach of electric supply areas. */
+export const MAX_ELECTRIC_SUPPLY = 2;
 
 
 export const STATE = {
@@ -104,18 +110,26 @@ export const LAB_FILTERS = [
   {item: I.redScience, amount: 1},
 ];
 
-export function rectOverlap(x, y, width, height, entity) {
-  return x + width > entity.x && x < entity.x + entity.width &&
-      y + height > entity.y && y < entity.y + entity.height;
-}
 
 export const ENERGY = {
   none: 0,
   burner: 1,
   windUp: 2,
-  electricity: 3,
+  electric: 3,
 };
 
 export const FUEL_FILTERS =
     [...ITEMS.entries().filter(([i, {fuelValue}]) => fuelValue)
     .map(([item]) => ({item, amount: 1}))];
+
+
+function rectOverlap(x, y, width, height, entity) {
+  return x + width > entity.x && x < entity.x + entity.width &&
+      y + height > entity.y && y < entity.y + entity.height;
+}
+function rectOverlap2(entity, other) {
+  return entity.x + entity.width > other.x &&
+      entity.x < other.x + other.width &&
+      entity.y + entity.height > other.y &&
+      entity.y < other.y + other.height;
+}

@@ -70,6 +70,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   this.spriteShadowAnimation = !def.noShadowAnimation;
   this.inputEntities.length = 0;
   this.outputEntities.length = 0;
+  this.electricConnections = [];
   
   if (this.type == TYPE.belt) {
     this.nextUpdate = NEVER;

@@ -1,7 +1,7 @@
 import {MapGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {S} from './sprite-definitions.js';
-import {TYPE, STATE, MAX_SIZE, ENERGY, rectOverlap, DIRECTIONS, MAX_WIRE_REACH, MAX_SHADOW} from './entity-properties.js';
+import {TYPE, STATE, MAX_SIZE, MAX_LOGISTIC_CONNECTION, ENERGY, DIRECTIONS, MAX_WIRE_REACH, MAX_SHADOW, MAX_ELECTRIC_SUPPLY} from './entity-properties.js';
 import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
 import {FluidNetwork} from './fluid-network.js';
@@ -9,13 +9,7 @@ import {ElectricNetwork} from './electric-network.js';
 
 function GameMap(seed) {
   this.mapGenerator = new MapGenerator(seed);
-  this.view = {
-    x: -50,
-    y: -50,
-    width: 100,
-    height: 100,
-    scale: 24,
-  };
+  this.view = {};
   this.chunks = new Map(); // 2-D map of coordinate -> chunk
   this.transportNetwork = new TransportNetwork();
   this.fluidNetwork = new FluidNetwork();
@@ -293,10 +287,10 @@ GameMap.prototype.getEntitiesIn = function(x, y, width, height, entityType) {
     for (let j = cy1; j <= cy2; j++) {
       if (!chunks.has(j)) continue;
       for (let entity of chunks.get(j).entities) {
-        if (x + width <= entity.x || x >= entity.x + entity.width ||
-            y + height <= entity.y || y >= entity.y + entity.height)
-          continue;
         if (entityType && entity.type != entityType)
+          continue;
+        if (x + width < entity.x || x > entity.x + entity.width ||
+            y + height < entity.y || y > entity.y + entity.height)
           continue;
         result.push(entity);
       }
@@ -306,76 +300,92 @@ GameMap.prototype.getEntitiesIn = function(x, y, width, height, entityType) {
 };
 
 GameMap.prototype.connectEntity = function(entity, time) {
-  if (entity.type == TYPE.electricPole) {
-    this.electricNetwork.addPole(entity);
-    return;
-  }
-  const x = entity.x - 2, y = entity.y - 2,
-        width = entity.width + 4, height = entity.height + 4;
-  const cx1 = Math.floor((x - MAX_SIZE) / SIZE);
-  const cx2 = Math.floor((x + width - 1) / SIZE);
-  const cy1 = Math.floor((y - MAX_SIZE) / SIZE);
-  const cy2 = Math.floor((y + height - 1) / SIZE);
+  const isElectric = entity.energySource == ENERGY.electric ||
+    entity.type == TYPE.electricPole;
+  const l = MAX_LOGISTIC_CONNECTION;
+  const r = isElectric ? MAX_ELECTRIC_SUPPLY : l;
+  const cx1 = Math.floor((entity.x - r - MAX_SIZE) / SIZE);
+  const cx2 = Math.floor((entity.x + entity.width + r - 1) / SIZE);
+  const cy1 = Math.floor((entity.y - r - MAX_SIZE) / SIZE);
+  const cy2 = Math.floor((entity.y + entity.height + r - 1) / SIZE);
   for (let i = cx1; i <= cx2; i++) {
     if (!this.chunks.has(i)) continue;
     const chunks = this.chunks.get(i);
     for (let j = cy1; j <= cy2; j++) {
       if (!chunks.has(j)) continue;
       for (let other of chunks.get(j).entities) {
-        if (rectOverlap(entity.x, y, entity.width, 2, other) ||
-            rectOverlap(entity.x + entity.width, entity.y, 2, entity.height, other) ||
-            rectOverlap(entity.x, entity.y + entity.height, entity.width, 2, other) ||
-            rectOverlap(x, entity.y, 2, entity.height, other)) {
-          if (entity.type == TYPE.belt && other.type == TYPE.belt) {
-            if (Math.abs(entity.x - other.x) + Math.abs(entity.y - other.y) == 1) {
-              if (entity.connectBelt(other, time, this.transportNetwork)) {
-                entity.updateBeltSprites();
-                other.updateBeltSprites();
-              }
+        if (other == entity) continue;
+        if ((entity.type == TYPE.electricPole &&
+            (other.energySource == ENERGY.electric ||
+            other.type == TYPE.steamEngine)) ||
+            ((entity.energySource == ENERGY.electric ||
+            entity.type == TYPE.steamEngine) &&
+            other.type == TYPE.electricPole)) {
+          const pole = entity.type == TYPE.electricPole ? entity : other;
+          const dist = pole.data.powerSupplyArea;
+          if (!(entity.x + entity.width + dist > other.x &&
+              entity.x - dist < other.x + other.width &&
+              entity.y + entity.height + dist > other.y &&
+              entity.y - dist < other.y + other.height))
+            continue;
+          entity.electricConnections.push(other);
+          other.electricConnections.push(entity);
+          continue;
+        }
+        if (!(entity.x + entity.width > other.x && entity.x < other.x + other.width &&
+            entity.y + entity.height + l > other.y && entity.y - l < other.y + other.height) &&
+            !(entity.x + entity.width + l > other.x && entity.x - l < other.x + other.width &&
+            entity.y + entity.height > other.y && entity.y < other.y + other.height))
+          continue;
+        if (entity.type == TYPE.belt && other.type == TYPE.belt) {
+          if (Math.abs(entity.x - other.x) + Math.abs(entity.y - other.y) == 1) {
+            if (entity.connectBelt(other, time, this.transportNetwork)) {
+              entity.updateBeltSprites();
+              other.updateBeltSprites();
             }
           }
-          if (entity.data.pipeConnections && other.data.pipeConnections) {
-            if (entity.connectPipe(other, time)) {
-              entity.updatePipeSprites();
-              other.updatePipeSprites();
-            }
+        }
+        if (entity.data.pipeConnections && other.data.pipeConnections) {
+          if (entity.connectPipe(other)) {
+            entity.updatePipeSprites();
+            other.updatePipeSprites();
           }
-          if (entity.type == TYPE.inserter) {
-            entity.connectInserter(other, time);
+        }
+        if (entity.type == TYPE.inserter) {
+          entity.connectInserter(other, time);
+        }
+        if (other.type == TYPE.inserter) {
+          other.connectInserter(entity, time);
+        }
+        if (entity.type == TYPE.mine) {
+          entity.connectMine(other, time);
+        }
+        if (other.type == TYPE.mine) {
+          other.connectMine(entity, time);
+        }
+        
+        if (entity.data.pipeConnections && other.outputFluidTank) {
+          if (other.connectFluidOutput(entity)) {
+            this.deleteEntity(entity);
+            return;
           }
-          if (other.type == TYPE.inserter) {
-            other.connectInserter(entity, time);
+        }
+        if (other.data.pipeConnections && entity.outputFluidTank) {
+          if (entity.connectFluidOutput(other)) {
+            this.deleteEntity(entity);
+            return;
           }
-          if (entity.type == TYPE.mine) {
-            entity.connectMine(other, time);
+        }
+        if (entity.data.pipeConnections && other.inputFluidTank) {
+          if (other.connectFluidInput(entity)) {
+            this.deleteEntity(entity);
+            return;
           }
-          if (other.type == TYPE.mine) {
-            other.connectMine(entity, time);
-          }
-          
-          if (entity.data.pipeConnections && other.outputFluidTank) {
-            if (other.connectFluidOutput(entity)) {
-              this.deleteEntity(entity);
-              return;
-            }
-          }
-          if (other.data.pipeConnections && entity.outputFluidTank) {
-            if (entity.connectFluidOutput(other)) {
-              this.deleteEntity(entity);
-              return;
-            }
-          }
-          if (entity.data.pipeConnections && other.inputFluidTank) {
-            if (other.connectFluidInput(entity)) {
-              this.deleteEntity(entity);
-              return;
-            }
-          }
-          if (other.data.pipeConnections && entity.inputFluidTank) {
-            if (entity.connectFluidInput(other)) {
-              this.deleteEntity(entity);
-              return;
-            }
+        }
+        if (other.data.pipeConnections && entity.inputFluidTank) {
+          if (entity.connectFluidInput(other)) {
+            this.deleteEntity(entity);
+            return;
           }
         }
       }
@@ -388,6 +398,9 @@ GameMap.prototype.connectEntity = function(entity, time) {
       this.deleteEntity(entity);
       return;
     }
+  }
+  if (entity.type == TYPE.electricPole) {
+    this.electricNetwork.addPole(entity);
   }
   if (entity.energySource == ENERGY.electric) {
     this.electricNetwork.addConsumer(entity);
@@ -402,6 +415,8 @@ GameMap.prototype.disconnectEntity = function(entity) {
       other.outputEntities.splice(other.outputEntities.indexOf(entity), 1));
   entity.outputEntities.forEach(other =>
       other.inputEntities.splice(other.inputEntities.indexOf(entity), 1));
+  entity.electricConnections.forEach(other =>
+      other.electricConnections.splice(other.electricConnections.indexOf(entity), 1));
   
   if (entity.type == TYPE.belt) {
     this.transportNetwork.removeBelt(entity);

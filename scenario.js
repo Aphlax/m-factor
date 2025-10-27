@@ -4,6 +4,7 @@ import {PROTO_TO_RECIPE} from './recipe-definitions.js';
 
 export function scenario(gameMap, time) {
   return productionTest(gameMap, time);
+  return inserterTest(gameMap, time);
 }
 
 function productionTest(gameMap, time) {
@@ -139,15 +140,22 @@ function inserterTest(gameMap, time) {
   gameMap.generateChunk(-1, -1);
   
   const s = {};
-  gameMap.createEntity(NAME.burnerDrill, 6, 0, 3, time);
+  gameMap.createEntity(NAME.burnerDrill, 6, 0, 3, time)
+      .energyStored = 150;
   s.chest = gameMap.createEntity(NAME.woodenChest, -18, -9, 0, time);
-  gameMap.createEntity(NAME.burnerDrill, -17, -10, 3, time);
+  gameMap.createEntity(NAME.burnerDrill, -17, -10, 3, time)
+      .energyStored = 150;
   
-  gameMap.createEntity(NAME.burnerDrill, 6, -8, 3, time);
-  gameMap.createEntity(NAME.burnerDrill, 6, -6, 3, time);
-  gameMap.createEntity(NAME.burnerDrill, 0, -9, 2, time);
-  gameMap.createEntity(NAME.burnerDrill, -7, 0, 1, time);
-  gameMap.createEntity(NAME.burnerDrill, 3, 5, 0, time);
+  gameMap.createEntity(NAME.burnerDrill, 6, -8, 3, time)
+      .energyStored = 150;
+  gameMap.createEntity(NAME.burnerDrill, 6, -6, 3, time)
+      .energyStored = 150;
+  gameMap.createEntity(NAME.burnerDrill, 0, -9, 2, time)
+      .energyStored = 150;
+  gameMap.createEntity(NAME.burnerDrill, -7, 0, 1, time)
+      .energyStored = 150;
+  gameMap.createEntity(NAME.burnerDrill, 3, 5, 0, time)
+      .energyStored = 150;
   
   const belts = [
     [0, 1, 0, 6],
@@ -295,16 +303,23 @@ function inserterTest(gameMap, time) {
       -7, 12, 3, time);
   createLane(gameMap, -8, 12, 2, 2, time);
  
-  gameMap.createEntity(NAME.burnerDrill, -23, -7, 1, time);
-  gameMap.createEntity(NAME.burnerDrill, -23, -9, 1, time);
-  gameMap.createEntity(NAME.burnerDrill, -23, -4, 1, time);
-  gameMap.createEntity(NAME.burnerDrill, -22, -12, 2, time);
+  gameMap.createEntity(NAME.burnerDrill, -23, -7, 1, time)
+      .energyStored = 150;
+  gameMap.createEntity(NAME.burnerDrill, -23, -9, 1, time)
+      .energyStored = 150;
+  gameMap.createEntity(NAME.burnerDrill, -23, -4, 1, time)
+      .energyStored = 150;
+  gameMap.createEntity(NAME.burnerDrill, -22, -12, 2, time)
+      .energyStored = 150;
   gameMap.createEntity(NAME.stoneFurnace,
-      -19, 4, 0, time);
+      -19, 4, 0, time)
+      .energyStored = 1500;
   gameMap.createEntity(NAME.stoneFurnace,
-      -19, 7, 0, time);
+      -19, 7, 0, time)
+      .energyStored = 1500;
   gameMap.createEntity(NAME.stoneFurnace,
-      -19, 9, 0, time);
+      -19, 9, 0, time)
+      .energyStored = 1500;
   gameMap.createEntity(NAME.inserter,
       -20, 4, 1, time);
   gameMap.createEntity(NAME.inserter,
@@ -339,7 +354,8 @@ function inserterTest(gameMap, time) {
   createLane(gameMap, -12, -6, 1, 1, time);
   createLane(gameMap, -11, -6, 2, 1, time);
   const lane = createLane(gameMap, -11, -5, 3, 1, time);
-  gameMap.createEntity(NAME.burnerDrill, -12, -8, 2, time);
+  gameMap.createEntity(NAME.burnerDrill, -12, -8, 2, time)
+      .energyStored = 150;
   lane.minusItem = I.ironOre;
   lane.minusFlow = new Array(4 * 6).fill(0);
   return s;

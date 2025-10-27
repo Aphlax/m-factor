@@ -82,6 +82,7 @@ Game.prototype.draw = function(ctx, time) {
   } else if (this.mode == MODE.loading) {
     this.spritePool.draw(ctx, time);
   } else if (this.mode == MODE.gameMenu) {
+    this.gameMap.drawGround(ctx, this.playTime);
     this.gameMap.draw(ctx, this.playTime);
     this.ui.window.draw(ctx, this.playTime);
     this.gameMenu.draw(ctx);
