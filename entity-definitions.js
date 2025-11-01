@@ -300,7 +300,7 @@ export const ENTITIES = new Map([
   {
     label: "Steam Engine",
     prototypeName: "steam-engine",
-    type: TYPE.steamEngine,
+    type: TYPE.generator,
     size: {
       [north]: {width: 3, height: 5},
       [east]: {width: 5, height: 3},

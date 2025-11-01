@@ -182,7 +182,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
       this.fuelInventory = new Inventory(1)
           .setFilters(FUEL_FILTERS);
     }
-  } else if (this.type == TYPE.steamEngine) {
+  } else if (this.type == TYPE.generator) {
     this.state = STATE.idle;
     this.nextUpdate = NEVER;
     this.data.pipeConnections = def.pipeConnections[direction];

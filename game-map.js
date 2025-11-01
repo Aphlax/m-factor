@@ -33,13 +33,14 @@ GameMap.prototype.centerView = function(canvas) {
 GameMap.prototype.update = function(time, dt) {
   this.transportNetwork.update(time, dt);
   this.fluidNetwork.update(time, dt);
+  this.electricNetwork.update(time, dt);
   for (let chunks of this.chunks.values()) {
     for (let chunk of chunks.values()) {
       for (let entity of chunk.entities) {
         if (entity.type == TYPE.belt ||
             entity.type == TYPE.chest ||
             entity.type == TYPE.pipe ||
-            entity.type == TYPE.steamEngine ||
+            entity.type == TYPE.generator ||
             entity.type == TYPE.electricPole) continue;
         if (time < entity.nextUpdate) continue;
         entity.update(this, time);
@@ -317,9 +318,9 @@ GameMap.prototype.connectEntity = function(entity, time) {
         if (other == entity) continue;
         if ((entity.type == TYPE.electricPole &&
             (other.energySource == ENERGY.electric ||
-            other.type == TYPE.steamEngine)) ||
+            other.type == TYPE.generator)) ||
             ((entity.energySource == ENERGY.electric ||
-            entity.type == TYPE.steamEngine) &&
+            entity.type == TYPE.generator) &&
             other.type == TYPE.electricPole)) {
           const pole = entity.type == TYPE.electricPole ? entity : other;
           const dist = pole.data.powerSupplyArea;
@@ -401,12 +402,20 @@ GameMap.prototype.connectEntity = function(entity, time) {
   }
   if (entity.type == TYPE.electricPole) {
     this.electricNetwork.addPole(entity);
+    for (let other of entity.electricConnections) {
+      if (other.energySource == ENERGY.electric) {
+        this.electricNetwork.addConsumer(other);
+      }
+      if (other.type == TYPE.generator) {
+        this.electricNetwork.modifyGenerator(other);
+      }
+    }
   }
   if (entity.energySource == ENERGY.electric) {
     this.electricNetwork.addConsumer(entity);
   }
-  if (entity.type == TYPE.steamEngine) {
-    this.electricNetwork.addGenerator(entity);
+  if (entity.type == TYPE.generator) {
+    this.electricNetwork.modifyGenerator(entity);
   }
 };
 
@@ -461,6 +470,17 @@ GameMap.prototype.disconnectEntity = function(entity) {
   }
   if (entity.type == TYPE.electricPole) {
     this.electricNetwork.removePole(entity);
+    for (let other of entity.electricConnections) {
+      if (other.energySource == ENERGY.electric) {
+        
+      }
+      if (other.type == TYPE.generator) {
+        this.electricNetwork.modifyGenerator(other);
+      }
+    }
+  }
+  if (entity.type == TYPE.generator) {
+    this.electricNetwork.modifyGenerator(entity);
   }
 };
 

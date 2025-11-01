@@ -1,5 +1,5 @@
 import {Grid} from './electric-network-grid.js';
-import {TYPE} from './entity-properties.js';
+import {TYPE, STATE} from './entity-properties.js';
 
 function ElectricNetwork(gameMap) {
   this.gameMap = gameMap;
@@ -93,11 +93,37 @@ ElectricNetwork.prototype.removePole = function(entity) {
   }
 };
 
-ElectricNetwork.prototype.addConsumer = function(entity) {
-  
+/** This is called when a generator changes an electricConnection. */
+ElectricNetwork.prototype.modifyGenerator = function(entity) {
+  let grid = undefined;
+  for (let pole of entity.electricConnections) {
+    if (grid && grid != pole.data.grid) {
+      if (entity.data.grid) {
+        entity.data.grid.generators.delete(entity);
+        entity.data.grid = undefined;
+      }
+      entity.state = STATE.multipleGrids;
+      return;
+    }
+    if (!grid) {
+      grid = pole.data.grid;
+    }
+  }
+  if (!grid && entity.data.grid) {
+    entity.data.grid.generators.delete(entity);
+    entity.data.grid = undefined;
+    entity.state = STATE.idle;
+    return;
+  }
+  if (entity.data.grid == grid) {
+    return;
+  }
+  entity.data.grid = grid;
+  grid.generators.add(entity);
+  entity.state = STATE.idle;
 };
 
-ElectricNetwork.prototype.addGenerator = function(entity) {
+ElectricNetwork.prototype.addConsumer = function(entity) {
   
 };
 
