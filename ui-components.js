@@ -45,7 +45,8 @@ UiProgress.prototype.draw = function(ctx, time) {
   ctx.font = "16px monospace";
   ctx.textBaseline = "middle";
   ctx.textAlign = "end";
-  ctx.fillStyle = COLOR.primary;
+  ctx.fillStyle = this.entity.state == STATE.running ?
+      COLOR.primary : COLOR.secondary;
   ctx.fillText(Math.floor(progress * 100) + "%", x + this.width - 5, y + 21);
   ctx.textAlign = "start";
 };
@@ -168,9 +169,12 @@ UiFluidIndicator.prototype.draw = function(ctx, time) {
   ctx.fillStyle = COLOR.primary;
   ctx.font = "16px monospace";
   ctx.textBaseline = "middle";
+  const xOffset =
+      ctx.measureText(this.entity.data.channel.capacity).width -
+      ctx.measureText(this.entity.data.channel.amount).width;
   const text = this.entity.data.channel.amount +
       "/" + this.entity.data.channel.capacity;
-  ctx.fillText(text, x + 46, y + 21);
+  ctx.fillText(text, x + 46 + xOffset, y + 21);
   
   if (!this.entity.data.channel.fluid) return;
   const fluid = FLUIDS.get(this.entity.data.channel.fluid);

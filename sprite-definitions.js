@@ -474,7 +474,7 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/boiler/boiler-E-idle.png",
-    sprites: entitySprites(S.boilerE, 105, 147, 1, 1, 24, 19, 26, 25, true),
+    sprites: entitySprites(S.boilerE, 105, 147, 1, 1, 25, 18, 26, 25, true),
   },
   {
     path: "graphics/entities/boiler/boiler-E-fire.png",
@@ -490,7 +490,7 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/boiler/boiler-E-working.png",
-    sprites: entitySprites(S.boilerWorkingE, 105, 147, 8, 4, 24, 17, 26, 25, true),
+    sprites: entitySprites(S.boilerWorkingE, 105, 147, 8, 4, 25, 16, 26, 25, true),
   },
   {
     path: "graphics/entities/boiler/boiler-S-idle.png",

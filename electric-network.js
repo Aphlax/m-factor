@@ -1,12 +1,12 @@
 import {Grid} from './electric-network-grid.js';
-import {TYPE, STATE} from './entity-properties.js';
+import {TYPE, STATE, NEVER, MIN_SATISFACTION} from './entity-properties.js';
 
 function ElectricNetwork(gameMap) {
   this.gameMap = gameMap;
   this.grids = [];
 }
 
-ElectricNetwork.prototype.addPole = function(entity) {
+ElectricNetwork.prototype.addPole = function(entity, time) {
   const reach = entity.data.wireReach;
   const area = [entity.x - reach, entity.y - reach, reach * 2, reach * 2];
   const poles = this.gameMap.getEntitiesIn(...area, TYPE.electricPole);
@@ -40,7 +40,7 @@ ElectricNetwork.prototype.addPole = function(entity) {
       connected = true;
       pole.data.grid.add(entity);
     } else {
-      pole.data.grid.join(entity.data.grid);
+      pole.data.grid.join(entity.data.grid, time);
     }
   }
   if (!connected) {
@@ -123,8 +123,64 @@ ElectricNetwork.prototype.modifyGenerator = function(entity) {
   entity.state = STATE.idle;
 };
 
-ElectricNetwork.prototype.addConsumer = function(entity) {
-  
+ElectricNetwork.prototype.modifyConsumer = function(entity, time) {
+  let grid = undefined;
+  for (let pole of entity.electricConnections) {
+    if (grid && grid != pole.data.grid) {
+      if (entity.data.grid) {
+        const el = entity.state == STATE.running ?
+            entity.energyConsumption1 : entity.energyConsumption0;
+        entity.data.grid.consumerss.get(el).delete(entity);
+        entity.data.grid = undefined;
+      }
+      if (entity.state == STATE.running) {
+        const p = (time - entity.taskStart) / entity.taskDuration;
+        entity.taskStart = time - p * NEVER;
+        entity.taskEnd = time + (1 - p) * NEVER;
+        entity.nextUpdate = NEVER;
+      }
+      entity.state = STATE.multipleGrids;
+      return;
+    }
+    if (!grid) {
+      grid = pole.data.grid;
+    }
+  }
+  if (!grid && entity.data.grid) {
+    const el = entity.state == STATE.running ?
+        entity.energyConsumption1 : entity.energyConsumption0;
+    entity.data.grid.consumerss.get(el).delete(entity);
+    entity.data.grid = undefined;
+    if (entity.state == STATE.running) {
+      const p = (time - entity.taskStart) /
+          (entity.taskEnd - entity.taskStart);
+      entity.taskStart = time - p * NEVER;
+      entity.taskEnd = entity.nextUpdate =
+          time + (1 - p) * NEVER;
+    }
+    return;
+  }
+  if (entity.data.grid == grid) {
+    return;
+  }
+  entity.data.grid = grid;
+  if (!grid.consumerss.has(entity.energyConsumption0)) {
+    grid.consumerss.set(entity.energyConsumption0, new Set());
+  }
+  if (!grid.consumerss.has(entity.energyConsumption1)) {
+    grid.consumerss.set(entity.energyConsumption1, new Set());
+  }
+  grid.consumerss.get(entity.energyConsumption0).add(entity);
+  if (entity.state == STATE.running) {
+    const p = (time - entity.taskStart) /
+        (entity.taskEnd - entity.taskStart);
+    const d = grid.satisfaction < MIN_SATISFACTION ? NEVER :
+        entity.taskDuration / grid.satisfaction;
+    entity.taskStart = time - p * d;
+    entity.taskEnd = entity.nextUpdate =
+        time + (1 - p) * d;
+  }
+  debugger;
 };
 
 ElectricNetwork.prototype.update = function(time, dt) {
@@ -145,8 +201,11 @@ ElectricNetwork.prototype.update = function(time, dt) {
 };
 
 ElectricNetwork.prototype.draw = function(ctx, view) {
-  for (let grid of this.grids) {
-    grid.draw(ctx, view);
+  for (let i = 0; i < this.grids.length; i++) {
+    this.grids[i].draw(ctx, view);
+    ctx.fillStyle = this.grids[i].color;
+    ctx.fillRect(10, 76 + i * 20, 10, 10);
+    ctx.fillText((Math.floor(this.grids[i].satisfaction * 1000) / 10) + "", 25, 90 + i * 20);
   }
 };
 

@@ -1,4 +1,4 @@
-import {UiInventory} from './ui-inventory.js';
+import {UiInventory, UiFluidInventory} from './ui-inventory.js';
 import {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator} from './ui-components.js';
 import {UiButton, BUTTON} from './ui-button.js';
 import {UiChoice, CHOICE} from './ui-choice.js';
@@ -214,7 +214,6 @@ UiWindow.prototype.initialize = function() {
   this.entityUis.set(TYPE.inserter, {});
   this.entityUis.set(TYPE.offshorePump, {});
   this.entityUis.set(TYPE.boiler, {});
-  this.entityUis.set(TYPE.steamEngine, {});
   this.entityUis.set(TYPE.electricPole, {});
   
   this.entityUis.set(TYPE.furnace, {
@@ -238,10 +237,16 @@ UiWindow.prototype.initialize = function() {
   
   this.entityUis.set(TYPE.lab, {
     inventory: new UiInventory(this, 10, 40),
+    progress: new UiProgress(this, 56, 40)
+        .setWidth(this.canvasWidth - 66),
   });
   
   this.entityUis.set(TYPE.pipe, {
     fluidIndicator: new UiFluidIndicator(this, 10, 40),
+  });
+  
+  this.entityUis.set(TYPE.generator, {
+    input: new UiFluidInventory(this, 10, 40),
   });
   
   for (let ui of this.entityUis.values()) {
@@ -295,8 +300,11 @@ UiWindow.prototype.set = function(selectedEntity) {
     }
   } else if (selectedEntity.type == TYPE.lab) {
     this.entityUi.inventory.set(selectedEntity.inputInventory);
+    this.entityUi.progress.set(selectedEntity);
   } else if (selectedEntity.type == TYPE.pipe) {
     this.entityUi.fluidIndicator.set(selectedEntity);
+  } else if (selectedEntity.type == TYPE.generator) {
+    this.entityUi.input.set(selectedEntity.inputFluidTank);
   }
   
   

@@ -1,9 +1,12 @@
-import {TYPE, STATE} from './entity-properties.js';
+import {TYPE, STATE, ENERGY, NEVER, MIN_SATISFACTION} from './entity-properties.js';
 
 function Grid(poles) {
   this.poles = poles;
   
   this.generators = new Set();
+  this.consumerss = new Map();
+  
+  this.satisfaction = 1;
   
   const c = Math.ceil(Math.random() * 255 * 2);
   this.color = `rgb(${Math.abs(c-255)}, ${Math.abs((c+170)%510-255)}, ${Math.abs((c+340)%510-255)})`;
@@ -16,12 +19,69 @@ Grid.fromPole = function(pole) {
 };
 
 Grid.prototype.update = function(time, dt) {
+  let demand = 0, output = 0;
+  for (let [el, consumers] of this.consumerss) {
+    demand += el * consumers.size;
+  }
+  if (!demand) {
+    for (let generator of this.generators) {
+      if (generator.state == STATE.running) {
+        generator.state = STATE.idle;
+        generator.animation = Math.floor(generator.animation +
+            (time - generator.taskStart) * generator.animationSpeed / 60) %
+            generator.animationLength;
+        generator.taskStart = NEVER;
+      }
+    }
+    return;
+  }
   for (let generator of this.generators) {
-    const ready = generator.inputFluidTank.tanklets[0].amount > 0;
-    if (generator.state != STATE.running && ready) {
+    const steam = generator.inputFluidTank.tanklets[0].amount;
+    const needed = generator.data.fluidConsumption * dt / 1000;
+    if (steam < needed) {
+      output += steam / needed * generator.data.powerOutput;
+    } else {
+      output += generator.data.powerOutput;
+    }
+  }
+  const satisfaction = output > demand ? 1 : output / demand;
+  const production = output < demand ? 1 : demand / output;
+  for (let generator of this.generators) {
+    const steam = generator.inputFluidTank.tanklets[0].amount;
+    if (!steam) {
+      if (generator.state == STATE.running) {
+        generator.state = STATE.idle;
+        generator.animation = Math.floor(generator.animation +
+            (time - generator.taskStart) * generator.animationSpeed / 60) %
+            generator.animationLength;
+        generator.taskStart = NEVER;
+      }
+      continue;
+    }
+    const needed = generator.data.fluidConsumption * dt / 1000;
+    generator.inputFluidTank.tanklets[0].amount -=
+        Math.min(needed * production,
+        generator.inputFluidTank.tanklets[0].amount);
+    if (generator.state != STATE.running) {
       generator.state = STATE.running;
       generator.taskStart = time;
     }
+  }
+  if (Math.round(satisfaction * 100) !=
+      Math.round(this.satisfaction * 100)) {
+    for (let [el, consumers] of this.consumerss) {
+      for (let entity of consumers) {
+        if (entity.state != STATE.running) continue;
+        const p = (time - entity.taskStart) /
+            (entity.taskEnd - entity.taskStart);
+        const d = satisfaction < MIN_SATISFACTION ? NEVER :
+            entity.taskDuration / satisfaction;
+        entity.taskStart = time - p * d;
+        entity.taskEnd = entity.nextUpdate =
+            time + (1 - p) * d;
+      }
+    }
+    this.satisfaction = satisfaction;
   }
 };
 
@@ -53,6 +113,17 @@ Grid.prototype.draw = function(ctx, view) {
         0.4 * view.scale, 0, 2 * Math.PI);
   }
   ctx.stroke();
+  ctx.beginPath();
+  for (let consumers of this.consumerss.values()) {
+    for (let consumer of consumers) {
+      ctx.moveTo((consumer.x + consumer.width / 2 + 0.2) * view.scale - view.x,
+          (consumer.y + consumer.height / 2) * view.scale - view.y);
+      ctx.arc((consumer.x + consumer.width / 2) * view.scale - view.x,
+          (consumer.y + consumer.height / 2) * view.scale - view.y,
+          0.2 * view.scale, 0, 2 * Math.PI);
+    }
+  }
+  ctx.fill();
 };
 
 Grid.prototype.add = function(pole) {
@@ -60,19 +131,48 @@ Grid.prototype.add = function(pole) {
   pole.data.grid = this;
 };
 
-Grid.prototype.join = function(other) {
+Grid.prototype.join = function(other, time) {
   if (other == this) return;
+  if (this.poles.size < other.poles.size) {
+    other.join(this);
+    return;
+  }
   
   for (let pole of other.poles) {
     this.poles.add(pole);
     pole.data.grid = this;
   }
+  // check all electricConnections if they were between the two grids.
   for (let entity of other.generators) {
     this.generators.add(entity);
     entity.data.grid = this;
   }
+  const needSatisfactionUpdate =
+      other.satisfaction != this.satisfaction;
+  for (let [el, consumers] of other.consumerss) {
+    if (!this.consumerss.has(el)) {
+      this.consumerss.set(el, new Set());
+    }
+    const cons = this.consumerss.get(el);
+    for (let entity of consumers) {
+      cons.add(entity);
+      entity.data.grid = this;
+      if (entity.state == STATE.running &&
+          needSatisfactionUpdate) {
+        const p = (time - entity.taskStart) /
+            (entity.taskEnd - entity.taskStart);
+        const d = this.satisfaction < MIN_SATISFACTION ? NEVER :
+            entity.taskDuration / this.satisfaction;
+        entity.taskStart = time - p * d;
+        entity.taskEnd = entity.nextUpdate =
+            time + (1 - p) * d;
+      }
+    }
+    consumers.clear();
+  }
   other.poles.clear();
   other.generators.clear();
+  other.consumerss.clear();
 };
 
 Grid.prototype.split = function(entity, not, targets) {
@@ -89,14 +189,32 @@ Grid.prototype.split = function(entity, not, targets) {
   }
   
   const segment = new Grid(poles);
+  segment.satisfaction = this.satisfaction;
   for (let pole of poles) {
     pole.data.grid = segment;
     this.poles.delete(pole);
-    
+    /*
+  }
+  for (let pole of poles) {
+    // check if entity has only one grid among poles.
+    */
     for (let entity of pole.electricConnections) {
       if (entity.type == TYPE.generator) {
         this.generators.delete(entity);
         segment.generators.add(entity);
+        entity.data.grid = segment;
+      }
+      if (entity.energySource == ENERGY.electric) {
+        const el = entity.state == STATE.running ?
+            entity.energyConsumption1 : entity.energyConsumption0;
+        this.consumerss.get(el).delete(entity);
+        if (!segment.consumerss.has(entity.energyConsumption0)) {
+          segment.consumerss.set(entity.energyConsumption0, new Set());
+        }
+        if (!segment.consumerss.has(entity.energyConsumption1)) {
+          segment.consumerss.set(entity.energyConsumption1, new Set());
+        }
+        segment.consumerss.get(el).add(entity);
         entity.data.grid = segment;
       }
     }

@@ -1,7 +1,7 @@
 import {Inventory} from './inventory.js';
 import {FluidTank} from './fluid-tank.js';
 import {ENTITIES} from './entity-definitions.js';
-import {TYPE, MAX_SIZE, NEVER, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ENERGY} from './entity-properties.js';
+import {TYPE, MAX_SIZE, NEVER, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ENERGY, MIN_SATISFACTION} from './entity-properties.js';
 import {ITEMS, I} from './item-definitions.js';
 import {RECIPES, FURNACE_FILTERS, WATER_PUMPING_RECIPE, BOILER_RECIPE} from './recipe-definitions.js';
 import {S, SPRITES} from './sprite-pool.js';
@@ -27,7 +27,7 @@ function Entity() {
   this.spriteShadowAnimation = true;
   
   this.taskStart = 0;
-  this.taskDuration = 0; // Move to data.taskDuration.
+  this.taskDuration = 0;
   this.taskEnd = 0;
   this.nextUpdate = 0;
   this.state = 0;
@@ -35,6 +35,7 @@ function Entity() {
   this.energySource = 0;
   this.energyStored = 0; // kJ.
   this.energyConsumption = 0; // kW.
+  this.energySatisfaction = 1;
   // Inventories.
   this.inputInventory = undefined;
   this.outputInventory = undefined;
@@ -44,6 +45,7 @@ function Entity() {
   // Connected entities.
   this.inputEntities = [];
   this.outputEntities = [];
+  this.electricConnections = [];
 }
 
 Entity.prototype.setup = function(name, x, y, direction, time) {
@@ -70,7 +72,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   this.spriteShadowAnimation = !def.noShadowAnimation;
   this.inputEntities.length = 0;
   this.outputEntities.length = 0;
-  this.electricConnections = [];
+  this.electricConnections.length = 0;
   
   if (this.type == TYPE.belt) {
     this.nextUpdate = NEVER;
@@ -137,8 +139,15 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   } else if (this.type == TYPE.lab) {
     this.state = STATE.missingItem;
     this.nextUpdate = NEVER;
+    this.taskStart = NEVER;
+    this.taskEnd = NEVER;
+    this.taskDuration = def.taskDuration;
     this.inputInventory = this.outputInventory =
         new Inventory(1).setFilters(LAB_FILTERS);
+    this.energySource = ENERGY.electric;
+    this.energyConsumption0 = 0;
+    this.energyConsumption1 = def.energyConsumption;
+    this.data.grid = undefined;
   } else if (this.type == TYPE.pipe) {
     this.data.pipeConnections = def.pipeConnections[direction];
     this.data.pipes = {};
@@ -173,10 +182,10 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.idleAnimation = def.idleAnimation[direction][0];
     this.sprite = this.data.idleAnimation;
     this.outputFluidTank = new FluidTank()
-        .setTanklets([I.steam])
+        .setTanklets([BOILER_RECIPE.outputs[0].item])
         .setPipeConnections(def.fluidOutputs[direction]);
     this.inputFluidTank = new FluidTank()
-        .setTanklets([I.water])
+        .setTanklets([BOILER_RECIPE.inputs[0].item])
         .setInternalInlet(true);
     if (def.energySource == ENERGY.burner) {
       this.fuelInventory = new Inventory(1)
@@ -594,8 +603,13 @@ Entity.prototype.update = function(gameMap, time) {
             this.animationLength;
       }
       if (!this.inputInventory.extractFilters()) {
+        if (this.data.grid && this.state == STATE.running) {
+          this.data.grid.consumerss.get(this.energyConsumption1).delete(this);
+          this.data.grid.consumerss.get(this.energyConsumption0).add(this);
+        }
         this.state = STATE.missingItem;
         this.nextUpdate = NEVER;
+        this.taskStart = this.taskEnd = NEVER;
         this.animation = 0;
         return;
       }
@@ -605,10 +619,16 @@ Entity.prototype.update = function(gameMap, time) {
           inputEntity.nextUpdate = this.nextUpdate;
         }
       }
+      if (this.data.grid && this.state != STATE.running) {
+        this.data.grid.consumerss.get(this.energyConsumption0).delete(this);
+        this.data.grid.consumerss.get(this.energyConsumption1).add(this);
+      }
       this.state = STATE.running;
       this.taskStart = this.nextUpdate;
+      const sat = this.data.grid?.satisfaction ?? 0;
       this.taskEnd = this.nextUpdate =
-          this.taskStart + 9800;
+          sat < MIN_SATISFACTION ? NEVER :
+          this.taskStart + this.taskDuration / sat;
     }
   } else if (this.type == TYPE.offshorePump) {
     this.outputFluidTank.tanklets[0].amount =
@@ -679,93 +699,6 @@ Entity.prototype.update = function(gameMap, time) {
       return;
     }
   }
-};
-
-Entity.prototype.insert = function(item, amount, time) {
-  if (this.fuelInventory) {
-    for (let filter of FUEL_FILTERS) {
-      if (item == filter.item) {
-        const count = this.fuelInventory.insert(item, amount);
-        if (count && (this.state == STATE.outOfEnergy ||
-            this.state == STATE.noEnergy)) {
-          this.nextUpdate = time;
-        }
-        return count;
-      }
-    }
-  }
-  if (this.inputInventory) {
-    const count = this.inputInventory.insert(item, amount);
-    if (count) {
-      if (this.type == TYPE.chest ||
-          this.type == TYPE.lab) {
-        for (let outputEntity of this.outputEntities) {
-          if (outputEntity.state == STATE.missingItem) {
-            outputEntity.nextUpdate = time;
-          }
-        }
-      }
-      if (this.state == STATE.missingItem) {
-        this.nextUpdate = time;
-      }
-    }
-    return count;
-  } else if (this.type == TYPE.belt) {
-    throw new Error("Can only insert into belts with beltInsert.");
-  }
-  return 0;
-};
-
-/**
- * What does this entiry want to have inserted?
- * Either an array of items or -1 for anything.
- */
-Entity.prototype.insertWants = function() {
-  if (this.type == TYPE.belt) {
-    return -1;
-  } else if (this.type == TYPE.assembler) {
-    const wants = this.outputInventory.insertWants();
-    if (wants != -1 && !wants.length) {
-      return wants;
-    }
-    return this.inputInventory.insertWants();
-  } else if (this.energySource == ENERGY.burner) {
-    if (!this.inputInventory) {
-      return this.fuelInventory.insertWants();
-    }
-    const wants = this.inputInventory.insertWants();
-    const fuel = this.fuelInventory.insertWants();
-    if (wants == -1 || fuel == -1 ) return -1;
-    return !fuel.length ? wants : !wants.length ? fuel :
-        [...wants, ...fuel];
-  } else if (this.inputInventory) {
-    return this.inputInventory.insertWants();
-  }
-  return [];
-}
-
-Entity.prototype.extract = function(item, amount, time) {
-  if (this.outputInventory) {
-    const count = this.outputInventory.extract(item, amount);
-    if (count) {
-      if (this.type == TYPE.chest ||
-          this.type == TYPE.assembler ||
-          this.type == TYPE.lab) {
-        for (let inputEntity of this.inputEntities) {
-          if (inputEntity.state == STATE.outputFull ||
-              inputEntity.state == STATE.itemReady) {
-            inputEntity.nextUpdate = time;
-          }
-        }
-      }
-      if (this.state == STATE.outputFull ||
-          this.state == STATE.itemReady) {
-        this.nextUpdate = time;
-      }
-    }
-    return count;
-  }
-  return 0;
 };
 
 export {Entity};

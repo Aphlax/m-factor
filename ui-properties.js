@@ -7,6 +7,7 @@ export const COLOR = {
   border1: "#282830",
   border2: "#555565",
   primary: "#FFFBF8",
+  secondary: "#9F9A98",
   progressBar: "#109A40",
   buttonBackground: "#505562",
   buttonBackgroundPressed: "#808588",

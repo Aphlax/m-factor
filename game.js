@@ -49,8 +49,10 @@ Game.prototype.update = function(time) {
         .filter(s => STATE[s] == entity.state)[0] +
         ", " + (entity.nextUpdate < 1000000 ?
         (entity.nextUpdate / 1000).toFixed(1) : "XXX") +
-        ", " + (entity.taskStart / 1000).toFixed(1) +
-        ", " + (entity.taskEnd / 1000).toFixed(1);
+        ", " + (entity.taskStart < 1000000 ?
+        (entity.taskStart / 1000).toFixed(1) : "XXX") +
+        ", " + (entity.taskEnd < 1000000 ?
+        (entity.taskEnd / 1000).toFixed(1) : "XXX");
   } else {
     this.debug = "";
   }

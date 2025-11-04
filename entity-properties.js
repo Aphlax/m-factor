@@ -15,7 +15,7 @@ export const TYPE = {
   electricPole: 12,
 };
 
-/** Never value for next update. */
+/** Never value for next update. 285 years from now. */
 export const NEVER = Math.floor(Number.MAX_SAFE_INTEGER / 1000);
 
 /** Maximal width/length of any entity. */
@@ -33,6 +33,8 @@ export const MAX_WIRE_REACH = 7;
 /** Maximal reach of electric supply areas. */
 export const MAX_ELECTRIC_SUPPLY = 2;
 
+/** Minimal electric satisfaction for an entiry to make progress. */
+export const MIN_SATISFACTION = 0.01;
 
 export const STATE = {
   running: 0,
@@ -46,8 +48,8 @@ export const STATE = {
   inserterCoolDown: 12, // Inserter moving back to initial position.
   mineEmpty: 13,
   noRecipe: 14,
-  idle: 1,
-  multipleGrids: 15,
+  idle: 15, // No work todo for other reason
+  multipleGrids: 16,
 };
 
 export const DIRECTION = {

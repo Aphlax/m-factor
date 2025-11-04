@@ -1,5 +1,93 @@
-import {TYPE, NEVER, STATE} from './entity-properties.js';
+import {TYPE, NEVER, STATE, ENERGY, FUEL_FILTERS} from './entity-properties.js';
 import {ITEMS} from './item-definitions.js';
+
+
+export function insert(item, amount, time) {
+  if (this.fuelInventory) {
+    for (let filter of FUEL_FILTERS) {
+      if (item == filter.item) {
+        const count = this.fuelInventory.insert(item, amount);
+        if (count && (this.state == STATE.outOfEnergy ||
+            this.state == STATE.noEnergy)) {
+          this.nextUpdate = time;
+        }
+        return count;
+      }
+    }
+  }
+  if (this.inputInventory) {
+    const count = this.inputInventory.insert(item, amount);
+    if (count) {
+      if (this.type == TYPE.chest ||
+          this.type == TYPE.lab) {
+        for (let outputEntity of this.outputEntities) {
+          if (outputEntity.state == STATE.missingItem) {
+            outputEntity.nextUpdate = time;
+          }
+        }
+      }
+      if (this.state == STATE.missingItem) {
+        this.nextUpdate = time;
+      }
+    }
+    return count;
+  } else if (this.type == TYPE.belt) {
+    throw new Error("Can only insert into belts with beltInsert.");
+  }
+  return 0;
+};
+
+/**
+ * What does this entiry want to have inserted?
+ * Either an array of items or -1 for anything.
+ */
+export function insertWants() {
+  if (this.type == TYPE.belt) {
+    return -1;
+  } else if (this.type == TYPE.assembler) {
+    const wants = this.outputInventory.insertWants();
+    if (wants != -1 && !wants.length) {
+      return wants;
+    }
+    return this.inputInventory.insertWants();
+  } else if (this.energySource == ENERGY.burner) {
+    if (!this.inputInventory) {
+      return this.fuelInventory.insertWants();
+    }
+    const wants = this.inputInventory.insertWants();
+    const fuel = this.fuelInventory.insertWants();
+    if (wants == -1 || fuel == -1 ) return -1;
+    return !fuel.length ? wants : !wants.length ? fuel :
+        [...wants, ...fuel];
+  } else if (this.inputInventory) {
+    return this.inputInventory.insertWants();
+  }
+  return [];
+}
+
+export function extract(item, amount, time) {
+  if (this.outputInventory) {
+    const count = this.outputInventory.extract(item, amount);
+    if (count) {
+      if (this.type == TYPE.chest ||
+          this.type == TYPE.assembler ||
+          this.type == TYPE.lab) {
+        for (let inputEntity of this.inputEntities) {
+          if (inputEntity.state == STATE.outputFull ||
+              inputEntity.state == STATE.itemReady) {
+            inputEntity.nextUpdate = time;
+          }
+        }
+      }
+      if (this.state == STATE.outputFull ||
+          this.state == STATE.itemReady) {
+        this.nextUpdate = time;
+      }
+    }
+    return count;
+  }
+  return 0;
+};
 
 /**
  * Returns the expected wait time in ms until the belt is free to take the item.

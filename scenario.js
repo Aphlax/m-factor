@@ -1,6 +1,7 @@
 import {NAME} from './entity-definitions.js';
 import {I} from './item-definitions.js';
 import {PROTO_TO_RECIPE} from './recipe-definitions.js';
+import {STATE} from './entity-properties.js';
 
 export function scenario(gameMap, time) {
   return productionTest(gameMap, time);
@@ -23,6 +24,7 @@ function productionTest(gameMap, time) {
   const e = (n, x, y, d) => gameMap.createEntity(n, x, y, d, time);
   const l = (x, y, d, l) => createLane(gameMap, x, y, d, l, time);
   const p = (x, y, d, l) => createPipe(gameMap, x, y, d, l, time);
+  const el = (x, y, d, l, s) => createPoles(gameMap, x, y, d, l, s, time);
   
   for (let i = 0; i < 5; i++) {
     e(NAME.burnerDrill, -10, -7 + 2 * i, 3)
@@ -90,13 +92,18 @@ function productionTest(gameMap, time) {
   e(NAME.inserter, -3, 40, 0);
   e(NAME.assemblingMachine1, -3, 41, 0)
       .setRecipe(PROTO_TO_RECIPE.get("iron-gear-wheel"), time);
+  let assembler;
   for (let i = 0; i < 6; i++) {
-    e(NAME.assemblingMachine1, 3 * i, 41, 0)
-        .setRecipe(PROTO_TO_RECIPE.get("automation-science-pack"), time);
+    assembler = e(NAME.assemblingMachine1, 3 * i, 41, 0);
+    assembler.setRecipe(PROTO_TO_RECIPE.get("automation-science-pack"), time);
     e(NAME.inserter, 1 + 3 * i, 40, 2);
     e(NAME.inserter, 1 + 3 * i, 44, 0);
     e(NAME.inserter, 2 + 3 * i, 40, 0);
   }
+  assembler.state = STATE.running;
+  assembler.taskEnd = assembler.nextUpdate = time;
+  assembler.inputInventory.insert(I.ironGear, 5);
+  assembler.inputInventory.insert(I.copperPlate, 5);
   
   e(NAME.inserter, 23, 39, 1);
   for (let i = 0; i < 6; i++) {
@@ -110,7 +117,8 @@ function productionTest(gameMap, time) {
   l(-13, -14, 1, 46);
   const lane2 = l(33, -14, 2, 39);
   lane2.plusItem = I.coal;
-  lane2.plusFlow = new Array(4 * 85 - 7).fill(0);
+  lane2.plusFlow = new Array(4 * 85 - 55).fill(0);
+  lane2.plusFlow[0] = 10;
   e(NAME.inserter, 34, 21, 1);
   e(NAME.inserter, 34, 24, 1);
   
@@ -128,9 +136,9 @@ function productionTest(gameMap, time) {
   e(NAME.steamEngine, 44, 18, 1);
   e(NAME.steamEngine, 49, 18, 1);
   e(NAME.steamEngine, 54, 18, 1);
-  e(NAME.smallElectricPole, 41, 17, 0);
-  e(NAME.smallElectricPole, 47, 17, 0);
-  e(NAME.smallElectricPole, 53, 17, 0);
+  el(27, 17, 1, 5);
+  el(27, 21, 2, 5, 4);
+  el(23, 21, 2, 5, 4);
 };
 
 function inserterTest(gameMap, time) {
@@ -381,6 +389,18 @@ function createPipe(gameMap, x, y, direction, length, time) {
         x + dx, y + dy, 0, time);
     if (i == length - 1) {
       return b?.data?.channel;
+    }
+  }
+}
+
+function createPoles(gameMap, x, y, direction, length, spacing, time) {
+  for (let i = 0; i < length; i++) {
+    const dx = -((direction - 2) % 2) * i * (spacing ?? 7);
+    const dy = ((direction - 1) % 2) * i * (spacing ?? 7);
+    const b = gameMap.createEntity(NAME.smallElectricPole,
+        x + dx, y + dy, 0, time);
+    if (i == length - 1) {
+      return b.data?.grid;
     }
   }
 }

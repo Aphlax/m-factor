@@ -138,7 +138,7 @@ export const ENTITIES = new Map([
     energySource: ENERGY.burner,
     energyConsumption: 90, // kW
     
-    processingSpeed: 1,
+    processingSpeed: 1, // inverse.
     idleAnimation: {
       [north]: [S.stoneFurnace],
       [east]: [S.stoneFurnace],
@@ -164,11 +164,11 @@ export const ENTITIES = new Map([
     animationLength: 32,
     animationSpeed: 1,
     
-    processingSpeed: 2,
+    processingSpeed: 2, // inverse.
   }],
   [NAME.lab,
   {
-    label: "Wind up lab",
+    label: "Laboratory",
     prototypeName: "lab",
     type: TYPE.lab,
     width: 3,
@@ -183,6 +183,9 @@ export const ENTITIES = new Map([
     },
     animationLength: 33,
     noShadowAnimation: true,
+    
+    taskDuration: 9800,
+    energyConsumption: 60, // kW
   }],
   [NAME.offshorePump,
   {

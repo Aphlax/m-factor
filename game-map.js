@@ -7,6 +7,11 @@ import {TransportNetwork} from './transport-network.js';
 import {FluidNetwork} from './fluid-network.js';
 import {ElectricNetwork} from './electric-network.js';
 
+/* Optimizations
+- store expired particles per chunk.
+- store expired entities by chunk.
+*/
+
 function GameMap(seed) {
   this.mapGenerator = new MapGenerator(seed);
   this.view = {};
@@ -211,14 +216,14 @@ GameMap.prototype.createEntity = function(name, x, y, direction, time) {
   return entity;
 };
 
-GameMap.prototype.deleteEntity = function(entity) {
+GameMap.prototype.deleteEntity = function(entity, time) {
   if (!entity) return;
   const cx = Math.floor(entity.x / SIZE);
   const cy = Math.floor(entity.y / SIZE);
   const entities = this.chunks.get(cx).get(cy).entities;
   entities.splice(entities.indexOf(entity), 1);
   
-  this.disconnectEntity(entity);
+  this.disconnectEntity(entity, time);
 };
 
 GameMap.prototype.canPlace = function(x, y, width, height, ignoredEntity) {
@@ -401,10 +406,10 @@ GameMap.prototype.connectEntity = function(entity, time) {
     }
   }
   if (entity.type == TYPE.electricPole) {
-    this.electricNetwork.addPole(entity);
+    this.electricNetwork.addPole(entity, time);
     for (let other of entity.electricConnections) {
       if (other.energySource == ENERGY.electric) {
-        this.electricNetwork.addConsumer(other);
+        this.electricNetwork.modifyConsumer(other, time);
       }
       if (other.type == TYPE.generator) {
         this.electricNetwork.modifyGenerator(other);
@@ -412,14 +417,14 @@ GameMap.prototype.connectEntity = function(entity, time) {
     }
   }
   if (entity.energySource == ENERGY.electric) {
-    this.electricNetwork.addConsumer(entity);
+    this.electricNetwork.modifyConsumer(entity, time);
   }
   if (entity.type == TYPE.generator) {
     this.electricNetwork.modifyGenerator(entity);
   }
 };
 
-GameMap.prototype.disconnectEntity = function(entity) {
+GameMap.prototype.disconnectEntity = function(entity, time) {
   entity.inputEntities.forEach(other =>
       other.outputEntities.splice(other.outputEntities.indexOf(entity), 1));
   entity.outputEntities.forEach(other =>
@@ -472,14 +477,19 @@ GameMap.prototype.disconnectEntity = function(entity) {
     this.electricNetwork.removePole(entity);
     for (let other of entity.electricConnections) {
       if (other.energySource == ENERGY.electric) {
-        
+        this.electricNetwork.modifyConsumer(other, time);
       }
       if (other.type == TYPE.generator) {
         this.electricNetwork.modifyGenerator(other);
       }
     }
   }
+  if (entity.energySource == ENERGY.electric) {
+    entity.electricConnections.length = 0;
+    this.electricNetwork.modifyConsumer(entity, time);
+  }
   if (entity.type == TYPE.generator) {
+    entity.electricConnections.length = 0;
     this.electricNetwork.modifyGenerator(entity);
   }
 };

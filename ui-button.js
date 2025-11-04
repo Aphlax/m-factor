@@ -93,7 +93,9 @@ UiButton.prototype.touchEnd = function(e) {
           46 * Math.ceil(this.parent.entityUi.recipeChoice.choices.length / 8));
     this.parent.animationSpeed = (this.parent.yTarget - this.parent.y) / 100;
   } else if (this.name == BUTTON.deleteEntity) {
-    this.parent.ui.game.gameMap.deleteEntity(this.parent.selectedEntity);
+    this.parent.ui.game.gameMap.deleteEntity(
+        this.parent.selectedEntity,
+        this.parent.ui.game.playTime);
     this.parent.set();
   } else if (this.name == BUTTON.gameMenu) {
     this.parent.ui.game.openMenu();
