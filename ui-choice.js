@@ -1,6 +1,5 @@
 import {COLOR} from './ui-properties.js';
 import {RECIPES} from './recipe-definitions.js';
-import {NAME} from './entity-definitions.js';
 import {ITEMS} from './item-definitions.js';
 import {SPRITES} from './sprite-pool.js';
 
@@ -16,6 +15,7 @@ function UiChoice(parent, x, y) {
   this.mode = 0;
   this.entity = undefined;
   this.choices = [];
+  this.width = 10000;
   
   this.pressedIndex = -1;
 }
@@ -45,22 +45,33 @@ UiChoice.prototype.setChoice = function(choice, entity) {
   return this;
 };
 
+UiChoice.prototype.setWidth = function(width) {
+  this.width = width;
+  return this;
+};
+
 UiChoice.prototype.draw = function(ctx) {
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
   
   ctx.lineWidth = 1;
   ctx.strokeStyle = COLOR.buttonBorder;
-  for (let i = 0; i < this.choices.length; i++) {
-    ctx.fillStyle = i == this.pressedIndex ?
-      COLOR.buttonBackgroundPressed : COLOR.buttonBackground;
-    ctx.fillRect(x + i * 46, y, 40, 40);
-    ctx.strokeRect(x + i * 46, y, 40, 40);
-    const sprite = this.choices[i].sprite;
-    ctx.drawImage(sprite.image,
+  const columns = Math.floor((this.width + 6) / 46);
+  const rows = Math.ceil(this.choices.length / columns);
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < columns; j++) {
+      const index = i * columns + j;
+      if (index >= this.choices.length) return;
+      ctx.fillStyle = index == this.pressedIndex ?
+          COLOR.buttonBackgroundPressed : COLOR.buttonBackground;
+      ctx.fillRect(x + j * 46, y + i * 46, 40, 40);
+      ctx.strokeRect(x + j * 46, y + i * 46, 40, 40);
+      const sprite = this.choices[index].sprite;
+      ctx.drawImage(sprite.image,
           sprite.x, sprite.y,
           sprite.width, sprite.height,
-          x + i * 46 + 5, y + 5, 32, 32);
+          x + j * 46 + 5, y + i * 46 + 5, 32, 32);
+    }
   }
 };
 
@@ -68,13 +79,19 @@ UiChoice.prototype.touchStart = function(e) {
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
   const t = e.touches[0];
+  const columns = Math.floor((this.width + 6) / 46);
+  const rows = Math.ceil(this.choices.length / columns);
  
-  if (x > t.clientX || t.clientX > x + 46 * this.choices.length ||
-      y > t.clientY || t.clientY > y + 40) return;
+  if (x > t.clientX || t.clientX > x + 46 * columns - 6 ||
+      y > t.clientY || t.clientY > y + 46 * rows - 6) return;
   
   if ((t.clientX - x) % 46 > 40) return;
+  if ((t.clientY - y) % 46 > 40) return;
   
-  this.pressedIndex = Math.floor((t.clientX - x) / 46);
+  const column = Math.floor((t.clientX - x) / 46);
+  const row = Math.floor((t.clientY - y) / 46);
+  if (row * columns + column >= this.choices.length) return;
+  this.pressedIndex = row * columns + column;
 };
 
 UiChoice.prototype.touchMove = function(e) {
@@ -87,9 +104,11 @@ UiChoice.prototype.touchEnd = function(e) {
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
   const t = e.changedTouches[0];
- 
-  if (x > t.clientX || t.clientX > x + 46 * this.choices.length - 6 ||
-      y > t.clientY || t.clientY > y + 40) return;
+  const columns = Math.floor((this.width + 6) / 46);
+  const rows = Math.ceil(this.choices.length / columns);
+  
+  if (x > t.clientX || t.clientX > x + 46 * columns - 6 ||
+      y > t.clientY || t.clientY > y + 46 * rows - 6) return;
   
   if (this.pressedIndex == -1) return;
   

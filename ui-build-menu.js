@@ -1,6 +1,7 @@
 import {COLOR} from './ui-properties.js';
 import {S, SPRITES} from './sprite-pool.js';
-import {NAME, ENTITIES} from './entity-definitions.js';
+import {NAME} from './entity-properties.js';
+import {ENTITIES} from './entity-definitions.js';
 
 const BUILD_MENU = [
   NAME.woodenChest,

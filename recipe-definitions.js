@@ -1,5 +1,5 @@
 import {I} from './item-definitions.js';
-import {NAME} from './entity-definitions.js';
+import {NAME} from './entity-properties.js';
 
 export const RECIPES = [
   {
@@ -180,6 +180,45 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1],
     duration: 500,
   },
+  {
+    prototypeName: "boiler",
+    inputs: [
+      {item: I.pipe, amount: 4},
+      {item: I.stoneFurnace, amount: 1},
+    ],
+    outputs: [
+      {item: I.boiler, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 500,
+  },
+  {
+    prototypeName: "steam-engine",
+    inputs: [
+      {item: I.ironGear, amount: 8},
+      {item: I.ironPlate, amount: 10},
+      {item: I.pipe, amount: 5},
+    ],
+    outputs: [
+      {item: I.steamEngine, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 500,
+  },
+  {
+    prototypeName: "small-electric-pole",
+    inputs: [
+      {item: I.copperCable, amount: 2},
+      {item: I.wood, amount: 1},
+    ],
+    outputs: [
+      {item: I.smallElectricPole, amount: 2},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 500,
+  },
+  
+  
   {
     prototypeName: "water-pumping",
     inputs: [],

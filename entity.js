@@ -3,7 +3,7 @@ import {FluidTank} from './fluid-tank.js';
 import {ENTITIES} from './entity-definitions.js';
 import {TYPE, MAX_SIZE, NEVER, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ENERGY, MIN_SATISFACTION} from './entity-properties.js';
 import {ITEMS, I} from './item-definitions.js';
-import {RECIPES, FURNACE_FILTERS, WATER_PUMPING_RECIPE, BOILER_RECIPE} from './recipe-definitions.js';
+import {RECIPES, FURNACE_FILTERS} from './recipe-definitions.js';
 import {S, SPRITES} from './sprite-pool.js';
 import * as entityLogic from './entity-logic.js';
 import * as entityDrawing from './entity-drawing.js';
@@ -35,7 +35,6 @@ function Entity() {
   this.energySource = 0;
   this.energyStored = 0; // kJ.
   this.energyConsumption = 0; // kW.
-  this.energySatisfaction = 1;
   // Inventories.
   this.inputInventory = undefined;
   this.outputInventory = undefined;
@@ -156,14 +155,14 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   } else if (this.type == TYPE.offshorePump) {
     this.state = STATE.running;
     this.nextUpdate = time;
-    this.taskDuration = WATER_PUMPING_RECIPE.duration;
-    this.data.outputAmount = WATER_PUMPING_RECIPE.outputs[0].amount;
+    this.taskDuration = def.recipe.duration;
+    this.data.outputAmount = def.recipe.outputs[0].amount;
     this.outputFluidTank = new FluidTank()
         .setTanklets([I.water])
         .setPipeConnections(def.fluidOutputs[direction]);
     this.outputFluidTank.tanklets[0].capacity =
-        WATER_PUMPING_RECIPE.outputs[0].amount *
-        1000 / WATER_PUMPING_RECIPE.duration;
+        def.recipe.outputs[0].amount *
+        1000 / def.recipe.duration;
   } else if (this.type == TYPE.boiler) {
     this.state = STATE.missingItem;
     this.nextUpdate = NEVER;
@@ -172,20 +171,19 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.pipeConnections = def.pipeConnections[direction];
     this.data.pipes = {};
     this.data.capacity = def.capacity;
-    this.data.processingSpeed = 1;
-    this.data.inputAmount = BOILER_RECIPE.inputs[0].amount;
-    this.data.outputAmount = BOILER_RECIPE.outputs[0].amount;
-    this.taskDuration = BOILER_RECIPE.duration;
+    this.data.inputAmount = def.recipe.inputs[0].amount;
+    this.data.outputAmount = def.recipe.outputs[0].amount;
+    this.taskDuration = def.recipe.duration;
     this.energySource = def.energySource;
     this.energyConsumption = def.energyConsumption;
     this.data.workingAnimation = def.sprites[direction][0];
     this.data.idleAnimation = def.idleAnimation[direction][0];
     this.sprite = this.data.idleAnimation;
     this.outputFluidTank = new FluidTank()
-        .setTanklets([BOILER_RECIPE.outputs[0].item])
+        .setTanklets([def.recipe.outputs[0].item])
         .setPipeConnections(def.fluidOutputs[direction]);
     this.inputFluidTank = new FluidTank()
-        .setTanklets([BOILER_RECIPE.inputs[0].item])
+        .setTanklets([def.recipe.inputs[0].item])
         .setInternalInlet(true);
     if (def.energySource == ENERGY.burner) {
       this.fuelInventory = new Inventory(1)
@@ -544,7 +542,7 @@ Entity.prototype.update = function(gameMap, time) {
       this.state = STATE.running;
       this.taskStart = this.nextUpdate;
       this.taskEnd = this.nextUpdate = this.taskStart +
-          this.data.processingSpeed * this.data.recipe.duration;
+          this.data.recipe.duration / this.data.processingSpeed;
       this.sprite = this.data.workingAnimation;
       gameMap.createSmoke(this.x + 1, this.y, this.taskStart,
           this.nextUpdate - this.taskStart);
@@ -591,7 +589,7 @@ Entity.prototype.update = function(gameMap, time) {
       this.state = STATE.running;
       this.taskStart = this.nextUpdate;
       this.taskEnd = this.nextUpdate = this.taskStart +
-          this.data.processingSpeed * this.data.recipe.duration;
+          this.data.recipe.duration / this.data.processingSpeed;
       return;
     }
   } else if (this.type == TYPE.lab) {

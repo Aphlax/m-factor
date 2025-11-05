@@ -1,7 +1,6 @@
-import {NAME} from './entity-definitions.js';
 import {I} from './item-definitions.js';
 import {PROTO_TO_RECIPE} from './recipe-definitions.js';
-import {STATE} from './entity-properties.js';
+import {STATE, NAME} from './entity-properties.js';
 
 export function scenario(gameMap, time) {
   return productionTest(gameMap, time);

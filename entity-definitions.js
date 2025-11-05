@@ -1,21 +1,6 @@
 import {S} from './sprite-pool.js';
-import {DIRECTION, TYPE, ENERGY} from './entity-properties.js';
-
-
-export const NAME = {
-  burnerDrill: 1,
-  woodenChest: 2,
-  transportBelt: 3,
-  inserter: 4,
-  stoneFurnace: 5,
-  assemblingMachine1: 6,
-  lab: 7,
-  offshorePump: 8,
-  pipe: 9,
-  boiler: 10,
-  steamEngine: 11,
-  smallElectricPole: 12,
-};
+import {DIRECTION, TYPE, ENERGY, NAME} from './entity-properties.js';
+import {WATER_PUMPING_RECIPE, BOILER_RECIPE} from './recipe-definitions.js';
 
 const {north, east, south, west} = DIRECTION;
 
@@ -138,7 +123,7 @@ export const ENTITIES = new Map([
     energySource: ENERGY.burner,
     energyConsumption: 90, // kW
     
-    processingSpeed: 1, // inverse.
+    processingSpeed: 1,
     idleAnimation: {
       [north]: [S.stoneFurnace],
       [east]: [S.stoneFurnace],
@@ -164,7 +149,7 @@ export const ENTITIES = new Map([
     animationLength: 32,
     animationSpeed: 1,
     
-    processingSpeed: 2, // inverse.
+    processingSpeed: 0.5,
   }],
   [NAME.lab,
   {
@@ -209,6 +194,7 @@ export const ENTITIES = new Map([
     animationLength: 32,
     animationSpeed: 0.5,
     
+    recipe: WATER_PUMPING_RECIPE,
     fluidOutputs: {
       [north]: [{x: 0, y: -1}],
       [east]: [{x: 2, y: 0}],
@@ -283,8 +269,8 @@ export const ENTITIES = new Map([
     animationSpeed: 0.6,
     energySource: ENERGY.burner,
     energyConsumption: 1800, // kW
-    processingSpeed: 1,
     
+    recipe: BOILER_RECIPE,
     pipeConnections: {
       [north]: [{x: -1, y: 1}, {x: 3, y: 1}],
       [east]: [{x: 0, y: -1}, {x: 0, y: 3}],

@@ -15,6 +15,21 @@ export const TYPE = {
   electricPole: 12,
 };
 
+export const NAME = {
+  burnerDrill: 1,
+  woodenChest: 2,
+  transportBelt: 3,
+  inserter: 4,
+  stoneFurnace: 5,
+  assemblingMachine1: 6,
+  lab: 7,
+  offshorePump: 8,
+  pipe: 9,
+  boiler: 10,
+  steamEngine: 11,
+  smallElectricPole: 12,
+};
+
 /** Never value for next update. 285 years from now. */
 export const NEVER = Math.floor(Number.MAX_SAFE_INTEGER / 1000);
 

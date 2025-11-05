@@ -25,6 +25,9 @@ export const I = {
   lab: 106,
   offshorePump: 107,
   pipe: 108,
+  boiler: 109,
+  steamEngine: 110,
+  smallElectricPole: 111,
 };
 
 export const ITEMS = new Map([
@@ -130,6 +133,22 @@ export const ITEMS = new Map([
     sprite: S.pipeItem,
     stacksize: 100,
   }],
+  [I.boiler,
+  {
+    sprite: S.boilerItem,
+    stacksize: 50,
+  }],
+  [I.steamEngine,
+  {
+    sprite: S.steamEngineItem,
+    stacksize: 10,
+  }],
+  [I.smallElectricPole,
+  {
+    sprite: S.smallElectricPoleItem,
+    stacksize: 50,
+  }],
+  
 ]);
 
 export const FLUIDS = new Map([

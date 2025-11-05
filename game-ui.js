@@ -85,6 +85,7 @@ GameUi.prototype.drawGroundIndicators = function(ctx) {
 
 GameUi.prototype.draw = function(ctx, time) {
   if (this.window.selectedEntity) {
+    // Resources do not have drawSelection, but this still works...
     Entity.prototype.drawSelection.call(
         this.window.selectedEntity, ctx, this.gameMapInput.view);
     if (this.window.selectedEntity.type) {

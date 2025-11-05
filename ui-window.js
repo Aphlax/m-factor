@@ -232,7 +232,8 @@ UiWindow.prototype.initialize = function() {
         .setWidth(this.canvasWidth - 158),
     recipe: new UiButton(this, this.canvasWidth - 50, 40)
         .setButton(BUTTON.assemblerRecipe, S.gearIcon),
-    recipeChoice: new UiChoice(this, this.canvasWidth + 10, 40),
+    recipeChoice: new UiChoice(this, this.canvasWidth + 10, 40)
+        .setWidth(this.canvasWidth - 20),
   });
   
   this.entityUis.set(TYPE.lab, {

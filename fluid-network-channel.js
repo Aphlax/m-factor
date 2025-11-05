@@ -35,9 +35,10 @@ Channel.prototype.update = function(time, dt) {
     const pOut = Math.min(this.amount / outputAmount, 1);
     if (pOut) {
       for (let [entity, tanklet] of this.outputTanklets.entries()) {
-        const transfer = Math.floor(pOut *
+        const transfer = Math.floor(
             Math.min(tanklet.capacity - tanklet.amount,
-            maxOutputAmount));
+            this.amount,
+            Math.ceil(pOut * maxOutputAmount)));
         
         tanklet.amount += transfer;
         this.amount -= transfer;
@@ -60,8 +61,10 @@ Channel.prototype.update = function(time, dt) {
   }
   const pIn = inputAmount ? Math.min((this.capacity - this.amount) / inputAmount, 1) : 0;
   for (let [entity, tanklet] of this.inputTanklets.entries()) {
-    const transfer = Math.floor(pIn *
-        Math.min(tanklet.amount, maxInputAmount));
+    const transfer = Math.floor(
+        Math.min(tanklet.amount,
+        this.capacity - this.amount,
+        Math.ceil(pIn * maxInputAmount)));
     this.amount += transfer;
     tanklet.amount -= transfer;
     

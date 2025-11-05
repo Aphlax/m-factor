@@ -89,7 +89,7 @@ UiButton.prototype.touchEnd = function(e) {
     this.parent.entityUi.recipeChoice.setChoice(
         CHOICE.assemblerRecipe, this.parent.selectedEntity);
     this.parent.xTarget = -this.parent.canvasWidth;
-    this.parent.yTarget = Math.max(150, this.parent.canvasHeight - 50 -
+    this.parent.yTarget = Math.max(150, this.parent.canvasHeight - 44 -
           46 * Math.ceil(this.parent.entityUi.recipeChoice.choices.length / 8));
     this.parent.animationSpeed = (this.parent.yTarget - this.parent.y) / 100;
   } else if (this.name == BUTTON.deleteEntity) {
