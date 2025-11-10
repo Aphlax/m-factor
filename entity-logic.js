@@ -411,8 +411,8 @@ export function connectFluidOutput(pipe) {
         // input/output before it gets its channel.
         return pipe.data.channel.addInputEntity(this, i);
       }
+      return;
     }
-    
   }
 }
 
@@ -442,7 +442,7 @@ export function connectFluidInput(pipe) {
         // input/output before it gets its channel.
         return pipe.data.channel.addOutputEntity(this, i);
       }
+      return;
     }
-    
   }
 }

@@ -627,6 +627,8 @@ Entity.prototype.update = function(gameMap, time) {
       this.taskEnd = this.nextUpdate =
           sat < MIN_SATISFACTION ? NEVER :
           this.taskStart + this.taskDuration / sat;
+      this.animationSpeed = sat < MIN_SATISFACTION ?
+          1 / NEVER : sat;
     }
   } else if (this.type == TYPE.offshorePump) {
     this.outputFluidTank.tanklets[0].amount =

@@ -72,13 +72,21 @@ Grid.prototype.update = function(time, dt) {
     for (let [el, consumers] of this.consumerss) {
       for (let entity of consumers) {
         if (entity.state != STATE.running) continue;
-        const p = (time - entity.taskStart) /
-            (entity.taskEnd - entity.taskStart);
+        // Entity delta time.
+        const edt = time - entity.taskStart;
+        const p = edt / (entity.taskEnd - entity.taskStart);
         const d = satisfaction < MIN_SATISFACTION ? NEVER :
             entity.taskDuration / satisfaction;
         entity.taskStart = time - p * d;
         entity.taskEnd = entity.nextUpdate =
             time + (1 - p) * d;
+        const oldSpeed = entity.animationSpeed;
+        entity.animationSpeed = satisfaction < MIN_SATISFACTION ?
+            1 / NEVER : satisfaction;
+        entity.animation = (Math.floor(entity.animation +
+            edt * oldSpeed / 60 -
+            p * d * entity.animationSpeed / 60) %
+            entity.animationLength + entity.animationLength) % entity.animationLength;
       }
     }
     this.satisfaction = satisfaction;

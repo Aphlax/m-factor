@@ -53,27 +53,29 @@ FluidNetwork.prototype.addPipe = function(pipe) {
 
 FluidNetwork.prototype.removePipe = function(pipe) {
   if (!pipe.data.channel) return;
-  let previous1 = undefined,
+  let channel = pipe.data.channel,
+      previous1 = undefined,
       previous2 = undefined,
       previous3 = undefined;
-  pipe.data.channel.remove(pipe);
+  channel.remove(pipe);
   for (let i = 0; i < pipe.data.pipeConnections.length; i++) {
     const other = pipe.data.pipes[i];
-    if (other && other.data.pipeConnections) {
-      if (previous1) {
-        const segment = other.data.channel.split(
-            other, pipe, previous1, previous2, previous3);
-        if (segment) {
-          this.channels.push(segment);
-        }
+    if (!other || !other.data.pipeConnections ||
+        other.data.channel != channel)
+      continue;
+    if (previous1) {
+      const segment = other.data.channel.split(
+          other, pipe, previous1, previous2, previous3);
+      if (segment) {
+        this.channels.push(segment);
       }
-      if (!previous1) {
-        previous1 = other;
-      } else if (!previous2) {
-        previous2 = other;
-      } else {
-        previous3 = other;
-      }
+    }
+    if (!previous1) {
+      previous1 = other;
+    } else if (!previous2) {
+      previous2 = other;
+    } else {
+      previous3 = other;
     }
   }
 };
@@ -98,6 +100,37 @@ FluidNetwork.prototype.update = function(time, dt) {
 FluidNetwork.prototype.draw = function(ctx, view) {
   for (let channel of this.channels) {
     channel.draw(ctx, view);
+  }
+};
+
+FluidNetwork.prototype.removeInputFluidTank = function(entity) {
+  if (entity.inputFluidTank.internalInlet &&
+      entity.data.channel) {
+    entity.data.channel.removeOutputEntity(entity);
+    return;
+  }
+  for (let other of entity.inputEntities) {
+    if (!other.data.pipeConnections) continue;
+    for (let i = 0; i < other.data.pipeConnections.length; i++) {
+      if (other.data.pipes[i] != entity) continue;
+      other.data.pipes[i] = undefined;
+      other.updatePipeSprites();
+      other.data.channel.removeOutputEntity(entity);
+      break;
+    }
+  }
+};
+
+FluidNetwork.prototype.removeOutputFluidTank = function(entity) {
+  for (let other of entity.outputEntities) {
+    if (!other.data.pipeConnections) continue;
+    for (let i = 0; i < other.data.pipeConnections.length; i++) {
+      if (other.data.pipes[i] != entity) continue;
+      other.data.pipes[i] = undefined;
+      other.updatePipeSprites();
+      other.data.channel.removeInputEntity(entity);
+      break;
+    }
   }
 };
 

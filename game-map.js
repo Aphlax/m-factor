@@ -461,17 +461,10 @@ GameMap.prototype.disconnectEntity = function(entity, time) {
     entity.disconnectPipe();
   }
   if (entity.outputFluidTank) {
-    for (let other of entity.outputEntities) {
-      if (other.type == TYPE.pipe) {
-        for (let i = 0; i < 4; i++) {
-          if (other.data.pipes[i] == entity) {
-            other.data.pipes[i] = undefined;
-            other.updatePipeSprites();
-            break;
-          }
-        }
-      }
-    }
+    this.fluidNetwork.removeOutputFluidTank(entity);
+  }
+  if (entity.inputFluidTank) {
+    this.fluidNetwork.removeInputFluidTank(entity);
   }
   if (entity.type == TYPE.electricPole) {
     this.electricNetwork.removePole(entity);

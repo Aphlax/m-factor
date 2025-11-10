@@ -147,7 +147,6 @@ export const ENTITIES = new Map([
       [west]: [S.assemblingMachine1, S.assemblingMachine1Shadow],
     },
     animationLength: 32,
-    animationSpeed: 1,
     
     processingSpeed: 0.5,
   }],
@@ -305,7 +304,6 @@ export const ENTITIES = new Map([
       [west]: [S.steamEngineH, S.steamEngineShadowH],
     },
     animationLength: 32,
-    animationSpeed: 1,
     
     pipeConnections: {
       [north]: [{x: 1, y: -1}, {x: 1, y: 5}],

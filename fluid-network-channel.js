@@ -28,6 +28,9 @@ Channel.prototype.update = function(time, dt) {
       Math.max(this.amount / this.capacity, 0.05) * dt / 1000);
   let outputAmount = 0;
   for (let [entity, tanklet] of this.outputTanklets.entries()) {
+    if (!tanklet) {
+      console.log(entity);
+    }
     outputAmount += Math.min(tanklet.capacity -
         tanklet.amount, maxOutputAmount);
   }
@@ -68,7 +71,8 @@ Channel.prototype.update = function(time, dt) {
     this.amount += transfer;
     tanklet.amount -= transfer;
     
-    if (entity.state == STATE.itemReady) {
+    if (entity.state == STATE.outputFull ||
+        entity.state == STATE.itemReady) {
       entity.nextUpdate = time;
     }
   }
@@ -116,6 +120,10 @@ Channel.prototype.addInputEntity = function(entity, index) {
   this.inputTanklets.set(entity, tanklet);
 };
 
+Channel.prototype.removeInputEntity = function(entity) {
+  this.inputTanklets.delete(entity);
+};
+
 /** Returns true if this is an invalid connection and it should be removed. */
 Channel.prototype.addOutputEntity = function(entity, index) {
   const tanklet = entity.inputFluidTank.tanklets[index] ??
@@ -126,6 +134,10 @@ Channel.prototype.addOutputEntity = function(entity, index) {
     this.fluid = tanklet.fluid;
   }
   this.outputTanklets.set(entity, tanklet);
+};
+
+Channel.prototype.removeOutputEntity = function(entity) {
+  this.outputTanklets.delete(entity);
 };
 
 Channel.prototype.add = function(pipe) {
@@ -177,6 +189,9 @@ Channel.prototype.remove = function(pipe) {
       }
     }
     this.outputTanklets.delete(entity);
+  }
+  if (pipe.inputFluidTank?.internalInlet) {
+    this.outputTanklets.delete(pipe);
   }
 };
 
@@ -230,12 +245,20 @@ Channel.prototype.split = function(pipe, not, a, b, c) {
     segment.capacity += p.data.capacity;
     
     for (let entity of p.inputEntities) {
+      if (!this.inputTanklets.has(entity))
+        continue;
       segment.inputTanklets.set(entity, this.inputTanklets.get(entity));
       this.inputTanklets.delete(entity);
     }
     for (let entity of p.outputEntities) {
+      if (!this.outputTanklets.has(entity))
+        continue;
       segment.outputTanklets.set(entity, this.outputTanklets.get(entity));
       this.outputTanklets.delete(entity);
+    }
+    if (p.inputFluidTank?.internalInlet) {
+      segment.outputTanklets.set(p, this.outputTanklets.get(p));
+      this.outputTanklets.delete(p);
     }
   }
   
