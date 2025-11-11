@@ -86,7 +86,7 @@ export const ENTITIES = new Map([
   [NAME.inserter,
   {
     label: 'Inserter',
-    prototypeName: "burner-inserter",
+    prototypeName: "inserter",
     type: TYPE.inserter,
     width: 1,
     height: 1,
@@ -99,6 +99,9 @@ export const ENTITIES = new Map([
       [west]: [S.inserter + 3],
     },
     animationLength: 0,
+    energySource: ENERGY.electric,
+    energyConsumption0: 4, // kW
+    energyConsumption1: 15.1, // kW
     
     inserterHandSprites: S.inserterHand,
     taskDuration: 400,

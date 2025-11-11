@@ -38,7 +38,7 @@ export function insert(item, amount, time) {
 };
 
 /**
- * What does this entiry want to have inserted?
+ * What does this entity want to have inserted?
  * Either an array of items or -1 for anything.
  */
 export function insertWants() {

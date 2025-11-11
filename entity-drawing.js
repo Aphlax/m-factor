@@ -187,12 +187,15 @@ export function drawInserterHand(ctx, view, time) {
   const hand = SPRITES.get(this.data.inserterHandSprites +
       (this.data.inserterItem ? 2 : 1));
   
-  let p = Math.min((time - this.taskStart) / this.taskDuration, 1);
-  if (this.state == STATE.inserterCoolDown ||
-      this.state == STATE.missingItem ||
-      this.state == STATE.noOutput ||
-      this.state == STATE.outputFull) {
-    p = 1 - p;
+  let p;
+  if (this.state == STATE.running) {
+    p = Math.min((time - this.taskStart) /
+        (this.taskEnd - this.taskStart), 1);
+    if (!this.data.inserterItem) {
+      p = 1 - p;
+    }
+  } else {
+    p = this.state == STATE.itemReady ? 1 : 0;
   }
   const smooth = p < 0.5 ? 2 * p * p : 1 - Math.pow(2 - 2 * p, 2) / 2;
   let angle;

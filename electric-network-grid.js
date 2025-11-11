@@ -80,13 +80,16 @@ Grid.prototype.update = function(time, dt) {
         entity.taskStart = time - p * d;
         entity.taskEnd = entity.nextUpdate =
             time + (1 - p) * d;
-        const oldSpeed = entity.animationSpeed;
-        entity.animationSpeed = satisfaction < MIN_SATISFACTION ?
-            1 / NEVER : satisfaction;
-        entity.animation = (Math.floor(entity.animation +
-            edt * oldSpeed / 60 -
-            p * d * entity.animationSpeed / 60) %
-            entity.animationLength + entity.animationLength) % entity.animationLength;
+        if (entity.animationLength) {
+          const oldSpeed = entity.animationSpeed;
+          entity.animationSpeed = satisfaction < MIN_SATISFACTION ?
+              1 / NEVER : satisfaction;
+          entity.animation = ((Math.floor(entity.animation +
+              edt * oldSpeed / 60 -
+              p * d * entity.animationSpeed / 60) %
+              entity.animationLength) +
+              entity.animationLength) % entity.animationLength;
+        }
       }
     }
     this.satisfaction = satisfaction;

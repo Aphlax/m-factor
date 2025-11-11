@@ -49,7 +49,7 @@ export const MAX_WIRE_REACH = 7;
 export const MAX_ELECTRIC_SUPPLY = 2;
 
 /** Minimal electric satisfaction for an entiry to make progress. */
-export const MIN_SATISFACTION = 0.01;
+export const MIN_SATISFACTION = 0.005;
 
 export const STATE = {
   running: 0,

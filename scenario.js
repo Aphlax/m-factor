@@ -120,11 +120,13 @@ function productionTest(gameMap, time) {
   lane2.plusFlow[0] = 10;
   e(NAME.inserter, 34, 21, 1);
   e(NAME.inserter, 34, 24, 1);
+  el(34, 22);
   
   e(NAME.offshorePump, 41, 35, 3);
   p(40, 35, 3, 5);
   p(35, 35, 0, 10);
-  e(NAME.boiler, 35, 23, 1);
+  e(NAME.boiler, 35, 23, 1)
+      .fuelInventory.insert(I.coal, 5);
   e(NAME.boiler, 35, 20, 1);
   
   p(37, 24, 0, 1);
@@ -138,6 +140,18 @@ function productionTest(gameMap, time) {
   el(27, 17, 1, 5);
   el(27, 21, 2, 5, 4);
   el(23, 21, 2, 5, 4);
+  
+  el(-24, 13, 2, 4, 4);
+  el(-21, 13, 2, 4, 4);
+  el(-11, 13, 2, 4, 4);
+  el(-8, 13, 2, 4, 4);
+  
+  el(-16, 12, 0, 5);
+  el(-1, 17, 1, 4);
+  
+  el(3, 40, 1, 3, 6);
+  el(-3, 44, 1, 4, 6);
+  el(-4, 41, 0, 3);
 };
 
 function inserterTest(gameMap, time) {
@@ -393,9 +407,9 @@ function createPipe(gameMap, x, y, direction, length, time) {
 }
 
 function createPoles(gameMap, x, y, direction, length, spacing, time) {
-  for (let i = 0; i < length; i++) {
-    const dx = -((direction - 2) % 2) * i * (spacing ?? 7);
-    const dy = ((direction - 1) % 2) * i * (spacing ?? 7);
+  for (let i = 0; i < (length ?? 1); i++) {
+    const dx = -(((direction ?? 0) - 2) % 2) * i * (spacing ?? 7);
+    const dy = (((direction ?? 0) - 1) % 2) * i * (spacing ?? 7);
     const b = gameMap.createEntity(NAME.smallElectricPole,
         x + dx, y + dy, 0, time);
     if (i == length - 1) {

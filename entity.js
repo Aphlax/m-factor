@@ -93,6 +93,9 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.inserterItem = 0;
     this.data.inserterPickupBend =
         INSERTER_PICKUP_BEND[(direction + 2) % 4];
+    this.energySource = def.energySource;
+    this.energyConsumption0 = def.energyConsumption0;
+    this.energyConsumption1 = def.energyConsumption1;
   } else if (this.type == TYPE.mine) {
     this.state = STATE.noEnergy;
     this.taskStart = time;
@@ -216,121 +219,115 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
 
 Entity.prototype.update = function(gameMap, time) {
   if (this.type == TYPE.inserter) {
-    if (this.state == STATE.inserterCoolDown ||
-        this.state == STATE.missingItem ||
-        this.state == STATE.noOutput ||
-        this.state == STATE.outputFull) {
-      if (!this.outputEntities.length || !this.inputEntities.length) {
-        this.state = !this.outputEntities.length ?
-            STATE.noOutput : STATE.missingItem;
-        this.nextUpdate = NEVER;
-        return;
-      }
-      const [inputEntity] = this.inputEntities;
-      const [outputEntity] = this.outputEntities;
-      
-      if (inputEntity.type == TYPE.belt) {
-        const wants = outputEntity.insertWants();
-        if (wants != -1 && !wants.length) {
-          this.state = STATE.outputFull;
-          this.nextUpdate = NEVER;
-          return;
+    let state, nextUpdate = NEVER;
+    inserter: {
+      if ((this.state == STATE.running && !this.data.inserterItem) ||
+          this.state == STATE.missingItem ||
+          this.state == STATE.noOutput ||
+          this.state == STATE.outputFull) {
+        if (!this.outputEntities.length || !this.inputEntities.length) {
+          state = !this.outputEntities.length ?
+              STATE.noOutput : STATE.missingItem;
+          break inserter;
         }
-        const positionForBelt = this.direction * 3 + 1;
-        const waitOrItem = inputEntity.beltExtract(
-            wants, this.nextUpdate, positionForBelt);
-        if (waitOrItem >= 0) {
-          this.state = STATE.missingItem;
-          this.nextUpdate += waitOrItem;
-          return;
+        const [inputEntity] = this.inputEntities;
+        const [outputEntity] = this.outputEntities;
+        let inserterItem = undefined;
+        
+        if (inputEntity.type == TYPE.belt) {
+          const wants = outputEntity.insertWants();
+          if (wants != -1 && !wants.length) {
+            state = STATE.outputFull;
+            break inserter;
+          }
+          const positionForBelt = this.direction * 3 + 1;
+          const waitOrItem = inputEntity.beltExtract(
+              wants, this.nextUpdate, positionForBelt);
+          if (waitOrItem >= 0) {
+            state = STATE.missingItem;
+            nextUpdate = this.nextUpdate + waitOrItem;
+            break inserter;
+          }
+          inserterItem = -waitOrItem;
+        } else {
+          const wants = outputEntity.insertWants();
+          if (wants != -1 && !wants.length) {
+            state = STATE.outputFull;
+            break inserter;
+          }
+          for (let i = 0; i < inputEntity.outputInventory.items.length; i++) {
+            const item = inputEntity.outputInventory.items[i];
+            if ((i && item == inputEntity.outputInventory.items[i - 1]) ||
+                (wants != -1 && !wants.includes(item))) {
+              continue;
+            }
+            if (inputEntity.extract(item, 1, this.nextUpdate)) {
+              inserterItem = item;
+              break;
+            }
+          }
+          if (!inserterItem) {
+            state = STATE.missingItem;
+            break inserter;
+          }
         }
-        this.data.inserterItem = -waitOrItem;
-        this.state = STATE.running;
+        this.data.inserterItem = inserterItem;
+        state = STATE.running;
         this.taskStart = this.nextUpdate;
-        this.taskEnd = this.nextUpdate =
-            this.taskStart + this.taskDuration;
-        return;
-      } else if (outputEntity.type == TYPE.belt) {
-        const [item] = inputEntity.outputInventory.items;
-        if (!inputEntity.extract(item, 1, this.nextUpdate)) {
-          this.state = STATE.missingItem;
-          this.nextUpdate = NEVER;
-          return;
+        const sat = this.energySource == ENERGY.electric ?
+            this.data.grid?.satisfaction ?? 0 : 1;
+        this.taskEnd = nextUpdate =
+            sat < MIN_SATISFACTION ? NEVER :
+            this.taskStart + this.taskDuration / sat;
+        break inserter;
+      } else if (this.state == STATE.running ||
+          this.state == STATE.itemReady) {
+        // We arrived at the target with the hand holding an item.
+        if (!this.outputEntities.length) {
+          state = STATE.itemReady;
+          break inserter;
         }
-        this.data.inserterItem = item;
-        this.state = STATE.running;
-        this.taskStart = this.nextUpdate;
-        this.taskEnd = this.nextUpdate =
-            this.taskStart + this.taskDuration;
-        return;
-      } else {
-        const wants = outputEntity.insertWants();
-        if (wants != -1 && !wants.length) {
-          this.state = STATE.outputFull;
-          this.nextUpdate = NEVER;
-          return;
-        }
-        for (let i = 0; i < inputEntity.outputInventory.items.length; i++) {
-          const item = inputEntity.outputInventory.items[i];
-          if (!i && item == inputEntity.outputInventory.items[i - 1]) {
-            continue;
+        const [outputEntity] = this.outputEntities;
+        if (outputEntity.type == TYPE.belt) {
+          const positionForBelt = this.direction * 3 + 1;
+          const wait = outputEntity.beltInsert(
+              this.data.inserterItem,
+              this.taskEnd, positionForBelt);
+          if (wait) {
+            state = STATE.itemReady;
+            nextUpdate = this.nextUpdate + wait;
+            break inserter;
           }
-          if (wants != -1 && !wants.includes(item)) {
-            continue;
+        } else {
+          const amount = outputEntity.insert(this.data.inserterItem, 1, this.taskEnd);
+          if (!amount) {
+            state = STATE.itemReady;
+            break inserter;
           }
-          if (inputEntity.extract(item, 1, this.nextUpdate)) {
-            this.data.inserterItem = item;
-            this.state = STATE.running;
-            this.taskStart = this.nextUpdate;
-            this.taskEnd = this.nextUpdate =
-                this.taskStart + this.taskDuration;
-            return;
-          }
-        }
-        this.state = STATE.missingItem;
-        this.nextUpdate = NEVER;
-        return;
-      }
-    } else if (this.state == STATE.running ||
-        this.state == STATE.itemReady) {
-      // We arrived at the target with the hand holding an item.
-      if (!this.outputEntities.length) {
-        this.state = STATE.noOutput;
-        this.nextUpdate = NEVER;
-        return;
-      }
-      const [outputEntity] = this.outputEntities;
-      if (outputEntity.type == TYPE.belt) {
-        const positionForBelt = this.direction * 3 + 1;
-        const wait = outputEntity.beltInsert(
-            this.data.inserterItem,
-            this.taskStart + this.taskDuration,
-            positionForBelt);
-        if (wait) {
-          this.nextUpdate += wait;
-          return;
         }
         this.data.inserterItem = undefined;
-        this.state = STATE.inserterCoolDown;
+        state = STATE.running;
         this.taskStart = this.nextUpdate;
-        this.taskEnd = this.nextUpdate =
-            this.taskStart + this.taskDuration;
-        return;
+        const sat = this.energySource == ENERGY.electric ?
+            this.data.grid?.satisfaction ?? 0 : 1;
+        this.taskEnd = nextUpdate =
+            sat < MIN_SATISFACTION ? NEVER :
+            this.taskStart + this.taskDuration / sat;
+        break inserter;
       }
-      
-      const amount = outputEntity.insert(this.data.inserterItem, 1, this.nextUpdate);
-      if (!amount) {
-        this.state = STATE.itemReady;
-        this.nextUpdate = NEVER;
-        return;
+    } // break inserter:
+    if (this.energySource == ENERGY.electric && this.data.grid) {
+      if (this.state != STATE.running && state == STATE.running) {
+        this.data.grid.consumerss.get(this.energyConsumption0).delete(this);
+        this.data.grid.consumerss.get(this.energyConsumption1).add(this);
       }
-      this.data.inserterItem = undefined;
-      this.state = STATE.inserterCoolDown;
-      this.taskStart = this.nextUpdate;
-      this.taskEnd = this.nextUpdate =
-          this.taskStart + this.taskDuration;
-      return;
+      if (this.state == STATE.running && state != STATE.running) {
+        this.data.grid.consumerss.get(this.energyConsumption1).delete(this);
+        this.data.grid.consumerss.get(this.energyConsumption0).add(this);
+      }
     }
+    this.state = state;
+    this.nextUpdate = nextUpdate;
   } else if (this.type == TYPE.mine) {
     if (this.state == STATE.running) {
       this.animation = Math.floor(this.animation +

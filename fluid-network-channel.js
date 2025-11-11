@@ -28,9 +28,6 @@ Channel.prototype.update = function(time, dt) {
       Math.max(this.amount / this.capacity, 0.05) * dt / 1000);
   let outputAmount = 0;
   for (let [entity, tanklet] of this.outputTanklets.entries()) {
-    if (!tanklet) {
-      console.log(entity);
-    }
     outputAmount += Math.min(tanklet.capacity -
         tanklet.amount, maxOutputAmount);
   }
