@@ -138,6 +138,13 @@ ElectricNetwork.prototype.modifyConsumer = function(entity, time) {
         entity.taskStart = time - p * NEVER;
         entity.taskEnd = time + (1 - p) * NEVER;
         entity.nextUpdate = NEVER;
+        if (entity.animationLength) {
+          const oldSpeed = entity.animationSpeed;
+          entity.animationSpeed = 1 / NEVER;
+          entity.animation = Math.floor(entity.animation +
+              edt * oldSpeed / 60) %
+              entity.animationLength;
+        }
       }
       entity.state = STATE.multipleGrids;
       return;
@@ -152,11 +159,18 @@ ElectricNetwork.prototype.modifyConsumer = function(entity, time) {
     entity.data.grid.consumerss.get(el).delete(entity);
     entity.data.grid = undefined;
     if (entity.state == STATE.running) {
-      const p = (time - entity.taskStart) /
-          (entity.taskEnd - entity.taskStart);
+      const edt = time - entity.taskStart;
+      const p = edt / (entity.taskEnd - entity.taskStart);
       entity.taskStart = time - p * NEVER;
       entity.taskEnd = entity.nextUpdate =
           time + (1 - p) * NEVER;
+      if (entity.animationLength) {
+        const oldSpeed = entity.animationSpeed;
+        entity.animationSpeed = 1 / NEVER;
+        entity.animation = Math.floor(entity.animation +
+            edt * oldSpeed / 60) %
+            entity.animationLength;
+      }
     }
     return;
   }
@@ -164,23 +178,26 @@ ElectricNetwork.prototype.modifyConsumer = function(entity, time) {
     return;
   }
   entity.data.grid = grid;
-  if (!grid.consumerss.has(entity.energyConsumption0)) {
-    grid.consumerss.set(entity.energyConsumption0, new Set());
-  }
-  if (!grid.consumerss.has(entity.energyConsumption1)) {
-    grid.consumerss.set(entity.energyConsumption1, new Set());
-  }
   grid.consumerss.get(entity.energyConsumption0).add(entity);
   if (entity.state == STATE.running) {
-    const p = (time - entity.taskStart) /
-        (entity.taskEnd - entity.taskStart);
+    const edt = time - entity.taskStart;
+    const p = edt / (entity.taskEnd - entity.taskStart);
     const d = grid.satisfaction < MIN_SATISFACTION ? NEVER :
         entity.taskDuration / grid.satisfaction;
     entity.taskStart = time - p * d;
     entity.taskEnd = entity.nextUpdate =
         time + (1 - p) * d;
+    if (entity.animationLength) {
+      const oldSpeed = entity.animationSpeed;
+      entity.animationSpeed = grid.satisfaction < MIN_SATISFACTION ?
+          1 / NEVER : grid.satisfaction;
+      entity.animation = ((Math.floor(entity.animation +
+          edt * oldSpeed / 60 -
+          p * d * entity.animationSpeed / 60) %
+          entity.animationLength) +
+          entity.animationLength) % entity.animationLength;
+    }
   }
-  debugger;
 };
 
 ElectricNetwork.prototype.update = function(time, dt) {
@@ -201,6 +218,7 @@ ElectricNetwork.prototype.update = function(time, dt) {
 };
 
 ElectricNetwork.prototype.draw = function(ctx, view) {
+  return;
   for (let i = 0; i < this.grids.length; i++) {
     this.grids[i].draw(ctx, view);
     ctx.fillStyle = this.grids[i].color;

@@ -98,6 +98,7 @@ FluidNetwork.prototype.update = function(time, dt) {
 };
 
 FluidNetwork.prototype.draw = function(ctx, view) {
+  return;
   for (let channel of this.channels) {
     channel.draw(ctx, view);
   }

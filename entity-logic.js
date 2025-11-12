@@ -304,6 +304,7 @@ export function setRecipe(recipe, time) {
   }
   
   this.data.recipe = recipe;
+  this.taskDuration = recipe.duration / this.data.processingSpeed;
   this.state = recipe ? STATE.missingItem : STATE.noRecipe;
   this.nextUpdate = NEVER;
   if (recipe) {

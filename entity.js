@@ -135,6 +135,9 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.recipe = undefined;
     this.inputInventory = new Inventory(0);
     this.outputInventory = new Inventory(0);
+    this.energySource = def.energySource;
+    this.energyConsumption0 = def.energyConsumption0;
+    this.energyConsumption1 = def.energyConsumption1;
   } else if (this.type == TYPE.chest) {
     this.inputInventory = this.outputInventory =
         new Inventory(def.capacity);
@@ -552,43 +555,58 @@ Entity.prototype.update = function(gameMap, time) {
       return;
     }
   } else if (this.type == TYPE.assembler) {
-    let continueNextItem = false;
-    if (this.state == STATE.running || this.state == STATE.itemReady) {
-      if (this.state == STATE.running) {
-        this.animation = Math.floor(this.animation +
-          (time - this.taskStart) * this.animationSpeed / 60) %
-          this.animationLength;
-      }
-      if (!this.outputInventory.insertFilters()) {
-        this.state = STATE.itemReady;
-        this.nextUpdate = NEVER;
-        return;
-      }
-      for (let outputEntity of this.outputEntities) {
-        if (outputEntity.state == STATE.missingItem) {
-          outputEntity.nextUpdate = this.nextUpdate;
+    let state = this.state, nextUpdate = NEVER;
+    assembler: {
+      if (state == STATE.running ||
+          state == STATE.itemReady) {
+        if (state == STATE.running && this.animationLength) {
+          this.animation = Math.floor(this.animation +
+            (time - this.taskStart) * this.animationSpeed / 60) %
+            this.animationLength;
         }
-      }
-      continueNextItem = true;
-    }
-    if (continueNextItem || this.state == STATE.missingItem) {
-      if (!this.inputInventory.extractFilters()) {
-        this.state = STATE.missingItem;
-        this.nextUpdate = NEVER;
-        return;
-      }
-      for (let inputEntity of this.inputEntities) {
-        if (inputEntity.state == STATE.outputFull ||
-            inputEntity.state == STATE.itemReady) {
-          inputEntity.nextUpdate = this.nextUpdate;
+        if (!this.outputInventory.insertFilters()) {
+          state = STATE.itemReady;
+          break assembler;
         }
+        for (let outputEntity of this.outputEntities) {
+          if (outputEntity.state == STATE.missingItem) {
+            outputEntity.nextUpdate = this.nextUpdate;
+          }
+        }
+        state = STATE.missingItem;
       }
-      this.state = STATE.running;
-      this.taskStart = this.nextUpdate;
-      this.taskEnd = this.nextUpdate = this.taskStart +
-          this.data.recipe.duration / this.data.processingSpeed;
-      return;
+      if (state == STATE.missingItem) {
+        if (!this.inputInventory.extractFilters()) {
+          break assembler;
+        }
+        for (let inputEntity of this.inputEntities) {
+          if (inputEntity.state == STATE.outputFull ||
+              inputEntity.state == STATE.itemReady) {
+            inputEntity.nextUpdate = this.nextUpdate;
+          }
+        }
+        state = STATE.running;
+        this.taskStart = this.nextUpdate;
+        const sat = this.energySource == ENERGY.electric ?
+            this.data.grid?.satisfaction ?? 0 : 1;
+        this.taskEnd = nextUpdate =
+            sat < MIN_SATISFACTION ? NEVER :
+            this.taskStart + this.taskDuration / sat;
+        break assembler;
+      }
+    } // break assembler:
+    if (this.energySource == ENERGY.electric && this.data.grid) {
+      if (this.state != STATE.running && state == STATE.running) {
+        this.data.grid.consumerss.get(this.energyConsumption0).delete(this);
+        this.data.grid.consumerss.get(this.energyConsumption1).add(this);
+      }
+      if (this.state == STATE.running && state != STATE.running) {
+        this.data.grid.consumerss.get(this.energyConsumption1).delete(this);
+        this.data.grid.consumerss.get(this.energyConsumption0).add(this);
+      }
     }
+    this.state = state;
+    this.nextUpdate = nextUpdate;
   } else if (this.type == TYPE.lab) {
     if (this.state == STATE.running ||
         this.state == STATE.missingItem) {

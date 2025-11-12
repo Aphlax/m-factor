@@ -99,8 +99,7 @@ function productionTest(gameMap, time) {
     e(NAME.inserter, 1 + 3 * i, 44, 0);
     e(NAME.inserter, 2 + 3 * i, 40, 0);
   }
-  assembler.state = STATE.running;
-  assembler.taskEnd = assembler.nextUpdate = time;
+  assembler.nextUpdate = time;
   assembler.inputInventory.insert(I.ironGear, 5);
   assembler.inputInventory.insert(I.copperPlate, 5);
   

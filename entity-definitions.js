@@ -100,7 +100,7 @@ export const ENTITIES = new Map([
     },
     animationLength: 0,
     energySource: ENERGY.electric,
-    energyConsumption0: 4, // kW
+    energyConsumption0: 0.4, // kW
     energyConsumption1: 15.1, // kW
     
     inserterHandSprites: S.inserterHand,
@@ -150,6 +150,9 @@ export const ENTITIES = new Map([
       [west]: [S.assemblingMachine1, S.assemblingMachine1Shadow],
     },
     animationLength: 32,
+    energySource: ENERGY.electric,
+    energyConsumption0: 2.5, // kW
+    energyConsumption1: 76, // kW
     
     processingSpeed: 0.5,
   }],
@@ -348,3 +351,11 @@ ENTITIES.keys().forEach(name =>
 export const PROTO_TO_NAME = new Map(
     ENTITIES.values().map(def =>
     [def.prototypeName, def.name]));
+
+export const ENTITY_ELECTRIC_CONSUMPTIONS =
+    new Set(ENTITIES.values().flatMap(def => [
+    ...(def.energyConsumption ? [def.energyConsumption] : []),
+    ...(def.energyConsumption0 ? [def.energyConsumption0] : []),
+    ...(def.energyConsumption1 ? [def.energyConsumption1] : []),
+    ]));
+ENTITY_ELECTRIC_CONSUMPTIONS.add(0);

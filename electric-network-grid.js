@@ -1,10 +1,14 @@
 import {TYPE, STATE, ENERGY, NEVER, MIN_SATISFACTION} from './entity-properties.js';
+import {ENTITY_ELECTRIC_CONSUMPTIONS} from './entity-definitions.js';
 
 function Grid(poles) {
   this.poles = poles;
   
   this.generators = new Set();
   this.consumerss = new Map();
+  for (let el of ENTITY_ELECTRIC_CONSUMPTIONS) {
+    this.consumerss.set(el, new Set());
+  }
   
   this.satisfaction = 1;
   
@@ -145,7 +149,7 @@ Grid.prototype.add = function(pole) {
 Grid.prototype.join = function(other, time) {
   if (other == this) return;
   if (this.poles.size < other.poles.size) {
-    other.join(this);
+    other.join(this, time);
     return;
   }
   
@@ -161,22 +165,29 @@ Grid.prototype.join = function(other, time) {
   const needSatisfactionUpdate =
       other.satisfaction != this.satisfaction;
   for (let [el, consumers] of other.consumerss) {
-    if (!this.consumerss.has(el)) {
-      this.consumerss.set(el, new Set());
-    }
     const cons = this.consumerss.get(el);
     for (let entity of consumers) {
       cons.add(entity);
       entity.data.grid = this;
       if (entity.state == STATE.running &&
           needSatisfactionUpdate) {
-        const p = (time - entity.taskStart) /
-            (entity.taskEnd - entity.taskStart);
+        const edt = time - entity.taskStart;
+        const p = edt / (entity.taskEnd - entity.taskStart);
         const d = this.satisfaction < MIN_SATISFACTION ? NEVER :
             entity.taskDuration / this.satisfaction;
         entity.taskStart = time - p * d;
         entity.taskEnd = entity.nextUpdate =
             time + (1 - p) * d;
+        if (entity.animationLength) {
+          const oldSpeed = entity.animationSpeed;
+          entity.animationSpeed = this.satisfaction < MIN_SATISFACTION ?
+              1 / NEVER : this.satisfaction;
+          entity.animation = ((Math.floor(entity.animation +
+              edt * oldSpeed / 60 -
+              p * d * entity.animationSpeed / 60) %
+              entity.animationLength) +
+              entity.animationLength) % entity.animationLength;
+        }
       }
     }
     consumers.clear();
@@ -219,12 +230,6 @@ Grid.prototype.split = function(entity, not, targets) {
         const el = entity.state == STATE.running ?
             entity.energyConsumption1 : entity.energyConsumption0;
         this.consumerss.get(el).delete(entity);
-        if (!segment.consumerss.has(entity.energyConsumption0)) {
-          segment.consumerss.set(entity.energyConsumption0, new Set());
-        }
-        if (!segment.consumerss.has(entity.energyConsumption1)) {
-          segment.consumerss.set(entity.energyConsumption1, new Set());
-        }
         segment.consumerss.get(el).add(entity);
         entity.data.grid = segment;
       }

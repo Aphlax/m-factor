@@ -50,6 +50,12 @@ export function draw(ctx, view, time) {
       spriteId: this.sprite + animation,
       entity: this,
     });
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 5;
+    ctx.strokeRect(this.x * view.scale - view.x,
+      this.y * view.scale - view.y,
+      this.width * view.scale,
+      this.height * view.scale);
     throw new Error("Missing sprite!");
   }
   const xScale = this.width * view.scale /
@@ -92,6 +98,12 @@ export function drawShadow(ctx, view, time) {
       spriteId: this.spriteShadow + animation,
       entity: this,
     });
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 5;
+    ctx.strokeRect(this.x * view.scale - view.x,
+      this.y * view.scale - view.y,
+      this.width * view.scale,
+      this.height * view.scale);
     throw new Error("Missing shadow sprite!");
   }
   const xScale = this.width * view.scale /
