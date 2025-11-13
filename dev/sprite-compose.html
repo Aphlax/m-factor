@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" style="width: 100%; height: 100%; margin: 0; overflow: hidden;">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script>
+      window.process = {env: {NODE_ENV: 'development'}};
+    </script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+    <title>Sprite compose</title>
+    <style>
+.col {
+  display: flex;
+  flex-direction: column;
+}
+.row {
+  display: flex;
+  flex-direction: row;
+}
+.flex {flex: 1;}
+    </style>
+  </head>
+  <body style="width: 100%; height: 100%; margin: 0; overflow: hidden; touch-action: none;">
+    <div id="root" class="col" style="width: 100%; height: 100%; margin: 0; overflow: hidden;"></div>
+<script type="text/babel">
+const {useState, createRef, useEffect} = React;
+const {createRoot} = ReactDOM;
+
+function SpriteDef({sprite, base, dim, onUpdate}) {
+  const icon = createRef();
+  function onImage({target: {value}}) {
+    const name = value.replace(/^.*[\/\\]/, '');
+    const image = new Image();
+    image.src = base + name;
+    image.onload = () => {
+      icon.current.src = base + name;
+      onUpdate({...sprite, image});
+    };
+  }
+  
+  return (
+<div className="row" style={{margin: '10px 0', overflow: 'hidden'}}>
+  <label htmlFor={'sfs' + sprite.key} style={{margin: '0 10px'}}>
+    <img ref={icon} width="60" height="60"></img>
+  </label>
+  <input type="file" id={'sfs' + sprite.key} onInput={onImage} style={{display: 'none'}}/>
+  <div className="col">
+    <div className="row">
+      <label> cols:
+        <input type="number" value={sprite.cols} min="1" max="100" onInput={e => onUpdate({...sprite, cols: e.target.value})}/>
+      </label>
+      <label> rows:
+        <input type="number" value={sprite.rows} min="1" max="100" onInput={e => onUpdate({...sprite, rows: e.target.value})}/>
+      </label>
+    </div>
+    <div className="row">
+      <label className="flex"> x:
+        <input type="number" value={sprite.x} min="-200" max="200" onInput={e => onUpdate({...sprite, x: e.target.value})}/>
+      </label>
+      <label className="flex"> y:
+        <input type="number" value={sprite.y} min="-200" max="200" onInput={e => onUpdate({...sprite, y: e.target.value})}/>
+      </label>
+    </div>
+    <textarea readOnly rows="1" value={
+        ((sprite.image?.width ?? 0) / sprite.cols) + ', ' +
+        ((sprite.image?.height ?? 0) / sprite.rows) + ', ' +
+        sprite.cols + ', ' + sprite.rows + ', ' +
+        sprite.x + ', ' + sprite.y + ', ' +
+        (dim.x * 32 - (sprite.image?.width ?? 0) / sprite.cols - sprite.x) + ', ' +
+        (dim.y * 32 - (sprite.image?.height ?? 0) / sprite.rows - sprite.y)}
+        style={{height: '18px', padding: '1px'}}></textarea>
+  </div>
+  <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: '1fr 1fr 1fr'}}>
+    <button onClick={e => onUpdate({...sprite, y: sprite.y - 1})} style={{gridColumn: 2, gridRow: 1}}></button>
+    <button onClick={e => onUpdate({...sprite, x: sprite.x - 1})} style={{gridColumn: 1, gridRow: 2}}></button>
+    <button onClick={e => onUpdate({...sprite, x: sprite.x + 1})} style={{gridColumn: 3, gridRow: 2}}></button>
+    <button onClick={e => onUpdate({...sprite, y: sprite.y + 1})} style={{gridColumn: 2, gridRow: 3}}></button>
+  </div>
+  <input type="checkbox" checked={sprite.light} onChange={e => onUpdate({...sprite, light: e.target.checked})}/>
+  <input type="checkbox" checked={sprite.enabled} onChange={e => onUpdate({...sprite, enabled: e.target.checked})}/>
+</div>
+);
+}
+
+function App() {
+  const [basePath, setBasePath] = useState('../graphics/entities/electric-furnace/');
+  const [xTiles, setXTiles] = useState(1);
+  const [yTiles, setYTiles] = useState(1);
+  const [sprites, setSprites] = useState([]);
+  
+  const canvas = createRef();
+  let ctx;
+  useEffect(() => {
+    ctx = canvas.current.getContext('2d');
+    requestAnimationFrame(draw);
+  });
+
+  function onUpdate(sprite) {
+    setSprites(sprites.map(s =>
+        s.key == sprite.key ? sprite : s));
+  }
+  
+  function addSprite() {
+    setSprites([...sprites, {
+      key: sprites.length,
+      cols: 1, rows: 1, enabled: true,
+      x: 0, y: 0, light: false,
+    }])
+  }
+  
+  function draw() {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    for (let sprite of sprites) {
+      if (!sprite.image || !sprite.enabled) continue;
+      ctx.globalCompositeOperation = sprite.light ? "screen" : "source-over";
+      ctx.drawImage(sprite.image, sprite.x, sprite.y);
+    }
+    requestAnimationFrame(draw);
+  }
+
+  return (
+<>
+  <h5>Sprite Compose</h5>
+  <input type="text" value={basePath} onInput={e => setBasePath(e.target.value)}/>
+  <div className="row">
+    Tiles:
+    <label> x:
+      <input type="number" value={xTiles} min="1" max="5" onInput={e => setXTiles(e.target.value)}/>
+    </label>
+    <label> y:
+      <input type="number" value={yTiles} min="1" max="5" onInput={e => setYTiles(e.target.value)}/>
+    </label>
+  </div>
+  <div className="col" style={{maxHeight: '320px', overflowY: 'auto'}}>
+    {sprites.map(sprite =>
+        <SpriteDef key={sprite.key} sprite={sprite}
+        base={basePath} dim={{x: xTiles, y: yTiles}}
+        onUpdate={onUpdate}/>)}
+  </div>
+  <button onClick={addSprite}>Add sprite</button>
+  <span className="flex"></span>
+  <canvas ref={canvas}></canvas>
+</>
+);
+}
+
+createRoot(document.getElementById("root"))
+    .render(<App/>);
+</script>
+  </body>
+</html>
