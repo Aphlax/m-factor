@@ -3,11 +3,14 @@
   <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <script>
-      window.process = {env: {NODE_ENV: 'development'}};
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/stable/react@19.2.0",
+        "react-dom/client": "https://esm.sh/stable/react-dom@19.2.0/client"
+      }
+    }
     </script>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
     <title>Sprite compose</title>
     <style>
@@ -23,12 +26,13 @@
     </style>
   </head>
   <body style="width: 100%; height: 100%; margin: 0; overflow: hidden; touch-action: none;">
-    <div id="root" class="col" style="width: 100%; height: 100%; margin: 0; overflow: hidden;"></div>
-<script type="text/babel">
+    <div id="root" class="col" style="width: calc(100% - 20px); height: 100%; margin: 0 10px; overflow: hidden;"></div>
+<script type="text/babel" data-type="module">
+import React from 'react';
+import {createRoot} from 'react-dom/client';
 const {useState, createRef, useEffect} = React;
-const {createRoot} = ReactDOM;
 
-function SpriteDef({sprite, base, dim, onUpdate}) {
+function SpriteDef({sprite, base, tiles, onUpdate, onDelete}) {
   const icon = createRef();
   function onImage({target: {value}}) {
     const name = value.replace(/^.*[\/\\]/, '');
@@ -39,9 +43,13 @@ function SpriteDef({sprite, base, dim, onUpdate}) {
       onUpdate({...sprite, image});
     };
   }
+  useEffect(() => {
+    if (sprite.image)
+      icon.current.src = sprite.image.src;
+  });
   
   return (
-<div className="row" style={{margin: '10px 0', overflow: 'hidden'}}>
+<div className="row" style={{minHeight: '60px', margin: '10px 0', overflow: 'hidden'}}>
   <label htmlFor={'sfs' + sprite.key} style={{margin: '0 10px'}}>
     <img ref={icon} width="60" height="60"></img>
   </label>
@@ -49,53 +57,77 @@ function SpriteDef({sprite, base, dim, onUpdate}) {
   <div className="col">
     <div className="row">
       <label> cols:
-        <input type="number" value={sprite.cols} min="1" max="100" onInput={e => onUpdate({...sprite, cols: e.target.value})}/>
+        <input type="number" value={sprite.cols} min="1" max="100" onInput={e => onUpdate({...sprite, cols: Number(e.target.value)})} style={{width: '40px'}}/>
       </label>
       <label> rows:
-        <input type="number" value={sprite.rows} min="1" max="100" onInput={e => onUpdate({...sprite, rows: e.target.value})}/>
+        <input type="number" value={sprite.rows} min="1" max="100" onInput={e => onUpdate({...sprite, rows: Number(e.target.value)})} style={{width: '40px'}}/>
       </label>
     </div>
     <div className="row">
       <label className="flex"> x:
-        <input type="number" value={sprite.x} min="-200" max="200" onInput={e => onUpdate({...sprite, x: e.target.value})}/>
+        <input type="number" value={sprite.x} min="-200" max="200" onInput={e => onUpdate({...sprite, x: Number(e.target.value)})} style={{width: '40px'}}/>
       </label>
       <label className="flex"> y:
-        <input type="number" value={sprite.y} min="-200" max="200" onInput={e => onUpdate({...sprite, y: e.target.value})}/>
+        <input type="number" value={sprite.y} min="-200" max="200" onInput={e => onUpdate({...sprite, y: Number(e.target.value)})} style={{width: '40px'}}/>
       </label>
     </div>
     <textarea readOnly rows="1" value={
         ((sprite.image?.width ?? 0) / sprite.cols) + ', ' +
         ((sprite.image?.height ?? 0) / sprite.rows) + ', ' +
         sprite.cols + ', ' + sprite.rows + ', ' +
-        sprite.x + ', ' + sprite.y + ', ' +
-        (dim.x * 32 - (sprite.image?.width ?? 0) / sprite.cols - sprite.x) + ', ' +
-        (dim.y * 32 - (sprite.image?.height ?? 0) / sprite.rows - sprite.y)}
-        style={{height: '18px', padding: '1px'}}></textarea>
+        (-sprite.x) + ', ' +
+        (-(tiles.x * 32 - (sprite.image?.width ?? 0) / sprite.cols - sprite.x)) + ', ' +
+        (-sprite.y) + ', ' +
+        (-(tiles.y * 32 - (sprite.image?.height ?? 0) / sprite.rows - sprite.y))}
+        style={{height: '18px', padding: '1px', overflow: 'hidden'}}></textarea>
   </div>
-  <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: '1fr 1fr 1fr'}}>
-    <button onClick={e => onUpdate({...sprite, y: sprite.y - 1})} style={{gridColumn: 2, gridRow: 1}}></button>
-    <button onClick={e => onUpdate({...sprite, x: sprite.x - 1})} style={{gridColumn: 1, gridRow: 2}}></button>
-    <button onClick={e => onUpdate({...sprite, x: sprite.x + 1})} style={{gridColumn: 3, gridRow: 2}}></button>
-    <button onClick={e => onUpdate({...sprite, y: sprite.y + 1})} style={{gridColumn: 2, gridRow: 3}}></button>
+  <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: '1fr 1fr 1fr', margin: ' 0 10px'}}>
+    <button onClick={e => onUpdate({...sprite, y: Number(sprite.y) - 1})} style={{gridColumn: 2, gridRow: 1}}></button>
+    <button onClick={e => onUpdate({...sprite, x: Number(sprite.x) - 1})} style={{gridColumn: 1, gridRow: 2}}></button>
+    <button onClick={e => onUpdate({...sprite, x: Number(sprite.x) + 1})} style={{gridColumn: 3, gridRow: 2}}></button>
+    <button onClick={e => onUpdate({...sprite, y: Number(sprite.y) + 1})} style={{gridColumn: 2, gridRow: 3}}></button>
   </div>
   <input type="checkbox" checked={sprite.light} onChange={e => onUpdate({...sprite, light: e.target.checked})}/>
   <input type="checkbox" checked={sprite.enabled} onChange={e => onUpdate({...sprite, enabled: e.target.checked})}/>
-</div>
-);
+  {onDelete ? <button onClick={onDelete}>X</button> : []}
+</div>);
 }
 
 function App() {
-  const [basePath, setBasePath] = useState('../graphics/entities/electric-furnace/');
-  const [xTiles, setXTiles] = useState(1);
-  const [yTiles, setYTiles] = useState(1);
-  const [sprites, setSprites] = useState([]);
+  const [basePath, setBasePath] = useLocalStorage('base-path', '../graphics/entities/electric-furnace/');
+  const [xTiles, setXTiles] = useLocalStorage('x-tiles', 3);
+  const [yTiles, setYTiles] = useLocalStorage('y-tiles', 3);
+  const [maxCols, setMaxCols] = useLocalStorage('max-cols', 4);
+  const [showSheet, setShowSheet] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [sprites, setSprites] = useLocalStorage('sprites', [], 
+      val => JSON.parse(val).map(stored => {
+        const image = new Image();
+        image.src = stored.image;
+        return {
+          ...stored,
+          cols: Number(stored.cols),
+          rows: Number(stored.rows),
+          x: Number(stored.x),
+          y: Number(stored.y),
+          image,
+        };
+      }),
+      ss => JSON.stringify(ss.map(s => ({...s, image: s.image?.src}))));
   
   const canvas = createRef();
-  let ctx;
+  let ctx, handle;
   useEffect(() => {
     ctx = canvas.current.getContext('2d');
-    requestAnimationFrame(draw);
+    canvas.current.width = canvas.current.clientWidth;
+    canvas.current.height = canvas.current.clientHeight;
+    handle = requestAnimationFrame(draw);
+    return () => {
+      cancelAnimationFrame(handle);
+    };
   });
+  
+  const [sheet] = useState(document.createElement("canvas"));
 
   function onUpdate(sprite) {
     setSprites(sprites.map(s =>
@@ -110,14 +142,135 @@ function App() {
     }])
   }
   
-  function draw() {
+  function draw(time) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    for (let sprite of sprites) {
-      if (!sprite.image || !sprite.enabled) continue;
-      ctx.globalCompositeOperation = sprite.light ? "screen" : "source-over";
-      ctx.drawImage(sprite.image, sprite.x, sprite.y);
+    if (showSheet) {
+      if (sheet)
+        ctx.drawImage(sheet, 0, 0);
+      handle = requestAnimationFrame(draw);
+      return;
     }
-    requestAnimationFrame(draw);
+    try{
+      const origin = {x: 32, y: 32};
+      ctx.beginPath();
+      for (let i = 0; i <= xTiles + 2; i++) {
+        ctx.moveTo(i * 32, 0);
+        ctx.lineTo(i * 32, (yTiles + 2) * 32);
+      }
+      for (let j = 0; j <= yTiles + 2; j++) {
+        ctx.moveTo(0, j * 32);
+        ctx.lineTo((xTiles + 2) * 32, j * 32);
+      }
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'lightGrey';
+      ctx.stroke();
+      
+      const animationLength = Math.max(
+          ...sprites.map(s => s.cols * s.rows));
+      const fps = 30;
+      const duration = animationLength / fps * 1000;
+      const animation = Math.floor((time % duration) / (1000 / fps));
+      
+      for (let s of sprites) {
+        if (!s.image?.complete || !s.enabled) continue;
+        ctx.globalCompositeOperation = s.light ? "screen" : "source-over";
+        
+        const width = s.image.width / s.cols;
+        const height = s.image.height / s.rows;
+        const x = (animation % s.cols) * width;
+        const y = (Math.floor(animation / s.rows) % s.rows) * width;
+        
+        ctx.drawImage(s.image,
+            x, y, width, height,
+            s.x + origin.x, s.y + origin.y,
+            width, height);
+      }
+      handle = requestAnimationFrame(draw);
+    } catch(e) {console.log(e);}
+  }
+  
+  useEffect(compose);
+  function compose() {
+    try{
+      const {animationLength, xmin, xmax, ymin, ymax, cols, rows} = sheetStats();
+      
+      if (xmax - xmin == -100) return;
+      
+      sheet.width = cols * (xmax - xmin);
+      sheet.height = rows * (ymax - ymin);
+      const ctx = sheet.getContext('2d');
+      for (let s of sprites) {
+        if (!s.image?.complete || !s.enabled) continue;
+        ctx.globalCompositeOperation = s.light ? "screen" : "source-over";
+        const width = s.image.width / s.cols;
+        const height = s.image.height / s.rows;
+        
+        for (let i = 0; i < animationLength; i++) {
+          const sheetX = i % cols, sheetY = Math.floor(i / cols);
+          const x = (i % s.cols) * width;
+          const y = (Math.floor(i / s.rows) % s.rows) * width;
+        
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(sheetX * (xmax - xmin), sheetY * (ymax - ymin), xmax - xmin, ymax - ymin);
+          ctx.clip();
+          
+          ctx.drawImage(s.image,
+            x, y, width, height,
+            sheetX * (xmax - xmin) + s.x - xmin,
+            sheetY * (ymax - ymin) + s.y - ymin,
+            width, height);
+          
+          ctx.restore();
+        }
+      }
+    }catch(e) {console.log(e);}
+    setReady(true);
+  }
+  
+  function exportConfig() {
+    const config = JSON.stringify({
+      basePath, xTiles, yTiles, maxCols,
+      sprites: sprites.map(s =>
+          ({...s, image: basePath + s.image?.src.replace(/^.*[\/\\]/, '')})),
+    });
+    navigator.clipboard.writeText(config);
+  }
+  
+  function importConfig() {
+    navigator.clipboard.readText().then(val => {
+      try {
+        const config = JSON.parse(val);
+        setBasePath(config.basePath);
+        setXTiles(config.xTiles);
+        setYTiles(config.yTiles);
+        setMaxCols(config.maxCols);
+        setSprites(config.sprites.map(s => {
+          const image = new Image();
+          image.src = s.image;
+          return {...s, image};
+        }));
+      } catch(e){console.log(e);}
+    });
+  }
+  
+  function sheetStats() {
+    let animationLength = 1,
+        xmin = 100, ymin = 100, xmax = 0, ymax = 0;
+    for (let s of sprites) {
+      if (!s.image?.complete || !s.enabled) continue;
+      if (s.x < xmin) xmin = s.x;
+      if (s.y < ymin) ymin = s.y;
+      if (s.x + s.image.width / s.cols > xmax) xmax = s.x + s.image.width / s.cols;
+      if (s.y + s.image.height / s.rows > ymax) ymax = s.y + s.image.height / s.rows;
+      if (s.cols * s.rows > animationLength) animationLength = s.cols * s.rows;
+    }
+    const width = xmax - xmin, height = ymax - ymin;
+    const cols = Math.min(animationLength, maxCols),
+        rows = Math.ceil(animationLength / cols);
+    const endX = xmax - xTiles * 32, endY = ymax - yTiles * 32;
+    const stats = [width, height, cols, rows, -xmin, endX, -ymin, endY].join(', ');
+    return {animationLength, width, height, xmin, xmax, ymin, ymax, cols, rows, endX, endY, stats};
   }
 
   return (
@@ -127,23 +280,45 @@ function App() {
   <div className="row">
     Tiles:
     <label> x:
-      <input type="number" value={xTiles} min="1" max="5" onInput={e => setXTiles(e.target.value)}/>
+      <input type="number" value={xTiles} min="1" max="5" onInput={e => setXTiles(Number(e.target.value))}/>
     </label>
     <label> y:
-      <input type="number" value={yTiles} min="1" max="5" onInput={e => setYTiles(e.target.value)}/>
+      <input type="number" value={yTiles} min="1" max="5" onInput={e => setYTiles(Number(e.target.value))}/>
     </label>
+    <span className="flex"></span>
+    Sheet:
+    <input type="checkbox" checked={showSheet} onChange={e => setShowSheet(e.target.checked)}/>
+    <label> cols:
+      <input type="number" value={maxCols} min="1" max="16" onInput={e => setMaxCols(Number(e.target.value))}/>
+    </label>
+    {!ready ? [] :
+    <a href={sheet.toDataURL()} download="sheet.png">download</a>
+    }
+  </div>
+  <div className="row">
+    <button onClick={exportConfig}>exp</button>
+    <button onClick={importConfig}>imp</button>
+    <textarea readOnly rows="1"
+        value={sheetStats().stats}
+        style={{height: '18px', padding: '1px', overflow: 'hidden'}}></textarea>
   </div>
   <div className="col" style={{maxHeight: '320px', overflowY: 'auto'}}>
-    {sprites.map(sprite =>
+    {sprites.map((sprite, i) =>
         <SpriteDef key={sprite.key} sprite={sprite}
-        base={basePath} dim={{x: xTiles, y: yTiles}}
-        onUpdate={onUpdate}/>)}
+        base={basePath} tiles={{x: xTiles, y: yTiles}}
+        onUpdate={onUpdate} onDelete={i == sprites.length - 1 ? () => setSprites(sprites.slice(0, sprites.length - 1)) : undefined}/>)}
   </div>
   <button onClick={addSprite}>Add sprite</button>
   <span className="flex"></span>
-  <canvas ref={canvas}></canvas>
-</>
-);
+  <canvas ref={canvas} className="flex"></canvas>
+</>);
+}
+
+function useLocalStorage(name, value, toValue = JSON.parse, toStorage = JSON.stringify) {
+  const stored = localStorage.getItem(name);
+  const [variable, setter] = useState(stored ? toValue(stored) : value);
+  useEffect(() => localStorage.setItem(name, toStorage(variable)), [variable]);
+  return [variable, setter];
 }
 
 createRoot(document.getElementById("root"))
