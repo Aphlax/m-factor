@@ -119,14 +119,19 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.recipe = undefined;
     this.data.idleAnimation = def.idleAnimation[direction][0];
     this.data.workingAnimation = def.sprites[direction][0];
+    this.data.smokeX = def.smokePosition.x;
+    this.data.smokeY = def.smokePosition.y;
     this.inputInventory = new Inventory(1)
         .setFilters(FURNACE_FILTERS);
     this.outputInventory = new Inventory(1);
     this.energySource = def.energySource;
-    this.energyConsumption = def.energyConsumption;
     if (def.energySource == ENERGY.burner) {
       this.fuelInventory = new Inventory(1)
           .setFilters(FUEL_FILTERS);
+      this.energyConsumption1 = def.energyConsumption;
+    } else if (def.energySource == ENERGY.electric) {
+      this.energyConsumption0 = def.energyConsumption0;
+      this.energyConsumption1 = def.energyConsumption1;
     }
   } else if (this.type == TYPE.assembler) {
     this.state = STATE.noRecipe;
@@ -181,9 +186,11 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.outputAmount = def.recipe.outputs[0].amount;
     this.taskDuration = def.recipe.duration;
     this.energySource = def.energySource;
-    this.energyConsumption = def.energyConsumption;
+    this.energyConsumption1 = def.energyConsumption;
     this.data.workingAnimation = def.sprites[direction][0];
     this.data.idleAnimation = def.idleAnimation[direction][0];
+    this.data.smokeX = def.smokePosition.x;
+    this.data.smokeY = def.smokePosition.y;
     this.sprite = this.data.idleAnimation;
     this.outputFluidTank = new FluidTank()
         .setTanklets([def.recipe.outputs[0].item])
@@ -237,12 +244,12 @@ Entity.prototype.update = function(gameMap, time) {
         const [outputEntity] = this.outputEntities;
         let inserterItem = undefined;
         
+        const wants = outputEntity.insertWants();
+        if (wants != -1 && !wants.length) {
+          state = STATE.outputFull;
+          break inserter;
+        }
         if (inputEntity.type == TYPE.belt) {
-          const wants = outputEntity.insertWants();
-          if (wants != -1 && !wants.length) {
-            state = STATE.outputFull;
-            break inserter;
-          }
           const positionForBelt = this.direction * 3 + 1;
           const waitOrItem = inputEntity.beltExtract(
               wants, this.nextUpdate, positionForBelt);
@@ -253,11 +260,6 @@ Entity.prototype.update = function(gameMap, time) {
           }
           inserterItem = -waitOrItem;
         } else {
-          const wants = outputEntity.insertWants();
-          if (wants != -1 && !wants.length) {
-            state = STATE.outputFull;
-            break inserter;
-          }
           for (let i = 0; i < inputEntity.outputInventory.items.length; i++) {
             const item = inputEntity.outputInventory.items[i];
             if ((i && item == inputEntity.outputInventory.items[i - 1]) ||
@@ -406,154 +408,140 @@ Entity.prototype.update = function(gameMap, time) {
       return;
     }
   } else if (this.type == TYPE.furnace) {
-    if (this.state == STATE.outOfEnergy) {
-      // fuel up.
-      const item = this.fuelInventory.items[0];
-      if (item && this.fuelInventory.extract(item, 1, true)) {
-        this.state = STATE.running;
+    let state = this.state, nextUpdate = NEVER;
+    furnace: {
+      if (this.energySource == ENERGY.burner &&
+          ((state == STATE.running &&
+          this.nextUpdate != this.taskEnd) ||
+          state == STATE.outOfEnergy)) {
         const p = (this.nextUpdate - this.taskStart) /
             (this.taskEnd - this.taskStart);
-        this.taskStart = this.nextUpdate - p * this.data.recipe.duration;
-        this.taskEnd = this.nextUpdate + (1 - p) * this.data.recipe.duration;
-        this.energyStored = ITEMS.get(item).fuelValue +
-            (this.nextUpdate - this.taskStart) / 1000 *
-            this.energyConsumption;
-        this.sprite = this.data.workingAnimation;
-        gameMap.createSmoke(this.x + 1, this.y, this.nextUpdate,
-            this.taskEnd - this.nextUpdate);
+        const item = this.fuelInventory.items[0];
+        if (!item || !this.fuelInventory.extract(item, 1, true)) {
+          if (state == STATE.running) {
+            this.taskStart = this.nextUpdate - p * NEVER;
+            this.taskEnd = this.nextUpdate + (1 - p) * NEVER;
+            state = STATE.outOfEnergy;
+          }
+          break furnace;
+        }
+        this.energyStored += ITEMS.get(item).fuelValue;
         for (let inputEntity of this.inputEntities) {
           if (inputEntity.state == STATE.outputFull ||
               inputEntity.state == STATE.itemReady) {
             inputEntity.nextUpdate = this.nextUpdate;
           }
         }
-        this.nextUpdate = this.taskEnd;
-        return;
+        if (state != STATE.running) {
+          this.taskStart = this.nextUpdate - p * this.taskDuration;
+          this.taskEnd = this.nextUpdate + (1 - p) * this.taskDuration;
+          state = STATE.running;
+        }
+        nextUpdate = this.taskEnd;
+        break furnace;
       }
-      this.nextUpdate = NEVER;
-      return;
-    }
-    let taskFinished = false, continueNextItem = false;
-    if (this.state == STATE.running) {
-      if (this.energySource == ENERGY.burner) {
-        if (this.nextUpdate >= this.taskEnd) {
-          this.energyStored -=
-              (this.nextUpdate - this.taskStart) /
-              1000 * this.energyConsumption;
-          taskFinished = true;
-        } else {
-          const item = this.fuelInventory.items[0];
-          if (item && this.fuelInventory.extract(item, 1, true)) {
-            this.energyStored = ITEMS.get(item).fuelValue +
-                (this.nextUpdate - this.taskStart) / 1000 *
-                this.energyConsumption;
-            for (let inputEntity of this.inputEntities) {
-              if (inputEntity.state == STATE.outputFull ||
-                  inputEntity.state == STATE.itemReady) {
-                inputEntity.nextUpdate = this.nextUpdate;
-              }
-            }
-            this.nextUpdate = this.taskEnd;
-            return;
-          } else {
-            this.energyStored = 0;
-            this.state = STATE.outOfEnergy;
-            const p = (this.nextUpdate - this.taskStart) /
-                (this.taskEnd - this.taskStart);
-            this.taskStart = this.nextUpdate - p * NEVER;
-            this.taskEnd = this.nextUpdate + (1 - p) * NEVER;
-            this.nextUpdate = NEVER;
-            this.sprite = this.data.idleAnimation;
-            this.animation = 0;
-            return;
+      if (state == STATE.running ||
+          state == STATE.itemReady) {
+        if (state == STATE.running &&
+            this.energySource == ENERGY.burner) {
+          this.energyStored -= (this.nextUpdate - this.taskStart) /
+              1000 * this.energyConsumption1;
+        }
+        if (state == STATE.running && this.animationLength) {
+          this.animation = Math.floor(this.animation +
+            (time - this.taskStart) * this.animationSpeed / 60) %
+            this.animationLength;
+        }
+        const output = this.data.recipe.outputs[0];
+        if (!this.outputInventory.insert(output.item, output.amount)) {
+          state = STATE.itemReady;
+          break furnace;
+        }
+        for (let outputEntity of this.outputEntities) {
+          if (outputEntity.state == STATE.missingItem) {
+            outputEntity.nextUpdate = this.nextUpdate;
           }
         }
-      } else {
-        taskFinished = true;
+        state = STATE.missingItem;
       }
-    }
-    if (taskFinished ||
-        this.state == STATE.itemReady) {
-      const output = this.data.recipe.outputs[0];
-      const amount = this.outputInventory.insert(output.item, output.amount);
-      if (!amount) {
-        this.state = STATE.itemReady;
-        this.nextUpdate = NEVER;
-        this.sprite = this.data.idleAnimation;
-        this.animation = 0;
-        return;
-      }
-      for (let outputEntity of this.outputEntities) {
-        if (outputEntity.state == STATE.missingItem) {
-          outputEntity.nextUpdate = this.nextUpdate;
-        }
-      }
-      continueNextItem = true;
-    }
-    if (continueNextItem ||
-        this.state == STATE.missingItem ||
-        this.state == STATE.noEnergy) {
-      if (this.energySource == ENERGY.burner &&
-          this.energyStored <= 0) {
-        const item = this.fuelInventory.items[0];
-        if (item && this.fuelInventory.extract(item, 1, true)) {
+      if (state == STATE.missingItem ||
+          state == STATE.noEnergy) {
+        if (this.energySource == ENERGY.burner &&
+            this.energyStored <= 0) {
+          const item = this.fuelInventory.items[0];
+          if (!item || !this.fuelInventory.extract(item, 1, true)) {
+            state = STATE.noEnergy;
+            break furnace;
+          }
           this.energyStored = ITEMS.get(item).fuelValue;
-        } else {
-          this.state = STATE.noEnergy;
-          this.nextUpdate = NEVER;
-          return;
+          for (let inputEntity of this.inputEntities) {
+            if (inputEntity.state == STATE.outputFull ||
+                inputEntity.state == STATE.itemReady) {
+              inputEntity.nextUpdate = this.nextUpdate;
+            }
+          }
+          state = STATE.missingItem;
         }
-      }
-      const item = this.inputInventory.items[0];
-      if (!this.data.recipe ||
-          this.data.recipe.inputs[0].item != item) {
-        this.data.recipe = RECIPES.filter(r =>
-             r.entities.includes(this.name) &&
-             r.inputs[0].item == item)[0];
-      }
-      if (!this.data.recipe) {
-        this.state = STATE.missingItem;
-        this.nextUpdate = NEVER;
-        this.sprite = this.data.idleAnimation;
-        this.animation = 0;
-        return;
-      }
-      const amount = this.inputInventory.extract(
-          item, this.data.recipe.inputs[0].amount,
-          true /* onlyFullAmount */);
-      if (!amount) {
-        this.state = STATE.missingItem;
-        this.nextUpdate = NEVER;
-        this.sprite = this.data.idleAnimation;
-        this.animation = 0;
-        return;
-      }
-      for (let inputEntity of this.inputEntities) {
-        if (inputEntity.state == STATE.outputFull ||
-            inputEntity.state == STATE.itemReady) {
-          inputEntity.nextUpdate = this.nextUpdate;
+        const item = this.inputInventory.items[0];
+        if (!this.data.recipe ||
+            this.data.recipe.inputs[0].item != item) {
+          this.data.recipe = RECIPES.filter(r =>
+               r.entities.includes(this.name) &&
+               r.inputs[0].item == item)[0];
+          this.taskDuration = (this.data.recipe?.duration ?? NEVER) / this.data.processingSpeed;
         }
+        if (!this.data.recipe) {
+          break furnace;
+        }
+        if (!this.inputInventory.extract(
+            item, this.data.recipe.inputs[0].amount,
+            true /* onlyFullAmount */)) {
+          break furnace;
+        }
+        for (let inputEntity of this.inputEntities) {
+          if (inputEntity.state == STATE.outputFull ||
+              inputEntity.state == STATE.itemReady) {
+            inputEntity.nextUpdate = this.nextUpdate;
+          }
+        }
+        state = STATE.running;
+        this.taskStart = this.nextUpdate;
+        const sat = this.energySource == ENERGY.electric ?
+            this.data.grid?.satisfaction ?? 0 : 1;
+        this.taskEnd = nextUpdate =
+            sat < MIN_SATISFACTION ? NEVER :
+            this.taskStart + this.taskDuration / sat;
+        break furnace;
       }
-      if (continueNextItem && this.state == STATE.running) {
-        this.animation = Math.floor(this.animation +
-          (time - this.taskStart) * this.animationSpeed / 60) %
-          this.animationLength;
-      }
-      this.state = STATE.running;
-      this.taskStart = this.nextUpdate;
-      this.taskEnd = this.nextUpdate = this.taskStart +
-          this.data.recipe.duration / this.data.processingSpeed;
+    } // break furnace:
+    if (this.state != STATE.running && state == STATE.running) {
       this.sprite = this.data.workingAnimation;
-      gameMap.createSmoke(this.x + 1, this.y, this.taskStart,
-          this.nextUpdate - this.taskStart);
-      if (this.energySource == ENERGY.burner &&
-          this.nextUpdate > this.taskStart +
-          this.energyStored / this.energyConsumption * 1000) {
-        this.nextUpdate = this.taskStart +
-            this.energyStored / this.energyConsumption * 1000;
+      if (this.energySource == ENERGY.electric && this.data.grid) {
+        this.data.grid.consumerss.get(this.energyConsumption0).delete(this);
+        this.data.grid.consumerss.get(this.energyConsumption1).add(this);
       }
-      return;
     }
+    if (this.state == STATE.running && state != STATE.running) {
+      this.sprite = this.data.idleAnimation;
+      this.animation = 0;
+      if (this.energySource == ENERGY.electric && this.data.grid) {
+        this.data.grid.consumerss.get(this.energyConsumption1).delete(this);
+        this.data.grid.consumerss.get(this.energyConsumption0).add(this);
+      }
+    }
+    if (state == STATE.running) {
+      if (this.energySource == ENERGY.burner &&
+          nextUpdate > this.taskStart +
+          this.energyStored / this.energyConsumption1 * 1000) {
+        nextUpdate = this.taskStart +
+            this.energyStored / this.energyConsumption1 * 1000;
+      }
+      gameMap.createSmoke(this.x + this.data.smokeX,
+          this.y + this.data.smokeY, this.nextUpdate,
+          nextUpdate - this.nextUpdate);
+    }
+    this.state = state;
+    this.nextUpdate = nextUpdate;
   } else if (this.type == TYPE.assembler) {
     let state = this.state, nextUpdate = NEVER;
     assembler: {
@@ -655,7 +643,7 @@ Entity.prototype.update = function(gameMap, time) {
     if (this.state == STATE.running ||
         this.state == STATE.itemReady) {
       if (this.state == STATE.running)
-        this.energyStored -= this.taskDuration / 1000 * this.energyConsumption;
+        this.energyStored -= this.taskDuration / 1000 * this.energyConsumption1;
       const outputTanklet = this.outputFluidTank.tanklets[0];
       if (outputTanklet.amount + this.data.outputAmount > outputTanklet.capacity) {
         this.state = STATE.itemReady;
@@ -708,7 +696,8 @@ Entity.prototype.update = function(gameMap, time) {
       this.taskStart = this.nextUpdate;
       this.taskEnd = this.taskStart + this.taskDuration;
       this.sprite = this.data.workingAnimation;
-      gameMap.createSmoke(this.x + 1, this.y, this.nextUpdate,
+      gameMap.createSmoke(this.x + this.data.smokeX,
+          this.y + this.data.smokeY, this.nextUpdate,
           this.taskEnd - this.nextUpdate);
       this.nextUpdate = this.taskEnd;
       return;

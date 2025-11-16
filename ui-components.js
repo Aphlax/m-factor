@@ -110,7 +110,7 @@ UiFuel.prototype.draw = function(ctx, time) {
   const current = this.entity.energyStored - 
       (this.entity.state != STATE.running ? 0 :
       Math.max(time - this.entity.taskStart, 0) /
-      1000 * this.entity.energyConsumption);
+      1000 * this.entity.energyConsumption1);
   const height = Math.min(36, Math.max(0,
       Math.ceil(current / maxFuel * 36)));
   

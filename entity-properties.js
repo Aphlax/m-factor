@@ -28,6 +28,7 @@ export const NAME = {
   boiler: 10,
   steamEngine: 11,
   smallElectricPole: 12,
+  electricFurnace: 13,
 };
 
 /** Never value for next update. 285 years from now. */

@@ -133,6 +133,7 @@ export const ENTITIES = new Map([
       [south]: [S.stoneFurnace],
       [west]: [S.stoneFurnace],
     },
+    smokePosition: {x: 0.97, y: 0},
   }],
   [NAME.assemblingMachine1,
   {
@@ -289,6 +290,7 @@ export const ENTITIES = new Map([
       [south]: [{x: 1, y: 2}],
       [west]: [{x: -1, y: 1}],
     },
+    smokePosition: {x: 0.7, y: 0.3},
   }],
   [NAME.steamEngine,
   {
@@ -342,6 +344,36 @@ export const ENTITIES = new Map([
     powerSupplyArea: 2,
     wireConnectionPoint: {x: 0.5, y: -2},
     wireConnectionPointShadow: {x: 3.68, y: 0.59},
+  }],
+  [NAME.electricFurnace,
+  {
+    label: "Electric Furnace",
+    prototypeName: "electric-furnace",
+    type: TYPE.furnace,
+    width: 3,
+    height: 3,
+    rotatable: false,
+    icon: S.electricFurnaceIcon,
+    sprites: {
+      [north]: [S.electricFurnaceWorking],
+      [east]: [S.electricFurnaceWorking],
+      [south]: [S.electricFurnaceWorking],
+      [west]: [S.electricFurnaceWorking],
+    },
+    animationLength: 12,
+    animationSpeed: 1,
+    energySource: ENERGY.electric,
+    energyConsumption1: 186, // kW
+    energyConsumption0: 6, // kW
+    
+    processingSpeed: 2,
+    idleAnimation: {
+      [north]: [S.electricFurnaceIdle],
+      [east]: [S.electricFurnaceIdle],
+      [south]: [S.electricFurnaceIdle],
+      [west]: [S.electricFurnaceIdle],
+    },
+    smokePosition: {x: 0.85, y: 0},
   }],
 ]);
 

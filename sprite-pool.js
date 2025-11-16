@@ -66,16 +66,16 @@ SpritePool.prototype.draw = function(ctx, time) {
   ctx.fillStyle = "lightgrey";
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   
-  let sprite = S.smallElectricPole;
-  let shadow = S.smallElectricPoleShadow;
-  const animShad = true;
+  let sprite = S.electricFurnaceWorking;
+  let shadow = 0;S.smallElectricPoleShadow;
+  const animShad = false;
   let light = 0; // S.boilerLightW;
-  let size = [32*1, 32*1], xlen = 4, ylen = 1;
+  let size = [32*3, 32*3], xlen = 4, ylen = 3;
   for (let i = 0; i < xlen; i++) {
     for (let j = 0; j < ylen; j++) {
       let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(sprite+i*ylen+j)};
       if (!s.image) continue;
-      let rect = [10+i*(size[0]+15), 100+ i*(size[1]+15), ...size];
+      let rect = [10+i*(size[0]+15), 100+ i*(size[1]+15)+ j*(size[1]+15), ...size];
       let xScale = rect[2] / (s.width - s.left - s.right);
       let yScale = rect[3] / (s.height - s.top - s.bottom);
       if (shadow) {

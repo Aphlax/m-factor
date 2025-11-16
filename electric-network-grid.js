@@ -10,7 +10,7 @@ function Grid(poles) {
     this.consumerss.set(el, new Set());
   }
   
-  this.satisfaction = 1;
+  this.satisfaction = 0;
   
   const c = Math.ceil(Math.random() * 255 * 2);
   this.color = `rgb(${Math.abs(c-255)}, ${Math.abs((c+170)%510-255)}, ${Math.abs((c+340)%510-255)})`;

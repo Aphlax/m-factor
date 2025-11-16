@@ -16,6 +16,7 @@ const BUILD_MENU = [
   NAME.boiler,
   NAME.steamEngine,
   NAME.smallElectricPole,
+  NAME.electricFurnace,
 ];
 const DEACC = 50;
 

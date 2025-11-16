@@ -148,7 +148,11 @@ export const ITEMS = new Map([
     sprite: S.smallElectricPoleItem,
     stacksize: 50,
   }],
-  
+  [I.electricFurnace,
+  {
+    sprite: S.electricFurnaceItem,
+    stacksize: 50,
+  }],
 ]);
 
 export const FLUIDS = new Map([

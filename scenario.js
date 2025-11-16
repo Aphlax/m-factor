@@ -151,6 +151,11 @@ function productionTest(gameMap, time) {
   el(3, 40, 1, 3, 6);
   el(-3, 44, 1, 4, 6);
   el(-4, 41, 0, 3);
+  
+  e(NAME.electricFurnace, -9, 8, 0);
+  e(NAME.inserter, -10, 9, 1);
+  e(NAME.inserter, -7, 11, 2);
+  el(-10, 8);
 };
 
 function inserterTest(gameMap, time) {

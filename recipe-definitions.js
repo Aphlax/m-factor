@@ -10,7 +10,7 @@ export const RECIPES = [
     outputs: [
       {item: I.ironPlate, amount: 1},
     ],
-    entities: [NAME.stoneFurnace],
+    entities: [NAME.stoneFurnace, NAME.electricFurnace],
     duration: 3200,
   },
   {
@@ -21,7 +21,7 @@ export const RECIPES = [
     outputs: [
       {item: I.copperPlate, amount: 1},
     ],
-    entities: [NAME.stoneFurnace],
+    entities: [NAME.stoneFurnace, NAME.electricFurnace],
     duration: 3200,
   },
   {

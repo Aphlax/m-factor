@@ -80,6 +80,7 @@ export const S = {
   steamEngineShadowH: 130*16,
   
   
+  
   woodenChest: 15000,
   woodenChestShadow: 15001,
   inserter: 15002,
@@ -117,6 +118,8 @@ export const S = {
   boilerLightW: 15071,
   smallElectricPole: 15072, // 4
   smallElectricPoleShadow: 15076, // 4
+  electricFurnaceWorking: 15080, // 12
+  electricFurnaceIdle: 15092,
   
   ironOreItem: 16000,
   copperOreItem: 16000 + 1,
@@ -556,7 +559,14 @@ export const SPRITES = [
     path: "graphics/entities/small-electric-pole/small-electric-pole-shadow.png",
     sprites: entitySprites(S.smallElectricPoleShadow, 130, 28, 4, 1, 0, 98, -4, 0, true),
   },
-  
+  {
+    path: "graphics/entities/electric-furnace/electric-furnace-base.png",
+    sprites: entitySprites(S.electricFurnaceIdle, 129, 100, 1, 1, 1, 32, 1, 3, true)
+  },
+  {
+    path: "graphics/entities/electric-furnace/electric-furnace-working.png",
+    sprites: entitySprites(S.electricFurnaceWorking, 132, 102, 4, 3, 4, 32, 4, 2, true)
+  },
   
   // Items.
   {
@@ -660,6 +670,10 @@ export const SPRITES = [
   {
     path: "graphics/items/small-electric-pole.png",
     sprites: itemSprites(S.smallElectricPoleItem, S.smallElectricPoleIcon),
+  },
+  {
+    path: "graphics/items/electric-furnace.png",
+    sprites: itemSprites(S.electricFurnaceItem, S.electricFurnaceIcon),
   },
   
   // Misc.
