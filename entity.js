@@ -34,6 +34,7 @@ function Entity() {
   this.data = {};
   this.energySource = 0;
   this.energyStored = 0; // kJ.
+  this.energyDrain = 0; // kW.
   this.energyConsumption = 0; // kW.
   // Inventories.
   this.inputInventory = undefined;
@@ -94,8 +95,8 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.inserterPickupBend =
         INSERTER_PICKUP_BEND[(direction + 2) % 4];
     this.energySource = def.energySource;
-    this.energyConsumption0 = def.energyConsumption0;
-    this.energyConsumption1 = def.energyConsumption1;
+    this.energyDrain = def.energyDrain;
+    this.energyConsumption = def.energyConsumption;
   } else if (this.type == TYPE.mine) {
     this.state = STATE.noEnergy;
     this.taskStart = time;
@@ -128,10 +129,10 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     if (def.energySource == ENERGY.burner) {
       this.fuelInventory = new Inventory(1)
           .setFilters(FUEL_FILTERS);
-      this.energyConsumption1 = def.energyConsumption;
+      this.energyConsumption = def.energyConsumption;
     } else if (def.energySource == ENERGY.electric) {
-      this.energyConsumption0 = def.energyConsumption0;
-      this.energyConsumption1 = def.energyConsumption1;
+      this.energyDrain = def.energyDrain;
+      this.energyConsumption = def.energyConsumption;
     }
   } else if (this.type == TYPE.assembler) {
     this.state = STATE.noRecipe;
@@ -141,8 +142,8 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.inputInventory = new Inventory(0);
     this.outputInventory = new Inventory(0);
     this.energySource = def.energySource;
-    this.energyConsumption0 = def.energyConsumption0;
-    this.energyConsumption1 = def.energyConsumption1;
+    this.energyDrain = def.energyDrain;
+    this.energyConsumption = def.energyConsumption;
   } else if (this.type == TYPE.chest) {
     this.inputInventory = this.outputInventory =
         new Inventory(def.capacity);
@@ -155,8 +156,8 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.inputInventory = this.outputInventory =
         new Inventory(1).setFilters(LAB_FILTERS);
     this.energySource = ENERGY.electric;
-    this.energyConsumption0 = 0;
-    this.energyConsumption1 = def.energyConsumption;
+    this.energyDrain = 0;
+    this.energyConsumption = def.energyConsumption;
     this.data.grid = undefined;
   } else if (this.type == TYPE.pipe) {
     this.data.pipeConnections = def.pipeConnections[direction];
@@ -186,7 +187,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.outputAmount = def.recipe.outputs[0].amount;
     this.taskDuration = def.recipe.duration;
     this.energySource = def.energySource;
-    this.energyConsumption1 = def.energyConsumption;
+    this.energyConsumption = def.energyConsumption;
     this.data.workingAnimation = def.sprites[direction][0];
     this.data.idleAnimation = def.idleAnimation[direction][0];
     this.data.smokeX = def.smokePosition.x;
@@ -323,12 +324,12 @@ Entity.prototype.update = function(gameMap, time) {
     } // break inserter:
     if (this.energySource == ENERGY.electric && this.data.grid) {
       if (this.state != STATE.running && state == STATE.running) {
-        this.data.grid.consumerss.get(this.energyConsumption0).delete(this);
-        this.data.grid.consumerss.get(this.energyConsumption1).add(this);
+        this.data.grid.consumerss.get(this.energyDrain).delete(this);
+        this.data.grid.consumerss.get(this.energyConsumption).add(this);
       }
       if (this.state == STATE.running && state != STATE.running) {
-        this.data.grid.consumerss.get(this.energyConsumption1).delete(this);
-        this.data.grid.consumerss.get(this.energyConsumption0).add(this);
+        this.data.grid.consumerss.get(this.energyConsumption).delete(this);
+        this.data.grid.consumerss.get(this.energyDrain).add(this);
       }
     }
     this.state = state;
@@ -445,7 +446,7 @@ Entity.prototype.update = function(gameMap, time) {
         if (state == STATE.running &&
             this.energySource == ENERGY.burner) {
           this.energyStored -= (this.nextUpdate - this.taskStart) /
-              1000 * this.energyConsumption1;
+              1000 * this.energyConsumption;
         }
         if (state == STATE.running && this.animationLength) {
           this.animation = Math.floor(this.animation +
@@ -517,24 +518,24 @@ Entity.prototype.update = function(gameMap, time) {
     if (this.state != STATE.running && state == STATE.running) {
       this.sprite = this.data.workingAnimation;
       if (this.energySource == ENERGY.electric && this.data.grid) {
-        this.data.grid.consumerss.get(this.energyConsumption0).delete(this);
-        this.data.grid.consumerss.get(this.energyConsumption1).add(this);
+        this.data.grid.consumerss.get(this.energyDrain).delete(this);
+        this.data.grid.consumerss.get(this.energyConsumption).add(this);
       }
     }
     if (this.state == STATE.running && state != STATE.running) {
       this.sprite = this.data.idleAnimation;
       this.animation = 0;
       if (this.energySource == ENERGY.electric && this.data.grid) {
-        this.data.grid.consumerss.get(this.energyConsumption1).delete(this);
-        this.data.grid.consumerss.get(this.energyConsumption0).add(this);
+        this.data.grid.consumerss.get(this.energyConsumption).delete(this);
+        this.data.grid.consumerss.get(this.energyDrain).add(this);
       }
     }
     if (state == STATE.running) {
       if (this.energySource == ENERGY.burner &&
           nextUpdate > this.taskStart +
-          this.energyStored / this.energyConsumption1 * 1000) {
+          this.energyStored / this.energyConsumption * 1000) {
         nextUpdate = this.taskStart +
-            this.energyStored / this.energyConsumption1 * 1000;
+            this.energyStored / this.energyConsumption * 1000;
       }
       gameMap.createSmoke(this.x + this.data.smokeX,
           this.y + this.data.smokeY, this.nextUpdate,
@@ -585,12 +586,12 @@ Entity.prototype.update = function(gameMap, time) {
     } // break assembler:
     if (this.energySource == ENERGY.electric && this.data.grid) {
       if (this.state != STATE.running && state == STATE.running) {
-        this.data.grid.consumerss.get(this.energyConsumption0).delete(this);
-        this.data.grid.consumerss.get(this.energyConsumption1).add(this);
+        this.data.grid.consumerss.get(this.energyDrain).delete(this);
+        this.data.grid.consumerss.get(this.energyConsumption).add(this);
       }
       if (this.state == STATE.running && state != STATE.running) {
-        this.data.grid.consumerss.get(this.energyConsumption1).delete(this);
-        this.data.grid.consumerss.get(this.energyConsumption0).add(this);
+        this.data.grid.consumerss.get(this.energyConsumption).delete(this);
+        this.data.grid.consumerss.get(this.energyDrain).add(this);
       }
     }
     this.state = state;
@@ -605,8 +606,8 @@ Entity.prototype.update = function(gameMap, time) {
       }
       if (!this.inputInventory.extractFilters()) {
         if (this.data.grid && this.state == STATE.running) {
-          this.data.grid.consumerss.get(this.energyConsumption1).delete(this);
-          this.data.grid.consumerss.get(this.energyConsumption0).add(this);
+          this.data.grid.consumerss.get(this.energyConsumption).delete(this);
+          this.data.grid.consumerss.get(this.energyDrain).add(this);
         }
         this.state = STATE.missingItem;
         this.nextUpdate = NEVER;
@@ -621,8 +622,8 @@ Entity.prototype.update = function(gameMap, time) {
         }
       }
       if (this.data.grid && this.state != STATE.running) {
-        this.data.grid.consumerss.get(this.energyConsumption0).delete(this);
-        this.data.grid.consumerss.get(this.energyConsumption1).add(this);
+        this.data.grid.consumerss.get(this.energyDrain).delete(this);
+        this.data.grid.consumerss.get(this.energyConsumption).add(this);
       }
       this.state = STATE.running;
       this.taskStart = this.nextUpdate;
@@ -643,7 +644,7 @@ Entity.prototype.update = function(gameMap, time) {
     if (this.state == STATE.running ||
         this.state == STATE.itemReady) {
       if (this.state == STATE.running)
-        this.energyStored -= this.taskDuration / 1000 * this.energyConsumption1;
+        this.energyStored -= this.taskDuration / 1000 * this.energyConsumption;
       const outputTanklet = this.outputFluidTank.tanklets[0];
       if (outputTanklet.amount + this.data.outputAmount > outputTanklet.capacity) {
         this.state = STATE.itemReady;

@@ -228,7 +228,7 @@ Grid.prototype.split = function(entity, not, targets) {
       }
       if (entity.energySource == ENERGY.electric) {
         const el = entity.state == STATE.running ?
-            entity.energyConsumption1 : entity.energyConsumption0;
+            entity.energyConsumption : entity.energyDrain;
         this.consumerss.get(el).delete(entity);
         segment.consumerss.get(el).add(entity);
         entity.data.grid = segment;

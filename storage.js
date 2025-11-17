@@ -1,7 +1,7 @@
 import {GameMap} from './game-map.js';
 import {Chunk} from './chunk.js';
 import {ENTITIES, PROTO_TO_NAME} from './entity-definitions.js';
-import {TYPE, ENERGY} from './entity-properties.js';
+import {TYPE, ENERGY, STATE} from './entity-properties.js';
 import {PROTO_TO_RECIPE} from './recipe-definitions.js';
 import {COLOR} from './ui-properties.js';
 
@@ -174,9 +174,9 @@ Storage.prototype.serializeMap = function(gameMap) {
         x: lane.belts[0].x,
         y: lane.belts[0].y,
         minusFlow: lane.minusFlow,
-        minusItem: lane.minusItem,
+        minusItems: lane.minusItems,
         plusFlow: lane.plusFlow,
-        plusItem: lane.plusItem,
+        plusItems: lane.plusItems,
       }));
   const fluidNetworkChannels =
       gameMap.fluidNetwork.channels
@@ -190,12 +190,24 @@ Storage.prototype.serializeMap = function(gameMap) {
           amount: channel.amount,
         };
       });
+  const electricNetworkGrids =
+      gameMap.electricNetwork.grids
+      .filter(grid => grid.poles.size)
+      .map(grid => {
+        const [pole] = grid.poles;
+        return {
+          x: pole.x,
+          y: pole.y,
+          satisfaction: grid.satisfaction,
+        };
+      });
   return {
     seed: gameMap.mapGenerator.seed,
     entities,
     chunks,
     transportNetworkLanes,
     fluidNetworkChannels,
+    electricNetworkGrids,
     view: gameMap.view,
   };
 };
@@ -219,16 +231,22 @@ Storage.prototype.serializeEntity = function(index, entity) {
         entity.type == TYPE.mine ||
         entity.type == TYPE.furnace ||
         entity.type == TYPE.assembler ||
-        entity.type == TYPE.lab ? {
+        entity.type == TYPE.lab ||
+        entity.type == TYPE.boiler ||
+        entity.type == TYPE.generator ? {
           animation: entity.animation,
           state: entity.state,
           nextUpdate: entity.nextUpdate,
           taskStart: entity.taskStart,
           taskEnd: entity.taskEnd,
+          taskDuration: entity.taskDuration,
         } : {}),
     ...(entity.energySource == ENERGY.burner ||
         entity.energySource == ENERGY.windUp ? {
           energyStored: entity.energyStored,
+        } : {}),
+    ...(entity.energySource == ENERGY.electric ? {
+          animationSpeed: entity.animationSpeed,
         } : {}),
     ...(entity.inputInventory ? {inputInventory:
         this.serializeInventory(entity.inputInventory)} : {}),
@@ -299,17 +317,22 @@ Storage.prototype.deserializeMap = function(map) {
     const belt = gameMap.getEntityAt(lane.x, lane.y);
     if (belt != belt.data.lane.belts[0]) {
       // Circular lane, make it start at correct belt.
-      belt.data.lane.split(belt);
+      gameMap.transportNetwork.lanes.push(
+          belt.data.lane.split(belt));
     }
     belt.data.lane.minusFlow.push(...lane.minusFlow);
-    belt.data.lane.minusItem = lane.minusItem;
+    belt.data.lane.minusItems.push(...lane.minusItems);
     belt.data.lane.plusFlow.push(...lane.plusFlow);
-    belt.data.lane.plusItem = lane.plusItem;
+    belt.data.lane.plusItems.push(...lane.plusItems);
   }
   for (let channel of map.fluidNetworkChannels) {
     const pipe = gameMap.getEntityAt(channel.x, channel.y);
     pipe.data.channel.fluid = channel.fluid;
     pipe.data.channel.amount = channel.amount;
+  }
+  for (let grid of map.electricNetworkGrids) {
+    const pole = gameMap.getEntityAt(grid.x, grid.y);
+    pole.data.grid.satisfaction = grid.satisfaction;
   }
   return gameMap;
 };
@@ -319,22 +342,29 @@ Storage.prototype.deserializeEntity = function(e, entity) {
       entity.type == TYPE.mine ||
       entity.type == TYPE.furnace ||
       entity.type == TYPE.assembler ||
-      entity.type == TYPE.lab) {
+      entity.type == TYPE.lab ||
+      entity.type == TYPE.boiler ||
+      entity.type == TYPE.generator) {
     entity.animation = e.animation;
     entity.state = e.state;
     entity.nextUpdate = e.nextUpdate;
     entity.taskStart = e.taskStart;
     entity.taskEnd = e.taskEnd;
+    entity.taskDuration = e.taskDuration;
   }
   if (entity.energySource == ENERGY.burner ||
       entity.energySource == ENERGY.windUp) {
     entity.energyStored = e.energyStored;
   }
+  if (entity.energySource == ENERGY.electric) {
+    entity.animationSpeed = e.animationSpeed;
+  }
   if (e.inputInventory) {
     entity.inputInventory.items.push(...e.inputInventory.items);
     entity.inputInventory.amounts.push(...e.inputInventory.amounts);
   }
-  if (e.outputInventory) {
+  if (e.outputInventory &&
+      entity.inputInventory != entity.outputInventory) {
     entity.outputInventory.items.push(...e.outputInventory.items);
     entity.outputInventory.amounts.push(...e.outputInventory.amounts);
   }
@@ -358,6 +388,9 @@ Storage.prototype.deserializeEntity = function(e, entity) {
   }
   if (entity.type == TYPE.furnace && e.recipe) {
     entity.data.recipe = PROTO_TO_RECIPE.get(e.recipe);
+  }
+  if (entity.state == STATE.running &&
+      entity.data.workingAnimation) {
     entity.sprite = entity.data.workingAnimation;
   }
   if (entity.type == TYPE.belt) {

@@ -113,15 +113,15 @@ export function beltInsert(item, time, positionForBelt) {
  * returns a positive wait time in ms if no item.
  */
 export function beltExtract(items, time, positionForBelt) {
-  const wait = this.data.lane.extractItem(items, this, time, positionForBelt);
-  if (wait > 0) {
+  const waitOrItem = this.data.lane.extractItem(items, this, time, positionForBelt);
+  if (waitOrItem < 0) {
     for (let inputEntity of this.inputEntities) {
       if (inputEntity.state == STATE.itemReady) {
         inputEntity.nextUpdate = time;
       }
     }
   }
-  return wait;
+  return waitOrItem;
 }
 
 export function connectBelt(other, time, transportNetwork) {

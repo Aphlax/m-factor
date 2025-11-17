@@ -129,7 +129,7 @@ ElectricNetwork.prototype.modifyConsumer = function(entity, time) {
     if (grid && grid != pole.data.grid) {
       if (entity.data.grid) {
         const el = entity.state == STATE.running ?
-            entity.energyConsumption1 : entity.energyConsumption0;
+            entity.energyConsumption : entity.energyDrain;
         entity.data.grid.consumerss.get(el).delete(entity);
         entity.data.grid = undefined;
       }
@@ -153,9 +153,9 @@ ElectricNetwork.prototype.modifyConsumer = function(entity, time) {
       grid = pole.data.grid;
     }
   }
+  const el = entity.state == STATE.running ?
+      entity.energyConsumption : entity.energyDrain;
   if (!grid && entity.data.grid) {
-    const el = entity.state == STATE.running ?
-        entity.energyConsumption1 : entity.energyConsumption0;
     entity.data.grid.consumerss.get(el).delete(entity);
     entity.data.grid = undefined;
     if (entity.state == STATE.running) {
@@ -178,7 +178,7 @@ ElectricNetwork.prototype.modifyConsumer = function(entity, time) {
     return;
   }
   entity.data.grid = grid;
-  grid.consumerss.get(entity.energyConsumption0).add(entity);
+  grid.consumerss.get(el).add(entity);
   if (entity.state == STATE.running) {
     const edt = time - entity.taskStart;
     const p = edt / (entity.taskEnd - entity.taskStart);

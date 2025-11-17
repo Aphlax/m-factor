@@ -100,8 +100,8 @@ export const ENTITIES = new Map([
     },
     animationLength: 0,
     energySource: ENERGY.electric,
-    energyConsumption0: 0.4, // kW
-    energyConsumption1: 15.1, // kW
+    energyDrain: 0.4, // kW
+    energyConsumption: 15.1, // kW
     
     inserterHandSprites: S.inserterHand,
     taskDuration: 400,
@@ -152,8 +152,8 @@ export const ENTITIES = new Map([
     },
     animationLength: 32,
     energySource: ENERGY.electric,
-    energyConsumption0: 2.5, // kW
-    energyConsumption1: 76, // kW
+    energyDrain: 2.5, // kW
+    energyConsumption: 76, // kW
     
     processingSpeed: 0.5,
   }],
@@ -363,8 +363,8 @@ export const ENTITIES = new Map([
     animationLength: 12,
     animationSpeed: 1,
     energySource: ENERGY.electric,
-    energyConsumption1: 186, // kW
-    energyConsumption0: 6, // kW
+    energyConsumption: 186, // kW
+    energyDrain: 6, // kW
     
     processingSpeed: 2,
     idleAnimation: {
@@ -387,7 +387,6 @@ export const PROTO_TO_NAME = new Map(
 export const ENTITY_ELECTRIC_CONSUMPTIONS =
     new Set(ENTITIES.values().flatMap(def => [
     ...(def.energyConsumption ? [def.energyConsumption] : []),
-    ...(def.energyConsumption0 ? [def.energyConsumption0] : []),
-    ...(def.energyConsumption1 ? [def.energyConsumption1] : []),
+    ...(def.energyDrain ? [def.energyDrain] : []),
     ]));
 ENTITY_ELECTRIC_CONSUMPTIONS.add(0);
