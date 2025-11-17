@@ -53,10 +53,10 @@ function productionTest(gameMap, time) {
   l(-78, -17, 1, 63);
   l(-15, -17, 2, 26);
   const lane = l(-15, 9, 3, 2);
-  lane.minusItem = I.coal;
+  lane.minusItems = new Array(140).fill(I.coal);
   lane.minusFlow = new Array(140).fill(0.81);
   lane.minusFlow[0] = 7;
-  lane.plusItem = I.coal;
+  lane.plusItems = new Array(135).fill(I.coal);
   lane.plusFlow = new Array(135).fill(0.81);
   lane.plusFlow[0] = 6.4;
   
@@ -114,7 +114,7 @@ function productionTest(gameMap, time) {
   e(NAME.inserter, -14, -14, 1);
   l(-13, -14, 1, 46);
   const lane2 = l(33, -14, 2, 39);
-  lane2.plusItem = I.coal;
+  lane2.plusItems = new Array(4 * 85 - 55).fill(I.coal);
   lane2.plusFlow = new Array(4 * 85 - 55).fill(0);
   lane2.plusFlow[0] = 10;
   e(NAME.inserter, 34, 21, 1);
@@ -381,7 +381,7 @@ function inserterTest(gameMap, time) {
   const lane = createLane(gameMap, -11, -5, 3, 1, time);
   gameMap.createEntity(NAME.burnerDrill, -12, -8, 2, time)
       .energyStored = 150;
-  lane.minusItem = I.ironOre;
+  lane.minusItems = new Array(4 * 6).fill(I.ironOre);
   lane.minusFlow = new Array(4 * 6).fill(0);
   return s;
 }
