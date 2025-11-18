@@ -8,6 +8,7 @@ const MODE = {
   none: 0,
   buildBelt: 1,
   buildOffshorePump: 2,
+  buildUndergroundBeltExit: 3,
 };
 
 function GameMapInput(ui) {
@@ -35,7 +36,8 @@ GameMapInput.prototype.update = function(time) {
 };
 
 GameMapInput.prototype.draw = function(ctx) {
-  if (this.mode == MODE.buildBelt) {
+  if (this.mode == MODE.buildBelt ||
+      this.mode == MODE.buildUndergroundBeltExit) {
     ctx.strokeStyle = COLOR.buildPlanner;
     ctx.lineWidth = 1;
     const d = this.currentBuild.direction;
@@ -51,7 +53,9 @@ GameMapInput.prototype.draw = function(ctx) {
         Math.min(x1, x2), Math.min(y1, y2),
         Math.abs(x1 - x2) + this.view.scale,
         Math.abs(y1 - y2) + this.view.scale);
-    if (this.currentBuild.length > 1) {
+    if (this.mode == MODE.buildBelt &&
+        this.currentBuild.length > 1) {
+      // Draw arrow.
       const half = this.view.scale / 2;
       const vx = -((d - 2) % 2) * this.view.scale,
           vy = ((d - 1) % 2) * this.view.scale,
@@ -110,10 +114,12 @@ GameMapInput.prototype.touchStart = function(e) {
 GameMapInput.prototype.touchMove = function(e, longTouch) {
   let i = -1;
   if ((this.mode == MODE.none ||
-      this.mode == MODE.buildOffshorePump) && !longTouch) {
+      this.mode == MODE.buildOffshorePump ||
+      this.mode == MODE.buildUndergroundBeltExit) && !longTouch) {
     i = 0;
   } else if (this.mode != MODE.none &&
-      this.mode != MODE.buildOffshorePump) {
+      this.mode != MODE.buildOffshorePump &&
+      this.mode != MODE.buildUndergroundBeltExit) {
     i = 1;
   }
   if (e.touches[i]) {
@@ -208,6 +214,23 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
           x, y, direction, this.ui.game.playTime);
       this.ui.buildMenu.entityBuilt();
     }
+  } else if (this.mode == MODE.buildUndergroundBeltExit && shortTouch) {
+    const x = Math.floor((this.touches[0].x + this.view.x) / this.view.scale);
+    const y = Math.floor((this.touches[0].y + this.view.y) / this.view.scale);
+    const dx = x - this.currentBuild.x,
+        dy = y - this.currentBuild.y,
+        d = this.currentBuild.direction;
+    if ((!(dx == 0 && dy * ((d - 1) % 2) >= 0 &&
+        dy * ((d - 1) % 2) < this.currentBuild.length) &&
+        !(dy == 0 && dx * -((d - 2) % 2) >= 0 &&
+        dx * -((d - 2) % 2) < this.currentBuild.length)) ||
+        this.gameMap.tryCreateEntity(
+        this.touches[0].x, this.touches[0].y, d,
+        this.ui.buildMenu.getSelectedEntity(),
+        this.lastUpdate, {undergroundUp: true})) {
+      this.mode = MODE.none;
+      this.ui.buildMenu.entityBuilt();
+    }
   } else if (shortTouch) {
     const entity = this.gameMap.getSelectedEntity(
         this.touches[0].x, this.touches[0].y);
@@ -218,11 +241,20 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
         this.ui.buildMenu.reset();
       }
     } else {
-      if (this.gameMap.tryCreateEntity(
+      const d = this.ui.rotateButton.direction;
+      const entity = this.gameMap.tryCreateEntity(
           this.touches[0].x, this.touches[0].y,
-          this.ui.rotateButton.direction,
-          entityDef, this.lastUpdate)) {
-        this.ui.buildMenu.entityBuilt();
+          d, entityDef, this.lastUpdate);
+      if (entity) {
+        if (entity.type == TYPE.undergroundBelt) {
+          this.mode = MODE.buildUndergroundBeltExit;
+          this.currentBuild.x = entity.x - (d - 2) % 2;
+          this.currentBuild.y = entity.y + (d - 1) % 2;
+          this.currentBuild.direction = d;
+          this.currentBuild.length = entity.data.maxUndergroundGap + 1;
+        } else {
+          this.ui.buildMenu.entityBuilt();
+        }
       }
     }
   }
@@ -230,8 +262,8 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
 };
 
 GameMapInput.prototype.touchLong = function(e) {
-  const entity = this.ui.buildMenu.getSelectedEntity();
-  if (entity?.type == TYPE.belt) {
+  const entityDef = this.ui.buildMenu.getSelectedEntity();
+  if (entityDef?.type == TYPE.belt) {
     this.currentBuild.x = Math.floor((e.touches[0].clientX +
         this.view.x) / this.view.scale);
     this.currentBuild.y = Math.floor((e.touches[0].clientY +

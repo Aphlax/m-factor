@@ -66,10 +66,11 @@ export const ENTITIES = new Map([
       [south]: [S.transportBeltS],
       [west]: [S.transportBeltW],
     },
-    animationLength: 16,
-    animationSpeed: 1.925,
+    animationLength: 0,
     
     beltSpeed: 1.875, // 15 = 1.875 * 8
+    beltAnimation: 16,
+    beltAnimationSpeed: 1.925 * 1.875,
     beltSprites: {
       [north]: [S.transportBeltN, S.transportBeltEN, S.transportBeltWN],
       [east]: [S.transportBeltE, S.transportBeltSE, S.transportBeltNE],
@@ -101,7 +102,7 @@ export const ENTITIES = new Map([
     animationLength: 0,
     energySource: ENERGY.electric,
     energyDrain: 0.4, // kW
-    energyConsumption: 15.1, // kW
+    energyConsumption: 4.6, // kW
     
     inserterHandSprites: S.inserterHand,
     taskDuration: 400,
@@ -153,7 +154,7 @@ export const ENTITIES = new Map([
     animationLength: 32,
     energySource: ENERGY.electric,
     energyDrain: 2.5, // kW
-    energyConsumption: 76, // kW
+    energyConsumption: 78.5, // kW
     
     processingSpeed: 0.5,
   }],
@@ -374,6 +375,39 @@ export const ENTITIES = new Map([
       [west]: [S.electricFurnaceIdle],
     },
     smokePosition: {x: 0.85, y: 0},
+  }],
+  [NAME.undergroundBelt,
+  {
+    label: "Underground Belt",
+    prototypeName: "underground-belt",
+    type: TYPE.undergroundBelt,
+    width: 1,
+    height: 1,
+    rotatable: true,
+    icon: S.undergroundBeltIcon,
+    sprites: {
+      [north]: [S.undergroundBeltNI],
+      [east]: [S.undergroundBeltEI],
+      [south]: [S.undergroundBeltSI],
+      [west]: [S.undergroundBeltWI],
+    },
+    
+    beltSpeed: 1.875, // 15 = 1.875 * 8
+    beltAnimation: 16,
+    beltAnimationSpeed: 1.925 * 1.875,
+    maxUndergroundGap: 4,
+    beltSprites: {
+      [north]: [S.undergroundEnterBeltN, S.undergroundExitBeltN, S.undergroundBeltNI, S.undergroundBeltNO, S.undergroundBeltNI, S.undergroundBeltNO],
+      [east]: [S.undergroundEnterBeltE, S.undergroundExitBeltE, S.undergroundBeltEI, S.undergroundBeltEO, S.undergroundBeltEISideLoaded, S.undergroundBeltEOSideLoaded],
+      [south]: [S.undergroundEnterBeltS, S.undergroundExitBeltS, S.undergroundBeltSI, S.undergroundBeltSO, S.undergroundBeltSI, S.undergroundBeltSO],
+      [west]: [S.undergroundEnterBeltW, S.undergroundExitBeltW, S.undergroundBeltWI, S.undergroundBeltWO, S.undergroundBeltWISideLoaded, S.undergroundBeltWOSideLoaded],
+    },
+    beltEndSprites: {
+      [north]: [S.transportBeltBeginN, S.transportBeltEndN, S.transportBeltEndW, S.transportBeltEndE],
+      [east]: [S.transportBeltBeginE, S.transportBeltEndE, S.transportBeltEndN, S.transportBeltEndS],
+      [south]: [S.transportBeltBeginS, S.transportBeltEndS, S.transportBeltEndE, S.transportBeltEndW],
+      [west]: [S.transportBeltBeginW, S.transportBeltEndW, S.transportBeltEndS, S.transportBeltEndN],
+    },
   }],
 ]);
 

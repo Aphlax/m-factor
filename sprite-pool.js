@@ -50,10 +50,12 @@ SpritePool.prototype.draw = function(ctx, time) {
   
   // For debugging the missing sprites on github.
   if (this.current > this.total * 0.85) {
+    ctx.fillStyle = "black";
+    ctx.fillText(this.total - this.current, ctx.canvas.width * 0.5 - 40,
+        ctx.canvas.height - 125);
     for (let imageDef of SPRITES) {
       const id = imageDef.sprites[0].id;
       if (!this.sprites.has(id)) {
-        ctx.fillStyle = "black";
         ctx.fillText("#" + id, ctx.canvas.width * 0.5 - 40,
             ctx.canvas.height - 100);
         break;
@@ -66,11 +68,11 @@ SpritePool.prototype.draw = function(ctx, time) {
   ctx.fillStyle = "lightgrey";
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   
-  let sprite = S.electricFurnaceWorking;
+  let sprite = S.undergroundBeltSI;
   let shadow = 0;S.smallElectricPoleShadow;
   const animShad = false;
   let light = 0; // S.boilerLightW;
-  let size = [32*3, 32*3], xlen = 4, ylen = 3;
+  let size = [32*1, 32*1], xlen = 4, ylen = 4;
   for (let i = 0; i < xlen; i++) {
     for (let j = 0; j < ylen; j++) {
       let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(sprite+i*ylen+j)};
@@ -97,7 +99,7 @@ SpritePool.prototype.draw = function(ctx, time) {
       ctx.strokeRect(...rect);
     }
   }
-  
+  //return;
   const imgs = [this.get(sprite).image,
       shadow ? this.get(shadow).image : 0,
       light ? this.get(light).image : 0];

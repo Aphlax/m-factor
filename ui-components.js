@@ -45,7 +45,8 @@ UiProgress.prototype.draw = function(ctx, time) {
   ctx.font = "16px monospace";
   ctx.textBaseline = "middle";
   ctx.textAlign = "end";
-  ctx.fillStyle = this.entity.state == STATE.running ?
+  ctx.fillStyle = this.entity.state == STATE.running ||
+      this.entity.state == STATE.itemReady ?
       COLOR.primary : COLOR.secondary;
   ctx.fillText(Math.floor(progress * 100) + "%", x + this.width - 5, y + 21);
   ctx.textAlign = "start";

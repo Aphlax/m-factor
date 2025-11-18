@@ -78,8 +78,14 @@ export const S = {
   steamEngineShadowV: 126*16,
   steamEngineH: 128*16, // 32
   steamEngineShadowH: 130*16,
-  
-  
+  undergroundExitBeltS: 132*16,
+  undergroundExitBeltW: 133*16,
+  undergroundExitBeltN: 134*16,
+  undergroundExitBeltE: 135*16,
+  undergroundEnterBeltN: 136*16,
+  undergroundEnterBeltE: 137*16,
+  undergroundEnterBeltS: 138*16,
+  undergroundEnterBeltW: 139*16,
   
   woodenChest: 15000,
   woodenChestShadow: 15001,
@@ -120,6 +126,18 @@ export const S = {
   smallElectricPoleShadow: 15076, // 4
   electricFurnaceWorking: 15080, // 12
   electricFurnaceIdle: 15092,
+  undergroundBeltSO: 15093,
+  undergroundBeltWO: 15094,
+  undergroundBeltNO: 15095,
+  undergroundBeltEO: 15096,
+  undergroundBeltNI: 15097,
+  undergroundBeltEI: 15098,
+  undergroundBeltSI: 15099,
+  undergroundBeltWI: 15100,
+  undergroundBeltWOSideLoaded: 15102,
+  undergroundBeltEOSideLoaded: 15104,
+  undergroundBeltEISideLoaded: 15106,
+  undergroundBeltWISideLoaded: 15108,
   
   ironOreItem: 16000,
   copperOreItem: 16000 + 1,
@@ -148,6 +166,8 @@ export const S = {
   boilerItem: 16100 + 17,
   steamEngineItem: 16100 + 18,
   smallElectricPoleItem: 16100 + 19,
+  electricFurnaceItem: 16100 + 20,
+  undergroundBeltItem: 16100 + 21,
   
   gearIcon: 16500,
   burnerDrillIcon: 16500 + 1,
@@ -165,6 +185,8 @@ export const S = {
   boilerIcon: 16500 + 13,
   steamEngineIcon: 16500 + 14,
   smallElectricPoleIcon: 16500 + 15,
+  electricFurnaceIcon: 16500 + 16,
+  undergroundBeltIcon: 16500 + 17,
   
   smoke: 17000,
   
@@ -305,7 +327,17 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/transport-belt/transport-belt.png",
-    sprites: entitySprites(S.transportBeltE, 64, 64, 16, 20, 16, 16, 16, 16, true),
+    sprites: [
+        ...entitySprites(S.transportBeltE, 64, 64, 16, 20, 16, 16, 16, 16, true),
+        ...halfBeltSprites(S.undergroundEnterBeltE, 64, 64, 64*0, 16, 32, 0, 16, 16, 16, 16),
+        ...halfBeltSprites(S.undergroundEnterBeltW, 64, 64, 64*1, 16, -32, 0, 16, 16, 16, 16),
+        ...halfBeltSprites(S.undergroundEnterBeltN, 64, 64, 64*2, 16, 0, -32, 16, 16, 16, 16),
+        ...halfBeltSprites(S.undergroundEnterBeltS, 64, 64, 64*3, 16, 0, 37, 16, 16, 16, 16),
+        ...halfBeltSprites(S.undergroundExitBeltE, 64, 64, 64*0, 16, -32, 0, 16, 16, 16, 16),
+        ...halfBeltSprites(S.undergroundExitBeltW, 64, 64, 64*1, 16, 32, 0, 16, 16, 16, 16),
+        ...halfBeltSprites(S.undergroundExitBeltN, 64, 64, 64*2, 16, 0, 37, 16, 16, 16, 16),
+        ...halfBeltSprites(S.undergroundExitBeltS, 64, 64, 64*3, 16, 0, -32, 16, 16, 16, 16),
+    ],
   },
   {
     path: "graphics/entities/wooden-chest/wooden-chest.png",
@@ -561,11 +593,15 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/electric-furnace/electric-furnace-base.png",
-    sprites: entitySprites(S.electricFurnaceIdle, 129, 100, 1, 1, 1, 32, 1, 3, true)
+    sprites: entitySprites(S.electricFurnaceIdle, 129, 100, 1, 1, 1, 32, 1, 3, true),
   },
   {
     path: "graphics/entities/electric-furnace/electric-furnace-working.png",
-    sprites: entitySprites(S.electricFurnaceWorking, 132, 102, 4, 3, 4, 32, 4, 2, true)
+    sprites: entitySprites(S.electricFurnaceWorking, 132, 102, 4, 3, 4, 32, 4, 2, true),
+  },
+  {
+    path: "graphics/entities/underground-belt/underground-belt-structure.png",
+    sprites: entitySprites(S.undergroundBeltSO, 96, 96, 4, 4, 32, 32, 32, 32, true),
   },
   
   // Items.
@@ -675,6 +711,11 @@ export const SPRITES = [
     path: "graphics/items/electric-furnace.png",
     sprites: itemSprites(S.electricFurnaceItem, S.electricFurnaceIcon),
   },
+  {
+    path: "graphics/items/underground-belt.png",
+    sprites: itemSprites(S.undergroundBeltItem, S.undergroundBeltIcon),
+  },
+  
   
   // Misc.
   {
@@ -723,6 +764,26 @@ function entitySprites(id, width, height, xCount, yCount,
         left, right, top, bottom,
       });
     }
+  }
+  return res;
+}
+
+function halfBeltSprites(id, width, height,
+                         yStart, xCount, xCut, yCut,
+                         left, right, top, bottom) {
+  const res = [];
+  for (let i = 0; i < xCount; i++) {
+    const xOff = xCut < 0 ? -xCut : 0;
+    const yOff = yCut < 0 ? -yCut : 0;
+    res.push({
+      id: id + i,
+      ...rect(i * width + xOff, yStart + yOff,
+          width - Math.abs(xCut), height - Math.abs(yCut)),
+      left: left - (xCut < 0 ? -xCut : 0),
+      right: right - (xCut > 0 ? xCut : 0),
+      top: top - (yCut < 0 ? -yCut : 0),
+      bottom: bottom - (yCut > 0 ? yCut : 0),
+    });
   }
   return res;
 }

@@ -13,6 +13,7 @@ export const TYPE = {
   boiler: 10,
   generator: 11,
   electricPole: 12,
+  undergroundBelt: 14,
 };
 
 export const NAME = {
@@ -29,6 +30,7 @@ export const NAME = {
   steamEngine: 11,
   smallElectricPole: 12,
   electricFurnace: 13,
+  undergroundBelt: 14,
 };
 
 /** Never value for next update. 285 years from now. */

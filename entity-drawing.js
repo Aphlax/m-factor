@@ -130,8 +130,8 @@ export function drawBelt(ctx, view, time) {
   if ((this.y - 1) * view.scale > view.y + view.height)
     return;
   let animation = Math.floor(
-      time * this.animationSpeed / 60) % this.animationLength;
-  const sprite = SPRITES.get(this.sprite + animation);
+      time * this.data.beltAnimationSpeed / 60) % this.data.beltAnimation;
+  const sprite = SPRITES.get(this.data.beltSprite + animation);
   const xScale = this.width * view.scale /
       (sprite.width - sprite.left - sprite.right);
   const yScale = this.height * view.scale /

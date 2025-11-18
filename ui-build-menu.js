@@ -6,6 +6,7 @@ import {ENTITIES} from './entity-definitions.js';
 const BUILD_MENU = [
   NAME.woodenChest,
   NAME.transportBelt,
+  NAME.undergroundBelt,
   NAME.inserter,
   NAME.assemblingMachine1,
   NAME.lab,

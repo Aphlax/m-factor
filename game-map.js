@@ -108,7 +108,8 @@ GameMap.prototype.draw = function(ctx, time) {
   	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
       if (y * size > this.view.height + this.view.y) continue;
       for (let entity of chunk.entities) {
-        if (entity.type == TYPE.belt) {
+        if (entity.type == TYPE.belt ||
+            entity.type == TYPE.undergroundBelt) {
           entity.drawBelt(ctx, this.view, time);
         }
       }
@@ -199,9 +200,9 @@ GameMap.prototype.draw = function(ctx, time) {
   }
 };
 
-GameMap.prototype.createEntity = function(name, x, y, direction, time) {
+GameMap.prototype.createEntity = function(name, x, y, direction, time, data) {
   // Create should not do any checks if there is enough space etc.
-  const entity = new Entity().setup(name, x, y, direction, time);
+  const entity = new Entity().setup(name, x, y, direction, time, data);
   const cx = Math.floor(x / SIZE);
   const cy = Math.floor(y / SIZE);
   if (!this.chunks.has(cx) || !this.chunks.get(cx).has(cy))
@@ -529,7 +530,7 @@ GameMap.prototype.getSelectedEntity = function(screenX, screenY) {
       this.getResourceAt(Math.floor(x), Math.floor(y));
 };
 
-GameMap.prototype.tryCreateEntity = function(screenX, screenY, direction, entityDef, time) {
+GameMap.prototype.tryCreateEntity = function(screenX, screenY, direction, entityDef, time, data) {
   direction = entityDef.rotatable ? direction : 0;
   const {width, height} = !entityDef.size ? entityDef :
       entityDef.size[direction];
@@ -538,10 +539,8 @@ GameMap.prototype.tryCreateEntity = function(screenX, screenY, direction, entity
   const y = Math.round((this.view.y + screenY) /
       this.view.scale - height / 2);
   if (this.canPlace(x, y, width, height)) {
-    this.createEntity(entityDef.name, x, y, direction, time);
-    return true;
+    return this.createEntity(entityDef.name, x, y, direction, time, data);
   }
-  return false;
 };
 
 /** Returns the direction it is possible to place, otherwise -1. */

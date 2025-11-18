@@ -48,7 +48,7 @@ function Entity() {
   this.electricConnections = [];
 }
 
-Entity.prototype.setup = function(name, x, y, direction, time) {
+Entity.prototype.setup = function(name, x, y, direction, time, data) {
   const def = ENTITIES.get(name);
   this.name = name;
   this.type = def.type;
@@ -67,7 +67,7 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   this.sprite = def.sprites[direction][0];
   this.spriteShadow = def.sprites[direction][1];
   this.animation = 0;
-  this.animationLength = def.animationLength;
+  this.animationLength = def.animationLength ?? 0;
   this.animationSpeed = def.animationSpeed ?? 1;
   this.spriteShadowAnimation = !def.noShadowAnimation;
   this.inputEntities.length = 0;
@@ -76,7 +76,8 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
   
   if (this.type == TYPE.belt) {
     this.nextUpdate = NEVER;
-    this.animationSpeed *= def.beltSpeed;
+    this.data.beltAnimation = def.beltAnimation;
+    this.data.beltAnimationSpeed = def.beltAnimationSpeed;
     this.data.beltSpeed = def.beltSpeed;
     this.data.beltSprites = def.beltSprites[direction];
     this.data.beltEndSprites = def.beltEndSprites[direction];
@@ -224,6 +225,20 @@ Entity.prototype.setup = function(name, x, y, direction, time) {
     this.data.wireConnectionPointY = def.wireConnectionPoint.y;
     this.data.wireConnectionPointShadowX = def.wireConnectionPointShadow.x;
     this.data.wireConnectionPointShadowY = def.wireConnectionPointShadow.y;
+  } else if (this.type == TYPE.undergroundBelt) {
+    this.nextUpdate = NEVER;
+    this.data.undergroundUp = !!data?.undergroundUp;
+    this.data.maxUndergroundGap = def.maxUndergroundGap;
+    this.data.beltAnimation = def.beltAnimation;
+    this.data.beltAnimationSpeed = def.beltAnimationSpeed;
+    this.data.beltSpeed = def.beltSpeed;
+    this.data.beltSprites = def.beltSprites[direction];
+    this.data.beltEndSprites = def.beltEndSprites[direction];
+    this.data.beltInput = undefined;
+    this.data.beltOutput = undefined;
+    this.data.beltSideLoadMinusWait = 0;
+    this.data.beltSideLoadPlusWait = 0;
+    this.updateBeltSprites();
   }
   return this;
 };

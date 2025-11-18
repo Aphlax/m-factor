@@ -207,7 +207,8 @@ export function updateBeltSprites() {
   let right = false, left = false;
   for (let other of this.inputEntities) {
     if (other == this.data.beltInput) continue;
-    if (other.type != TYPE.belt) continue;
+    if (other.type != TYPE.belt &&
+        other.type != TYPE.undergroundBelt) continue;
     if (!right &&
         this.x - (this.direction - 1) % 2 == other.x &&
         this.y - (this.direction - 2) % 2 == other.y) {
@@ -220,18 +221,36 @@ export function updateBeltSprites() {
   }
   this.data.beltExtraRightSprite = right ? this.data.beltEndSprites[2] : 0;
   this.data.beltExtraLeftSprite = left ? this.data.beltEndSprites[3] : 0;
-  if (!this.data.beltInput) {
-    this.sprite = this.data.beltSprites[0];
-    this.data.beltBeginSprite = this.data.beltEndSprites[0];
+  if (this.type == TYPE.belt) {
+    if (!this.data.beltInput) {
+      this.data.beltSprite = this.data.beltSprites[0];
+    } else {
+      const curve = (this.direction - this.data.beltInput.direction + 4) % 4;
+      this.data.beltSprite = this.data.beltSprites[curve == 3 ? 2 : curve];
+    }
   } else {
-    const curve = (this.direction - this.data.beltInput.direction + 4) % 4;
-    this.sprite = this.data.beltSprites[curve == 3 ? 2 : curve];
+    this.data.beltSprite = !this.data.undergroundUp ?
+        this.data.beltSprites[0] :
+        this.data.beltSprites[1];
+  }
+  if (!this.data.beltInput) {
+    this.data.beltBeginSprite =
+      this.type == TYPE.undergroundBelt && this.data.undergroundUp ?
+      0 : this.data.beltEndSprites[0];
+  } else {
     this.data.beltBeginSprite = 0;
   }
-  if (!this.data.beltOutput) {
+  if (!this.data.beltOutput &&
+      !(this.type == TYPE.undergroundBelt && !this.data.undergroundUp)) {
     this.data.beltEndSprite = this.data.beltEndSprites[1];
   } else {
     this.data.beltEndSprite = 0;
+  }
+  if (this.type == TYPE.undergroundBelt) {
+    const sideLoaded = left || right ? 2 : 0;
+    this.sprite = this.data.undergroundUp ?
+        this.data.beltSprites[3 + sideLoaded] :
+        this.data.beltSprites[2 + sideLoaded];
   }
 }
 

@@ -84,11 +84,20 @@ UiWindow.prototype.draw = function(ctx, time) {
   }
   
   ctx.beginPath();
-  ctx.moveTo(width / 2 - 12, y + 16);
-  ctx.lineTo(width / 2 + 12, y + 16);
+  ctx.moveTo(width / 2 - 2, y + 16);
+  ctx.lineTo(width / 2 + 2, y + 16);
   ctx.strokeStyle = COLOR.primary;
   ctx.lineWidth = 4;
   ctx.lineCaps = "round";
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(width / 2 - 2, y + 11);
+  ctx.lineTo(width / 2 + 2, y + 11);
+  ctx.moveTo(width / 2 - 2, y + 21);
+  ctx.lineTo(width / 2 + 2, y + 21);
+  ctx.strokeStyle = COLOR.primary;
+  ctx.lineWidth = 1;
+  ctx.lineCaps = "butt";
   ctx.stroke();
   
   if (this.entityUi) {
@@ -215,6 +224,7 @@ UiWindow.prototype.initialize = function() {
   this.entityUis.set(TYPE.offshorePump, {});
   this.entityUis.set(TYPE.boiler, {});
   this.entityUis.set(TYPE.electricPole, {});
+  this.entityUis.set(TYPE.undergroundBelt, {});
   
   this.entityUis.set(TYPE.furnace, {
     input: new UiInventory(this, 10, 40),
