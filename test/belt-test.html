@@ -1,1 +1,119 @@
-<html>
+<!DOCTYPE html>
+<html lang="en" style="width: 100%; height: 100%; margin: 0; overflow: hidden;">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/stable/react@19.2.0",
+        "react-dom/client": "https://esm.sh/stable/react-dom@19.2.0/client"
+      }
+    }
+    </script>
+    <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+    <title>Belt Test</title>
+  </head>
+  <body style="width: 100%; height: 100%; margin: 0; overflow: hidden; touch-action: none;">
+    <h2>Test results</h2>
+    <div id="root" style="width: 100%; height: 100%; margin: 0; overflow: auto;"></div>
+<script type="text/babel" data-type="module">
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import {it, sit, fit, test, assertEqual, assertNotEqual, assertExists, assertNotExists, pasteBlueprintAll} from './test-framework.js';
+import {DIRECTION, NAME} from '../entity-properties.js';
+const {north, east, south, west} = DIRECTION;
+
+it("belt creation", () => {
+  const name = NAME.transportBelt;
+  pasteBlueprintAll([
+    {name, x: 0, y: 0, direction: north},
+  ], ([b1]) => {
+    assertExists(b1);
+    assertExists(b1.data.lane);
+  });
+});
+it("removal splits lane with chunk border", () => {
+  const name = NAME.transportBelt;
+  pasteBlueprintAll([
+    {name, x: 0, y: -1, direction: north},
+    {name, x: 0, y: 0, direction: north},
+    {name, x: 0, y: 1, direction: north},
+  ], ([b1, b2, b3], map) => {
+    assertExists(b1.data.lane);
+    assertEqual(b1.data.lane, b3.data.lane);
+    map.deleteEntity(b2, 0);
+    assertNotEqual(b1.data.lane, b3.data.lane);
+    assertNotExists(map.getEntityAt(0, 0));
+  });
+});
+it("T junction behaves correctly", () => {
+  const name = NAME.transportBelt;
+  pasteBlueprintAll([
+    {name, x: 0, y: 0, direction: north},
+    {name, x: -1, y: 0, direction: east},
+    {name, x: 1, y: 0, direction: west},
+  ], ([b1, b2, b3], map) => {
+    assertNotEqual(b1.data.lane, b2.data.lane);
+    assertNotEqual(b1.data.lane, b3.data.lane);
+    map.deleteEntity(b2, 0);
+    assertEqual(b1.data.lane, b3.data.lane);
+  });
+});
+it("X junction behaves correctly", () => {
+  const name = NAME.transportBelt;
+  pasteBlueprintAll([
+    {name, x: 0, y: 0, direction: north},
+    {name, x: 0, y: 1, direction: north},
+    {name, x: -1, y: 0, direction: east},
+    {name, x: 1, y: 0, direction: west},
+  ], ([b1, b2, b3, b4], map) => {
+    assertEqual(b1.data.lane, b2.data.lane);
+    assertNotEqual(b1.data.lane, b3.data.lane);
+    assertNotEqual(b1.data.lane, b4.data.lane);
+    map.deleteEntity(b3, 0);
+    assertNotEqual(b1.data.lane, b4.data.lane);
+    map.deleteEntity(b2, 0);
+    assertEqual(b1.data.lane, b4.data.lane);
+  });
+});
+it("loop behaves correctly", () => {
+  const name = NAME.transportBelt;
+  pasteBlueprintAll([
+    {name, x: 0, y: 0, direction: east},
+    {name, x: 0, y: 1, direction: north},
+    {name, x: 1, y: 1, direction: west},
+    {name, x: 1, y: 0, direction: south},
+  ], ([b1, b2, b3, b4], map) => {
+    assertExists(b1.data.lane);
+    assertEqual(b1.data.lane, b2.data.lane);
+    assertEqual(b1.data.lane, b3.data.lane);
+    assertEqual(b1.data.lane, b4.data.lane);
+    assertEqual(b1.data.lane.circular, true);
+    map.deleteEntity(b1, 0);
+    assertEqual(b2.data.lane.circular, false);
+  });
+});
+it("underground connects", () => {
+  const name = NAME.undergroundBelt;
+  pasteBlueprintAll([
+    {name, x: 0, y: 0, direction: north, data: {undergrounUp: true}},
+    {name, x: 0, y: 5, direction: north, data: {undergrounUp: false}},
+  ], ([u1, u2]) => {
+    assertExists(u1.data.lane);
+    assertEqual(u1.data.lane, u2.data.lane);
+  });
+});
+it("works", () => {
+  const name = NAME.transportBelt;
+  pasteBlueprintAll([
+    {name, x: 0, y: 0, direction: north},
+  ], ([b1]) => {
+    assertEqual();
+  });
+});
+
+createRoot(document.getElementById("root")).render(test());
+</script>
+  </body>
+</html>
