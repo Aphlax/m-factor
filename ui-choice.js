@@ -66,11 +66,13 @@ UiChoice.prototype.draw = function(ctx) {
           COLOR.buttonBackgroundPressed : COLOR.buttonBackground;
       ctx.fillRect(x + j * 46, y + i * 46, 40, 40);
       ctx.strokeRect(x + j * 46, y + i * 46, 40, 40);
+      window.numberOtherDraws += 2;
       const sprite = this.choices[index].sprite;
       ctx.drawImage(sprite.image,
           sprite.x, sprite.y,
           sprite.width, sprite.height,
           x + j * 46 + 5, y + i * 46 + 5, 32, 32);
+      window.numberImageDraws++;
     }
   }
 };

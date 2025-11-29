@@ -88,9 +88,11 @@ UiFluidInventory.prototype.draw = function(ctx) {
         sprite.x, sprite.y,
         sprite.width, sprite.height,
         x + i * 46 + 5, y + 5, 32, 32);
+    window.numberImageDraws++;
     ctx.fillStyle = COLOR.primary;
     ctx.fillText(Math.floor(tanklet.amount),
         x + i * 46 + 37, y + 32);
+    window.numberOtherDraws += 3;
   }
   ctx.textAlign = "start";
 };

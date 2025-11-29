@@ -49,6 +49,8 @@ import {Game} from "./game.js";
     game.update(time);
     const timestampUpdate = performance.now();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    window.numberImageDraws = 0;
+    window.numberOtherDraws = 0;
     game.draw(ctx, time);
     const timestampDraw = performance.now();
     const update = timestampUpdate - timestampStart;
@@ -61,9 +63,12 @@ import {Game} from "./game.js";
     ctx.font = "24px Arial";
     ctx.fillStyle = "black";
     ctx.textBaseline = "alphabetic";
-    ctx.fillText(frameRate + "", canvas.width - 118, 24);
-    ctx.fillText((game.playTime / 1000).toFixed(1), canvas.width - 118, 48);
-    ctx.fillText(game.seed, canvas.width - 118, 72);
+    ctx.textAlign = "end";
+    ctx.fillText(frameRate + "", canvas.width - 60, 24);
+    ctx.fillText((game.playTime / 1000).toFixed(1), canvas.width - 60, 48);
+    ctx.fillText(window.numberImageDraws + " dI", canvas.width - 60, 72);
+    ctx.fillText(window.numberOtherDraws + " dO", canvas.width - 60, 96);
+    ctx.textAlign = "start";
     ctx.fillText((Math.round(maxUpdateTime * 10) / 10) + "/" +
         (Math.round(maxDrawTime * 10) / 10), 40, 55);
     if (game.debug !== undefined) {

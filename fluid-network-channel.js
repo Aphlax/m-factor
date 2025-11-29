@@ -85,6 +85,7 @@ Channel.prototype.draw = function(ctx, view) {
         (pipe.y + 0.1) * view.scale - view.y,
         (pipe.width - 0.2) * view.scale,
         (pipe.height - 0.2) * view.scale);
+    window.numberOtherDraws++;
   }
   ctx.globalAlpha = 0.5;
   ctx.fillStyle = this.color;
@@ -94,6 +95,7 @@ Channel.prototype.draw = function(ctx, view) {
         (entity.y + 0.1) * view.scale - view.y,
         (0.4) * view.scale,
         (0.4) * view.scale);
+    window.numberOtherDraws++;
   }
   for (let entity of this.outputTanklets.keys()) {
     ctx.fillRect(
@@ -101,6 +103,7 @@ Channel.prototype.draw = function(ctx, view) {
         (entity.y + entity.height - 0.5) * view.scale - view.y,
         (0.4) * view.scale,
         (0.4) * view.scale);
+    window.numberOtherDraws++;
   }
   ctx.globalAlpha = 1;
 };

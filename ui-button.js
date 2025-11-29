@@ -39,12 +39,14 @@ UiButton.prototype.draw = function(ctx, time) {
   ctx.lineWidth = 1;
   ctx.strokeStyle = COLOR.buttonBorder;
   ctx.strokeRect(x, y, 40, 40);
+  window.numberOtherDraws += 2;
   
   const sprite = SPRITES.get(this.sprite);
   ctx.drawImage(sprite.image,
-          sprite.x, sprite.y,
-          sprite.width, sprite.height,
-          x + 4, y + 4, 32, 32)
+      sprite.x, sprite.y,
+      sprite.width, sprite.height,
+      x + 4, y + 4, 32, 32)
+  window.numberImageDraws++;
 };
 
 UiButton.prototype.inBounds = function(t) {

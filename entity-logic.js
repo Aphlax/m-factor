@@ -42,7 +42,8 @@ export function insert(item, amount, time) {
  * Either an array of items or -1 for anything.
  */
 export function insertWants() {
-  if (this.type == TYPE.belt) {
+  if (this.type == TYPE.belt ||
+      this.type == TYPE.undergroundBelt) {
     return -1;
   } else if (this.type == TYPE.assembler) {
     const wants = this.outputInventory.insertWants();
@@ -124,83 +125,58 @@ export function beltExtract(items, time, positionForBelt) {
   return waitOrItem;
 }
 
-export function connectBelt(other, time, transportNetwork) {
+export function connectBelt(other, transportNetwork) {
+  if (other.direction + 2 % 4 == this.direction) {
+    return;
+  }
   const x = this.x - (this.direction - 2) % 2;
   const y = this.y + (this.direction - 1) % 2;
-  if (x == other.x && y == other.y) {
-    if (other.direction + 2 % 4 == this.direction) {
+  if (x == other.x && y == other.y &&
+      !(this.type == TYPE.undergroundBelt &&
+      !this.data.undergroundUp)) {
+    if (other.direction == this.direction &&
+        other.type == TYPE.undergroundBelt &&
+        other.data.undergroundUp)
       return;
-    }
     this.outputEntities.push(other);
     other.inputEntities.push(this);
-    if (other.beltInputOutput()) {
-      transportNetwork.beltInputChanged(other);
-    }
+    transportNetwork.computeBeltConnections(other);
     return true;
   }
   const x2 = other.x - (other.direction - 2) % 2;
   const y2 = other.y + (other.direction - 1) % 2;
-  if (x2 == this.x && y2 == this.y) {
+  if (x2 == this.x && y2 == this.y &&
+      !(other.type == TYPE.undergroundBelt &&
+      !other.data.undergroundUp)) {
+    if (this.direction == other.direction &&
+        this.type == TYPE.undergroundBelt &&
+        this.data.undergroundUp)
+      return;
     this.inputEntities.push(other);
     other.outputEntities.push(this);
-    if (this.beltInputOutput()) {
-      transportNetwork.beltInputChanged(this);
-    }
+    transportNetwork.computeBeltConnections(this);
     return true;
   }
 }
 
-/**
- * Computes the belt connection input and output of this belt.
- * Returns true iff the input of this belt changed.
- */
-export function beltInputOutput() {
-  const oldBeltInput = this.data.beltInput;
-  let right = undefined, left = undefined;
-  for (let i = 0; i < this.inputEntities.length; i++) {
-    const other = this.inputEntities[i];
-    if (other.type != TYPE.belt) continue;
-    if (this.x + (this.direction - 2) % 2 == other.x &&
-        this.y - (this.direction - 1) % 2 == other.y) {
-      this.data.beltInput = other;
-      other.data.beltOutput = this;
-      if (right?.data.beltOutput) {
-        right.data.beltOutput = undefined;
-      }
-      if (left?.data.beltOutput) {
-        left.data.beltOutput = undefined;
-      }
-      for (i++; i < this.inputEntities.length; i++) {
-        if (this.inputEntities[i].type != TYPE.belt ||
-            !this.inputEntities[i].data.beltOutput) continue;
-        this.inputEntities[i].data.beltOutput = undefined;
-      }
-      return oldBeltInput != this.data.beltInput;
-    } else if (!right &&
-        this.x - (this.direction - 1) % 2 == other.x &&
-        this.y - (this.direction - 2) % 2 == other.y) {
-      right = other;
-    } else if (!left &&
-        this.x + (this.direction - 1) % 2 == other.x &&
-        this.y + (this.direction - 2) % 2 == other.y) {
-      left = other;
-    }
-  }
-  if (right && left) {
-    this.data.beltInput = undefined;
-    if (right.data.beltOutput) {
-      right.data.beltOutput = undefined;
-    }
-    if (left.data.beltOutput) {
-      left.data.beltOutput = undefined;
-    }
-    return oldBeltInput != this.data.beltInput;
-  }
-  this.data.beltInput = right || left;
-  if (this.data.beltInput) {
-    this.data.beltInput.data.beltOutput = this;
-  }
-  return oldBeltInput != this.data.beltInput;
+export function connectUndergroundBelt(other, transportNetwork) {
+  if (this.data.undergroundUp == other.data.undergroundUp ||
+      this.direction != other.direction ||
+      this.name != other.name)
+    return;
+  const input = this.data.undergroundUp ? other : this,
+      output = this.data.undergroundUp ? this : other;
+  const dx = output.x - input.x,
+      dy = output.y - input.y;
+  if (this.direction % 2 == 0 ?
+      !(dx == 0 && dy * ((this.direction - 1) % 2) >= 0 &&
+      dy * ((this.direction - 1) % 2) <= this.data.maxUndergroundGap + 1) :
+      !(dy == 0 && dx * -((this.direction - 2) % 2) >= 0 &&
+      dx * -((this.direction - 2) % 2) <= this.data.maxUndergroundGap + 1))
+    return;
+  input.outputEntities.push(output);
+  output.inputEntities.push(input);
+  transportNetwork.computeBeltConnections(output);
 }
 
 export function updateBeltSprites() {
@@ -262,7 +238,8 @@ export function connectInserter(other, time) {
       other.y <= this.y + dy &&
       other.y + other.height > this.y + dy) {
     if (other.inputInventory || other.fuelInventory ||
-        other.type == TYPE.belt) {
+        other.type == TYPE.belt ||
+        other.type == TYPE.undergroundBelt) {
       this.outputEntities.push(other);
       other.inputEntities.push(this);
       if (this.state == STATE.noOutput ||

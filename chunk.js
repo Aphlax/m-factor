@@ -40,6 +40,7 @@ Chunk.prototype.drawTerrain = function(ctx, view) {
           Math.floor((this.x * SIZE + x) * view.scale - view.x),
           Math.floor((this.y * SIZE + y) * view.scale - view.y),
           scaleCeil, scaleCeil);
+      window.numberImageDraws++;
     }
   }
   
@@ -53,6 +54,7 @@ Chunk.prototype.drawTerrain = function(ctx, view) {
   ctx.lineWidth = 1;
   ctx.strokeStyle = "red";
   ctx.stroke();
+  window.numberOtherDraws++;
 };
 
 Chunk.prototype.drawResources = function(ctx, view) {
@@ -61,21 +63,21 @@ Chunk.prototype.drawResources = function(ctx, view) {
   const yStart = Math.max(0, Math.floor(view.y / view.scale - this.y * SIZE - 1));
   const yEnd = Math.min(SIZE, Math.ceil((view.height + view.y) / view.scale - this.y * SIZE + 1));
   const resourceSize = Math.ceil(view.scale * 1.5);
-  if (this.resources) {
-    for (let x = xStart; x < xEnd; x++) {
-      if (!this.resources[x]) continue;
-      for (let y = yStart; y < yEnd; y++) {
-        const r = this.resources[x][y];
-        if (!r) continue;
-        const sprite = SPRITES.get(r.sprite);
-        ctx.drawImage(
+  if (!this.resources) return;
+  for (let x = xStart; x < xEnd; x++) {
+    if (!this.resources[x]) continue;
+    for (let y = yStart; y < yEnd; y++) {
+      const r = this.resources[x][y];
+      if (!r) continue;
+      const sprite = SPRITES.get(r.sprite);
+      ctx.drawImage(
           sprite.image,
           sprite.x, sprite.y,
           sprite.width, sprite.height,
           Math.floor((this.x * SIZE + x - 0.25) * view.scale - view.x),
           Math.floor((this.y * SIZE + y - 0.25) * view.scale - view.y),
           resourceSize, resourceSize);
-      }
+      window.numberImageDraws++;
     }
   }
 };
@@ -109,6 +111,7 @@ Chunk.prototype.drawParticles = function(ctx, view, time) {
         (y * view.scale - view.y),
         (sprite.width * size * view.scale / 64),
         (sprite.height * size * view.scale / 64));
+    window.numberImageDraws++;
   }
   ctx.globalAlpha = 1;
 };

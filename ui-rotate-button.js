@@ -25,6 +25,7 @@ UiRotateButton.prototype.draw = function(ctx) {
   ctx.lineTo(this.x, this.y);
   ctx.fill();
   ctx.stroke();
+  window.numberOtherDraws += 4;
 };
 
 UiRotateButton.prototype.inBounds = function(t) {

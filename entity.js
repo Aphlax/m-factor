@@ -265,7 +265,8 @@ Entity.prototype.update = function(gameMap, time) {
           state = STATE.outputFull;
           break inserter;
         }
-        if (inputEntity.type == TYPE.belt) {
+        if (inputEntity.type == TYPE.belt ||
+            inputEntity.type == TYPE.undergroundBelt) {
           const positionForBelt = this.direction * 3 + 1;
           const waitOrItem = inputEntity.beltExtract(
               wants, this.nextUpdate, positionForBelt);
@@ -309,7 +310,8 @@ Entity.prototype.update = function(gameMap, time) {
           break inserter;
         }
         const [outputEntity] = this.outputEntities;
-        if (outputEntity.type == TYPE.belt) {
+        if (outputEntity.type == TYPE.belt ||
+            outputEntity.type == TYPE.undergroundBelt) {
           const positionForBelt = this.direction * 3 + 1;
           const wait = outputEntity.beltInsert(
               this.data.inserterItem,
@@ -396,7 +398,8 @@ Entity.prototype.update = function(gameMap, time) {
         return;
       }
       const item = MINE_PRODUCTS[this.data.minedResource];
-      if (outputEntity.type == TYPE.belt) {
+      if (outputEntity.type == TYPE.belt ||
+          outputEntity.type == TYPE.undergroundBelt) {
         const positionForBelt = ((this.direction + 2) % 4) * 3 + 1;
         const wait = outputEntity.beltInsert(item, this.nextUpdate, positionForBelt);
         if (wait) {

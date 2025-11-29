@@ -9,6 +9,7 @@ function ElectricNetwork(gameMap) {
 ElectricNetwork.prototype.addPole = function(entity, time) {
   const reach = entity.data.wireReach;
   const area = [entity.x - reach, entity.y - reach, reach * 2, reach * 2];
+  // TODO: poles should be connected in gameMap.conmectEntity.
   const poles = this.gameMap.getEntitiesIn(...area, TYPE.electricPole);
   const distList = [];
   for (let pole of poles) {

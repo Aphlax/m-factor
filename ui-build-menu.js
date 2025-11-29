@@ -8,16 +8,16 @@ const BUILD_MENU = [
   NAME.transportBelt,
   NAME.undergroundBelt,
   NAME.inserter,
+  NAME.smallElectricPole,
+  NAME.pipe,
   NAME.assemblingMachine1,
-  NAME.lab,
   NAME.burnerDrill,
   NAME.stoneFurnace,
-  NAME.pipe,
+  NAME.electricFurnace,
+  NAME.lab,
   NAME.offshorePump,
   NAME.boiler,
   NAME.steamEngine,
-  NAME.smallElectricPole,
-  NAME.electricFurnace,
 ];
 const DEACC = 50;
 
@@ -125,12 +125,14 @@ UiBuildMenu.prototype.draw = function(ctx) {
         COLOR.buildSingleBorder) : COLOR.buildBorder;
     ctx.lineWidth = i == this.selectedIndex ? 2 : 1;
     ctx.strokeRect(this.menu[i].x, this.menu[i].y, size, size);
+    window.numberOtherDraws += 2;
     const sprite = SPRITES.get(this.menu[i].sprite);
     ctx.drawImage(sprite.image,
-          sprite.x, sprite.y,
-          sprite.width, sprite.height,
-          this.menu[i].x + 4, this.menu[i].y + 4,
-          size - 8, size - 8);
+        sprite.x, sprite.y,
+        sprite.width, sprite.height,
+        this.menu[i].x + 4, this.menu[i].y + 4,
+        size - 8, size - 8);
+    window.numberImageDraws++;
   }
   // return;
   ctx.beginPath();
@@ -139,6 +141,7 @@ UiBuildMenu.prototype.draw = function(ctx) {
   ctx.lineTo(243, this.canvasHeight - 180);
   ctx.lineTo(this.canvasWidth, this.canvasHeight - 30);
   ctx.stroke();
+  window.numberOtherDraws++;
 };
 
 UiBuildMenu.prototype.inBounds = function(t) {

@@ -52,7 +52,7 @@ GameUi.prototype.update = function(time) {
     this.longTouchEnd = 0;
     this.longTouch = true;
     this.shortTouch = false;
-    navigator.vibrate(50);
+    navigator.vibrate(20);
     this.longTouchIndicator = time + 200;
     
     if (this.mode == MODE.window) {
@@ -105,8 +105,10 @@ GameUi.prototype.draw = function(ctx, time) {
     ctx.strokeStyle = COLOR.longTouchIndicator;
     ctx.lineWidth = Math.floor(intensity * 10) * 2;
     ctx.strokeRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    window.numberOtherDraws++;
     ctx.lineWidth = Math.floor(intensity * 10);
     ctx.strokeRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    window.numberOtherDraws++;
     ctx.globalAlpha = 1;
   }
 };

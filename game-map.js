@@ -1,7 +1,7 @@
 import {MapGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {S} from './sprite-definitions.js';
-import {TYPE, STATE, MAX_SIZE, MAX_LOGISTIC_CONNECTION, ENERGY, DIRECTIONS, MAX_WIRE_REACH, MAX_SHADOW, MAX_ELECTRIC_SUPPLY} from './entity-properties.js';
+import {TYPE, STATE, MAX_SIZE, MAX_LOGISTIC_CONNECTION, MAX_UNDERGROUND_CONNECTION, ENERGY, DIRECTIONS, MAX_WIRE_REACH, MAX_SHADOW, MAX_ELECTRIC_SUPPLY} from './entity-properties.js';
 import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
 import {FluidNetwork} from './fluid-network.js';
@@ -12,8 +12,15 @@ import {ElectricNetwork} from './electric-network.js';
 - store expired entities by chunk.
 */
 
-function GameMap(seed) {
-  this.mapGenerator = new MapGenerator(seed);
+export const MAP = {
+  nauvis: 0,
+  test: 1,
+};
+
+function GameMap(seed, type) {
+  this.mapGenerator = type == MAP.test ?
+      new TestGenerator() :
+      new MapGenerator(seed);
   this.view = {};
   this.chunks = new Map(); // 2-D map of coordinate -> chunk
   this.transportNetwork = new TransportNetwork();
@@ -200,6 +207,14 @@ GameMap.prototype.draw = function(ctx, time) {
   }
 };
 
+GameMap.prototype.createEntityNow = function({name, x, y, direction, data}) {
+  const cx = Math.floor(x / SIZE);
+  const cy = Math.floor(y / SIZE);
+  if (!this.chunks.has(cx) || !this.chunks.get(cx).has(cy))
+    this.generateChunk(cx, cy);
+  return this.createEntity(name, x, y, direction, 0, data);
+};
+
 GameMap.prototype.createEntity = function(name, x, y, direction, time, data) {
   // Create should not do any checks if there is enough space etc.
   const entity = new Entity().setup(name, x, y, direction, time, data);
@@ -310,7 +325,8 @@ GameMap.prototype.connectEntity = function(entity, time) {
   const isElectric = entity.energySource == ENERGY.electric ||
     entity.type == TYPE.electricPole;
   const l = MAX_LOGISTIC_CONNECTION;
-  const r = isElectric ? MAX_ELECTRIC_SUPPLY : l;
+  const r = Math.max(isElectric ? MAX_ELECTRIC_SUPPLY : 0,
+      l, MAX_UNDERGROUND_CONNECTION);
   const cx1 = Math.floor((entity.x - r - MAX_SIZE) / SIZE);
   const cx2 = Math.floor((entity.x + entity.width + r - 1) / SIZE);
   const cy1 = Math.floor((entity.y - r - MAX_SIZE) / SIZE);
@@ -339,14 +355,23 @@ GameMap.prototype.connectEntity = function(entity, time) {
           other.electricConnections.push(entity);
           continue;
         }
+        if (entity.type == TYPE.undergroundBelt &&
+            other.type == TYPE.undergroundBelt &&
+            (entity.x == other.x || entity.y == other.y)) {
+          entity.connectUndergroundBelt(other, this.transportNetwork);
+        }
+        // From here on only check for local (short) connections.
         if (!(entity.x + entity.width > other.x && entity.x < other.x + other.width &&
             entity.y + entity.height + l > other.y && entity.y - l < other.y + other.height) &&
             !(entity.x + entity.width + l > other.x && entity.x - l < other.x + other.width &&
             entity.y + entity.height > other.y && entity.y < other.y + other.height))
           continue;
-        if (entity.type == TYPE.belt && other.type == TYPE.belt) {
+        if ((entity.type == TYPE.belt ||
+            entity.type == TYPE.undergroundBelt) &&
+            (other.type == TYPE.belt ||
+            other.type == TYPE.undergroundBelt)) {
           if (Math.abs(entity.x - other.x) + Math.abs(entity.y - other.y) == 1) {
-            if (entity.connectBelt(other, time, this.transportNetwork)) {
+            if (entity.connectBelt(other, this.transportNetwork)) {
               entity.updateBeltSprites();
               other.updateBeltSprites();
             }
@@ -398,9 +423,11 @@ GameMap.prototype.connectEntity = function(entity, time) {
       }
     }
   }
-  if (entity.type == TYPE.belt) {
+  if (entity.type == TYPE.belt ||
+      entity.type == TYPE.undergroundBelt) {
     this.transportNetwork.addBelt(entity);
-  } else if (entity.data.pipeConnections) {
+  }
+  if (entity.data.pipeConnections) {
     if (this.fluidNetwork.addPipe(entity)) {
       this.deleteEntity(entity);
       return;
@@ -433,22 +460,28 @@ GameMap.prototype.disconnectEntity = function(entity, time) {
   entity.electricConnections.forEach(other =>
       other.electricConnections.splice(other.electricConnections.indexOf(entity), 1));
   
-  if (entity.type == TYPE.belt) {
+  if (entity.type == TYPE.belt ||
+      entity.type == TYPE.undergroundBelt) {
     this.transportNetwork.removeBelt(entity);
     for (let other of entity.inputEntities) {
-      if (other.type == TYPE.belt) {
-        if (other.data.beltOutput == entity) {
-          other.data.beltOutput = undefined;
+      if (other.type == TYPE.belt ||
+          other.type == TYPE.undergroundBelt) {
+        other.data.beltOutput = undefined;
+        for (let other2 of other.outputEntities) {
+          if (other2.type == TYPE.undergroundBelt) {
+            this.transportNetwork.computeBeltConnections(other2);
+          }
         }
         other.updateBeltSprites();
       }
     }
     for (let other of entity.outputEntities) {
-      if (other.type == TYPE.belt) {
-        if (other.beltInputOutput()) {
-          this.transportNetwork.beltInputChanged(other);
+      if (other.type == TYPE.belt ||
+          other.type == TYPE.undergroundBelt) {
+        if (this.transportNetwork.computeBeltConnections(other)) {
           for (let other2 of other.inputEntities) {
-            if (other2.type == TYPE.belt) {
+            if (other2.type == TYPE.belt ||
+                other2.type == TYPE.undergroundBelt) {
               other2.updateBeltSprites();
             }
           }
@@ -604,5 +637,12 @@ GameMap.prototype.createSmoke = function(x, y, time, duration) {
     this.chunks.get(cx).get(cy).particles.push(p);
   }
 };
+
+function TestGenerator() {}
+TestGenerator.prototype.initialize = function() {};
+TestGenerator.prototype.generateTiles = function() {
+  return new Array(SIZE).fill(0).map(_ => new Array(SIZE).fill(0));
+};
+TestGenerator.prototype.generateResources = function() {};
 
 export {GameMap};

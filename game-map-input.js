@@ -53,29 +53,33 @@ GameMapInput.prototype.draw = function(ctx) {
         Math.min(x1, x2), Math.min(y1, y2),
         Math.abs(x1 - x2) + this.view.scale,
         Math.abs(y1 - y2) + this.view.scale);
-    if (this.mode == MODE.buildBelt &&
-        this.currentBuild.length > 1) {
+    if (this.mode == MODE.buildBelt) {
       // Draw arrow.
       const half = this.view.scale / 2;
       const vx = -((d - 2) % 2) * this.view.scale,
           vy = ((d - 1) % 2) * this.view.scale,
           px = -vy, py = vx;
       ctx.beginPath();
-      ctx.moveTo(x1 + half + 0.5 * vx, y1 + half + 0.5 * vy);
+      ctx.moveTo(x2 + half + 0.25 * (-vx - px),
+          y2 + half + 0.25 * (-vy - py));
       ctx.lineTo(x2 + half, y2 + half);
       ctx.lineTo(x2 + half + 0.25 * (-vx + px),
           y2 + half + 0.25 * (-vy + py));
-      ctx.moveTo(x2 + half, y2 + half);
-      ctx.lineTo(x2 + half + 0.25 * (-vx - px),
-          y2 + half + 0.25 * (-vy - py));
-      ctx.stroke();
-      ctx.font = this.view.scale > 22 ?
-          "20px monospace" : "14px monospace";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillStyle = COLOR.buildPlanner;
-      ctx.fillText(this.currentBuild.length, x1 + half, y1 + half);
-      ctx.textAlign = "start";
+      if (this.currentBuild.length > 1) {
+        ctx.moveTo(x1 + half + 0.5 * vx,
+            y1 + half + 0.5 * vy);
+        ctx.lineTo(x2 + half, y2 + half);
+        ctx.stroke();
+        ctx.font = this.view.scale > 22 ?
+            "20px monospace" : "14px monospace";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = COLOR.buildPlanner;
+        ctx.fillText(this.currentBuild.length, x1 + half, y1 + half);
+        ctx.textAlign = "start";
+      } else {
+        ctx.stroke();
+      }
     }
   } else if (this.mode == MODE.buildOffshorePump) {
     ctx.strokeStyle = COLOR.buildPlanner;
@@ -246,7 +250,9 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
           this.touches[0].x, this.touches[0].y,
           d, entityDef, this.lastUpdate);
       if (entity) {
-        if (entity.type == TYPE.undergroundBelt) {
+        if (entity.type == TYPE.undergroundBelt &&
+            !entity.data.undergroundUp &&
+            !entity.data.beltOutput) {
           this.mode = MODE.buildUndergroundBeltExit;
           this.currentBuild.x = entity.x - (d - 2) % 2;
           this.currentBuild.y = entity.y + (d - 1) % 2;

@@ -50,6 +50,7 @@ UiProgress.prototype.draw = function(ctx, time) {
       COLOR.primary : COLOR.secondary;
   ctx.fillText(Math.floor(progress * 100) + "%", x + this.width - 5, y + 21);
   ctx.textAlign = "start";
+  window.numberOtherDraws += 3;
 };
 
 function UiResource(parent, x, y) {
@@ -78,6 +79,7 @@ UiResource.prototype.draw = function(ctx) {
       sprite.x, sprite.y,
       sprite.width, sprite.height,
       x - 4, y - 4, 48, 48);
+  window.numberImageDraws++;
   ctx.restore();
   ctx.lineWidth = 1;
   ctx.strokeStyle = COLOR.border2;
@@ -86,6 +88,7 @@ UiResource.prototype.draw = function(ctx) {
   ctx.textBaseline = "middle";
   ctx.fillStyle = COLOR.primary;
   ctx.fillText(this.resource.amount, x + 48, y + 21);
+  window.numberOtherDraws += 3;
 };
 
 function UiFuel(parent, x, y) {
@@ -121,6 +124,7 @@ UiFuel.prototype.draw = function(ctx, time) {
   ctx.fillRect(x + 2, y + 40 - 2 - height, 2, height);
   ctx.strokeStyle = COLOR.border2;
   ctx.strokeRect(x, y, 6, 40);
+  window.numberOtherDraws += 3;
 };
 
 function UiWindUp(parent, x, y) {
@@ -143,6 +147,7 @@ UiWindUp.prototype.draw = function(ctx, time) {
   ctx.font = "16px monospace";
   ctx.textBaseline = "middle";
   ctx.fillText(Math.floor(this.entity.energyStored), x, y + 21);
+  window.numberOtherDraws += 1;
 };
 
 function UiFluidIndicator(parent, x, y) {
@@ -176,6 +181,7 @@ UiFluidIndicator.prototype.draw = function(ctx, time) {
   const text = this.entity.data.channel.amount +
       "/" + this.entity.data.channel.capacity;
   ctx.fillText(text, x + 46 + xOffset, y + 21);
+  window.numberOtherDraws += 3;
   
   if (!this.entity.data.channel.fluid) return;
   const fluid = FLUIDS.get(this.entity.data.channel.fluid);
@@ -184,6 +190,7 @@ UiFluidIndicator.prototype.draw = function(ctx, time) {
       sprite.x, sprite.y,
       sprite.width, sprite.height,
       x + 5, y + 5, 32, 32);
+  window.numberImageDraws++;
 };
 
 export {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator};

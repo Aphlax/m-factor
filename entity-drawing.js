@@ -70,6 +70,7 @@ export function draw(ctx, view, time) {
           sprite.top * yScale),
       Math.ceil(sprite.width * xScale),
       Math.ceil(sprite.height * yScale));
+  window.numberImageDraws++;
 };
 
 export function drawShadow(ctx, view, time) {
@@ -118,6 +119,7 @@ export function drawShadow(ctx, view, time) {
           sprite.top * yScale),
       Math.ceil(sprite.width * xScale),
       Math.ceil(sprite.height * yScale));
+  window.numberImageDraws++;
 };
 
 export function drawBelt(ctx, view, time) {
@@ -144,6 +146,7 @@ export function drawBelt(ctx, view, time) {
           sprite.top * yScale),
       Math.ceil(sprite.width * xScale),
       Math.ceil(sprite.height * yScale));
+  window.numberImageDraws++;
   if (this.data.beltEndSprite) {
     const s = SPRITES.get(this.data.beltEndSprite + animation);
     const x = this.x - (this.direction - 2) % 2;
@@ -154,6 +157,7 @@ export function drawBelt(ctx, view, time) {
         Math.floor(y * view.scale - view.y - s.top * yScale),
         Math.ceil(s.width * xScale),
         Math.ceil(s.height * yScale));
+    window.numberImageDraws++;
   }
   if (this.data.beltBeginSprite) {
     const s = SPRITES.get(this.data.beltBeginSprite + animation);
@@ -165,6 +169,7 @@ export function drawBelt(ctx, view, time) {
         Math.floor(y * view.scale - view.y - s.top * yScale),
         Math.ceil(s.width * xScale),
         Math.ceil(s.height * yScale));
+    window.numberImageDraws++;
   }
   if (this.data.beltExtraRightSprite) {
     const s = SPRITES.get(this.data.beltExtraRightSprite + animation);
@@ -174,6 +179,7 @@ export function drawBelt(ctx, view, time) {
         Math.floor(this.y * view.scale - view.y - s.top * yScale),
         Math.ceil(s.width * xScale),
         Math.ceil(s.height * yScale));
+    window.numberImageDraws++;
   }
   if (this.data.beltExtraLeftSprite) {
     const s = SPRITES.get(this.data.beltExtraLeftSprite + animation);
@@ -183,6 +189,7 @@ export function drawBelt(ctx, view, time) {
         Math.floor(this.y * view.scale - view.y - s.top * yScale),
         Math.ceil(s.width * xScale),
         Math.ceil(s.height * yScale));
+    window.numberImageDraws++;
   }
 }
 
@@ -241,6 +248,7 @@ export function drawInserterHand(ctx, view, time) {
         item.x, item.y, item.width, item.height,
         -8 * scale, -8 * scale,
         16 * scale, 16 * scale);
+    window.numberImageDraws++;
     ctx.rotate(-this.data.inserterPickupBend * Math.PI);
     ctx.translate(0, 40 * scale * handScale);
   }
@@ -252,6 +260,7 @@ export function drawInserterHand(ctx, view, time) {
       -40 * scale,
       hand.width * scale,
       hand.height * scale);
+  window.numberImageDraws++;
   ctx.scale(1, 1 / handScale);
   
   ctx.rotate(bend * 1.9 * Math.PI);
@@ -262,6 +271,7 @@ export function drawInserterHand(ctx, view, time) {
       -4 * scale,
       base.width * scale,
       base.height * scale);
+  window.numberImageDraws++;
   ctx.setTransform();
 }
 
@@ -296,6 +306,7 @@ export function drawSelection(ctx, view) {
   ctx.strokeStyle = COLOR.yellowHighlight;
   ctx.lineWidth = 2;
   ctx.stroke();
+  window.numberOtherDraws += 2;
 }
 
 export function drawIO(ctx, view) {
@@ -333,6 +344,7 @@ export function drawIO(ctx, view) {
     ctx.strokeStyle = COLOR.greenHighlight;
     ctx.lineWidth = 2;
     ctx.stroke();
+    window.numberOtherDraws++;
   }
   for (let entity of this.outputEntities) {
     const direction = this.type == TYPE.inserter ||
@@ -367,6 +379,7 @@ export function drawIO(ctx, view) {
     ctx.strokeStyle = COLOR.greenHighlight;
     ctx.lineWidth = 2;
     ctx.stroke();
+    window.numberOtherDraws++;
   }
 }
 
@@ -387,6 +400,7 @@ export function drawRecipe(ctx, view, recipe) {
       sprite.width, sprite.height,
       Math.floor(x - size), Math.floor(y - size),
       Math.ceil(size * 2), Math.ceil(size * 2));
+  window.numberImageDraws++;
   ctx.shadowColor = undefined;
   ctx.shadowBlur = 0;
 }
@@ -420,6 +434,7 @@ export function drawWireConnections(ctx, view, shadow) {
         cp2x * view.scale - view.x, cp2y * view.scale - view.y,
         ox * view.scale - view.x, oy * view.scale - view.y);
     ctx.stroke();
+    window.numberOtherDraws++;
   }
 }
 
@@ -432,4 +447,5 @@ export function drawPowerSupplyArea(ctx, view) {
       x2 < 0 || y2 < 0) return;
   ctx.fillStyle = COLOR.powerSupplyArea;
   ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
+  window.numberOtherDraws++;
 }

@@ -1,6 +1,6 @@
 "use strict";
 
-import {GameMap} from './game-map.js';
+import {GameMap, MAP} from './game-map.js';
 import {GameUi} from './game-ui.js';
 import {GameMenu} from './game-menu.js';
 import {Storage} from './storage.js';
@@ -29,7 +29,7 @@ function Game(canvas) {
   this.playTime = 0;
   
   this.storage.initialize();
-  this.loadMap(0, new GameMap(this.seed)
+  this.loadMap(0, new GameMap(this.seed, MAP.nauvis)
       .centerView(canvas));
   this.mode = MODE.loading;
 }

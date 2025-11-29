@@ -118,6 +118,7 @@ Grid.prototype.draw = function(ctx, view) {
           (consumer.y + consumer.height / 2) * view.scale - view.y);
     }
     ctx.stroke();
+    window.numberOtherDraws++;
   }
   ctx.beginPath();
   for (let generator of this.generators) {
@@ -128,6 +129,7 @@ Grid.prototype.draw = function(ctx, view) {
         0.4 * view.scale, 0, 2 * Math.PI);
   }
   ctx.stroke();
+  window.numberOtherDraws++;
   ctx.beginPath();
   for (let consumers of this.consumerss.values()) {
     for (let consumer of consumers) {
@@ -139,6 +141,7 @@ Grid.prototype.draw = function(ctx, view) {
     }
   }
   ctx.fill();
+  window.numberOtherDraws++;
 };
 
 Grid.prototype.add = function(pole) {

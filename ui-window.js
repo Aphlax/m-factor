@@ -73,6 +73,7 @@ UiWindow.prototype.draw = function(ctx, time) {
   ctx.strokeStyle = COLOR.border1;
   ctx.lineWidth = 1;
   ctx.strokeRect(-2, y, width + 4, 32);
+  window.numberOtherDraws++;
   
   if (this.selectedEntity) {
     ctx.font = "20px monospace";
@@ -81,6 +82,7 @@ UiWindow.prototype.draw = function(ctx, time) {
     const label = this.selectedEntity.label ||
         RESOURCE_LABELS[this.selectedEntity.id];
     ctx.fillText(label, 8, y + 17);
+    window.numberOtherDraws++;
   }
   
   ctx.beginPath();
@@ -90,6 +92,7 @@ UiWindow.prototype.draw = function(ctx, time) {
   ctx.lineWidth = 4;
   ctx.lineCaps = "round";
   ctx.stroke();
+  window.numberOtherDraws++;
   ctx.beginPath();
   ctx.moveTo(width / 2 - 2, y + 11);
   ctx.lineTo(width / 2 + 2, y + 11);
@@ -99,6 +102,7 @@ UiWindow.prototype.draw = function(ctx, time) {
   ctx.lineWidth = 1;
   ctx.lineCaps = "butt";
   ctx.stroke();
+  window.numberOtherDraws++;
   
   if (this.entityUi) {
     for (let c of this.entityUi.all) {

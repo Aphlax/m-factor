@@ -17,8 +17,9 @@ function productionTest(gameMap, time) {
       [-3, -1], [-3, 0], [-3, 1], [-3, 2],
       [-4, -1]];
   chunks.forEach(([x, y]) => gameMap.generateChunk(x, y));
-  gameMap.view.x = 750;
-  gameMap.view.y = 480;
+  gameMap.view.x = -550;
+  gameMap.view.y = 460;
+  gameMap.view.scale = 24;
   
   const e = (n, x, y, d) => gameMap.createEntity(n, x, y, d, time);
   const l = (x, y, d, l) => createLane(gameMap, x, y, d, l, time);

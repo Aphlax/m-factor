@@ -8,7 +8,17 @@ const FLOW = {
 const FLOWS = [FLOW.minus, FLOW.plus];
 /**
  *  The 12 insertion positions from inserters
- *  and side loading start from north TODO
+ *  and side loading for a belt facing north.
+ *
+ *     0         2
+ *          1
+ *  11             3
+ *
+ *    10         4
+ *
+ *  9              5
+ *          7
+ *     8         6
  */
 const BELT_POSITION =
     [0.0, 0.25, 0.0, 0.25, 0.5, 0.75,
@@ -30,6 +40,9 @@ function Lane(belts, nodes) {
   this.minusFlow = [];
   this.plusItems = [];
   this.plusFlow = [];
+  
+  const c = Math.ceil(Math.random() * 255 * 2);
+  this.color = `rgb(${Math.abs(c-255)}, ${Math.abs((c+170)%510-255)}, ${Math.abs((c+340)%510-255)})`;
 }
 
 Lane.fromBelt = function(belt) {
@@ -231,9 +244,13 @@ Lane.prototype.update = function(time, dt) {
       continue;
     }
     for (let entity of belt.outputEntities) {
-      if (entity.type != TYPE.belt) {
+      if (entity.type != TYPE.belt &&
+          entity.type != TYPE.undergroundBelt)
         continue;
-      }
+      if (entity.type == TYPE.undergroundBelt &&
+          ((((belt.direction - entity.direction + 4) % 4) == 1) ==
+          (entity.data.undergroundUp != (flowSign == FLOW.minus))))
+        continue;
       const positionForBelt = ((belt.direction + 2) % 4) * 3 + 1 - flowSign;
       const items = flowSign == FLOW.minus ? this.minusItems : this.plusItems;
       const wait = entity.beltInsert(items[0], time, positionForBelt);
@@ -260,7 +277,8 @@ Lane.prototype.draw = function(ctx, view) {
     const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
     const items = flowSign == FLOW.minus ? this.minusItems : this.plusItems;
     if (!flow.length) continue;
-    let dte = 0, n = this.nodes.length - 1;
+    let dte = 0, n = this.nodes.length - 1,
+        gapIndex = this.nodes[n].gaps.length - 2;
     for (let i = 0; i < flow.length; i++) {
       dte += flow[i] + 0.125;
       let len;
@@ -270,6 +288,22 @@ Lane.prototype.draw = function(ctx, view) {
           flowSign * 0.5))) {
         dte -= len;
         n--;
+        gapIndex = this.nodes[n].gaps.length - 2;
+      }
+      const pos = this.nodes[n].length - dte;
+      while (gapIndex >= 0 &&
+          pos < this.nodes[n].gaps[gapIndex]) {
+        gapIndex -= 2;
+      }
+      if ((gapIndex >= 0 && pos > this.nodes[n].gaps[gapIndex] + 0.7 &&
+          pos < this.nodes[n].gaps[gapIndex] + this.nodes[n].gaps[gapIndex + 1] + 0.3) ||
+          (n == 0 && pos < 0.3 && this.belts[0].type == TYPE.undergroundBelt &&
+          this.belts[0].data.undergroundUp) ||
+          (n == this.nodes.length - 1 && pos > this.nodes[n].length - 0.3 &&
+          this.belts[this.belts.length - 1].type == TYPE.undergroundBelt &&
+          !this.belts[this.belts.length - 1].data.undergroundUp)) {
+        dte += 0.125;
+        continue;
       }
       let x, y;
       if ((n || (this.circular &&
@@ -296,11 +330,11 @@ Lane.prototype.draw = function(ctx, view) {
         x = this.nodes[n].x + 0.5 - flowSign *
             ((this.nodes[n].direction - 1) % 2) * 0.23 -
             ((this.nodes[n].direction - 2) % 2) *
-            (this.nodes[n].length - dte - 0.5);
+            (pos - 0.5);
         y = this.nodes[n].y + 0.5 - flowSign *
             ((this.nodes[n].direction - 2) % 2) * 0.23 +
             ((this.nodes[n].direction - 1) % 2) *
-            (this.nodes[n].length - dte - 0.5);
+            (pos - 0.5);
       }
       if ((x + 0.234375) * view.scale >= view.x &&
           (y + 0.234375) * view.scale >= view.y &&
@@ -318,12 +352,13 @@ Lane.prototype.draw = function(ctx, view) {
             (x - 0.234375) * view.scale - view.x,
             (y - 0.234375) * view.scale - view.y,
             view.scale * 0.46875, view.scale * 0.46875);
+        window.numberImageDraws++;
       }
       dte += 0.125;
     }
   }
   
-  return;
+  //return;
   // Debug.
   ctx.beginPath();
   ctx.moveTo(
@@ -340,23 +375,56 @@ Lane.prototype.draw = function(ctx, view) {
   ctx.lineTo(
       (x + 0.5) * view.scale - view.x,
       (y + 0.5) * view.scale - view.y);
-  ctx.strokeStyle = this.circular ? "#FF00FF88" : "#00FFFF88";
+      
+  for (let entity of this.belts[this.belts.length - 1].outputEntities) {
+    if (entity.type != TYPE.belt &&
+        entity.type != TYPE.undergroundBelt) {
+      continue;
+    }
+    const vx = 0.2 * -((node.direction - 2) % 2),
+        vy = 0.2 * ((node.direction - 1) % 2),
+        px = -vy, py = vx;
+    ctx.moveTo(
+        (x + 0.5 - vx - px) * view.scale - view.x,
+        (y + 0.5 - vy - py) * view.scale - view.y);
+    ctx.lineTo(
+        (x + 0.5) * view.scale - view.x,
+        (y + 0.5) * view.scale - view.y);
+    ctx.lineTo(
+        (x + 0.5 - vx + px) * view.scale - view.x,
+        (y + 0.5 - vy + py) * view.scale - view.y);
+    break;
+  }
+  ctx.strokeStyle = this.circular ? "#FF000088" : this.color;
   ctx.lineWidth = 2;
   ctx.stroke();
+  window.numberOtherDraws++;
 };
 
 Lane.prototype.extendEnd = function(belt) {
   belt.data.lane = this;
   this.belts.push(belt);
+  const last = belt.data.beltInput;
+  if (last.direction == belt.direction) {
+    const diff = belt.type != TYPE.undergroundBelt ? 1 :
+        Math.abs(last.x - belt.x + last.y - belt.y);
+    const node = this.nodes[this.nodes.length - 1];
+    if (diff > 1) node.gaps.push(node.length - 1, diff);
+    node.length += diff;
+    if (this.minusFlow.length) {
+      this.minusFlow[0] += diff;
+    }
+    if (this.plusFlow.length) {
+      this.plusFlow[0] += diff;
+    }
+    return this;
+  }
+  const turn = (((belt.direction - last.direction + 4) % 4) - 2) * 0.5;
   if (this.minusFlow.length) {
-    this.minusFlow[0]++;
+    this.minusFlow[0] += 1 - turn;
   }
   if (this.plusFlow.length) {
-    this.plusFlow[0]++;
-  }
-  if (this.nodes[this.nodes.length - 1].direction == belt.direction) {
-    this.nodes[this.nodes.length - 1].length++;
-    return this;
+    this.plusFlow[0] += 1 + turn;
   }
   this.nodes.push(new Node(belt.x, belt.y, belt.direction, 1));
   return this;
@@ -368,10 +436,17 @@ Lane.prototype.extendBegin = function(belt) {
   if (this.circular) {
     this.circular = false;
   }
-  if (this.nodes[0].direction == belt.direction) {
-    this.nodes[0].x += (belt.direction - 2) % 2;
-    this.nodes[0].y += -(belt.direction - 1) % 2;
-    this.nodes[0].length++;
+  const first = belt.data.beltOutput;
+  if (first.direction == belt.direction) {
+    const diff = belt.type != TYPE.undergroundBelt ? 1 :
+        Math.abs(first.x - belt.x + first.y - belt.y);
+    for (let i = 0; i < this.nodes[0].gaps.length; i += 2) {
+      this.nodes[0].gaps[i] += diff;
+    }
+    if (diff > 1) this.nodes[0].gaps.unshift(0, diff);
+    this.nodes[0].x += ((belt.direction - 2) % 2) * diff;
+    this.nodes[0].y += (-(belt.direction - 1) % 2) * diff;
+    this.nodes[0].length += diff;
     return this;
   }
   this.nodes.unshift(new Node(belt.x, belt.y, belt.direction, 1));
@@ -380,6 +455,8 @@ Lane.prototype.extendBegin = function(belt) {
 
 Lane.prototype.removeEnd = function() {
   const belt = this.belts.pop();
+  const diff = belt.type != TYPE.undergroundBelt ? 1 :
+      Math.abs(this.belts[this.belts.length - 1].x - belt.x + this.belts[this.belts.length - 1].y - belt.y);
   const turnBelt = (belt.direction -
       (belt.data.beltInput?.direction ??
       belt.direction) + 4) % 4;
@@ -387,7 +464,7 @@ Lane.prototype.removeEnd = function() {
   for (let flowSign of FLOWS) {
     const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
     const items = flowSign == FLOW.minus ? this.minusItems : this.plusItems;
-    let removal = 1, i = 0;
+    let removal = diff, i = 0;
     if (turnBelt) {
       removal += (turnBelt == 1 ? -0.5 : 0.5) * flowSign;
     }
@@ -405,17 +482,22 @@ Lane.prototype.removeEnd = function() {
   if (this.circular) {
     this.circular = false;
   }
-  if (!--this.nodes[this.nodes.length - 1].length) {
+  const node = this.nodes[this.nodes.length - 1];
+  if (diff > 1) node.gaps.length -= 2;
+  if (!(node.length -= diff)) {
     this.nodes.pop();
   }
 };
 
 Lane.prototype.removeBegin = function() {
-  this.belts.shift().data.lane = undefined;
+  const belt = this.belts.shift();
+  const diff = belt.type != TYPE.undergroundBelt ? 1 :
+      Math.abs(this.belts[0].x - belt.x + this.belts[0].y - belt.y);
+  belt.data.lane = undefined;
   for (let flowSign of FLOWS) {
     const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
     const items = flowSign == FLOW.minus ? this.minusItems : this.plusItems;
-    let laneLength = -1;
+    let laneLength = -diff;
     for (let n = 0; n < this.nodes.length; n++) {
       laneLength += this.nodes[n].length;
       if (n) {
@@ -436,9 +518,13 @@ Lane.prototype.removeBegin = function() {
   if (this.circular) {
     this.circular = false;
   }
-  if (--this.nodes[0].length) {
-    this.nodes[0].x += -(this.nodes[0].direction - 2) % 2;
-    this.nodes[0].y += (this.nodes[0].direction - 1) % 2;
+  if (this.nodes[0].length -= diff) {
+    if (diff > 1) this.nodes[0].gaps.splice(0, 2);
+    for (let i = 0; i < this.nodes[0].gaps.length; i += 2) {
+      this.nodes[0].gaps[i] -= diff;
+    }
+    this.nodes[0].x += -((this.nodes[0].direction - 2) % 2) * diff;
+    this.nodes[0].y += ((this.nodes[0].direction - 1) % 2) * diff;
     return;
   }
   this.nodes.shift();
@@ -449,6 +535,9 @@ Lane.prototype.appendLaneEnd = function(other) {
     this.circular = true;
     return;
   }
+  const last = this.belts[this.belts.length - 1];
+  const diff = last.type != TYPE.undergroundBelt ? 0 :
+      Math.abs(other.belts[0].x - last.x + other.belts[0].y - last.y) - 1;
   for (let flowSign of FLOWS) {
     const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
     const otherFlow = flowSign == FLOW.minus ? other.minusFlow : other.plusFlow;
@@ -461,7 +550,7 @@ Lane.prototype.appendLaneEnd = function(other) {
       otherItems.length = 0;
       continue;
     }
-    let laneLength = 0;
+    let laneLength = diff;
     for (let n = 0; n < other.nodes.length; n++) {
       laneLength += other.nodes[n].length;
       if (n) {
@@ -479,8 +568,14 @@ Lane.prototype.appendLaneEnd = function(other) {
     items.unshift(...otherItems);
     otherItems.length = 0;
   }
-  if (this.nodes[this.nodes.length - 1].direction == other.nodes[0].direction) {
-    this.nodes[this.nodes.length - 1].length += other.nodes[0].length;
+  const node = this.nodes[this.nodes.length - 1];
+  if (node.direction == other.nodes[0].direction) {
+    if (diff > 0) node.gaps.push(node.length - 1, diff + 1);
+    for (let i = 0; i < other.nodes[0].gaps.length; i += 2) {
+      node.gaps.push(node.length + diff +
+          other.nodes[0].gaps[i], other.nodes[0].gaps[i + 1]);
+    }
+    node.length += other.nodes[0].length + diff;
     for (let i = 1; i < other.nodes.length; i++) {
       this.nodes.push(other.nodes[i]);
     }
@@ -500,19 +595,29 @@ Lane.prototype.appendLaneEnd = function(other) {
 Lane.prototype.split = function(belt) {
   const n = this.nodes.findIndex(n => n.contains(belt));
   const nodes = this.nodes.slice(n);
-  const d = Math.abs(this.nodes[n].x - belt.x) +
-      Math.abs(this.nodes[n].y - belt.y);
+  const d = Math.abs(this.nodes[n].x - belt.x + this.nodes[n].y - belt.y);
+  const b = this.belts.indexOf(belt);
+  const diff = belt.type != TYPE.undergroundBelt ? 0 :
+      Math.abs(this.belts[b - 1].x - belt.x + this.belts[b - 1].y - belt.y) - 1;
   if (d) {
     nodes[0] = new Node(
         nodes[0].x - ((nodes[0].direction - 2) % 2) * d,
         nodes[0].y + ((nodes[0].direction - 1) % 2) * d,
         nodes[0].direction,
         nodes[0].length - d);
-    this.nodes[n].length = d;
+    let gapsLength = this.nodes[n].gaps.length;
+    for (let i = 0; i < this.nodes[n].gaps.length; i += 2) {
+      if (this.nodes[n].gaps[i] < d - diff - 1) continue;
+      if (i < gapsLength) gapsLength = i;
+      if (this.nodes[n].gaps[i] < d) continue;
+      nodes[0].gaps.push(this.nodes[n].gaps[i] - d,
+          this.nodes[n].gaps[i + 1]);
+    }
+    this.nodes[n].gaps.length = gapsLength;
+    this.nodes[n].length = d - diff;
   }
   this.nodes.length = n + (d ? 1 : 0);
   
-  const b = this.belts.indexOf(belt);
   const belts = this.belts.splice(b);
   // lane is the end half of the original.
   const lane = new Lane(belts, nodes);
@@ -536,12 +641,20 @@ Lane.prototype.split = function(belt) {
       }
     }
     let i = 0;
-    while (i < flow.length && laneLength >= flow[i]) {
+    while (i < flow.length && laneLength > flow[i]) {
       laneLength -= flow[i++] + 0.25;
     }
     if (i < flow.length && laneLength < flow[i] + 0.25) {
       laneFlow.push(...flow.splice(0, i));
       laneItems.push(...items.splice(0, i));
+      if (diff) {
+        i = 0; laneLength += diff; 
+        while (i < flow.length && laneLength > flow[i]) {
+          laneLength -= flow[i++] + 0.25;
+        }
+        flow.splice(0, i);
+        items.splice(0, i);
+      }
       flow[0] -= laneLength;
     } else {
       laneFlow.push(...flow);
@@ -564,14 +677,20 @@ function Node(x, y, direction, length) {
   this.y = y;
   this.direction = direction;
   this.length = length;
+  this.gaps = [];
 }
 
 Node.prototype.contains = function(belt) {
   const x = (belt.x - this.x) * (this.direction == 3 ? -1 : 1);
   const y = (belt.y - this.y) * (this.direction == 0 ? -1 : 1);
-  return this.direction % 2 ?
-      x >= 0 && x < this.length && y == 0 :
-      x == 0 && y >= 0 && y < this.length;
+  const dv = this.direction % 2 ? x : y;
+  if (this.direction % 2 ? y != 0 : x != 0)
+    return false;
+  for (let i = 0; i < this.gaps.length; i += 2) {
+    if (dv > this.gaps[i] && dv < this.gaps[i] + this.gaps[i + 1])
+      return false;
+  }
+  return dv >= 0 && dv < this.length;
 }
 
 export {Lane};

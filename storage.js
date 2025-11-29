@@ -1,4 +1,4 @@
-import {GameMap} from './game-map.js';
+import {GameMap, MAP} from './game-map.js';
 import {Chunk} from './chunk.js';
 import {ENTITIES, PROTO_TO_NAME} from './entity-definitions.js';
 import {TYPE, ENERGY, STATE} from './entity-properties.js';
@@ -158,7 +158,7 @@ Storage.prototype.serializeMap = function(gameMap) {
     for (let [cy, chunk] of gameChunks.entries()) {
       for (let entity of chunk.entities) {
         entities.push(this.serializeEntity(
-            entities.length, entity));
+            entities.length + 1, entity));
       }
       chunks.push({
         x: cx, y: cy,
@@ -225,6 +225,8 @@ Storage.prototype.serializeEntity = function(index, entity) {
         {direction: entity.direction * 2} : {}),
     ...(entity.data.recipe ?
         {recipe: entity.data.recipe.prototypeName} : {}),
+    ...(entity.type == TYPE.undergroundBelt ?
+        {type: entity.data.undergroundUp ? "output" : "input"} : {}),
     
     // Non-blueprintable.
     ...(entity.type == TYPE.inserter ||
@@ -285,7 +287,7 @@ Storage.prototype.serializeFluidTank = function(fluidTank) {
 };
 
 Storage.prototype.deserializeMap = function(map) {
-  const gameMap = new GameMap(map.seed);
+  const gameMap = new GameMap(map.seed, MAP.nauvis);
   gameMap.initialize();
   Object.assign(gameMap.view, map.view);
   for (let c of map.chunks) {
@@ -303,7 +305,11 @@ Storage.prototype.deserializeMap = function(map) {
     const {width, height} = def.size ? def.size[direction] : def;
     const x = e.position.x - Math.floor(width / 2),
         y = e.position.y - Math.floor(height / 2);
-    const entity = gameMap.createEntity(name, x, y, direction, 0);
+    const data = {
+      ...(def.type == TYPE.undergroundBelt ?
+          {undergroundUp: e.type == "output"} : {}),
+    };
+    const entity = gameMap.createEntity(name, x, y, direction, 0, data);
     if (entity.type == TYPE.assembler && e.recipe) {
       entity.setRecipe(PROTO_TO_RECIPE.get(e.recipe));
     }
@@ -382,8 +388,6 @@ Storage.prototype.deserializeEntity = function(e, entity) {
     for (let i = 0; i < e.inputFluidTank.length; i++) {
       entity.inputFluidTank.tanklets[i].amount =
           e.inputFluidTank[i].amount;
-      entity.inputFluidTank.tanklets[i].constantProduction =
-          e.inputFluidTank[i].constantProduction;
     }
   }
   if (entity.type == TYPE.furnace && e.recipe) {

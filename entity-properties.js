@@ -42,6 +42,9 @@ export const MAX_SIZE = 3;
 /** Maximal length of inserter arm. */
 export const MAX_LOGISTIC_CONNECTION = 2;
 
+/** Maximal length of underground belts and pipes. */
+export const MAX_UNDERGROUND_CONNECTION = 5;
+
 /** Longest extra length of any shadow. */
 export const MAX_SHADOW = 3;
 
