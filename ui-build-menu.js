@@ -10,6 +10,7 @@ const BUILD_MENU = [
   NAME.inserter,
   NAME.smallElectricPole,
   NAME.pipe,
+  NAME.pipeToGround,
   NAME.assemblingMachine1,
   NAME.burnerDrill,
   NAME.stoneFurnace,

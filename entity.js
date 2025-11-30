@@ -239,6 +239,11 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.data.beltSideLoadMinusWait = 0;
     this.data.beltSideLoadPlusWait = 0;
     this.updateBeltSprites();
+  } else if (this.type == TYPE.pipeToGround) {
+    this.nextUpdate = NEVER;
+    this.data.pipeConnections = def.pipeConnections[direction];
+    this.data.pipes = {};
+    this.data.capacity = def.capacity;
   }
   return this;
 };

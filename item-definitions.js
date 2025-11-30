@@ -28,6 +28,8 @@ export const I = {
   boiler: 109,
   steamEngine: 110,
   smallElectricPole: 111,
+  undergroundBelt: 112,
+  pipeToGround: 113,
 };
 
 export const ITEMS = new Map([
@@ -151,6 +153,16 @@ export const ITEMS = new Map([
   [I.electricFurnace,
   {
     sprite: S.electricFurnaceItem,
+    stacksize: 50,
+  }],
+  [I.undergroundBelt,
+  {
+    sprite: S.undergroundBeltItem,
+    stacksize: 50,
+  }],
+  [I.pipeToGround,
+  {
+    sprite: S.pipeToGroundItem,
     stacksize: 50,
   }],
 ]);

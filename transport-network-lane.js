@@ -358,7 +358,7 @@ Lane.prototype.draw = function(ctx, view) {
     }
   }
   
-  //return;
+  return;
   // Debug.
   ctx.beginPath();
   ctx.moveTo(

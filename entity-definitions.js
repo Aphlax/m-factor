@@ -409,6 +409,32 @@ export const ENTITIES = new Map([
       [west]: [S.transportBeltBeginW, S.transportBeltEndW, S.transportBeltEndS, S.transportBeltEndN],
     },
   }],
+  [NAME.pipeToGround,
+  {
+    label: "Underground Pipe",
+    prototypeName: "pipe-to-ground",
+    type: TYPE.pipeToGround,
+    width: 1,
+    height: 1,
+    rotatable: true,
+    icon: S.pipeToGroundIcon,
+    sprites: {
+      [north]: [S.pipeToGroundN],
+      [east]: [S.pipeToGroundE],
+      [south]: [S.pipeToGroundS],
+      [west]: [S.pipeToGroundW],
+    },
+    animationLength: 0,
+    
+    pipeConnections: {
+      [north]: [{x: 0, y: -1}],
+      [east]: [{x: 1, y: 0}],
+      [south]: [{x: 0, y: 1}],
+      [west]: [{x: -1, y: 0}],
+    },
+    capacity: 100,
+    maxUndergroundGap: 9,
+  }],
 ]);
 
 ENTITIES.keys().forEach(name =>

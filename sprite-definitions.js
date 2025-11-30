@@ -138,6 +138,10 @@ export const S = {
   undergroundBeltEOSideLoaded: 15104,
   undergroundBeltEISideLoaded: 15106,
   undergroundBeltWISideLoaded: 15108,
+  pipeToGroundN: 15109,
+  pipeToGroundE: 15110,
+  pipeToGroundS: 15111,
+  pipeToGroundW: 15112,
   
   ironOreItem: 16000,
   copperOreItem: 16000 + 1,
@@ -168,6 +172,7 @@ export const S = {
   smallElectricPoleItem: 16100 + 19,
   electricFurnaceItem: 16100 + 20,
   undergroundBeltItem: 16100 + 21,
+  pipeToGroundItem: 16100 + 22,
   
   gearIcon: 16500,
   burnerDrillIcon: 16500 + 1,
@@ -187,6 +192,7 @@ export const S = {
   smallElectricPoleIcon: 16500 + 15,
   electricFurnaceIcon: 16500 + 16,
   undergroundBeltIcon: 16500 + 17,
+  pipeToGroundIcon: 16500 + 18,
   
   smoke: 17000,
   
@@ -603,6 +609,22 @@ export const SPRITES = [
     path: "graphics/entities/underground-belt/underground-belt-structure.png",
     sprites: entitySprites(S.undergroundBeltSO, 96, 96, 4, 4, 32, 32, 32, 32, true),
   },
+  {
+    path: "graphics/entities/pipe-to-ground/pipe-to-ground-up.png",
+    sprites: entitySprites(S.pipeToGroundN, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe-to-ground/pipe-to-ground-right.png",
+    sprites: entitySprites(S.pipeToGroundE, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe-to-ground/pipe-to-ground-down.png",
+    sprites: entitySprites(S.pipeToGroundS, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe-to-ground/pipe-to-ground-left.png",
+    sprites: entitySprites(S.pipeToGroundW, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
   
   // Items.
   {
@@ -714,6 +736,10 @@ export const SPRITES = [
   {
     path: "graphics/items/underground-belt.png",
     sprites: itemSprites(S.undergroundBeltItem, S.undergroundBeltIcon),
+  },
+  {
+    path: "graphics/items/pipe-to-ground.png",
+    sprites: itemSprites(S.pipeToGroundItem, S.pipeToGroundIcon),
   },
   
   

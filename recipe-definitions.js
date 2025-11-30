@@ -217,6 +217,30 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1],
     duration: 500,
   },
+  {
+    prototypeName: "underground-belt",
+    inputs: [
+      {item: I.transportBelt, amount: 5},
+      {item: I.ironPlate, amount: 10},
+    ],
+    outputs: [
+      {item: I.undergroundBelt, amount: 2},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 1000,
+  },
+  {
+    prototypeName: "pipe-to-ground",
+    inputs: [
+      {item: I.pipe, amount: 10},
+      {item: I.ironPlate, amount: 5},
+    ],
+    outputs: [
+      {item: I.pipeToGround, amount: 2},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 500,
+  },
   
   
   {

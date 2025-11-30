@@ -53,7 +53,9 @@ GameMap.prototype.update = function(time, dt) {
             entity.type == TYPE.chest ||
             entity.type == TYPE.pipe ||
             entity.type == TYPE.generator ||
-            entity.type == TYPE.electricPole) continue;
+            entity.type == TYPE.electricPole ||
+            entity.type == TYPE.undergroundBelt ||
+            entity.type == TYPE.pipeToGround) continue;
         if (time < entity.nextUpdate) continue;
         entity.update(this, time);
       }
