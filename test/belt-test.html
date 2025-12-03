@@ -84,14 +84,14 @@ it("loop behaves correctly", () => {
     {name, x: 0, y: 1, direction: north},
     {name, x: 1, y: 1, direction: west},
     {name, x: 1, y: 0, direction: south},
-  ], ([b1, b2, b3, b4], map) => {
+  ], ([b1, b2, b3, b4], map, r) => {
     assertExists(b1.data.lane);
     assertEqual(b1.data.lane, b2.data.lane);
     assertEqual(b1.data.lane, b3.data.lane);
     assertEqual(b1.data.lane, b4.data.lane);
     assertEqual(b1.data.lane.circular, true);
     const b5 = map.createEntityNow(
-        {name, x: 1, y: -1, direction: south});
+        r({name, x: 1, y: -1, direction: south}));
     assertEqual(b1.data.lane.circular, false);
     map.deleteEntity(b5, 0);
     assertEqual(b1.data.lane.circular, true);
@@ -142,7 +142,7 @@ it("considers underground gaps", () => {
     {name, x: 0, y: 2, direction: north, data: {undergroundUp: false}},
     {name, x: 0, y: 3, direction: north, data: {undergroundUp: true}},
     {name, x: 0, y: 5, direction: north, data: {undergroundUp: false}},
-  ], ([u1, u2, u3, u4], map) => {
+  ], ([u1, u2, u3, u4], map, r) => {
     assertEqual(u1.data.lane, u2.data.lane);
     assertEqual(u1.data.lane, u4.data.lane);
     assertMatch(u1.data.lane.nodes,
@@ -151,7 +151,7 @@ it("considers underground gaps", () => {
     assertMatch(u1.data.lane.nodes,
         [{length: 4, gaps: [1, 2]}]);
     u4 = map.createEntityNow(
-        {name, x: 0, y: 5, direction: north, data: {undergroundUp: false}});
+        r({name, x: 0, y: 5, direction: north, data: {undergroundUp: false}}));
     assertMatch(u1.data.lane.nodes,
         [{length: 6, gaps: [0, 2, 3, 2]}]);
     map.deleteEntity(u3, 0);
@@ -168,7 +168,7 @@ it("considers underground items", () => {
     {name, x: 0, y: 2, direction: north, data: {undergroundUp: false}},
     {name: belt, x: 0, y: 3, direction: north},
     {name: belt, x: 0, y: -1, direction: north},
-  ], ([u1, b1, u2, b2, b3], map) => {
+  ], ([u1, b1, u2, b2, b3], map, r) => {
     assertMatch(u1.data.lane.nodes,
         [{length: 5, gaps: [1, 2]}]);
     u1.data.lane.minusFlow.push(...new Array(20).fill(0));
@@ -179,7 +179,7 @@ it("considers underground items", () => {
     assertMatch(b3.data.lane.minusFlow,
         new Array(4).fill(0));
     u1 = map.createEntityNow(
-        {name, x: 0, y: 0, direction: north, data: {undergroundUp: true}});
+        r({name, x: 0, y: 0, direction: north, data: {undergroundUp: true}}));
     assertMatch(u1.data.lane.minusFlow,
         [0,0,0,0,2,0,0,0,0,0,0,0]);
     u1.data.lane.minusFlow.length = 0;
@@ -188,7 +188,7 @@ it("considers underground items", () => {
     u1.data.lane.minusItems.push(...new Array(20).fill(1));
     map.deleteEntity(u2, 0);
     u2 = map.createEntityNow(
-        {name, x: 0, y: 2, direction: north, data: {undergroundUp: false}});
+        r({name, x: 0, y: 2, direction: north, data: {undergroundUp: false}}));
     assertMatch(u1.data.lane.minusFlow,
         [0,0,0,0,0,0,0,0,2,0,0,0]);
   });

@@ -29,7 +29,7 @@ export function fit(desc, fn) {
   tests.push(new Test({fit: 1, desc, it: fn}));
 }
 
-let assertNr = 0, permutation = undefined;
+let assertNr = 0, permutation = undefined, rotation = 0;
 const el = React.createElement;
 export const test = output =>
     createRoot(output).render(el(TestSuite));
@@ -45,6 +45,7 @@ function TestSuite() {
       try {
         assertNr = 0;
         permutation = undefined;
+        rotation = 0;
         test.it();
         results.push(el('div',
             {className: "success"}, test.desc));
@@ -52,6 +53,7 @@ function TestSuite() {
         results.push(el('details',
             {className: "failure"},
             el('summary', null, test.desc + " -" +
+            (rotation ? " ↺" + rotation : "") +
             (permutation ? " [" + permutation + "]" : "") +
             (assertNr ? " #" + assertNr : "") + " " + error),
             el('pre', null, error.stack.replace(
@@ -129,7 +131,7 @@ export function blueprint(blueprint, check) {
   gameMap.initialize();
   const entities = blueprint.map(bp =>
       gameMap.createEntityNow(bp));
-  check(entities, gameMap);
+  check(entities, gameMap, x => x);
 }
 
 /** Tests a blueprint with all possible creation orders. */
@@ -139,14 +141,19 @@ export function blueprintScrambled(blueprint, check, startPerm) {
   for (let perm of permutations) {
     assertNr = 0;
     permutation = perm;
-    const gameMap = new GameMap(0, MAP.test);
-    gameMap.initialize();
-    const entities = new Array(perm.length);
-    for (let i = 0; i < perm.length; i++) {
-      entities[perm[i]] =
-          gameMap.createEntityNow(blueprint[perm[i]]);
+    for (let rot = 0; rot < 4; rot++) {
+      rotation = rot;
+      const rotFn = createRotation(rot);
+      const gameMap = new GameMap(0, MAP.test);
+      gameMap.initialize();
+      const entities = new Array(perm.length);
+      for (let i = 0; i < perm.length; i++) {
+        entities[perm[i]] =
+            gameMap.createEntityNow(
+            rotFn(blueprint[perm[i]]));
+      }
+      check(entities, gameMap, rotFn);
     }
-    check(entities, gameMap, perm);
   }
 }
 
@@ -169,4 +176,18 @@ function createPermutations(n) {
     result.push(perm);
   }
   return result;
+}
+
+export function createRotation(r) {
+  return def => {
+    for (let i = 0; i < r; i++) {
+      def = {
+          ...def,
+          direction: (def.direction + 1) % 4,
+          x: -def.y,
+          y: def.x,
+        };
+    }
+    return def;
+  };
 }

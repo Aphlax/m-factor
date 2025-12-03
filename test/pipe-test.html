@@ -130,13 +130,13 @@ it("considers underground chain", () => {
     {name, x: 0, y: 2, direction: south},
     {name, x: 0, y: 3, direction: north},
     {name, x: 0, y: 5, direction: south},
-  ], ([u1, u2, u3, u4], map) => {
+  ], ([u1, u2, u3, u4], map, r) => {
     assertEqual(u1.data.channel, u2.data.channel);
     assertEqual(u1.data.channel, u4.data.channel);
     map.deleteEntity(u4, 0);
     assertNotEqual(u1.data.channel, u4.data.channel);
     u4 = map.createEntityNow(
-        {name, x: 0, y: 6, direction: south});
+        r({name, x: 0, y: 6, direction: south}));
     assertEqual(u1.data.channel, u4.data.channel);
     map.deleteEntity(u3, 0);
     assertNotEqual(u1.data.channel, u4.data.channel);
@@ -154,10 +154,10 @@ it("splits connected underground pipes", () => {
     {name, x: 1, y: 5, direction: south},
     {name: pipe, x: 0, y: 6, direction: north},
     {name: pipe, x: 1, y: 6, direction: north},
-  ], ([p1, p2, u1, u2, u3, u4], map) => {
+  ], ([p1, p2, u1, u2, u3, u4], map, r) => {
     assertEqual(u1.data.channel, u4.data.channel);
     const u5 = map.createEntityNow(
-        {name, x: 0, y: 3, direction: south});
+        r({name, x: 0, y: 3, direction: south}));
     assertEqual(u1.data.channel, u4.data.channel);
     assertEqual(u3.data.channel, u5.data.channel);
   });
