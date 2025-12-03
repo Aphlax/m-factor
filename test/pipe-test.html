@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" style="width: 100%; height: 100%; margin: 0; overflow: hidden;">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script type="importmap">{"imports": {
+    "react": "https://esm.sh/stable/react@19.2.0",
+    "react-dom/client": "https://esm.sh/stable/react-dom@19.2.0/client"}}
+    </script>
+    <title>Pipe Test</title>
+  </head>
+  <body style="width: calc(100% - 20px); height: calc(100% - 20px); margin: 10px; overflow: hidden; touch-action: none;">
+    <h2 style="font-family: Calibri, sans-serif;">Pipe Test</h2>
+    <div id="root" style="width: calc(100% - 20px); height: calc(100% - 20px); margin: 0; overflow: auto;"></div>
+<script type="module">
+import {it, sit, fit, test, assertEqual, assertNotEqual, assertExists, assertNotExists, assertMatch, blueprint, blueprintScrambled} from './test-framework.js';
+import {DIRECTION, NAME} from '../entity-properties.js';
+const {north, east, south, west} = DIRECTION;
+
+it("creates pipe", () => {
+  const name = NAME.pipe;
+  blueprint([
+    {name, x: 0, y: 0, direction: north},
+  ], ([p1], map) => {
+    assertExists(p1);
+    assertExists(p1.data.channel);
+    assertEqual(map.getEntityAt(0, 0), p1);
+    assertMatch(map.getEntitiesIn(0, 0, 1, 1),
+        [p1]);
+    assertMatch(map.getEntitiesIn(1, 0, 1, 1),
+        []);
+  });
+});
+it("splits channel with chunk border", () => {
+  const name = NAME.pipe;
+  blueprintScrambled([
+    {name, x: 0, y: -1, direction: north},
+    {name, x: 0, y: 0, direction: north},
+    {name, x: 0, y: 1, direction: north},
+  ], ([p1, p2, p3], map) => {
+    assertExists(p1.data.channel);
+    assertEqual(p1.data.channel, p3.data.channel);
+    map.deleteEntity(p2, 0);
+    assertNotEqual(p1.data.channel, p3.data.channel);
+    assertNotExists(map.getEntityAt(0, 0));
+  });
+});
+it("junction behaves correctly", () => {
+  const name = NAME.pipe;
+  blueprintScrambled([
+    {name, x: 0, y: 0, direction: north},
+    {name, x: 0, y: 1, direction: north},
+    {name, x: -1, y: 0, direction: north},
+    {name, x: 1, y: 0, direction: north},
+    {name, x: 0, y: -1, direction: north},
+  ], ([p1, p2, p3, p4, p5], map) => {
+    assertExists(p1.data.channel);
+    assertEqual(p1.data.channel, p2.data.channel);
+    assertEqual(p1.data.channel, p3.data.channel);
+    assertEqual(p1.data.channel, p4.data.channel);
+    map.deleteEntity(p1, 0);
+    assertNotEqual(p2.data.channel, p3.data.channel);
+    assertNotEqual(p2.data.channel, p4.data.channel);
+    assertNotEqual(p2.data.channel, p5.data.channel);
+  });
+});
+it("loop behaves correctly", () => {
+  const name = NAME.pipe;
+  blueprintScrambled([
+    {name, x: 0, y: 0, direction: north},
+    {name, x: 0, y: 1, direction: north},
+    {name, x: 1, y: 1, direction: north},
+    {name, x: 1, y: 0, direction: north},
+  ], ([p1, p2, p3, p4], map) => {
+    assertExists(p1.data.channel);
+    assertEqual(p1.data.channel, p2.data.channel);
+    assertEqual(p1.data.channel, p3.data.channel);
+    assertEqual(p1.data.channel, p4.data.channel);
+    map.deleteEntity(p1, 0);
+    assertEqual(p2.data.channel, p3.data.channel);
+    assertEqual(p2.data.channel, p4.data.channel);
+  });
+});
+it("connects underground", () => {
+  const pipe = NAME.pipe;
+  const name = NAME.pipeToGround;
+  blueprintScrambled([
+    {name: pipe, x: 0, y: -1, direction: north},
+    {name, x: 0, y: 0, direction: north},
+    {name, x: 0, y: 5, direction: south},
+    {name: pipe, x: 0, y: 6, direction: north},
+  ], ([p1, u1, u2, p2], map) => {
+    assertEqual(u1.data.pipes[1], u2);
+    assertExists(u1.data.channel);
+    assertEqual(u1.data.channel, u2.data.channel);
+    assertEqual(p1.data.channel, p2.data.channel);
+    map.deleteEntity(u1, 0);
+    assertNotEqual(p1.data.channel, p2.data.channel);
+  });
+});
+it("picks correct underground connection", () => {
+  const pipe = NAME.pipe;
+  const name = NAME.pipeToGround;
+  blueprintScrambled([
+    {name, x: 0, y: 0, direction: north},
+    {name, x: 0, y: 1, direction: north},
+    {name: pipe, x: 0, y: 2, direction: north},
+    {name, x: 0, y: 3, direction: south},
+    {name, x: 0, y: 4, direction: south},
+  ], ([u1, u2, p1, u3, u4], map) => {
+    assertEqual(u2.data.pipes[1], u3);
+    assertEqual(u2.data.channel, u3.data.channel);
+    assertNotEqual(u1.data.channel, u2.data.channel);
+    assertNotEqual(u4.data.channel, u2.data.channel);
+    assertNotEqual(u2.data.channel, p1.data.channel);
+    for (let i = 0; i < 4; i++)
+      assertNotExists(p1.data.pipes[i]);
+    assertNotExists(u4.data.pipes[1])
+    map.deleteEntity(u3, 0);
+    assertEqual(u2.data.channel, u4.data.channel);
+    assertNotExists(u1.data.pipes[1]);
+    map.deleteEntity(u2, 0);
+    assertEqual(u1.data.channel, u4.data.channel);
+  });
+});
+it("considers underground chain", () => {
+  const name = NAME.pipeToGround;
+  blueprintScrambled([
+    {name, x: 0, y: -2, direction: north},
+    {name, x: 0, y: 2, direction: south},
+    {name, x: 0, y: 3, direction: north},
+    {name, x: 0, y: 5, direction: south},
+  ], ([u1, u2, u3, u4], map) => {
+    assertEqual(u1.data.channel, u2.data.channel);
+    assertEqual(u1.data.channel, u4.data.channel);
+    map.deleteEntity(u4, 0);
+    assertNotEqual(u1.data.channel, u4.data.channel);
+    u4 = map.createEntityNow(
+        {name, x: 0, y: 6, direction: south});
+    assertEqual(u1.data.channel, u4.data.channel);
+    map.deleteEntity(u3, 0);
+    assertNotEqual(u1.data.channel, u4.data.channel);
+  });
+});
+it("splits connected underground pipes", () => {
+  const pipe = NAME.pipe;
+  const name = NAME.pipeToGround;
+  blueprint([
+    {name: pipe, x: 0, y: 0, direction: north},
+    {name: pipe, x: 1, y: 0, direction: north},
+    {name, x: 0, y: 1, direction: north},
+    {name, x: 1, y: 1, direction: north},
+    {name, x: 0, y: 5, direction: south},
+    {name, x: 1, y: 5, direction: south},
+    {name: pipe, x: 0, y: 6, direction: north},
+    {name: pipe, x: 1, y: 6, direction: north},
+  ], ([p1, p2, u1, u2, u3, u4], map) => {
+    assertEqual(u1.data.channel, u4.data.channel);
+    const u5 = map.createEntityNow(
+        {name, x: 0, y: 3, direction: south});
+    assertEqual(u1.data.channel, u4.data.channel);
+    assertEqual(u3.data.channel, u5.data.channel);
+  });
+});
+
+test(document.getElementById("root"));
+</script>
+  </body>
+</html>
