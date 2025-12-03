@@ -335,6 +335,56 @@ export function connectPipe(other) {
   }
 }
 
+export function connectPipeToGround(other, fluidNetwork) {
+  if ((this.direction - other.direction + 4) % 4 != 2 ||
+      this.name != other.name)
+    return;
+  const dx = this.x - other.x,
+      dy = this.y - other.y;
+  if (this.direction % 2 == 0 ?
+      !(dx == 0 && dy * ((this.direction - 1) % 2) >= 0 &&
+      dy * ((this.direction - 1) % 2) <= this.data.maxUndergroundGap + 1) :
+      !(dy == 0 && dx * -((this.direction - 2) % 2) >= 0 &&
+      dx * -((this.direction - 2) % 2) <= this.data.maxUndergroundGap + 1))
+    return;
+  this.data.undergroundPipes.push(other);
+  other.data.undergroundPipes.push(this);
+  
+  // Set data.pipes connection.
+  const cc = this.data.pipes[1],
+      oc = other.data.pipes[1],
+      dist = Math.abs(this.x - other.x + this.y - other.y);
+  if (cc &&
+      Math.abs(cc.x - this.x + cc.y - this.y) < dist) {
+    return;
+  }
+  if (oc &&
+      Math.abs(oc.x - other.x + oc.y - other.y) < dist) {
+    if (cc) {
+      cc.data.pipes[1] = undefined;
+      this.data.pipes[1] = undefined;
+    }
+    return;
+  }
+  if (cc) {
+    cc.data.pipes[1] = undefined;
+  }
+  if (oc) {
+    other.data.pipes[1] = undefined;
+    oc.data.pipes[1] = undefined;
+    const segment =
+        other.data.channel.split(other, undefined, oc);
+    if (segment)
+      fluidNetwork.channels.push(segment);
+  }
+  for (let p of this.data.undergroundPipes) {
+    if (Math.abs(p.x - this.x + p.y - this.y) < dist)
+      return;
+  }
+  this.data.pipes[1] = other;
+  other.data.pipes[1] = this;
+}
+
 export function disconnectPipe() {
   for (let i = 0; i < this.data.pipeConnections.length; i++) {
     const other = this.data.pipes[i];
@@ -347,6 +397,30 @@ export function disconnectPipe() {
         other.updatePipeSprites();
       }
     }
+  }
+}
+
+export function disconnectPipeToGround() {
+  for (let other of this.data.undergroundPipes) {
+    other.data.undergroundPipes.splice(
+        other.data.undergroundPipes.indexOf(this), 1);
+  }
+  const other = this.data.pipes[1];
+  if (!other) return;
+  let closest = undefined;
+  for (let oc of other.data.undergroundPipes) {
+    if (closest &&
+        Math.abs(closest.x - other.x + closest.y - other.y) <
+        Math.abs(oc.x - other.x + oc.y - other.y))
+      continue;
+    closest = oc;
+  }
+  if (closest && !closest.data.pipes[1]) {
+    other.data.pipes[1] = closest;
+    closest.data.pipes[1] = other;
+    other.data.channel.join(other.data.pipes[1].data.channel);
+  } else {
+    other.data.pipes[1] = undefined;
   }
 }
 

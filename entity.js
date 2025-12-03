@@ -244,6 +244,8 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.data.pipeConnections = def.pipeConnections[direction];
     this.data.pipes = {};
     this.data.capacity = def.capacity;
+    this.data.maxUndergroundGap = def.maxUndergroundGap;
+    this.data.undergroundPipes = [];
   }
   return this;
 };

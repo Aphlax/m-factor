@@ -427,10 +427,10 @@ export const ENTITIES = new Map([
     animationLength: 0,
     
     pipeConnections: {
-      [north]: [{x: 0, y: -1}],
-      [east]: [{x: 1, y: 0}],
-      [south]: [{x: 0, y: 1}],
-      [west]: [{x: -1, y: 0}],
+      [north]: [{x: 0, y: -1}, {x: 0, y: Infinity}],
+      [east]: [{x: 1, y: 0}, {x: -Infinity, y: 0}],
+      [south]: [{x: 0, y: 1}, {x: 0, y: -Infinity}],
+      [west]: [{x: -1, y: 0}, {x: Infinity, y: 0}],
     },
     capacity: 100,
     maxUndergroundGap: 9,

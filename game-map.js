@@ -362,6 +362,11 @@ GameMap.prototype.connectEntity = function(entity, time) {
             (entity.x == other.x || entity.y == other.y)) {
           entity.connectUndergroundBelt(other, this.transportNetwork);
         }
+        if (entity.type == TYPE.pipeToGround &&
+            other.type == TYPE.pipeToGround &&
+            (entity.x == other.x || entity.y == other.y)) {
+          entity.connectPipeToGround(other, this.fluidNetwork);
+        }
         // From here on only check for local (short) connections.
         if (!(entity.x + entity.width > other.x && entity.x < other.x + other.width &&
             entity.y + entity.height + l > other.y && entity.y - l < other.y + other.height) &&
@@ -493,6 +498,9 @@ GameMap.prototype.disconnectEntity = function(entity, time) {
     }
   }
   if (entity.data.pipeConnections) {
+    if (entity.type == TYPE.pipeToGround) {
+      entity.disconnectPipeToGround();
+    }
     this.fluidNetwork.removePipe(entity);
     entity.disconnectPipe();
   }
