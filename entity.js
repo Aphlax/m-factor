@@ -1,7 +1,7 @@
 import {Inventory} from './inventory.js';
 import {FluidTank} from './fluid-tank.js';
 import {ENTITIES} from './entity-definitions.js';
-import {TYPE, MAX_SIZE, NEVER, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ENERGY, MIN_SATISFACTION} from './entity-properties.js';
+import {TYPE, MAX_SIZE, NEVER, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ENERGY, MIN_SATISFACTION, DIRECTION} from './entity-properties.js';
 import {ITEMS, I} from './item-definitions.js';
 import {RECIPES, FURNACE_FILTERS} from './recipe-definitions.js';
 import {S, SPRITES} from './sprite-pool.js';
@@ -55,6 +55,8 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
   this.label = def.label;
   this.x = x;
   this.y = y;
+  direction = def.rotatable || def.type == TYPE.offshorePump ?
+      direction : DIRECTION.north;
   if (!def.size) {
     this.width = def.width;
     this.height = def.height;

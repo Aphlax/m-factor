@@ -51,29 +51,6 @@ FluidNetwork.prototype.addPipe = function(pipe) {
   }
 };
 
-/** Returns true if this is an invalid connection and it should be removed. */
-FluidNetwork.prototype.disconnectPipeToGround = function(pipe) {
-  if (!pipe.data.channel) return;
-  let channel = pipe.data.channel
-  channel.remove(pipe);
-  for (let i = 0; i < pipe.data.pipeConnections.length; i++) {
-    const other = pipe.data.pipes[i];
-    if (!other || !other.data.pipeConnections ||
-        other.data.channel != channel)
-      continue;
-    if (previous1) {
-      const segment = other.data.channel.split(
-          other, pipe, previous1, previous2, previous3);
-      if (segment) {
-        this.channels.push(segment);
-      }
-    }
-    if (!previous1) {
-      previous1 = other;
-    }
-  }
-};
-
 FluidNetwork.prototype.removePipe = function(pipe) {
   if (!pipe.data.channel) return;
   let channel = pipe.data.channel,
