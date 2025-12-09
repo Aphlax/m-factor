@@ -3,14 +3,10 @@
   <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <script type="importmap">
-    {
-      "imports": {
-        "react": "https://esm.sh/stable/react@19.2.0",
-        "react-dom/client": "https://esm.sh/stable/react-dom@19.2.0/client"
-      }
-    }
-    </script>
+    <script type="importmap">{"imports": {
+    "react": "https://esm.sh/stable/react@19.2.0",
+    "react-dom/client": "https://esm.sh/stable/react-dom@19.2.0/client"
+    }}</script>
     <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
     <title>Sprite compose</title>
     <style>
@@ -23,6 +19,7 @@
   flex-direction: row;
 }
 .flex {flex: 1;}
+.tb {width: 40px;}
     </style>
   </head>
   <body style="width: 100%; height: 100%; margin: 0; overflow: hidden; touch-action: none;">
@@ -30,9 +27,11 @@
 <script type="text/babel" data-type="module">
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-const {useState, createRef, useEffect} = React;
+const {useState, createRef, useRef, useEffect} = React;
+import {configs} from './sprite-compose-configs.js';
 
-function SpriteDef({sprite, base, tiles, onUpdate, onDelete}) {
+function SpriteDef({sprite, base, tiles, onUpdate, onDelete, onUp, onDown}) {
+  const [extended, setExtended] = useState(false);
   const icon = createRef();
   function onImage({target: {value}}) {
     const name = value.replace(/^.*[\/\\]/, '');
@@ -46,50 +45,101 @@ function SpriteDef({sprite, base, tiles, onUpdate, onDelete}) {
   useEffect(() => {
     if (sprite.image)
       icon.current.src = sprite.image.src;
-  });
+  }, [sprite]);
+  
+  function addKeyFrame() {
+    onUpdate({...sprite,
+        keyFrames: [...sprite.keyFrames,
+        {length: 0, start: 0, end: 0, xstart: 0, xend: 0, ystart: 0, yend: 0}]});
+  }
+  function removeKeyFrame(i) {
+    onUpdate({...sprite,
+        keyFrames: [
+        ...sprite.keyFrames.slice(0, i),
+        ...sprite.keyFrames.slice(i + 1)]});
+  }
+  function updateKeyFrame(i, props) {
+    onUpdate({...sprite,
+        keyFrames: [
+        ...sprite.keyFrames.slice(0, i),
+        {...sprite.keyFrames[i], ...props},
+        ...sprite.keyFrames.slice(i + 1)]});
+  }
   
   return (
-<div className="row" style={{minHeight: '60px', margin: '10px 0', overflow: 'hidden'}}>
-  <label htmlFor={'sfs' + sprite.key} style={{margin: '0 10px'}}>
-    <img ref={icon} width="60" height="60"></img>
-  </label>
-  <input type="file" id={'sfs' + sprite.key} onInput={onImage} style={{display: 'none'}}/>
-  <div className="col">
-    <div className="row">
-      <label> cols:
-        <input type="number" value={sprite.cols} min="1" max="100" onInput={e => onUpdate({...sprite, cols: Number(e.target.value)})} style={{width: '40px'}}/>
-      </label>
-      <label> rows:
-        <input type="number" value={sprite.rows} min="1" max="100" onInput={e => onUpdate({...sprite, rows: Number(e.target.value)})} style={{width: '40px'}}/>
-      </label>
+<div className="col" style={{minHeight: `${extended ? 85 + 21 * sprite.keyFrames.length : 60}px`, height: `${extended ? 120 : 60}px`, margin: '10px 0', overflow: 'hidden'}}>
+  <div className="row" style={{minHeight: '60px', overflow: 'hidden'}}>
+    <label htmlFor={'sfs' + sprite.key} style={{margin: '0 10px'}}>
+      <img ref={icon} width="60" height="60"></img>
+    </label>
+    <input type="file" id={'sfs' + sprite.key} onInput={onImage} style={{display: 'none'}}/>
+    <div className="col">
+      <div className="row">
+        <div className="flex">cols:</div>
+        <input type="number" value={sprite.cols} min="1" max="100" onInput={e => onUpdate({...sprite, cols: Number(e.target.value)})} className="flex tb" onFocus={e => e.target.select()}/>
+        <div className="flex">rows:</div>
+        <input type="number" value={sprite.rows} min="1" max="100" onInput={e => onUpdate({...sprite, rows: Number(e.target.value)})} className="flex tb" onFocus={e => e.target.select()}/>
+      </div>
+      <div className="row">
+        <div className="flex">x:</div>
+        <input type="number" value={sprite.x} min="-200" max="200" onInput={e => onUpdate({...sprite, x: Number(e.target.value)})} className="flex tb" onFocus={e => e.target.select()}/>
+        <div className="flex">y:</div>
+        <input type="number" value={sprite.y} min="-200" max="200" onInput={e => onUpdate({...sprite, y: Number(e.target.value)})} className="flex tb" onFocus={e => e.target.select()}/>
+      </div>
+      <textarea readOnly rows="1" value={
+          ((sprite.image?.width ?? 0) / sprite.cols) + ', ' +
+          ((sprite.image?.height ?? 0) / sprite.rows) + ', ' +
+          sprite.cols + ', ' + sprite.rows + ', ' +
+          (-sprite.x) + ', ' +
+          (-(tiles.x * 32 - (sprite.image?.width ?? 0) / sprite.cols - sprite.x)) + ', ' +
+          (-sprite.y) + ', ' +
+          (-(tiles.y * 32 - (sprite.image?.height ?? 0) / sprite.rows - sprite.y))}
+          style={{height: '18px', padding: '1px', overflow: 'hidden'}} onFocus={e => e.target.select()}></textarea>
     </div>
-    <div className="row">
-      <label className="flex"> x:
-        <input type="number" value={sprite.x} min="-200" max="200" onInput={e => onUpdate({...sprite, x: Number(e.target.value)})} style={{width: '40px'}}/>
-      </label>
-      <label className="flex"> y:
-        <input type="number" value={sprite.y} min="-200" max="200" onInput={e => onUpdate({...sprite, y: Number(e.target.value)})} style={{width: '40px'}}/>
-      </label>
+    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: '1fr 1fr 1fr', margin: ' 0 10px'}}>
+      <button onClick={e => onUpdate({...sprite, y: Number(sprite.y) - 1})} style={{gridColumn: 2, gridRow: 1}}></button>
+      <button onClick={e => onUpdate({...sprite, x: Number(sprite.x) - 1})} style={{gridColumn: 1, gridRow: 2}}></button>
+      <button onClick={e => onUpdate({...sprite, x: Number(sprite.x) + 1})} style={{gridColumn: 3, gridRow: 2}}></button>
+      <button onClick={e => onUpdate({...sprite, y: Number(sprite.y) + 1})} style={{gridColumn: 2, gridRow: 3}}></button>
     </div>
-    <textarea readOnly rows="1" value={
-        ((sprite.image?.width ?? 0) / sprite.cols) + ', ' +
-        ((sprite.image?.height ?? 0) / sprite.rows) + ', ' +
-        sprite.cols + ', ' + sprite.rows + ', ' +
-        (-sprite.x) + ', ' +
-        (-(tiles.x * 32 - (sprite.image?.width ?? 0) / sprite.cols - sprite.x)) + ', ' +
-        (-sprite.y) + ', ' +
-        (-(tiles.y * 32 - (sprite.image?.height ?? 0) / sprite.rows - sprite.y))}
-        style={{height: '18px', padding: '1px', overflow: 'hidden'}}></textarea>
+    <div className="col">
+      <div className="row flex">
+        <input type="checkbox" checked={sprite.light} onChange={e => onUpdate({...sprite, light: e.target.checked})}/>
+        <input type="checkbox" checked={sprite.enabled} onChange={e => onUpdate({...sprite, enabled: e.target.checked})}/>
+      </div>
+      <button className="flex" onClick={() => setExtended(!extended)} style={{margin: "5px"}}>{extended ? "⇑" : "⇓"}</button>
+    </div>
+    {onDelete && <button onClick={onDelete}>X</button>}
+    {!onDelete && <div className="col">
+      {onUp ? <button className="flex" onClick={onUp}>↑</button> : <div className="flex"></div>}
+      <button className="flex" onClick={onDown}>↓</button>
+    </div>}
   </div>
-  <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: '1fr 1fr 1fr', margin: ' 0 10px'}}>
-    <button onClick={e => onUpdate({...sprite, y: Number(sprite.y) - 1})} style={{gridColumn: 2, gridRow: 1}}></button>
-    <button onClick={e => onUpdate({...sprite, x: Number(sprite.x) - 1})} style={{gridColumn: 1, gridRow: 2}}></button>
-    <button onClick={e => onUpdate({...sprite, x: Number(sprite.x) + 1})} style={{gridColumn: 3, gridRow: 2}}></button>
-    <button onClick={e => onUpdate({...sprite, y: Number(sprite.y) + 1})} style={{gridColumn: 2, gridRow: 3}}></button>
-  </div>
-  <input type="checkbox" checked={sprite.light} onChange={e => onUpdate({...sprite, light: e.target.checked})}/>
-  <input type="checkbox" checked={sprite.enabled} onChange={e => onUpdate({...sprite, enabled: e.target.checked})}/>
-  {onDelete ? <button onClick={onDelete}>X</button> : []}
+  {extended &&
+  <div className="col" style={{position: "relative", flex: 1, flexAlign: "stretch"}}>
+    <div className="row">
+      <div className="flex">length</div>
+      <div className="flex">start</div>
+      <div className="flex">end</div>
+      <div className="flex">xs</div>
+      <div className="flex">xe</div>
+      <div className="flex">ys</div>
+      <div className="flex">ye</div>
+      <button onClick={addKeyFrame}>add</button>
+    </div>
+    {sprite.keyFrames.map((kf, i) => (
+    <div className="row">
+      <input type="number" value={kf.length} min="0" max="200" onInput={e => updateKeyFrame(i, {length: Number(e.target.value)})} className="flex tb" onFocus={e => e.target.select()}/>
+      <input type="number" value={kf.start} min="0" max="200" onInput={e => updateKeyFrame(i, {start: Number(e.target.value)})} className="flex tb" onFocus={e => e.target.select()}/>
+      <input type="number" value={kf.end} min="0" max="200" onInput={e => updateKeyFrame(i, {end: Number(e.target.value)})} className="flex tb" onFocus={e => e.target.select()}/>
+      <input type="number" value={kf.xstart} min="-200" max="200" onInput={e => updateKeyFrame(i, {xstart: Number(e.target.value)})} className="flex tb" onFocus={e => e.target.select()}/>
+      <input type="number" value={kf.xend} min="-200" max="200" onInput={e => updateKeyFrame(i, {xend: Number(e.target.value)})} className="flex tb" onFocus={e => e.target.select()}/>
+      <input type="number" value={kf.ystart} min="-200" max="200" onInput={e => updateKeyFrame(i, {ystart: Number(e.target.value)})} className="flex tb" onFocus={e => e.target.select()}/>
+      <input type="number" value={kf.yend} min="-200" max="200" onInput={e => updateKeyFrame(i, {yend: Number(e.target.value)})} className="flex tb" onFocus={e => e.target.select()}/>
+      <button onClick={() => removeKeyFrame(i)}>rem</button>
+    </div>
+    ))}
+  </div>}
 </div>);
 }
 
@@ -101,16 +151,18 @@ function App() {
   const [showSheet, setShowSheet] = useState(false);
   const [ready, setReady] = useState(false);
   const [sprites, setSprites] = useLocalStorage('sprites', [], 
-      val => JSON.parse(val).map(stored => {
+      val => JSON.parse(val).map((stored, i) => {
         const image = new Image();
         image.src = stored.image;
         return {
           ...stored,
+          key: Math.random() * 0xffffffff | 0,
           cols: Number(stored.cols),
           rows: Number(stored.rows),
           x: Number(stored.x),
           y: Number(stored.y),
           image,
+          keyFrames: stored.keyFrames ?? [],
         };
       }),
       ss => JSON.stringify(ss.map(s => ({...s, image: s.image?.src}))));
@@ -136,9 +188,10 @@ function App() {
   
   function addSprite() {
     setSprites([...sprites, {
-      key: sprites.length,
+      key: Math.random() * 0xffffffff | 0,
       cols: 1, rows: 1, enabled: true,
       x: 0, y: 0, light: false,
+      keyFrames: [],
     }])
   }
   
@@ -165,64 +218,43 @@ function App() {
       ctx.strokeStyle = 'lightGrey';
       ctx.stroke();
       
-      const animationLength = Math.max(
-          ...sprites.map(s => s.cols * s.rows));
+      const {animationLength} = sheetStats(sprites, {maxCols, xTiles, yTiles});
       const fps = 30;
       const duration = animationLength / fps * 1000;
       const animation = Math.floor((time % duration) / (1000 / fps));
       
-      for (let s of sprites) {
-        if (!s.image?.complete || !s.enabled) continue;
-        ctx.globalCompositeOperation = s.light ? "screen" : "source-over";
-        
-        const width = s.image.width / s.cols;
-        const height = s.image.height / s.rows;
-        const x = (animation % s.cols) * width;
-        const y = (Math.floor(animation / s.rows) % s.rows) * width;
-        
-        ctx.drawImage(s.image,
-            x, y, width, height,
-            s.x + origin.x, s.y + origin.y,
-            width, height);
-      }
+      drawFrame(ctx, sprites, animation, origin);
+      
       handle = requestAnimationFrame(draw);
     } catch(e) {console.log(e);}
   }
   
-  useEffect(compose);
+  useEffect(compose, [sprites, xTiles, yTiles, maxCols]);
   function compose() {
     try{
-      const {animationLength, xmin, xmax, ymin, ymax, cols, rows} = sheetStats();
+      const {animationLength, xmin, xmax, ymin, ymax, cols, rows} = sheetStats(sprites, {maxCols, xTiles, yTiles});
       
       if (xmax - xmin == -100) return;
       
       sheet.width = cols * (xmax - xmin);
       sheet.height = rows * (ymax - ymin);
       const ctx = sheet.getContext('2d');
-      for (let s of sprites) {
-        if (!s.image?.complete || !s.enabled) continue;
-        ctx.globalCompositeOperation = s.light ? "screen" : "source-over";
-        const width = s.image.width / s.cols;
-        const height = s.image.height / s.rows;
+      
+      for (let i = 0; i < animationLength; i++) {
+        const sheetX = i % cols,
+            sheetY = Math.floor(i / cols);
         
-        for (let i = 0; i < animationLength; i++) {
-          const sheetX = i % cols, sheetY = Math.floor(i / cols);
-          const x = (i % s.cols) * width;
-          const y = (Math.floor(i / s.rows) % s.rows) * width;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(sheetX * (xmax - xmin), sheetY * (ymax - ymin), xmax - xmin, ymax - ymin);
+        ctx.clip();
         
-          ctx.save();
-          ctx.beginPath();
-          ctx.rect(sheetX * (xmax - xmin), sheetY * (ymax - ymin), xmax - xmin, ymax - ymin);
-          ctx.clip();
-          
-          ctx.drawImage(s.image,
-            x, y, width, height,
-            sheetX * (xmax - xmin) + s.x - xmin,
-            sheetY * (ymax - ymin) + s.y - ymin,
-            width, height);
-          
-          ctx.restore();
-        }
+        const origin = {
+            x: sheetX * (xmax - xmin) - xmin,
+            y: sheetY * (ymax - ymin) - ymin};
+        drawFrame(ctx, sprites, i, origin);
+        
+        ctx.restore();
       }
     }catch(e) {console.log(e);}
     setReady(true);
@@ -236,41 +268,28 @@ function App() {
     });
     navigator.clipboard.writeText(config);
   }
-  
-  function importConfig() {
-    navigator.clipboard.readText().then(val => {
-      try {
-        const config = JSON.parse(val);
-        setBasePath(config.basePath);
-        setXTiles(config.xTiles);
-        setYTiles(config.yTiles);
-        setMaxCols(config.maxCols);
-        setSprites(config.sprites.map(s => {
-          const image = new Image();
-          image.src = s.image;
-          return {...s, image};
-        }));
-      } catch(e){console.log(e);}
-    });
-  }
-  
-  function sheetStats() {
-    let animationLength = 1,
-        xmin = 100, ymin = 100, xmax = 0, ymax = 0;
-    for (let s of sprites) {
-      if (!s.image?.complete || !s.enabled) continue;
-      if (s.x < xmin) xmin = s.x;
-      if (s.y < ymin) ymin = s.y;
-      if (s.x + s.image.width / s.cols > xmax) xmax = s.x + s.image.width / s.cols;
-      if (s.y + s.image.height / s.rows > ymax) ymax = s.y + s.image.height / s.rows;
-      if (s.cols * s.rows > animationLength) animationLength = s.cols * s.rows;
+  function importConfig(t) {
+    if (t.value == "clipboard") {
+      navigator.clipboard.readText().then(val => {
+        try {
+          setImportConfig(JSON.parse(val));
+        } catch(e){console.log(e);}
+      });
+    } else {
+      setImportConfig(configs[t.value]);
     }
-    const width = xmax - xmin, height = ymax - ymin;
-    const cols = Math.min(animationLength, maxCols),
-        rows = Math.ceil(animationLength / cols);
-    const endX = xmax - xTiles * 32, endY = ymax - yTiles * 32;
-    const stats = [width, height, cols, rows, -xmin, endX, -ymin, endY].join(', ');
-    return {animationLength, width, height, xmin, xmax, ymin, ymax, cols, rows, endX, endY, stats};
+    t.value = "imp";
+  }
+  function setImportConfig(config) {
+    setBasePath(config.basePath);
+    setXTiles(config.xTiles);
+    setYTiles(config.yTiles);
+    setMaxCols(config.maxCols);
+    setSprites(config.sprites.map(s => {
+      const image = new Image();
+      image.src = s.image;
+      return {...s, image, key: Math.random() * 0xffffffff | 0};
+    }));
   }
 
   return (
@@ -280,16 +299,16 @@ function App() {
   <div className="row">
     Tiles:
     <label> x:
-      <input type="number" value={xTiles} min="1" max="5" onInput={e => setXTiles(Number(e.target.value))}/>
+      <input type="number" value={xTiles} min="1" max="5" onInput={e => setXTiles(Number(e.target.value))} onFocus={e => e.target.select()}/>
     </label>
     <label> y:
-      <input type="number" value={yTiles} min="1" max="5" onInput={e => setYTiles(Number(e.target.value))}/>
+      <input type="number" value={yTiles} min="1" max="5" onInput={e => setYTiles(Number(e.target.value))} onFocus={e => e.target.select()}/>
     </label>
     <span className="flex"></span>
     Sheet:
     <input type="checkbox" checked={showSheet} onChange={e => setShowSheet(e.target.checked)}/>
     <label> cols:
-      <input type="number" value={maxCols} min="1" max="16" onInput={e => setMaxCols(Number(e.target.value))}/>
+      <input type="number" value={maxCols} min="1" max="16" onInput={e => setMaxCols(Number(e.target.value))} onFocus={e => e.target.select()}/>
     </label>
     {!ready ? [] :
     <a href={sheet.toDataURL()} download="sheet.png">download</a>
@@ -297,21 +316,90 @@ function App() {
   </div>
   <div className="row">
     <button onClick={exportConfig}>exp</button>
-    <button onClick={importConfig}>imp</button>
+    <select onChange={e => importConfig(e.target)} style={{width: '40px', overflow: 'hidden'}}>
+      <option disabled selected>imp</option>
+      <option>clipboard</option>
+      {Object.keys(configs).map(conf => (<option>{conf}</option>))}
+    </select>
     <textarea readOnly rows="1"
-        value={sheetStats().stats}
-        style={{height: '18px', padding: '1px', overflow: 'hidden'}}></textarea>
+        value={sheetStats(sprites, {maxCols, xTiles, yTiles}).stats}
+        style={{height: '18px', padding: '1px', overflow: 'hidden'}}
+        onFocus={e => e.target.select()}></textarea>
   </div>
   <div className="col" style={{maxHeight: '320px', overflowY: 'auto'}}>
     {sprites.map((sprite, i) =>
         <SpriteDef key={sprite.key} sprite={sprite}
         base={basePath} tiles={{x: xTiles, y: yTiles}}
-        onUpdate={onUpdate} onDelete={i == sprites.length - 1 ? () => setSprites(sprites.slice(0, sprites.length - 1)) : undefined}/>)}
+        onUpdate={onUpdate}
+        onUp={i && (() => setSprites([...sprites.slice(0, i - 1), sprite, sprites[i - 1], ...sprites.slice(i + 1)]))}
+        onDown={() => setSprites([...sprites.slice(0, i), sprites[i + 1], sprite, ...sprites.slice(i + 2)])}
+        onDelete={i == sprites.length - 1 ? () => setSprites(sprites.slice(0, sprites.length - 1)) : undefined}/>)}
   </div>
   <button onClick={addSprite}>Add sprite</button>
   <span className="flex"></span>
   <canvas ref={canvas} className="flex"></canvas>
 </>);
+}
+
+function sheetStats(sprites, {maxCols, xTiles, yTiles}) {
+  let animationLength = 1,
+      xmin = 100, ymin = 100, xmax = 0, ymax = 0;
+  for (let s of sprites) {
+    if (!s.image?.complete || !s.enabled) continue;
+    const kfxs = [0, ...s.keyFrames.map(kf => kf.xstart), ...s.keyFrames.map(kf => kf.xend)];
+    const kfys = [0, ...s.keyFrames.map(kf => kf.ystart), ...s.keyFrames.map(kf => kf.yend)];
+    if (s.x + Math.min(...kfxs) < xmin) xmin = s.x + Math.min(...kfxs);
+    if (s.y + Math.min(...kfys) < ymin) ymin = s.y + Math.min(...kfys);
+    if (s.x + s.image.width / s.cols + Math.max(...kfxs) > xmax) xmax = s.x + s.image.width / s.cols + Math.max(...kfxs);
+    if (s.y + s.image.height / s.rows + Math.max(...kfys) > ymax) ymax = s.y + s.image.height / s.rows + Math.max(...kfys);
+    const kfLength = s.keyFrames.map(kf => kf.length).reduce((a, b) => a + b, 0);
+    const length = kfLength ? kfLength : s.cols * s.rows;
+    if (length > animationLength) animationLength = length;
+  }
+  const width = xmax - xmin, height = ymax - ymin;
+  const cols = Math.min(animationLength, maxCols),
+      rows = Math.ceil(animationLength / cols);
+  const endX = xmax - xTiles * 32, endY = ymax - yTiles * 32;
+  const stats = [width, height, cols, rows, -xmin, endX, -ymin, endY].join(', ');
+  return {animationLength, width, height, xmin, xmax, ymin, ymax, cols, rows, endX, endY, stats};
+}
+
+function drawFrame(ctx, sprites, n, origin) {
+  for (let s of sprites) {
+    if (!s.image?.complete || !s.enabled) continue;
+    ctx.globalCompositeOperation = s.light ? "screen" : "source-over";
+    
+    const length = s.keyFrames.map(kf => kf.length).reduce((a, b) => a + b, 0);
+    let animation = n, i = 0, dx = 0, dy = 0;
+    while (length) {
+      const kf = s.keyFrames[i];
+      if (animation < kf.length) {
+        const p = animation / kf.length;
+        if (kf.end > kf.start) {
+          animation = kf.start + (animation % (kf.end - kf.start));
+        } else if (kf.end == kf.start) {
+          animation = kf.start;
+        } else {
+          animation = kf.start - 1 - (animation % (kf.start - kf.end));
+        }
+        dx = (1 - p) * kf.xstart + p * kf.xend;
+        dy = (1 - p) * kf.ystart + p * kf.yend;
+        break;
+      }
+      animation -= kf.length;
+      i = (i + 1) % s.keyFrames.length;
+    }
+    const width = s.image.width / s.cols;
+    const height = s.image.height / s.rows;
+    const x = (animation % s.cols) * width;
+    const y = (Math.floor(animation / s.cols) % s.rows) * height;
+    
+    ctx.drawImage(s.image,
+        x, y, width, height,
+        s.x + origin.x + dx,
+        s.y + origin.y + dy,
+        width, height);
+  }
 }
 
 function useLocalStorage(name, value, toValue = JSON.parse, toStorage = JSON.stringify) {
