@@ -641,15 +641,15 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/electric-mining-drill/electric-mining-drill-shadowN-short.png",
-    sprites: entitySprites(S.electricMiningDrillShadowN, 127, 104, 5, 2, 1, 30, 14, -6, true),
+    sprites: entitySprites(S.electricMiningDrillShadowN, 129, 104, 5, 2, 1, 30, 14, -6, true),
   },
   {
     path: "graphics/entities/electric-mining-drill/electric-mining-drillE-short.png",
-    sprites: entitySprites(S.electricMiningDrillE, 116, 108, 5, 2, 2, 18, 6, 6, true),
+    sprites: entitySprites(S.electricMiningDrillE, 116, 109, 5, 2, 2, 18, 6, 6, true),
   },
   {
     path: "graphics/entities/electric-mining-drill/electric-mining-drill-shadowE-short.png",
-    sprites: entitySprites(S.electricMiningDrillShadowE, 129, 92, 5, 2, -1, 34, 0, -4, true),
+    sprites: entitySprites(S.electricMiningDrillShadowE, 125, 92, 5, 2, -1, 34, 0, -4, true),
   },
   {
     path: "graphics/entities/electric-mining-drill/electric-mining-drillS-short.png",

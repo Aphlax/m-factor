@@ -31,6 +31,7 @@ export const ENTITIES = new Map([
       [south]: {x: 1, y: 2},
       [west]: {x: -1, y: 1},
     },
+    drillArea: 2,
   }],
   [NAME.woodenChest,
   {
@@ -450,18 +451,19 @@ export const ENTITIES = new Map([
       [south]: [S.electricMiningDrillS, S.electricMiningDrillShadowS],
       [west]: [S.electricMiningDrillW, S.electricMiningDrillShadowW],
     },
-    animationLength: 32,
+    animationLength: 10,
     energySource: ENERGY.electric,
-    energyConsumption: 186, // kW
-    energyDrain: 6, // kW
+    energyConsumption: 90, // kW
+    energyDrain: 0, // kW
     
-    taskDuration: 4000,
+    taskDuration: 2000,
     mineOutput: {
       [north]: {x: 1, y: -1},
       [east]: {x: 3, y: 1},
       [south]: {x: 1, y: 3},
       [west]: {x: -1, y: 1},
     },
+    drillArea: 5,
   }],
 ]);
 

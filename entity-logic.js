@@ -1,4 +1,4 @@
-import {TYPE, NEVER, STATE, ENERGY, FUEL_FILTERS} from './entity-properties.js';
+import {TYPE, NEVER, STATE, ENERGY, FUEL_FILTERS, MINE_PATTERN} from './entity-properties.js';
 import {ITEMS} from './item-definitions.js';
 
 
@@ -277,6 +277,12 @@ export function connectMine(other, time) {
     this.state = STATE.itemReady;
     this.nextUpdate = time;
   }
+}
+
+export function connectResources(gameMap) {
+  this.data.mineResources.push(
+      ...MINE_PATTERN[this.data.drillArea].map(({x, y}) =>
+      gameMap.getResourceAt(this.x + x, this.y + y)));
 }
 
 export function setRecipe(recipe, time) {

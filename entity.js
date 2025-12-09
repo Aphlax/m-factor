@@ -1,7 +1,7 @@
 import {Inventory} from './inventory.js';
 import {FluidTank} from './fluid-tank.js';
 import {ENTITIES} from './entity-definitions.js';
-import {TYPE, MAX_SIZE, NEVER, STATE, MINE_PATTERN, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ENERGY, MIN_SATISFACTION, DIRECTION} from './entity-properties.js';
+import {TYPE, MAX_SIZE, NEVER, STATE, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ENERGY, MIN_SATISFACTION, DIRECTION} from './entity-properties.js';
 import {ITEMS, I} from './item-definitions.js';
 import {RECIPES, FURNACE_FILTERS} from './recipe-definitions.js';
 import {S, SPRITES} from './sprite-pool.js';
@@ -107,6 +107,8 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.nextUpdate = this.taskEnd;
     this.taskDuration = def.taskDuration;
     this.data.minePattern = 0;
+    this.data.drillArea = def.drillArea;
+    this.data.mineResources = [];
     this.data.minedResource = 0;
     this.data.mineOutputX = def.mineOutput[direction].x;
     this.data.mineOutputY = def.mineOutput[direction].y;
@@ -361,80 +363,104 @@ Entity.prototype.update = function(gameMap, time) {
     this.state = state;
     this.nextUpdate = nextUpdate;
   } else if (this.type == TYPE.mine) {
-    if (this.state == STATE.running) {
-      this.animation = Math.floor(this.animation +
-          (time - this.taskStart) * this.animationSpeed / 60) %
-          this.animationLength;
-      let resource, x, y;
-      for (let i = 0; i < 16; i++) {
-        resource = gameMap.getResourceAt(
-            x = (this.x + MINE_PATTERN.x4[(i + this.data.minePattern) % 16]),
-            y = (this.y + MINE_PATTERN.y4[(i + this.data.minePattern) % 16]));
-        if (resource) {
-          this.data.minePattern = (this.data.minePattern + i + 1) % 16;
-          break;
+    let state = this.state, nextUpdate = NEVER;
+    mine: {
+      if (state == STATE.running) {
+        this.animation = Math.floor(this.animation +
+            (time - this.taskStart) * this.animationSpeed / 60) %
+            this.animationLength;
+        let resource, n = this.data.drillArea ** 2;
+        for (let i = 1; i <= n; i++) {
+          resource = this.data.mineResources[(this.data.minePattern + i) % n];
+          if (resource) {
+            this.data.minePattern = (this.data.minePattern + i) % n;
+            break;
+          }
         }
-      }
-      if (!resource) {
-        this.state = STATE.mineEmpty;
-        this.nextUpdate = NEVER;
-        return;
-      }
-      
-      // Modify resource.
-      resource.amount--;
-      if (resource.amount == 25 ||
-          resource.amount == 100 ||
-          resource.amount == 500 ||
-          resource.amount == 2500 ||
-          resource.amount == 10000 ||
-          resource.amount == 50000 ||
-          resource.amount == 250000) {
-        resource.sprite--;
-      } else if (!resource.amount) {
-        gameMap.getResourceAt(x, y, /*remove*/ true);
-      }
-      
-      this.data.minedResource = resource.id;
-      this.state = STATE.itemReady;
-    }
-    let continueNextItem = false;
-    if (this.state == STATE.itemReady) {
-      const [outputEntity] = this.outputEntities;
-      if (!outputEntity) {
-        this.state = STATE.noOutput;
-        this.nextUpdate = NEVER;
-        return;
-      }
-      const item = MINE_PRODUCTS[this.data.minedResource];
-      if (outputEntity.type == TYPE.belt ||
-          outputEntity.type == TYPE.undergroundBelt) {
-        const positionForBelt = ((this.direction + 2) % 4) * 3 + 1;
-        const wait = outputEntity.beltInsert(item, this.nextUpdate, positionForBelt);
-        if (wait) {
-          this.nextUpdate += wait;
-          return;
+        if (!resource) {
+          state = STATE.mineEmpty;
+          break mine;
         }
-      } else if (!outputEntity.insert(item, 1, this.nextUpdate)) {
-        this.nextUpdate = NEVER;
-        return;
+        
+        // Modify resource.
+        resource.amount--;
+        if (resource.amount == 25 ||
+            resource.amount == 100 ||
+            resource.amount == 500 ||
+            resource.amount == 2500 ||
+            resource.amount == 10000 ||
+            resource.amount == 50000 ||
+            resource.amount == 250000) {
+          resource.sprite--;
+        } else if (!resource.amount) {
+          this.data.mineResources[this.data.minePattern] = undefined;
+          const xstart = Math.floor(this.x + (this.data.drillArea - this.width) / 2),
+              ystart = Math.floor(this.y + (this.data.drillArea - this.height) / 2);
+          xloop:
+          for (let dx = 0; dx < this.data.drillArea; dx++) {
+            for (let dy = 0; dy < this.data.drillArea; dy++) {
+              if (gameMap.getResourceAt(xstart + dx, ystart + dy) == resource) {
+                gameMap.getResourceAt(xstart + dx, ystart + dy, /*remove*/ true);
+                break xloop;
+              }
+            }
+          }
+        }
+        
+        this.data.minedResource = resource.id;
+        state = STATE.itemReady;
       }
-      continueNextItem = true;
-    }
-    if (continueNextItem ||
-        this.state == STATE.noEnergy) {
-      if (this.energyStored < 1) {
-        this.state = STATE.noEnergy;
-        this.nextUpdate = NEVER;
-        return;
+      if (state == STATE.itemReady) {
+        const [outputEntity] = this.outputEntities;
+        if (!outputEntity) {
+          state = STATE.noOutput;
+          break mine;
+        }
+        const item = MINE_PRODUCTS[this.data.minedResource];
+        if (outputEntity.type == TYPE.belt ||
+            outputEntity.type == TYPE.undergroundBelt) {
+          const positionForBelt = ((this.direction + 2) % 4) * 3 + 1;
+          const wait = outputEntity.beltInsert(item, this.nextUpdate, positionForBelt);
+          if (wait) {
+            nextUpdate = this.nextUpdate + wait;
+            break mine;
+          }
+        } else if (!outputEntity.insert(item, 1, this.nextUpdate)) {
+          break mine;
+        }
+        state = STATE.noEnergy;
       }
-      this.energyStored--;
-      this.state = STATE.running;
-      this.taskStart = this.nextUpdate;
-      this.taskEnd = this.nextUpdate =
-          this.taskStart + this.taskDuration;
-      return;
+      if (state == STATE.noEnergy) {
+        if (this.energySource == ENERGY.windUp) { 
+          if (this.energyStored < 1) {
+            break mine;
+          }
+          this.energyStored--;
+        }
+        state = STATE.running;
+        this.taskStart = this.nextUpdate;
+        const sat = this.energySource == ENERGY.electric ?
+            this.data.grid?.satisfaction ?? 0 : 1;
+        this.taskEnd = nextUpdate =
+            sat < MIN_SATISFACTION ? NEVER :
+            this.taskStart + this.taskDuration / sat;
+        this.animationSpeed = sat < MIN_SATISFACTION ?
+            1 / NEVER : sat;
+        break mine;
+      }
+    } // break mine:
+    if (this.energySource == ENERGY.electric && this.data.grid) {
+      if (this.state != STATE.running && state == STATE.running) {
+        this.data.grid.consumerss.get(this.energyDrain).delete(this);
+        this.data.grid.consumerss.get(this.energyConsumption).add(this);
+      }
+      if (this.state == STATE.running && state != STATE.running) {
+        this.data.grid.consumerss.get(this.energyConsumption).delete(this);
+        this.data.grid.consumerss.get(this.energyDrain).add(this);
+      }
     }
+    this.state = state;
+    this.nextUpdate = nextUpdate;
   } else if (this.type == TYPE.furnace) {
     let state = this.state, nextUpdate = NEVER;
     furnace: {
@@ -539,6 +565,8 @@ Entity.prototype.update = function(gameMap, time) {
         this.taskEnd = nextUpdate =
             sat < MIN_SATISFACTION ? NEVER :
             this.taskStart + this.taskDuration / sat;
+        this.animationSpeed = sat < MIN_SATISFACTION ?
+            1 / NEVER : sat;
         break furnace;
       }
     } // break furnace:
@@ -608,6 +636,8 @@ Entity.prototype.update = function(gameMap, time) {
         this.taskEnd = nextUpdate =
             sat < MIN_SATISFACTION ? NEVER :
             this.taskStart + this.taskDuration / sat;
+        this.animationSpeed = sat < MIN_SATISFACTION ?
+            1 / NEVER : sat;
         break assembler;
       }
     } // break assembler:

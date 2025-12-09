@@ -22,6 +22,7 @@ const COLOR = {
   wire: "#EEAA22",
   shadow: "#000000",
   powerSupplyArea: "#88AAFF40",
+  mineDrillArea: "#AADDFF30",
 };
 
 export function draw(ctx, view, time) {
@@ -447,5 +448,16 @@ export function drawPowerSupplyArea(ctx, view) {
       x2 < 0 || y2 < 0) return;
   ctx.fillStyle = COLOR.powerSupplyArea;
   ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
+  window.numberOtherDraws++;
+}
+
+export function drawMineDrillArea(ctx, view) {
+  const x = (this.x - (this.data.drillArea - this.width) / 2) * view.scale - view.x,
+        y = (this.y - (this.data.drillArea - this.height) / 2) * view.scale - view.y,
+        size = this.data.drillArea * view.scale;
+  if (x > view.width || y > view.height ||
+      x + size < 0 || y + size < 0) return;
+  ctx.fillStyle = COLOR.mineDrillArea;
+  ctx.fillRect(x, y, size, size);
   window.numberOtherDraws++;
 }

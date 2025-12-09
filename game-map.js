@@ -457,6 +457,9 @@ GameMap.prototype.connectEntity = function(entity, time) {
   if (entity.type == TYPE.generator) {
     this.electricNetwork.modifyGenerator(entity);
   }
+  if (entity.type == TYPE.mine) {
+    entity.connectResources(this);
+  }
 };
 
 GameMap.prototype.disconnectEntity = function(entity, time) {

@@ -80,6 +80,8 @@ GameUi.prototype.drawGroundIndicators = function(ctx) {
   const entity = this.window.selectedEntity;
   if (entity && entity.type == TYPE.electricPole) {
     entity.drawPowerSupplyArea(ctx, this.gameMapInput.view);
+  } else if (entity && entity.type == TYPE.mine) {
+    entity.drawMineDrillArea(ctx, this.gameMapInput.view);
   }
 }
 
