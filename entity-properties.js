@@ -33,6 +33,7 @@ export const NAME = {
   electricFurnace: 13,
   undergroundBelt: 14,
   pipeToGround: 15,
+  electricMiningDrill: 16,
 };
 
 /** Never value for next update. 285 years from now. */

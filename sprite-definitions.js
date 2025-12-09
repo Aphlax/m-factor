@@ -142,6 +142,14 @@ export const S = {
   pipeToGroundE: 15110,
   pipeToGroundS: 15111,
   pipeToGroundW: 15112,
+  electricMiningDrillN: 15113, // 10
+  electricMiningDrillShadowN: 15123, // 10
+  electricMiningDrillE: 15133, // 10
+  electricMiningDrillShadowE: 15143, // 10
+  electricMiningDrillS: 15153, // 10
+  electricMiningDrillShadowS: 15163, // 10
+  electricMiningDrillW: 15173, // 10
+  electricMiningDrillShadowW: 15183, // 10
   
   ironOreItem: 16000,
   copperOreItem: 16000 + 1,
@@ -173,6 +181,7 @@ export const S = {
   electricFurnaceItem: 16100 + 20,
   undergroundBeltItem: 16100 + 21,
   pipeToGroundItem: 16100 + 22,
+  electricMiningDrillItem: 16100 + 23,
   
   gearIcon: 16500,
   burnerDrillIcon: 16500 + 1,
@@ -193,6 +202,7 @@ export const S = {
   electricFurnaceIcon: 16500 + 16,
   undergroundBeltIcon: 16500 + 17,
   pipeToGroundIcon: 16500 + 18,
+  electricMiningDrillIcon: 16500 + 19,
   
   smoke: 17000,
   
@@ -625,6 +635,38 @@ export const SPRITES = [
     path: "graphics/entities/pipe-to-ground/pipe-to-ground-left.png",
     sprites: entitySprites(S.pipeToGroundW, 64, 64, 1, 1, 16, 16, 16, 16, true),
   },
+  {
+    path: "graphics/entities/electric-mining-drill/electric-mining-drillN-short.png",
+    sprites: entitySprites(S.electricMiningDrillN, 110, 119, 5, 2, 9, 5, 17, 6, true),
+  },
+  {
+    path: "graphics/entities/electric-mining-drill/electric-mining-drill-shadowN-short.png",
+    sprites: entitySprites(S.electricMiningDrillShadowN, 127, 104, 5, 2, 1, 30, 14, -6, true),
+  },
+  {
+    path: "graphics/entities/electric-mining-drill/electric-mining-drillE-short.png",
+    sprites: entitySprites(S.electricMiningDrillE, 116, 108, 5, 2, 2, 18, 6, 6, true),
+  },
+  {
+    path: "graphics/entities/electric-mining-drill/electric-mining-drill-shadowE-short.png",
+    sprites: entitySprites(S.electricMiningDrillShadowE, 129, 92, 5, 2, -1, 34, 0, -4, true),
+  },
+  {
+    path: "graphics/entities/electric-mining-drill/electric-mining-drillS-short.png",
+    sprites: entitySprites(S.electricMiningDrillS, 108, 133, 5, 2, 6, 6, 20, 17, true),
+  },
+  {
+    path: "graphics/entities/electric-mining-drill/electric-mining-drill-shadowS-short.png",
+    sprites: entitySprites(S.electricMiningDrillShadowS, 128, 102, 5, 2, 1, 31, -3, 9, true),
+  },
+  {
+    path: "graphics/entities/electric-mining-drill/electric-mining-drillW-short.png",
+    sprites: entitySprites(S.electricMiningDrillW, 118, 107, 5, 2, 17, 5, 8, 3, true),
+  },
+  {
+    path: "graphics/entities/electric-mining-drill/electric-mining-drill-shadowW-short.png",
+    sprites: entitySprites(S.electricMiningDrillShadowW, 140, 92, 5, 2, 11, 33, -1, -3, true),
+  },
   
   // Items.
   {
@@ -740,6 +782,10 @@ export const SPRITES = [
   {
     path: "graphics/items/pipe-to-ground.png",
     sprites: itemSprites(S.pipeToGroundItem, S.pipeToGroundIcon),
+  },
+  {
+    path: "graphics/items/electric-mining-drill.png",
+    sprites: itemSprites(S.electricMiningDrillItem, S.electricMiningDrillIcon),
   },
   
   

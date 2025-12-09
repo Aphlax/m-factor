@@ -435,6 +435,34 @@ export const ENTITIES = new Map([
     capacity: 100,
     maxUndergroundGap: 9,
   }],
+  [NAME.electricMiningDrill,
+  {
+    label: 'Electric drill',
+    prototypeName: "electric-mining-drill",
+    type: TYPE.mine,
+    width: 3,
+    height: 3,
+    rotatable: true,
+    icon: S.electricMiningDrillIcon,
+    sprites: {
+      [north]: [S.electricMiningDrillN, S.electricMiningDrillShadowN],
+      [east]: [S.electricMiningDrillE, S.electricMiningDrillShadowE],
+      [south]: [S.electricMiningDrillS, S.electricMiningDrillShadowS],
+      [west]: [S.electricMiningDrillW, S.electricMiningDrillShadowW],
+    },
+    animationLength: 32,
+    energySource: ENERGY.electric,
+    energyConsumption: 186, // kW
+    energyDrain: 6, // kW
+    
+    taskDuration: 4000,
+    mineOutput: {
+      [north]: {x: 1, y: -1},
+      [east]: {x: 3, y: 1},
+      [south]: {x: 1, y: 3},
+      [west]: {x: -1, y: 1},
+    },
+  }],
 ]);
 
 ENTITIES.keys().forEach(name =>

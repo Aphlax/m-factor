@@ -13,6 +13,7 @@ const BUILD_MENU = [
   NAME.pipeToGround,
   NAME.assemblingMachine1,
   NAME.burnerDrill,
+  NAME.electricMiningDrill,
   NAME.stoneFurnace,
   NAME.electricFurnace,
   NAME.lab,
