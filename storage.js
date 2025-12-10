@@ -309,7 +309,7 @@ Storage.prototype.deserializeMap = function(map) {
       ...(def.type == TYPE.undergroundBelt ?
           {undergroundUp: e.type == "output"} : {}),
     };
-    const entity = gameMap.createEntity(name, x, y, direction, 0, data);
+    const entity = gameMap.createEntity({name, x, y, direction, data});
     if (entity.type == TYPE.assembler && e.recipe) {
       entity.setRecipe(PROTO_TO_RECIPE.get(e.recipe));
     }

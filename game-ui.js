@@ -68,7 +68,6 @@ GameUi.prototype.update = function(time) {
   
   const dt = time - this.lastUpdate;
   this.lastUpdate = time;
-  this.gameMapInput.update(time);
   this.window.update(time, dt);
   this.buildMenu.update(time, dt);
   if (this.game.gameMap.view.height != this.window.y) {

@@ -14,7 +14,6 @@ const MODE = {
 function GameMapInput(ui) {
   this.gameMap = undefined;
   this.view = undefined;
-  this.lastUpdate = 0;
   
   this.ui = ui;
   
@@ -29,10 +28,6 @@ function GameMapInput(ui) {
 GameMapInput.prototype.set = function(gameMap) {
   this.gameMap = gameMap;
   this.view = gameMap.view;
-};
-
-GameMapInput.prototype.update = function(time) {
-  this.lastUpdate = time;
 };
 
 GameMapInput.prototype.draw = function(ctx) {
@@ -192,9 +187,10 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
       if (!this.gameMap.canPlace(x, y, 1, 1)) {
         break;
       }
-      this.gameMap.createEntity(
-          this.ui.buildMenu.getSelectedEntity().name,
-          x, y, this.currentBuild.direction, this.lastUpdate);
+      this.gameMap.createEntity({
+          name: this.ui.buildMenu.getSelectedEntity().name,
+          x, y,
+          direction: this.currentBuild.direction});
     }
   } else if (this.mode == MODE.buildOffshorePump && shortTouch) {
     let x = Math.floor((this.touches[0].x + this.view.x) / this.view.scale);
@@ -213,9 +209,9 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
     if (direction != -1) {
       if (direction == DIRECTION.west) x--;
       if (direction == DIRECTION.north) y--;
-      this.gameMap.createEntity(
-          this.ui.buildMenu.getSelectedEntity().name,
-          x, y, direction, this.ui.game.playTime);
+      this.gameMap.createEntity({
+          name: this.ui.buildMenu.getSelectedEntity().name,
+          x, y, direction});
       this.ui.buildMenu.entityBuilt();
     }
   } else if (this.mode == MODE.buildUndergroundBeltExit && shortTouch) {
@@ -231,7 +227,7 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
         this.gameMap.tryCreateEntity(
         this.touches[0].x, this.touches[0].y, d,
         this.ui.buildMenu.getSelectedEntity(),
-        this.lastUpdate, {undergroundUp: true})) {
+        {undergroundUp: true})) {
       this.mode = MODE.none;
       this.ui.buildMenu.entityBuilt();
     }
@@ -248,7 +244,7 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
       const d = this.ui.rotateButton.direction;
       const entity = this.gameMap.tryCreateEntity(
           this.touches[0].x, this.touches[0].y,
-          d, entityDef, this.lastUpdate);
+          d, entityDef);
       if (entity) {
         if (entity.type == TYPE.undergroundBelt &&
             !entity.data.undergroundUp &&

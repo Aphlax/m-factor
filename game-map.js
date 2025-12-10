@@ -22,6 +22,7 @@ function GameMap(seed, type) {
       new TestGenerator() :
       new MapGenerator(seed);
   this.view = {};
+  this.playTime = 0;
   this.chunks = new Map(); // 2-D map of coordinate -> chunk
   this.transportNetwork = new TransportNetwork();
   this.fluidNetwork = new FluidNetwork();
@@ -43,6 +44,7 @@ GameMap.prototype.centerView = function(canvas) {
 };
 
 GameMap.prototype.update = function(time, dt) {
+  this.playTime = time;
   this.transportNetwork.update(time, dt);
   this.fluidNetwork.update(time, dt);
   this.electricNetwork.update(time, dt);
@@ -209,21 +211,14 @@ GameMap.prototype.draw = function(ctx, time) {
   }
 };
 
-GameMap.prototype.createEntityNow = function({name, x, y, direction, data}) {
+GameMap.prototype.createEntity = function({name, x, y, direction, data}, time) {
   const cx = Math.floor(x / SIZE);
   const cy = Math.floor(y / SIZE);
   if (!this.chunks.has(cx) || !this.chunks.get(cx).has(cy))
     this.generateChunk(cx, cy);
-  return this.createEntity(name, x, y, direction, 0, data);
-};
-
-GameMap.prototype.createEntity = function(name, x, y, direction, time, data) {
-  // Create should not do any checks if there is enough space etc.
+  
+  time = time ?? this.playTime;
   const entity = new Entity().setup(name, x, y, direction, time, data);
-  const cx = Math.floor(x / SIZE);
-  const cy = Math.floor(y / SIZE);
-  if (!this.chunks.has(cx) || !this.chunks.get(cx).has(cy))
-    return;
   
   const entities = this.chunks.get(cx).get(cy).entities;
   const i = entities.findIndex(e => e.y >= y && (e.y > y || e.x > x));
@@ -576,7 +571,7 @@ GameMap.prototype.getSelectedEntity = function(screenX, screenY) {
       this.getResourceAt(Math.floor(x), Math.floor(y));
 };
 
-GameMap.prototype.tryCreateEntity = function(screenX, screenY, direction, entityDef, time, data) {
+GameMap.prototype.tryCreateEntity = function(screenX, screenY, direction, entityDef, data) {
   direction = entityDef.rotatable ? direction : 0;
   const {width, height} = !entityDef.size ? entityDef :
       entityDef.size[direction];
@@ -585,7 +580,9 @@ GameMap.prototype.tryCreateEntity = function(screenX, screenY, direction, entity
   const y = Math.round((this.view.y + screenY) /
       this.view.scale - height / 2);
   if (this.canPlace(x, y, width, height)) {
-    return this.createEntity(entityDef.name, x, y, direction, time, data);
+    return this.createEntity({
+        name: entityDef.name,
+        x, y, direction, data});
   }
 };
 

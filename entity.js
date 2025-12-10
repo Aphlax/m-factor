@@ -394,8 +394,8 @@ Entity.prototype.update = function(gameMap, time) {
           resource.sprite--;
         } else if (!resource.amount) {
           this.data.mineResources[this.data.minePattern] = undefined;
-          const xstart = Math.floor(this.x + (this.data.drillArea - this.width) / 2),
-              ystart = Math.floor(this.y + (this.data.drillArea - this.height) / 2);
+          const xstart = Math.floor(this.x - (this.data.drillArea - this.width) / 2),
+              ystart = Math.floor(this.y -  (this.data.drillArea - this.height) / 2);
           xloop:
           for (let dx = 0; dx < this.data.drillArea; dx++) {
             for (let dy = 0; dy < this.data.drillArea; dy++) {

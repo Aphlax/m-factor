@@ -21,7 +21,7 @@ function productionTest(gameMap, time) {
   gameMap.view.y = 460;
   gameMap.view.scale = 24;
   
-  const e = (n, x, y, d) => gameMap.createEntity(n, x, y, d, time);
+  const e = (name, x, y, direction) => gameMap.createEntity({name, x, y, direction}, time);
   const l = (x, y, d, l) => createLane(gameMap, x, y, d, l, time);
   const p = (x, y, d, l) => createPipe(gameMap, x, y, d, l, time);
   const el = (x, y, d, l, s) => createPoles(gameMap, x, y, d, l, s, time);
@@ -165,22 +165,24 @@ function inserterTest(gameMap, time) {
   gameMap.generateChunk(-1, 0);
   gameMap.generateChunk(-1, -1);
   
+  const e = (name, x, y, direction) => gameMap.createEntity({name, x, y, direction});
+  
   const s = {};
-  gameMap.createEntity(NAME.burnerDrill, 6, 0, 3, time)
+  e(NAME.burnerDrill, 6, 0, 3)
       .energyStored = 150;
-  s.chest = gameMap.createEntity(NAME.woodenChest, -18, -9, 0, time);
-  gameMap.createEntity(NAME.burnerDrill, -17, -10, 3, time)
+  s.chest = e(NAME.woodenChest, -18, -9, 0);
+  e(NAME.burnerDrill, -17, -10, 3)
       .energyStored = 150;
   
-  gameMap.createEntity(NAME.burnerDrill, 6, -8, 3, time)
+  e(NAME.burnerDrill, 6, -8, 3)
       .energyStored = 150;
-  gameMap.createEntity(NAME.burnerDrill, 6, -6, 3, time)
+  e(NAME.burnerDrill, 6, -6, 3)
       .energyStored = 150;
-  gameMap.createEntity(NAME.burnerDrill, 0, -9, 2, time)
+  e(NAME.burnerDrill, 0, -9, 2)
       .energyStored = 150;
-  gameMap.createEntity(NAME.burnerDrill, -7, 0, 1, time)
+  e(NAME.burnerDrill, -7, 0, 1)
       .energyStored = 150;
-  gameMap.createEntity(NAME.burnerDrill, 3, 5, 0, time)
+  e(NAME.burnerDrill, 3, 5, 0)
       .energyStored = 150;
   
   const belts = [
@@ -274,113 +276,74 @@ function inserterTest(gameMap, time) {
   
   createLane(gameMap, 0, -6, 2, 1, time);
   
-  const i = gameMap.createEntity(NAME.inserter,
-      4, -11, 3, time);
+  const i = e(NAME.inserter, 4, -11, 3);
   i.data.inserterItem = 2;
-  gameMap.createEntity(NAME.inserter,
-      4, -5, 3, time);
-  gameMap.createEntity(NAME.inserter,
-      4, -1, 1, time);
-  gameMap.createEntity(NAME.inserter,
-      4, 3, 2, time);
-  gameMap.createEntity(NAME.inserter,
-      0, -2, 2, time);
-  gameMap.createEntity(NAME.inserter,
-      -2, -1, 3, time);
-  gameMap.createEntity(NAME.inserter,
-      -3, -2, 0, time);
-  gameMap.createEntity(NAME.inserter,
-      -3, -4, 0, time);
-  gameMap.createEntity(NAME.inserter,
-      2, 0, 3, time);
-  gameMap.createEntity(NAME.woodenChest,
-      1, 0, 0, time);
-  gameMap.createEntity(NAME.transportBelt,
-      1, -5, 3, time);
-  gameMap.createEntity(NAME.inserter,
-      2, -5, 3, time);
+  e(NAME.inserter, 4, -5, 3);
+  e(NAME.inserter, 4, -1, 1);
+  e(NAME.inserter, 4, 3, 2);
+  e(NAME.inserter, 0, -2, 2);
+  e(NAME.inserter, -2, -1, 3);
+  e(NAME.inserter, -3, -2, 0);
+  e(NAME.inserter, -3, -4, 0);
+  e(NAME.inserter, 2, 0, 3);
+  e(NAME.woodenChest, 1, 0, 0);
+  e(NAME.transportBelt, 1, -5, 3);
+  e(NAME.inserter, 2, -5, 3);
       
-  gameMap.createEntity(NAME.inserter,
-      1, 5, 2, time);
-  s.furnace = gameMap.createEntity(NAME.stoneFurnace,
-      0, 6, 0, time);
-  gameMap.createEntity(NAME.stoneFurnace,
-      -2, 6, 0, time);
-  const f = gameMap.createEntity(NAME.stoneFurnace,
-      -4, 6, 0, time);
+  e(NAME.inserter, 1, 5, 2);
+  s.furnace = e(NAME.stoneFurnace, 0, 6, 0);
+  e(NAME.stoneFurnace, -2, 6, 0);
+  const f = e(NAME.stoneFurnace, -4, 6, 0);
   f.outputInventory.insert(I.ironPlate, 100);
-  gameMap.createEntity(NAME.inserter,
-      1, 8, 2, time);
-  gameMap.createEntity(NAME.inserter,
-      -3, 8, 2, time);
-  gameMap.createEntity(NAME.inserter,
-      -2, 5, 2, time);
-  gameMap.createEntity(NAME.inserter,
-      0, 4, 3, time);
+  e(NAME.inserter, 1, 8, 2);
+  e(NAME.inserter, -3, 8, 2);
+  e(NAME.inserter, -2, 5, 2);
+  e(NAME.inserter, 0, 4, 3);
   
-  s.assembler = gameMap.createEntity(NAME.assemblingMachine1,
-      -6, 11, 0, time);
-  gameMap.createEntity(NAME.inserter,
-      -5, 10, 2, time);
-  s.inserter = gameMap.createEntity(NAME.inserter,
-      -4, 10, 2, time);
+  s.assembler = e(NAME.assemblingMachine1, -6, 11, 0);
+  e(NAME.inserter, -5, 10, 2);
+  s.inserter = e(NAME.inserter, -4, 10, 2);
   s.assembler.setRecipe(PROTO_TO_RECIPE.get("iron-gear-wheel"), time);
-  gameMap.createEntity(NAME.inserter,
-      -7, 12, 3, time);
+  e(NAME.inserter, -7, 12, 3);
   createLane(gameMap, -8, 12, 2, 2, time);
  
-  gameMap.createEntity(NAME.burnerDrill, -23, -7, 1, time)
+  e(NAME.burnerDrill, -23, -7, 1)
       .energyStored = 150;
-  gameMap.createEntity(NAME.burnerDrill, -23, -9, 1, time)
+  e(NAME.burnerDrill, -23, -9, 1)
       .energyStored = 150;
-  gameMap.createEntity(NAME.burnerDrill, -23, -4, 1, time)
+  e(NAME.burnerDrill, -23, -4, 1)
       .energyStored = 150;
-  gameMap.createEntity(NAME.burnerDrill, -22, -12, 2, time)
+  e(NAME.burnerDrill, -22, -12, 2)
       .energyStored = 150;
-  gameMap.createEntity(NAME.stoneFurnace,
-      -19, 4, 0, time)
+  e(NAME.stoneFurnace, -19, 4, 0)
       .energyStored = 1500;
-  gameMap.createEntity(NAME.stoneFurnace,
-      -19, 7, 0, time)
+  e(NAME.stoneFurnace, -19, 7, 0)
       .energyStored = 1500;
-  gameMap.createEntity(NAME.stoneFurnace,
-      -19, 9, 0, time)
+  e(NAME.stoneFurnace, -19, 9, 0)
       .energyStored = 1500;
-  gameMap.createEntity(NAME.inserter,
-      -20, 4, 1, time);
-  gameMap.createEntity(NAME.inserter,
-      -20, 8, 1, time);
-  gameMap.createEntity(NAME.inserter,
-      -17, 4, 1, time);
-  gameMap.createEntity(NAME.inserter,
-      -17, 7, 1, time);
-  gameMap.createEntity(NAME.inserter,
-      -20, 9, 1, time);
-  gameMap.createEntity(NAME.inserter,
-      -17, 9, 1, time);
+  e(NAME.inserter, -20, 4, 1);
+  e(NAME.inserter, -20, 8, 1);
+  e(NAME.inserter, -17, 4, 1);
+  e(NAME.inserter, -17, 7, 1);
+  e(NAME.inserter, -20, 9, 1);
+  e(NAME.inserter, -17, 9, 1);
   
-  gameMap.createEntity(NAME.assemblingMachine1,
-      -12, 11, 0, time).setRecipe(PROTO_TO_RECIPE.get("automation-science-pack"), time);
-  gameMap.createEntity(NAME.inserter,
-      -9, 13, 3, time);
-  gameMap.createEntity(NAME.inserter,
-      -13, 11, 1, time);
-  gameMap.createEntity(NAME.inserter,
-      -11, 14, 2, time);
+  e(NAME.assemblingMachine1, -12, 11, 0)
+      .setRecipe(PROTO_TO_RECIPE.get("automation-science-pack"), time);
+  e(NAME.inserter, -9, 13, 3);
+  e(NAME.inserter, -13, 11, 1);
+  e(NAME.inserter, -11, 14, 2);
   createLane(gameMap, -11, 15, 2, 2, time);
-  gameMap.createEntity(NAME.inserter,
-      -11, 17, 2, time);
-  s.lab = gameMap.createEntity(NAME.lab,
-      -12, 18, 0, time);
+  e(NAME.inserter, -11, 17, 2);
+  s.lab = e(NAME.lab, -12, 18, 0);
   
-  gameMap.createEntity(NAME.assemblingMachine1,
-      -8, 16, 0, time);
+  e(NAME.assemblingMachine1, -8, 16, 0);
   
   createLane(gameMap, -12, -5, 0, 1, time);
   createLane(gameMap, -12, -6, 1, 1, time);
   createLane(gameMap, -11, -6, 2, 1, time);
   const lane = createLane(gameMap, -11, -5, 3, 1, time);
-  gameMap.createEntity(NAME.burnerDrill, -12, -8, 2, time)
+  e(NAME.burnerDrill, -12, -8, 2)
       .energyStored = 150;
   lane.minusItems = new Array(4 * 6).fill(I.ironOre);
   lane.minusFlow = new Array(4 * 6).fill(0);
@@ -391,8 +354,10 @@ function createLane(gameMap, x, y, direction, length, time) {
   for (let i = 0; i < length; i++) {
     const dx = -((direction - 2) % 2) * i;
     const dy = ((direction - 1) % 2) * i;
-    const b = gameMap.createEntity(NAME.transportBelt,
-        x + dx, y + dy, direction, time);
+    const b = gameMap.createEntity({
+        name: NAME.transportBelt,
+        x: x + dx, y: y + dy,
+        direction});
     if (i == length - 1) {
       return b?.data?.lane;
     }
@@ -403,8 +368,10 @@ function createPipe(gameMap, x, y, direction, length, time) {
   for (let i = 0; i < length; i++) {
     const dx = -((direction - 2) % 2) * i;
     const dy = ((direction - 1) % 2) * i;
-    const b = gameMap.createEntity(NAME.pipe,
-        x + dx, y + dy, 0, time);
+    const b = gameMap.createEntity({
+        name: NAME.pipe,
+        x: x + dx, y: y + dy,
+        direction: 0});
     if (i == length - 1) {
       return b?.data?.channel;
     }
@@ -415,8 +382,10 @@ function createPoles(gameMap, x, y, direction, length, spacing, time) {
   for (let i = 0; i < (length ?? 1); i++) {
     const dx = -(((direction ?? 0) - 2) % 2) * i * (spacing ?? 7);
     const dy = (((direction ?? 0) - 1) % 2) * i * (spacing ?? 7);
-    const b = gameMap.createEntity(NAME.smallElectricPole,
-        x + dx, y + dy, 0, time);
+    const b = gameMap.createEntity({
+        name: NAME.smallElectricPole,
+        x: x + dx, y: y + dy,
+        direction: 0});
     if (i == length - 1) {
       return b.data?.grid;
     }
