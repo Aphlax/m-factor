@@ -180,6 +180,14 @@ export function connectUndergroundBelt(other, transportNetwork) {
 }
 
 export function updateBeltSprites() {
+  if (this.type == TYPE.splitter) {
+    this.data.beltSprite = this.data.beltSprites[0];
+    this.data.beltBeginSprite = this.data.beltEndSprites[0];
+    this.data.otherBeltBeginSprite = this.data.beltEndSprites[0];
+    this.data.beltEndSprite = this.data.beltEndSprites[1];
+    this.data.otherBeltEndSprite = this.data.beltEndSprites[1];
+    return;
+  }
   let right = false, left = false;
   for (let other of this.inputEntities) {
     if (other == this.data.beltInput) continue;

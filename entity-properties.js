@@ -15,6 +15,7 @@ export const TYPE = {
   electricPole: 12,
   undergroundBelt: 14,
   pipeToGround: 15,
+  splitter: 16,
 };
 
 export const NAME = {
@@ -34,6 +35,7 @@ export const NAME = {
   undergroundBelt: 14,
   pipeToGround: 15,
   electricMiningDrill: 16,
+  splitter: 17,
 };
 
 /** Never value for next update. 285 years from now. */

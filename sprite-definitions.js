@@ -86,6 +86,10 @@ export const S = {
   undergroundEnterBeltE: 137*16,
   undergroundEnterBeltS: 138*16,
   undergroundEnterBeltW: 139*16,
+  splitterN: 140*16, // 32
+  splitterE: 142*16, // 32
+  splitterS: 144*16, // 32
+  splitterW: 146*16, // 32
   
   woodenChest: 15000,
   woodenChestShadow: 15001,
@@ -182,6 +186,7 @@ export const S = {
   undergroundBeltItem: 16100 + 21,
   pipeToGroundItem: 16100 + 22,
   electricMiningDrillItem: 16100 + 23,
+  splitterItem: 16100 + 24,
   
   gearIcon: 16500,
   burnerDrillIcon: 16500 + 1,
@@ -203,6 +208,7 @@ export const S = {
   undergroundBeltIcon: 16500 + 17,
   pipeToGroundIcon: 16500 + 18,
   electricMiningDrillIcon: 16500 + 19,
+  splitterIcon: 16500 + 20,
   
   smoke: 17000,
   
@@ -667,6 +673,22 @@ export const SPRITES = [
     path: "graphics/entities/electric-mining-drill/electric-mining-drill-shadowW-short.png",
     sprites: entitySprites(S.electricMiningDrillShadowW, 140, 92, 5, 2, 11, 33, -1, -3, true),
   },
+  {
+    path: "graphics/entities/splitter/splitter-north.png",
+    sprites: entitySprites(S.splitterN, 82, 36, 8, 4, 4, 14, 2, 2, true),
+  },
+  {
+    path: "graphics/entities/splitter/splitter-east.png",
+    sprites: entitySprites(S.splitterE, 46, 80, 8, 4, 3, 11, 14, 2, true),
+  },
+  {
+    path: "graphics/entities/splitter/splitter-south.png",
+    sprites: entitySprites(S.splitterS, 82, 32, 8, 4, 4, 14, 1, -1, true),
+  },
+  {
+    path: "graphics/entities/splitter/splitter-west.png",
+    sprites: entitySprites(S.splitterW, 46, 76, 8, 4, 3, 11, 10, 2, true),
+  },
   
   // Items.
   {
@@ -786,6 +808,10 @@ export const SPRITES = [
   {
     path: "graphics/items/electric-mining-drill.png",
     sprites: itemSprites(S.electricMiningDrillItem, S.electricMiningDrillIcon),
+  },
+  {
+    path: "graphics/items/splitter.png",
+    sprites: itemSprites(S.splitterItem, S.splitterIcon),
   },
   
   

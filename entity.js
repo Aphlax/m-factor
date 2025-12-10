@@ -250,6 +250,22 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.data.capacity = def.capacity;
     this.data.maxUndergroundGap = def.maxUndergroundGap;
     this.data.undergroundPipes = [];
+  } else if (this.type == TYPE.splitter) {
+    this.nextUpdate = NEVER;
+    this.data.beltAnimation = def.beltAnimation;
+    this.data.beltAnimationSpeed = def.beltAnimationSpeed;
+    this.data.beltSpeed = def.beltSpeed;
+    this.data.beltSprites = def.beltSprites[direction];
+    this.data.beltEndSprites = def.beltEndSprites[direction];
+    this.data.leftBeltInput = undefined;
+    this.data.leftBeltOutput = undefined;
+    this.data.rightBeltInput = undefined;
+    this.data.rightBeltOutput = undefined;
+    this.data.leftBeltMinusWait = 0;
+    this.data.leftBeltPlusWait = 0;
+    this.data.rightBeltMinusWait = 0;
+    this.data.rightBeltPlusWait = 0;
+    this.updateBeltSprites();
   }
   return this;
 };

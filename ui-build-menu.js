@@ -7,6 +7,7 @@ const BUILD_MENU = [
   NAME.woodenChest,
   NAME.transportBelt,
   NAME.undergroundBelt,
+  NAME.splitter,
   NAME.inserter,
   NAME.smallElectricPole,
   NAME.pipe,

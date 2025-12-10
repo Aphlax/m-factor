@@ -120,7 +120,8 @@ GameMap.prototype.draw = function(ctx, time) {
       if (y * size > this.view.height + this.view.y) continue;
       for (let entity of chunk.entities) {
         if (entity.type == TYPE.belt ||
-            entity.type == TYPE.undergroundBelt) {
+            entity.type == TYPE.undergroundBelt ||
+            entity.type == TYPE.splitter) {
           entity.drawBelt(ctx, this.view, time);
         }
       }

@@ -465,6 +465,44 @@ export const ENTITIES = new Map([
     },
     drillArea: 5,
   }],
+  [NAME.splitter,
+  {
+    label: "Splitter",
+    prototypeName: "splitter",
+    type: TYPE.splitter,
+    size: {
+      [north]: {width: 2, height: 1},
+      [east]: {width: 1, height: 2},
+      [south]: {width: 2, height: 1},
+      [west]: {width: 1, height: 2},
+    },
+    rotatable: true,
+    icon: S.splitterIcon,
+    sprites: {
+      [north]: [S.splitterN],
+      [east]: [S.splitterE],
+      [south]: [S.splitterS],
+      [west]: [S.splitterW],
+    },
+    animationLength: 32,
+    animationSpeed: 2,
+    
+    beltSpeed: 1.875, // 15 = 1.875 * 8
+    beltAnimation: 16,
+    beltAnimationSpeed: 1.925 * 1.875,
+    beltSprites: {
+      [north]: [S.transportBeltN],
+      [east]: [S.transportBeltE],
+      [south]: [S.transportBeltS],
+      [west]: [S.transportBeltW],
+    },
+    beltEndSprites: {
+      [north]: [S.transportBeltBeginN, S.transportBeltEndN],
+      [east]: [S.transportBeltBeginE, S.transportBeltEndE],
+      [south]: [S.transportBeltBeginS, S.transportBeltEndS],
+      [west]: [S.transportBeltBeginW, S.transportBeltEndW],
+    },
+  }],
 ]);
 
 ENTITIES.keys().forEach(name =>

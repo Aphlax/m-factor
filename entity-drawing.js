@@ -135,9 +135,9 @@ export function drawBelt(ctx, view, time) {
   let animation = Math.floor(
       time * this.data.beltAnimationSpeed / 60) % this.data.beltAnimation;
   const sprite = SPRITES.get(this.data.beltSprite + animation);
-  const xScale = this.width * view.scale /
+  const xScale = view.scale /
       (sprite.width - sprite.left - sprite.right);
-  const yScale = this.height * view.scale /
+  const yScale = view.scale /
       (sprite.height - sprite.top - sprite.bottom);
   ctx.drawImage(sprite.image,
       sprite.x, sprite.y, sprite.width, sprite.height,
@@ -171,6 +171,43 @@ export function drawBelt(ctx, view, time) {
         Math.ceil(s.width * xScale),
         Math.ceil(s.height * yScale));
     window.numberImageDraws++;
+  }
+  if (this.type == TYPE.splitter) {
+    const dx = this.direction % 2 ? 0 : 1,
+        dy = this.direction % 2 ? 1 : 0;
+    ctx.drawImage(sprite.image,
+        sprite.x, sprite.y, sprite.width, sprite.height,
+        Math.floor((this.x + dx) * view.scale - view.x -
+            sprite.left * xScale),
+        Math.floor((this.y + dy) * view.scale - view.y -
+            sprite.top * yScale),
+        Math.ceil(sprite.width * xScale),
+        Math.ceil(sprite.height * yScale));
+    window.numberImageDraws++;
+    if (this.data.otherBeltEndSprite) {
+      const s = SPRITES.get(this.data.otherBeltEndSprite + animation);
+      const x = this.x + dx - (this.direction - 2) % 2;
+      const y = this.y + dy + (this.direction - 1) % 2;
+      ctx.drawImage(s.image,
+          s.x, s.y, s.width, s.height,
+          Math.floor(x * view.scale - view.x - s.left * xScale),
+          Math.floor(y * view.scale - view.y - s.top * yScale),
+          Math.ceil(s.width * xScale),
+          Math.ceil(s.height * yScale));
+      window.numberImageDraws++;
+    }
+    if (this.data.otherBeltBeginSprite) {
+      const s = SPRITES.get(this.data.otherBeltBeginSprite + animation);
+      const x = this.x + dx + (this.direction - 2) % 2;
+      const y = this.y + dy - (this.direction - 1) % 2;
+      ctx.drawImage(s.image,
+          s.x, s.y, s.width, s.height,
+          Math.floor(x * view.scale - view.x - s.left * xScale),
+          Math.floor(y * view.scale - view.y - s.top * yScale),
+          Math.ceil(s.width * xScale),
+          Math.ceil(s.height * yScale));
+      window.numberImageDraws++;
+    }
   }
   if (this.data.beltExtraRightSprite) {
     const s = SPRITES.get(this.data.beltExtraRightSprite + animation);
