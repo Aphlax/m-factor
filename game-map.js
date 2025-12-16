@@ -370,10 +370,14 @@ GameMap.prototype.connectEntity = function(entity, time) {
             entity.y + entity.height > other.y && entity.y < other.y + other.height))
           continue;
         if ((entity.type == TYPE.belt ||
-            entity.type == TYPE.undergroundBelt) &&
+            entity.type == TYPE.undergroundBelt ||
+            entity.type == TYPE.splitter) &&
             (other.type == TYPE.belt ||
-            other.type == TYPE.undergroundBelt)) {
-          if (Math.abs(entity.x - other.x) + Math.abs(entity.y - other.y) == 1) {
+            other.type == TYPE.undergroundBelt ||
+            other.type == TYPE.splitter)) {
+          if (Math.abs(entity.x - other.x) + Math.abs(entity.y - other.y) == 1 ||
+              entity.type == TYPE.splitter ||
+              other.type == TYPE.splitter) {
             if (entity.connectBelt(other, this.transportNetwork)) {
               entity.updateBeltSprites();
               other.updateBeltSprites();
@@ -427,7 +431,8 @@ GameMap.prototype.connectEntity = function(entity, time) {
     }
   }
   if (entity.type == TYPE.belt ||
-      entity.type == TYPE.undergroundBelt) {
+      entity.type == TYPE.undergroundBelt ||
+      entity.type == TYPE.splitter) {
     this.transportNetwork.addBelt(entity);
   }
   if (entity.data.pipeConnections) {
@@ -467,7 +472,8 @@ GameMap.prototype.disconnectEntity = function(entity, time) {
       other.electricConnections.splice(other.electricConnections.indexOf(entity), 1));
   
   if (entity.type == TYPE.belt ||
-      entity.type == TYPE.undergroundBelt) {
+      entity.type == TYPE.undergroundBelt ||
+      entity.type == TYPE.splitter) {
     this.transportNetwork.removeBelt(entity);
     for (let other of entity.inputEntities) {
       if (other.type == TYPE.belt ||
@@ -477,6 +483,14 @@ GameMap.prototype.disconnectEntity = function(entity, time) {
           if (other2.type == TYPE.undergroundBelt) {
             this.transportNetwork.computeBeltConnections(other2);
           }
+        }
+        other.updateBeltSprites();
+      } else if (other.type == TYPE.splitter) {
+        if (other.data.leftBeltOutput == entity) {
+          other.data.leftBeltOutput = undefined;
+        }
+        if (other.data.rightBeltOutput == entity) {
+          other.data.rightBeltOutput = undefined;
         }
         other.updateBeltSprites();
       }
@@ -491,6 +505,14 @@ GameMap.prototype.disconnectEntity = function(entity, time) {
               other2.updateBeltSprites();
             }
           }
+        }
+        other.updateBeltSprites();
+      } else if (other.type == TYPE.splitter) {
+        if (other.data.leftBeltInput == entity) {
+          other.data.leftBeltInput = undefined;
+        }
+        if (other.data.rightBeltInput == entity) {
+          other.data.rightBeltInput = undefined;
         }
         other.updateBeltSprites();
       }

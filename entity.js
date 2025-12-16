@@ -265,6 +265,10 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.data.leftBeltPlusWait = 0;
     this.data.rightBeltMinusWait = 0;
     this.data.rightBeltPlusWait = 0;
+    this.data.leftInLane = undefined;
+    this.data.leftOutLane = undefined;
+    this.data.rightInLane = undefined;
+    this.data.rightOutLane = undefined;
     this.updateBeltSprites();
   }
   return this;
