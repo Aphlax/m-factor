@@ -111,7 +111,7 @@ export function assertExists(x) {
 export function assertNotExists(x) {
   assertNr++;
   if (x !== undefined && x !== null) {
-    const error = new Error("did exist! (should not)");
+    const error = new Error(pp(x) + " did exist! (should not)");
     console.log(error);
     throw error;
   }
@@ -130,18 +130,19 @@ export function blueprint(blueprint, check) {
   const gameMap = new GameMap(0, MAP.test);
   gameMap.initialize();
   const entities = blueprint.map(bp =>
-      gameMap.createEntityNow(bp));
+      gameMap.createEntity(bp));
   check(entities, gameMap, x => x);
 }
 
 /** Tests a blueprint with all possible creation orders. */
-export function blueprintScrambled(blueprint, check, startPerm) {
+export function blueprintScrambled(blueprint, check, startPerm, rotations) {
   const permutations = createPermutations(blueprint.length);
   if (startPerm) permutations.unshift(startPerm);
+  rotations = rotations ?? [0, 1, 2, 3];
   for (let perm of permutations) {
-    assertNr = 0;
     permutation = perm;
-    for (let rot = 0; rot < 4; rot++) {
+    for (let rot of rotations) {
+      assertNr = 0;
       rotation = rot;
       const rotFn = createRotation(rot);
       const gameMap = new GameMap(0, MAP.test);
@@ -149,7 +150,7 @@ export function blueprintScrambled(blueprint, check, startPerm) {
       const entities = new Array(perm.length);
       for (let i = 0; i < perm.length; i++) {
         entities[perm[i]] =
-            gameMap.createEntityNow(
+            gameMap.createEntity(
             rotFn(blueprint[perm[i]]));
       }
       check(entities, gameMap, rotFn);

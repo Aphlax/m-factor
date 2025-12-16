@@ -90,7 +90,7 @@ it("loop behaves correctly", () => {
     assertEqual(b1.data.lane, b3.data.lane);
     assertEqual(b1.data.lane, b4.data.lane);
     assertEqual(b1.data.lane.circular, true);
-    const b5 = map.createEntityNow(
+    const b5 = map.createEntity(
         r({name, x: 1, y: -1, direction: south}));
     assertEqual(b1.data.lane.circular, false);
     map.deleteEntity(b5, 0);
@@ -150,7 +150,7 @@ it("considers underground gaps", () => {
     map.deleteEntity(u4, 0);
     assertMatch(u1.data.lane.nodes,
         [{length: 4, gaps: [1, 2]}]);
-    u4 = map.createEntityNow(
+    u4 = map.createEntity(
         r({name, x: 0, y: 5, direction: north, data: {undergroundUp: false}}));
     assertMatch(u1.data.lane.nodes,
         [{length: 6, gaps: [0, 2, 3, 2]}]);
@@ -178,7 +178,7 @@ it("considers underground items", () => {
         {length: 8});
     assertMatch(b3.data.lane.minusFlow,
         new Array(4).fill(0));
-    u1 = map.createEntityNow(
+    u1 = map.createEntity(
         r({name, x: 0, y: 0, direction: north, data: {undergroundUp: true}}));
     assertMatch(u1.data.lane.minusFlow,
         [0,0,0,0,2,0,0,0,0,0,0,0]);
@@ -187,11 +187,75 @@ it("considers underground items", () => {
     u1.data.lane.minusFlow.push(...new Array(20).fill(0));
     u1.data.lane.minusItems.push(...new Array(20).fill(1));
     map.deleteEntity(u2, 0);
-    u2 = map.createEntityNow(
+    u2 = map.createEntity(
         r({name, x: 0, y: 2, direction: north, data: {undergroundUp: false}}));
     assertMatch(u1.data.lane.minusFlow,
         [0,0,0,0,0,0,0,0,2,0,0,0]);
   });
+});
+it("connects splitter", () => {
+  const name = NAME.transportBelt;
+  const splitter = NAME.splitter;
+  blueprintScrambled([
+    {name: splitter, x: 0, y: 0, direction: north},
+    {name, x: 0, y: -1, direction: north},
+    {name, x: 1, y: -1, direction: north},
+    {name, x: 0, y: 1, direction: north},
+    {name, x: 1, y: 1, direction: north},
+  ], ([s1, b1, b2, b3, b4], map, r) => {
+    assertEqual(s1.outputEntities.includes(b1), true);
+    assertEqual(s1.data.leftBeltOutput, b1);
+    assertExists(s1.data.leftInLane);
+    assertEqual(s1.data.leftOutLane, b1.data.lane);
+    assertEqual(s1.data.rightOutLane, b2.data.lane);
+    assertEqual(s1.data.leftInLane, b3.data.lane);
+    assertEqual(s1.data.rightInLane, b4.data.lane);
+  }, 0, [0]);
+});
+it("connects circular splitter", () => {
+  const name = NAME.transportBelt;
+  const splitter = NAME.splitter;
+  blueprintScrambled([
+    {name: splitter, x: 0, y: 0, direction: north},
+    {name, x: 0, y: -1, direction: west},
+    {name, x: -1, y: -1, direction: south},
+    {name, x: -1, y: 0, direction: south},
+    {name, x: -1, y: 1, direction: east},
+    {name, x: 0, y: 1, direction: north},
+  ], ([s1, b1, b2, b3, b4, b5], map, r) => {
+    assertEqual(b1.data.beltInput, s1);
+    assertEqual(b5.data.beltOutput, s1);
+    assertEqual(b1.data.lane, b5.data.lane);
+    assertEqual(s1.data.leftOutLane, s1.data.leftInLane);
+    assertEqual(b1.data.lane.endSplitterData, s1.data);
+    assertEqual(b1.data.lane.circular, false);
+    map.deleteEntity(b5);
+    assertNotEqual(s1.data.leftOutLane, s1.data.leftInLane);
+    assertEqual(s1.data.leftBeltInput);
+    assertEqual(b4.data.beltOutput);
+    assertMatch(s1.data.leftInLane,
+        {belts: [s1], nodes:[{length: 1}]});
+    assertEqual(s1.data.leftInLane.endSplitterData, s1.data);
+    b5 = map.createEntity(
+        r({name, x: 0, y: 1, direction: north}));
+    assertEqual(s1.data.leftBeltInput, b5);
+    assertEqual(b1.data.lane, b5.data.lane);
+    assertEqual(s1.data.leftOutLane, s1.data.leftInLane);
+  }, 0, [0]);
+});
+it("connects two splitters", () => {
+  const name = NAME.splitter;
+  blueprintScrambled([
+    {name, x: 0, y: 0, direction: north},
+    {name, x: 0, y: -1, direction: north},
+  ], ([s1, s2], map, r) => {
+    assertEqual(s1.data.leftOutLane, s2.data.leftInLane);
+    assertEqual(s1.data.rightOutLane, s2.data.rightInLane);
+    map.deleteEntity(s2);
+    s2 = map.createEntity(
+        r({name, x: 1, y: -1, direction: north}));
+    assertEqual(s1.data.rightOutLane, s2.data.leftInLane);
+  }, 0, [0]);
 });
 it("works", () => {
   const name = NAME.transportBelt;
