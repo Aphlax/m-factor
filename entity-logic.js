@@ -1,5 +1,4 @@
 import {TYPE, NEVER, STATE, ENERGY, FUEL_FILTERS, MINE_PATTERN} from './entity-properties.js';
-import {ITEMS} from './item-definitions.js';
 
 
 export function insert(item, amount, time) {
@@ -31,8 +30,6 @@ export function insert(item, amount, time) {
       }
     }
     return count;
-  } else if (this.type == TYPE.belt) {
-    throw new Error("Can only insert into belts with beltInsert.");
   }
   return 0;
 };
@@ -94,8 +91,16 @@ export function extract(item, amount, time) {
  * Returns the expected wait time in ms until the belt is free to take the item.
  * If 0, the item was put on the belt.
  */
-export function beltInsert(item, time, positionForBelt) {
-  const wait = this.data.lane.insertItem(item, this, time, positionForBelt);
+export function beltInsert(item, time, origin, positionForBelt) {
+  let lane;
+  if (this.type != TYPE.splitter) {
+    lane = this.data.lane;
+  } else if (this.direction&0x1 ? (origin.y <= this.y) == (this.direction == 1) : (origin.x <= this.x) == (this.direction == 0)) {
+    lane = this.data.leftInLane;
+  } else {
+    lane = this.data.rightInLane;
+  }
+  const wait = lane.insertItem(item, this, time, positionForBelt);
   if (!wait) {
     for (let outputEntity of this.outputEntities) {
       if (outputEntity.state == STATE.missingItem) {
@@ -113,8 +118,16 @@ export function beltInsert(item, time, positionForBelt) {
  * returns a negative item id if extracted.
  * returns a positive wait time in ms if no item.
  */
-export function beltExtract(items, time, positionForBelt) {
-  const waitOrItem = this.data.lane.extractItem(items, this, time, positionForBelt);
+export function beltExtract(items, time, origin, positionForBelt) {
+  let lane;
+  if (this.type != TYPE.splitter) {
+    lane = this.data.lane;
+  } else if (this.direction&0x1 ? (origin.y <= this.y) == (this.direction == 1) : (origin.x <= this.x) == (this.direction == 0)) {
+    lane = this.data.leftOutLane;
+  } else {
+    lane = this.data.rightOutLane;
+  }
+  const waitOrItem = lane.extractItem(items, this, time, positionForBelt);
   if (waitOrItem < 0) {
     for (let inputEntity of this.inputEntities) {
       if (inputEntity.state == STATE.itemReady) {
@@ -138,7 +151,7 @@ export function connectBelt(other, transportNetwork) {
   const x = this.x + dx, y = this.y + dy;
   if (x < other.x + other.width &&
       x + this.width > other.x &&
-      y < other.y + other.width &&
+      y < other.y + other.height &&
       y + this.height > other.y &&
       !(this.type == TYPE.undergroundBelt &&
       !this.data.undergroundUp)) {
@@ -203,7 +216,6 @@ export function connectUndergroundBelt(other, transportNetwork) {
 
 export function updateBeltSprites() {
   if (this.type == TYPE.splitter) {
-    this.data.beltSprite = this.data.beltSprites[0];
     this.data.beltBeginSprite =
         (this.direction < 2 ? this.data.leftBeltInput : this.data.rightBeltInput) ? 0 :
         this.data.beltEndSprites[0];
@@ -222,14 +234,13 @@ export function updateBeltSprites() {
   for (let other of this.inputEntities) {
     if (other == this.data.beltInput) continue;
     if (other.type != TYPE.belt &&
-        other.type != TYPE.undergroundBelt) continue;
+        other.type != TYPE.undergroundBelt &&
+        other.type != TYPE.splitter) continue;
     if (!right &&
-        this.x - (this.direction - 1) % 2 == other.x &&
-        this.y - (this.direction - 2) % 2 == other.y) {
+        (this.direction - other.direction + 4) % 4 == 1) {
       right = true;
     } else if (!left &&
-        this.x + (this.direction - 1) % 2 == other.x &&
-        this.y + (this.direction - 2) % 2 == other.y) {
+        (this.direction - other.direction + 4) % 4 == 3) {
       left = true;
     }
   }
@@ -277,7 +288,8 @@ export function connectInserter(other, time) {
       other.y + other.height > this.y + dy) {
     if (other.inputInventory || other.fuelInventory ||
         other.type == TYPE.belt ||
-        other.type == TYPE.undergroundBelt) {
+        other.type == TYPE.undergroundBelt ||
+        other.type == TYPE.splitter) {
       this.outputEntities.push(other);
       other.inputEntities.push(this);
       if (this.state == STATE.noOutput ||
@@ -290,7 +302,10 @@ export function connectInserter(other, time) {
       other.x + other.width > this.x - dx &&
       other.y <= this.y - dy &&
       other.y + other.height > this.y - dy) {
-    if (other.outputInventory || other.type == TYPE.belt) {
+    if (other.outputInventory ||
+        other.type == TYPE.belt ||
+        other.type == TYPE.undergroundBelt ||
+        other.type == TYPE.splitter) {
       this.inputEntities.push(other);
       other.outputEntities.push(this);
       if (this.state == STATE.missingItem) {

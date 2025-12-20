@@ -52,17 +52,15 @@ function productionTest(gameMap, time) {
   }
   l(-78, 49, 0, 66);
   l(-78, -17, 1, 63);
-  l(-15, -17, 2, 26);
-  const lane = l(-15, 9, 3, 2);
+  const lane = l(-15, -17, 2, 27);
   lane.minusItems = new Array(140).fill(I.coal);
-  lane.minusFlow = new Array(140).fill(0.81);
+  lane.minusFlow = new Array(140).fill(0);
   lane.minusFlow[0] = 7;
   lane.plusItems = new Array(135).fill(I.coal);
-  lane.plusFlow = new Array(135).fill(0.81);
-  lane.plusFlow[0] = 6.4;
+  lane.plusFlow = new Array(135).fill(0);
+  lane.plusFlow[0] = 7;
   
-  e(NAME.inserter, -16, 10, 2);
-  e(NAME.inserter, -15, 10, 2);
+  e(NAME.splitter, -16, 10, 2);
   
   l(-16, 11, 3, 4);
   l(-20, 11, 2, 16);

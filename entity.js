@@ -255,16 +255,16 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.data.beltAnimation = def.beltAnimation;
     this.data.beltAnimationSpeed = def.beltAnimationSpeed;
     this.data.beltSpeed = def.beltSpeed;
-    this.data.beltSprites = def.beltSprites[direction];
+    this.data.beltSprite = def.beltSprites[direction][0];
     this.data.beltEndSprites = def.beltEndSprites[direction];
     this.data.leftBeltInput = undefined;
     this.data.leftBeltOutput = undefined;
     this.data.rightBeltInput = undefined;
     this.data.rightBeltOutput = undefined;
-    this.data.leftBeltMinusWait = 0;
-    this.data.leftBeltPlusWait = 0;
-    this.data.rightBeltMinusWait = 0;
-    this.data.rightBeltPlusWait = 0;
+    this.data.minusFromLeft = true;
+    this.data.plusFromLeft = true;
+    this.data.minusToLeft = true;
+    this.data.plusToLeft = true;
     this.data.leftInLane = undefined;
     this.data.leftOutLane = undefined;
     this.data.rightInLane = undefined;
@@ -297,10 +297,11 @@ Entity.prototype.update = function(gameMap, time) {
           break inserter;
         }
         if (inputEntity.type == TYPE.belt ||
-            inputEntity.type == TYPE.undergroundBelt) {
+            inputEntity.type == TYPE.undergroundBelt ||
+            inputEntity.type == TYPE.splitter) {
           const positionForBelt = this.direction * 3 + 1;
           const waitOrItem = inputEntity.beltExtract(
-              wants, this.nextUpdate, positionForBelt);
+              wants, this.nextUpdate, this, positionForBelt);
           if (waitOrItem >= 0) {
             state = STATE.missingItem;
             nextUpdate = this.nextUpdate + waitOrItem;
@@ -342,11 +343,12 @@ Entity.prototype.update = function(gameMap, time) {
         }
         const [outputEntity] = this.outputEntities;
         if (outputEntity.type == TYPE.belt ||
-            outputEntity.type == TYPE.undergroundBelt) {
+            outputEntity.type == TYPE.undergroundBelt ||
+            outputEntity.type == TYPE.splitter) {
           const positionForBelt = this.direction * 3 + 1;
           const wait = outputEntity.beltInsert(
               this.data.inserterItem,
-              this.taskEnd, positionForBelt);
+              this.taskEnd, this, positionForBelt);
           if (wait) {
             state = STATE.itemReady;
             nextUpdate = this.nextUpdate + wait;
@@ -438,9 +440,10 @@ Entity.prototype.update = function(gameMap, time) {
         }
         const item = MINE_PRODUCTS[this.data.minedResource];
         if (outputEntity.type == TYPE.belt ||
-            outputEntity.type == TYPE.undergroundBelt) {
+            outputEntity.type == TYPE.undergroundBelt ||
+            outputEntity.type == TYPE.splitter) {
           const positionForBelt = ((this.direction + 2) % 4) * 3 + 1;
-          const wait = outputEntity.beltInsert(item, this.nextUpdate, positionForBelt);
+          const wait = outputEntity.beltInsert(item, this.nextUpdate, this, positionForBelt);
           if (wait) {
             nextUpdate = this.nextUpdate + wait;
             break mine;

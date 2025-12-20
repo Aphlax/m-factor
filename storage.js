@@ -324,7 +324,7 @@ Storage.prototype.deserializeMap = function(map) {
     if (belt != belt.data.lane.belts[0]) {
       // Circular lane, make it start at correct belt.
       gameMap.transportNetwork.lanes.push(
-          belt.data.lane.split(belt));
+          belt.data.lane.split(belt, gameMap.transportNetwork.laneId++));
     }
     belt.data.lane.minusFlow.push(...lane.minusFlow);
     belt.data.lane.minusItems.push(...lane.minusItems);

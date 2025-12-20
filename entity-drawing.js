@@ -389,7 +389,12 @@ export function drawIO(ctx, view) {
         this.type == TYPE.mine ||
         this.type == TYPE.offshorePump ||
         this.type == TYPE.boiler ||
-        (this.type == TYPE.belt && entity.type == TYPE.belt) ?
+        ((this.type == TYPE.belt ||
+        this.type == TYPE.undergroundBelt ||
+        this.type == TYPE.splitter) && 
+        (entity.type == TYPE.belt ||
+        entity.type == TYPE.undergroundBelt ||
+        entity.type == TYPE.splitter)) ?
         this.direction : entity.direction;
     const dx = -s * ((direction - 2) % 2),
       dy = s * ((direction - 1) % 2),

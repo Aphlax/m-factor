@@ -111,7 +111,8 @@ UiFuel.prototype.draw = function(ctx, time) {
   const maxFuel = fuelItem ?
       ITEMS.get(fuelItem).fuelValue : 
       ITEMS.get(I.coal).fuelValue;
-  const current = this.entity.energyStored - 
+  const current = (this.entity.state == STATE.outOfEnergy ? 0 :
+      this.entity.energyStored) - 
       (this.entity.state != STATE.running ? 0 :
       Math.max(time - this.entity.taskStart, 0) /
       1000 * this.entity.energyConsumption);

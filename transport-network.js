@@ -3,6 +3,7 @@ import {Lane} from './transport-network-lane.js';
 
 function TransportNetwork() {
   this.lanes = [];
+  this.laneId = 0;
 }
 
 TransportNetwork.prototype.reset = function() {
@@ -61,7 +62,7 @@ TransportNetwork.prototype.computeBeltConnections = function(belt) {
             other.type != TYPE.splitter)
           continue;
         if (other.type != TYPE.splitter) {
-          if (belt.direction&1 ? (belt.y == other.y) == (belt.direction == 1) : (belt.x == other.x) == (belt.direction == 0)) {
+          if (belt.direction&0x1 ? (belt.y == other.y) == (belt.direction == 1) : (belt.x == other.x) == (belt.direction == 0)) {
             belt.data.leftBeltInput = other;
             left = true;
           } else {
@@ -71,14 +72,14 @@ TransportNetwork.prototype.computeBeltConnections = function(belt) {
           other.data.beltOutput = belt;
         } else {
           // Both splitters align perfectly.
-          if (belt.direction&1 ? belt.y == other.y : belt.x == other.x) {
+          if (belt.direction&0x1 ? belt.y == other.y : belt.x == other.x) {
             belt.data.leftBeltInput = other;
             belt.data.rightBeltInput = other;
             other.data.leftBeltOutput = belt;
             other.data.rightBeltOutput = belt;
             left = true;
             right = true;
-          } else if (belt.direction&1 ? (belt.y > other.y) == (belt.direction == 1) : (belt.x > other.x) == (belt.direction == 0)) {
+          } else if (belt.direction&0x1 ? (belt.y > other.y) == (belt.direction == 1) : (belt.x > other.x) == (belt.direction == 0)) {
             belt.data.leftBeltInput = other;
             other.data.rightBeltOutput = belt;
             left = true;
@@ -190,7 +191,7 @@ TransportNetwork.prototype.addBelt = function(belt) {
       }
       return;
     }
-    this.lanes.push(Lane.fromBelt(belt));
+    this.lanes.push(Lane.fromBelt(belt, this.laneId++));
   } else {
     if (belt.data.leftBeltInput) {
       const other = belt.data.leftBeltInput;
@@ -205,7 +206,7 @@ TransportNetwork.prototype.addBelt = function(belt) {
             other.data.rightOutLane.extendEnd(belt);
       }
     } else {
-      this.lanes.push(Lane.fromSplitter(belt, 1, 1));
+      this.lanes.push(Lane.fromSplitter(belt, 1, 1, this.laneId++));
     }
     if (belt.data.rightBeltInput) {
       const other = belt.data.rightBeltInput;
@@ -220,7 +221,7 @@ TransportNetwork.prototype.addBelt = function(belt) {
             other.data.leftOutLane.extendEnd(belt);
       }
     } else {
-      this.lanes.push(Lane.fromSplitter(belt, 1, 0));
+      this.lanes.push(Lane.fromSplitter(belt, 1, 0, this.laneId++));
     }
     if (belt.data.leftBeltOutput) {
       const other = belt.data.leftBeltOutput;
@@ -235,7 +236,7 @@ TransportNetwork.prototype.addBelt = function(belt) {
             other.data.rightInLane.extendBegin(belt);
       }
     } else {
-      this.lanes.push(Lane.fromSplitter(belt, 0, 1));
+      this.lanes.push(Lane.fromSplitter(belt, 0, 1, this.laneId++));
     }
     if (belt.data.rightBeltOutput) {
       const other = belt.data.rightBeltOutput;
@@ -250,7 +251,7 @@ TransportNetwork.prototype.addBelt = function(belt) {
             other.data.leftInLane.extendBegin(belt);
       }
     } else {
-      this.lanes.push(Lane.fromSplitter(belt, 0, 0));
+      this.lanes.push(Lane.fromSplitter(belt, 0, 0, this.laneId++));
     }
   }
 };
@@ -259,7 +260,7 @@ TransportNetwork.prototype.removeBelt = function(belt) {
   if (belt.type != TYPE.splitter) {
     if (belt.data.lane.belts[0] != belt) {
       if (belt.data.lane.belts[belt.data.lane.belts.length - 1] != belt) {
-        this.lanes.push(belt.data.lane.split(belt.data.beltOutput));
+        this.lanes.push(belt.data.lane.split(belt.data.beltOutput, this.laneId++));
       }
       belt.data.lane.removeEnd();
       return;
@@ -300,20 +301,21 @@ TransportNetwork.prototype.removeBelt = function(belt) {
 TransportNetwork.prototype.beltInputChanged = function(belt, lane) {
   if (!lane) return;
   if(lane.belts[0] != belt) {
-    this.lanes.push(lane.split(belt));
+    this.lanes.push(lane.split(belt, this.laneId++));
   }
-  if (belt.data.beltInput) {
-    if (belt.data.beltInput.type != TYPE.splitter) {
-      if (belt.data.beltInput.data.lane) {
-        belt.data.beltInput.data.lane.appendLaneEnd(lane);
+  const input = belt.data.beltInput;
+  if (input) {
+    if (input.type != TYPE.splitter) {
+      if (input.data.lane) {
+        input.data.lane.appendLaneEnd(lane);
       }
-    } else if (belt.data.beltInput.data.leftBeltOutput == belt) {
-      if (belt.data.beltInput.data.leftOutLane) {
-        belt.data.beltInput.data.leftOutLane.appendLaneEnd(lane);
+    } else if (input.data.leftBeltOutput == belt) {
+      if (input.data.leftOutLane) {
+        input.data.leftOutLane.appendLaneEnd(lane);
       }
     } else {
-      if (belt.data.beltInput.data.rightOutLane) {
-        belt.data.beltInput.data.rightOutLane.appendLaneEnd(lane);
+      if (input.data.rightOutLane) {
+        input.data.rightOutLane.appendLaneEnd(lane);
       }
     }
   }
