@@ -13,7 +13,7 @@
     <h2 style="font-family: Calibri, sans-serif;">Belt Test</h2>
     <div id="root" style="width: calc(100% - 20px); height: calc(100% - 20px); margin: 0; overflow: auto;"></div>
 <script type="module">
-import {it, sit, fit, test, assertEqual, assertNotEqual, assertExists, assertNotExists, assertMatch, blueprint, blueprintScrambled} from './test-framework.js';
+import {it, sit, fit, test, assertEqual, assertNotEqual, assertExists, assertNotExists, assertMatch, blueprint, blueprintScrambled, elapse} from './test-framework.js';
 import {DIRECTION, NAME} from '../entity-properties.js';
 const {north, east, south, west} = DIRECTION;
 
@@ -210,7 +210,7 @@ it("connects splitter", () => {
     assertEqual(s1.data.rightOutLane, b2.data.lane);
     assertEqual(s1.data.leftInLane, b3.data.lane);
     assertEqual(s1.data.rightInLane, b4.data.lane);
-  }, 0, [0]);
+  });
 });
 it("connects circular splitter", () => {
   const name = NAME.transportBelt;
@@ -241,7 +241,7 @@ it("connects circular splitter", () => {
     assertEqual(s1.data.leftBeltInput, b5);
     assertEqual(b1.data.lane, b5.data.lane);
     assertEqual(s1.data.leftOutLane, s1.data.leftInLane);
-  }, 0, [0]);
+  });
 });
 it("connects two splitters", () => {
   const name = NAME.splitter;
@@ -255,7 +255,98 @@ it("connects two splitters", () => {
     s2 = map.createEntity(
         r({name, x: 1, y: -1, direction: north}));
     assertEqual(s1.data.rightOutLane, s2.data.leftInLane);
-  }, 0, [0]);
+  });
+});
+it("insert to splitter", () => {
+  const name = NAME.transportBelt;
+  const splitter = NAME.splitter;
+  blueprint([
+    {name: splitter, x: 0, y: 0, direction: north},
+    {name, x: 0, y: 1, direction: north},
+    {name, x: 0, y: 2, direction: north},
+  ], ([s1, b1], map) => {
+    const lane = b1.data.lane;
+    lane.insertItem(1, b1, 0, 4);
+    assertMatch(lane.plusFlow, [1]);
+    lane.insertItem(1, s1, 0, 7);
+    assertMatch(lane.minusFlow, [0.25]);
+    lane.insertItem(1, s1, 0, 1);
+    assertMatch(lane.plusFlow, [0, 0.75]);
+  });
+});
+it("extract from splitter", () => {
+  const name = NAME.transportBelt;
+  const splitter = NAME.splitter;
+  blueprint([
+    {name: splitter, x: 0, y: 0, direction: north},
+    {name, x: 0, y: 1, direction: north},
+    {name: splitter, x: 0, y: 2, direction: north},
+  ], ([s1, b1, s2], map) => {
+    const lane = b1.data.lane;
+    lane.minusFlow = [0.5, 0.5];
+    lane.minusItems = [1, 1];
+    let item = lane.extractItem(-1, b1, 0, 4);
+    assertEqual(item, -1); // Negative item id.
+    item = lane.extractItem(-1, b1, 0, 4);
+    assertEqual(item, -1); // Negative item id.
+    lane.minusFlow = [1.5, 0];
+    lane.minusItems = [1, 1];
+    item = lane.extractItem(-1, s2, 0, 4);
+    assertEqual(item, -1); // Negative item id.
+    item = lane.extractItem(-1, s2, 0, 4);
+    assertEqual(item, -1); // Negative item id.
+  });
+});
+it("splits items in splitter", () => {
+  const name = NAME.transportBelt;
+  const splitter = NAME.splitter;
+  blueprint([
+    {name: splitter, x: 0, y: 0, direction: north},
+  ], ([s1], map) => {
+    s1.data.leftInLane.minusFlow = [0, 0];
+    s1.data.leftInLane.minusItems = [1, 1];
+    elapse(map, 1);
+    assertMatch(s1.data.leftOutLane.minusItems, [1]);
+    assertMatch(s1.data.rightOutLane.minusItems, [1]);
+  });
+});
+it("merges items in splitter", () => {
+  const name = NAME.transportBelt;
+  const splitter = NAME.splitter;
+  blueprint([
+    {name: splitter, x: 0, y: 0, direction: north},
+    {name, x: 0, y: -1, direction: north},
+  ], ([s1, b1], map) => {
+    s1.data.leftInLane.minusFlow = [0, 0];
+    s1.data.leftInLane.minusItems = [1, 1];
+    s1.data.rightInLane.minusFlow = [0, 0];
+    s1.data.rightInLane.minusItems = [2, 2];
+    s1.data.rightOutLane.minusFlow = [0, 0, 0];
+    s1.data.rightOutLane.minusItems = [3, 3, 3];
+    elapse(map, 1);
+    assertMatch(s1.data.leftOutLane.minusItems, [1, 2, 1, 2]);
+  });
+});
+it("moves items through constricted splitter", () => {
+  const name = NAME.transportBelt;
+  const splitter = NAME.splitter;
+  blueprint([
+    {name: splitter, x: 0, y: 0, direction: north},
+  ], ([s1], map) => {
+    s1.data.leftInLane.minusFlow = [0, 0, 0];
+    s1.data.leftInLane.minusItems = [1, 1, 1];
+    s1.data.rightInLane.minusFlow = [0, 0, 0];
+    s1.data.rightInLane.minusItems = [2, 2, 2];
+    s1.data.leftOutLane.minusFlow = [0];
+    s1.data.leftOutLane.minusItems = [3];
+    s1.data.rightOutLane.minusFlow = [0];
+    s1.data.rightOutLane.minusItems = [3];
+    elapse(map, 2);
+    assertMatch(s1.data.leftOutLane.minusItems, [3, 1, 1]);
+    assertMatch(s1.data.rightOutLane.minusItems, [3, 2, 2]);
+    assertMatch(s1.data.leftInLane.minusItems, [1]);
+    assertMatch(s1.data.rightInLane.minusItems, [2]);
+  });
 });
 it("works", () => {
   const name = NAME.transportBelt;

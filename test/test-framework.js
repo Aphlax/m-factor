@@ -1,6 +1,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {GameMap, MAP} from '../game-map.js';
+import {ENTITIES} from '../entity-definitions.js';
 
 const style = document.createElement('style');
 style.textContent = `
@@ -158,6 +159,13 @@ export function blueprintScrambled(blueprint, check, startPerm, rotations) {
   }
 }
 
+export function elapse(map, seconds) {
+  let startTime = map.playTime;
+  while (map.playTime - startTime < seconds * 1000) {
+    map.update(map.playTime + 100, 100);
+  }
+}
+
 function createPermutations(n) {
   const factorials = [1];
   for (let i = 1; i <= n; i++) {
@@ -179,13 +187,16 @@ function createPermutations(n) {
   return result;
 }
 
-export function createRotation(r) {
+function createRotation(r) {
   return def => {
+    const e = ENTITIES.get(def.name);
     for (let i = 0; i < r; i++) {
+      const direction = (def.direction + 1) % 4;
+      const width = (e.size ? e.size[direction] : e).width;
       def = {
           ...def,
-          direction: (def.direction + 1) % 4,
-          x: -def.y,
+          direction,
+          x: -def.y - width + 1,
           y: def.x,
         };
     }
