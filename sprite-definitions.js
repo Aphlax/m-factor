@@ -209,6 +209,7 @@ export const S = {
   pipeToGroundIcon: 16500 + 18,
   electricMiningDrillIcon: 16500 + 19,
   splitterIcon: 16500 + 20,
+  copyIcon: 16500 + 21,
   
   smoke: 17000,
   
@@ -835,6 +836,10 @@ export const SPRITES = [
   {
     path: "graphics/icons/windUp.png",
     sprites: sprites(S.windUpIcon, 32, 32, 1, 1),
+  },
+  {
+    path: "graphics/icons/copy.png",
+    sprites: sprites(S.copyIcon, 64, 64, 1, 1),
   },
 ];
 

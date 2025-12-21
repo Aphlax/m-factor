@@ -6,9 +6,12 @@ const MIN_SCALE = 16;
 const MAX_SCALE = 32;
 const MODE = {
   none: 0,
-  buildBelt: 1,
-  buildOffshorePump: 2,
-  buildUndergroundBeltExit: 3,
+  multiBuild: 1,
+  buildBelt: 2,
+  buildOffshorePump: 3,
+  buildUndergroundBeltExit: 4,
+  copySelection: 5,
+  copyDrag: 6,
 };
 
 function GameMapInput(ui) {
@@ -21,7 +24,9 @@ function GameMapInput(ui) {
   this.mode = MODE.none;
   this.currentBuild = {
     x: 0, y: 0,
-    direction: 0, length: 0
+    entity: undefined,
+    direction: 0, length: 0,
+    xEnd: 0, yEnd: 0,
   };
 }
 
@@ -76,10 +81,29 @@ GameMapInput.prototype.draw = function(ctx) {
         ctx.stroke();
       }
     }
+  } else if (this.mode == MODE.multiBuild) {
+    ctx.strokeStyle = COLOR.buildPlanner;
+    ctx.lineWidth = 1;
+    const eps = 0.08 * this.view.scale;
+    const {width, height} = this.currentBuild.entity.size ?
+        this.currentBuild.entity.size[this.ui.rotateButton.direction] :
+        this.currentBuild.entity;
+    const dx = -((this.currentBuild.direction - 2) % 2),
+        dy = (this.currentBuild.direction - 1) % 2;
+    for (let i = 0; i < this.currentBuild.length; i++) {
+      const x = Math.floor((this.currentBuild.x +
+          i * dx * width) * this.view.scale - this.view.x),
+          y = Math.floor((this.currentBuild.y +
+          i * dy * height) * this.view.scale - this.view.y);
+      ctx.strokeRect(x + eps, y + eps,
+          width * this.view.scale - 2 * eps,
+          height * this.view.scale - 2 * eps);
+    }
   } else if (this.mode == MODE.buildOffshorePump) {
     ctx.strokeStyle = COLOR.buildPlanner;
     ctx.lineWidth = 1;
-    const xStart = Math.floor(this.view.x / this.view.scale) -1;
+    const eps = 0.08 * this.view.scale;
+    const xStart = Math.floor(this.view.x / this.view.scale) - 1;
     const xEnd = Math.ceil((this.view.x + this.view.width) / this.view.scale) + 1;
     const yStart = Math.floor(this.view.y / this.view.scale) - 1;
     const yEnd = Math.ceil((this.view.y + this.view.height) / this.view.scale) + 1;
@@ -92,7 +116,6 @@ GameMapInput.prototype.draw = function(ctx) {
         const x2 = x1 - ((direction - 2) % 2) * this.view.scale;
         const y1 = Math.floor(y * this.view.scale - this.view.y);
         const y2 = y1 + ((direction - 1) % 2) * this.view.scale;
-        const eps = 0.08 * this.view.scale;
         ctx.strokeRect(
             Math.min(x1, x2) + eps, Math.min(y1, y2) + eps,
             Math.abs(x1 - x2) + this.view.scale - 2 * eps,
@@ -141,27 +164,44 @@ GameMapInput.prototype.touchMove = function(e, longTouch) {
       this.view.y = Math.round(this.view.y - dy);
     }
   }
-  if (this.mode == MODE.buildBelt) {
+  if (this.mode == MODE.multiBuild) {
     const x = (e.touches[0].clientX +
         this.view.x) / this.view.scale;
     const y = (e.touches[0].clientY +
         this.view.y) / this.view.scale;
+    const {width, height} = this.currentBuild.entity.size ?
+        this.currentBuild.entity.size[this.ui.rotateButton.direction] :
+        this.currentBuild.entity;
+    const diffX = x - this.currentBuild.x - width / 2,
+        diffY = y - this.currentBuild.y - height / 2;
+    if (Math.abs(diffX) < Math.abs(diffY)) {
+      this.currentBuild.direction = diffY < 0 ?
+          DIRECTION.north : DIRECTION.south;
+      this.currentBuild.length = Math.round(Math.abs(diffY / height) + 0.5);
+    } else {
+      this.currentBuild.direction = diffX > 0 ?
+          DIRECTION.east : DIRECTION.west;
+      this.currentBuild.length = Math.round(Math.abs(diffX / width) + 0.5);
+    }
+  } else if (this.mode == MODE.buildBelt) {
+    const diffX = (e.touches[0].clientX +
+        this.view.x) / this.view.scale -
+        this.currentBuild.x - 0.5;
+    const diffY = (e.touches[0].clientY +
+        this.view.y) / this.view.scale  -
+        this.currentBuild.y - 0.5;
     const oldDirection = this.currentBuild.direction;
-    if (Math.abs(x - this.currentBuild.x - 0.5) <
-        Math.abs(y - this.currentBuild.y - 0.5)) {
-      this.currentBuild.direction =
-          y - this.currentBuild.y < 0 ?
+    if (Math.abs(diffX) < Math.abs(diffY)) {
+      this.currentBuild.direction = diffY < 0 ?
           DIRECTION.north : DIRECTION.south;
     } else {
-      this.currentBuild.direction =
-          x - this.currentBuild.x > 0 ?
+      this.currentBuild.direction = diffX > 0 ?
           DIRECTION.east : DIRECTION.west;
     }
     const oldLength = oldDirection != this.currentBuild.direction ?
         1 : this.currentBuild.length;
     this.currentBuild.length = Math.round(Math.max(
-        Math.abs(x - this.currentBuild.x - 0.5),
-        Math.abs(y - this.currentBuild.y - 0.5)));
+        Math.abs(diffX), Math.abs(diffY)));
     for (let i = oldLength; i < this.currentBuild.length; i++) {
       const x = this.currentBuild.x - i *
           ((this.currentBuild.direction - 2) % 2);
@@ -177,7 +217,23 @@ GameMapInput.prototype.touchMove = function(e, longTouch) {
 };
 
 GameMapInput.prototype.touchEnd = function(e, shortTouch) {
-  if (this.mode == MODE.buildBelt && !e.touches.length) {
+  if (this.mode == MODE.multiBuild && !e.touches.length) {
+    const {width, height} = this.currentBuild.entity.size ?
+        this.currentBuild.entity.size[this.ui.rotateButton.direction] :
+        this.currentBuild.entity;
+    const dx = -((this.currentBuild.direction - 2) % 2),
+        dy = (this.currentBuild.direction - 1) % 2;
+    for (let i = 0; i < this.currentBuild.length; i++) {
+      const x = this.currentBuild.x + i * dx * width,
+          y = this.currentBuild.y + i * dy * height;
+      if (!this.gameMap.canPlace(x, y, width, height))
+        continue;
+      this.gameMap.createEntity({
+          x, y, direction: this.ui.rotateButton.direction,
+          name: this.currentBuild.entity.name});
+    }
+    this.mode = MODE.none;
+  } else if (this.mode == MODE.buildBelt && !e.touches.length) {
     this.mode = MODE.none;
     for (let i = 0; i < this.currentBuild.length; i++) {
       const x = this.currentBuild.x -
@@ -188,7 +244,7 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
         break;
       }
       this.gameMap.createEntity({
-          name: this.ui.buildMenu.getSelectedEntity().name,
+          name: this.currentBuild.entity.name,
           x, y,
           direction: this.currentBuild.direction});
     }
@@ -210,7 +266,7 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
       if (direction == DIRECTION.west) x--;
       if (direction == DIRECTION.north) y--;
       this.gameMap.createEntity({
-          name: this.ui.buildMenu.getSelectedEntity().name,
+          name: this.currentBuild.entity.name,
           x, y, direction});
       this.ui.buildMenu.entityBuilt();
     }
@@ -226,7 +282,7 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
         dx * -((d - 2) % 2) < this.currentBuild.length)) ||
         this.gameMap.tryCreateEntity(
         this.touches[0].x, this.touches[0].y, d,
-        this.ui.buildMenu.getSelectedEntity(),
+        this.currentBuild.entity,
         {undergroundUp: true})) {
       this.mode = MODE.none;
       this.ui.buildMenu.entityBuilt();
@@ -234,17 +290,17 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
   } else if (shortTouch) {
     const entity = this.gameMap.getSelectedEntity(
         this.touches[0].x, this.touches[0].y);
-    const entityDef = this.ui.buildMenu.getSelectedEntity();
-    if (entity?.type || !entityDef) {
+    const entry = this.ui.buildMenu.getSelectedEntry();
+    if (entity?.type || !entry?.entity) {
       this.ui.window.set(entity);
-      if (entityDef) {
+      if (entry?.entity) {
         this.ui.buildMenu.reset();
       }
     } else {
       const d = this.ui.rotateButton.direction;
       const entity = this.gameMap.tryCreateEntity(
           this.touches[0].x, this.touches[0].y,
-          d, entityDef);
+          d, entry.entity);
       if (entity) {
         if (entity.type == TYPE.undergroundBelt &&
             !entity.data.undergroundUp &&
@@ -252,6 +308,7 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
           this.mode = MODE.buildUndergroundBeltExit;
           this.currentBuild.x = entity.x - (d - 2) % 2;
           this.currentBuild.y = entity.y + (d - 1) % 2;
+          this.currentBuild.entity = entry.entity;
           this.currentBuild.direction = d;
           this.currentBuild.length = entity.data.maxUndergroundGap + 1;
         } else {
@@ -264,15 +321,27 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
 };
 
 GameMapInput.prototype.touchLong = function(e) {
-  const entityDef = this.ui.buildMenu.getSelectedEntity();
-  if (entityDef?.type == TYPE.belt) {
+  const entry = this.ui.buildMenu.getSelectedEntry();
+  const entity = entry?.entity;
+  if (entity) {
+    const {width, height} = entity.size ?
+        entity.size[this.ui.rotateButton.direction] : entity;
     this.currentBuild.x = Math.floor((e.touches[0].clientX +
-        this.view.x) / this.view.scale);
+        this.view.x) / this.view.scale -
+        (width - 1) / 2);
     this.currentBuild.y = Math.floor((e.touches[0].clientY +
-        this.view.y) / this.view.scale);
-    if (this.gameMap.canPlace(this.currentBuild.x,
-        this.currentBuild.y, 1, 1)) {
-      this.mode = MODE.buildBelt;
+        this.view.y) / this.view.scale -
+        (height - 1) / 2);
+    if (entity.type == TYPE.belt) {
+      if (this.gameMap.canPlace(this.currentBuild.x,
+          this.currentBuild.y, 1, 1)) {
+        this.mode = MODE.buildBelt;
+        this.currentBuild.entity = entity;
+        this.currentBuild.length = 1;
+      }
+    } else if (entity.type != TYPE.offshorePump) {
+      this.mode = MODE.multiBuild;
+      this.currentBuild.entity = entity;
       this.currentBuild.length = 1;
     }
   }
@@ -286,8 +355,9 @@ GameMapInput.prototype.mouseWheel = function(e) {
   this.view.y = Math.round((this.view.y + e.clientY) * scale - e.clientY);
 };
 
-GameMapInput.prototype.setOffshorePumpMode = function() {
+GameMapInput.prototype.setOffshorePumpMode = function(entity) {
   this.mode = MODE.buildOffshorePump;
+  this.currentBuild.entity = entity;
 };
 
 GameMapInput.prototype.resetMode = function() {

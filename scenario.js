@@ -1,25 +1,24 @@
 import {I} from './item-definitions.js';
 import {PROTO_TO_RECIPE} from './recipe-definitions.js';
-import {STATE, NAME} from './entity-properties.js';
+import {STATE, DIRECTION, NAME} from './entity-properties.js';
+
+const {north, east, south, west} = DIRECTION;
 
 export function scenario(gameMap, time) {
+  //return speedrun(gameMap, time);
   return productionTest(gameMap, time);
   return inserterTest(gameMap, time);
 }
 
+function speedrun(map, time) {
+  map.centerView(0, 0);
+  map.pasteEntities([
+    
+  ], 0, 0);
+}
+
 function productionTest(gameMap, time) {
-  const chunks = [
-      [2, -2], [2, -1], [2, 0], [2, 1],
-      [1, -2], [1, -1], [1, 0], [1, 1],
-      [0, -1], [0, 0], [0, 1],
-      [-1, 0], [-1, -1], [-1, 1],
-      [-2, -1], [-2, 0], [-2, 1], [-2, 2], [-2, 3],
-      [-3, -1], [-3, 0], [-3, 1], [-3, 2],
-      [-4, -1]];
-  chunks.forEach(([x, y]) => gameMap.generateChunk(x, y));
-  gameMap.view.x = -550;
-  gameMap.view.y = 460;
-  gameMap.view.scale = 24;
+  gameMap.centerView(-15, 34);
   
   const e = (name, x, y, direction) => gameMap.createEntity({name, x, y, direction}, time);
   const l = (x, y, d, l) => createLane(gameMap, x, y, d, l, time);

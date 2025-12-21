@@ -212,4 +212,12 @@ function dist(a, b) {
   return Math.sqrt((a.x - b.x)**2 + (a.y - b.y)**2);
 }
 
-export {MapGenerator};
+function TestGenerator() {}
+TestGenerator.prototype.initialize = function() {};
+TestGenerator.prototype.generateTiles = function() {
+  return new Array(32).fill(0).map(_ => new Array(32).fill(0));
+};
+TestGenerator.prototype.generateResources = function() {};
+
+
+export {MapGenerator, TestGenerator};

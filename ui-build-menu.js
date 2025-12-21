@@ -3,7 +3,16 @@ import {S, SPRITES} from './sprite-pool.js';
 import {NAME} from './entity-properties.js';
 import {ENTITIES} from './entity-definitions.js';
 
+const TOOL = {
+  copy: -1,
+};
+
+const TOOL_ICON = new Map([
+  [TOOL.copy, S.copyIcon],
+]);
+
 const BUILD_MENU = [
+  TOOL.copy,
   NAME.woodenChest,
   NAME.transportBelt,
   NAME.undergroundBelt,
@@ -45,10 +54,15 @@ function UiBuildMenu(ui, canvas) {
   this.canvasWidth = canvas.width;
   this.canvasHeight = canvas.height;
   
-  this.menu = BUILD_MENU.map(name => {
-    const entity = ENTITIES.get(name);
+  this.menu = BUILD_MENU.map(entry => {
     const x = 0, y = 0, size = 0;
-    return {sprite: entity.icon, entity, x, y, size};
+    if (entry > 0) {
+      const entity = ENTITIES.get(entry);
+      return {sprite: entity.icon, entity, x, y, size};
+    } else {
+      const sprite = TOOL_ICON.get(entry);
+      return {sprite, tool: entry, x, y, size};
+    }
   });
   
   this.x = 3;
@@ -57,7 +71,6 @@ function UiBuildMenu(ui, canvas) {
   this.dragX = 0;
   
   this.selectedIndex = -1;
-  this.multiBuild = false;
 }
 
 UiBuildMenu.prototype.update = function(time, dt) {
@@ -120,12 +133,10 @@ UiBuildMenu.prototype.draw = function(ctx) {
     const size = this.menu[i].size;
     if (!size || this.menu[i].y >= this.canvasHeight) continue;
     ctx.fillStyle = i == this.selectedIndex ?
-        (this.multiBuild ? COLOR.buildMultiBackground :
-        COLOR.buildSingleBackground) : COLOR.buildBackground;
+        COLOR.buildSingleBackground : COLOR.buildBackground;
     ctx.fillRect(this.menu[i].x, this.menu[i].y, size, size);
     ctx.strokeStyle = i == this.selectedIndex ?
-        (this.multiBuild ? COLOR.buildMultiBorder :
-        COLOR.buildSingleBorder) : COLOR.buildBorder;
+        COLOR.buildSingleBorder : COLOR.buildBorder;
     ctx.lineWidth = i == this.selectedIndex ? 2 : 1;
     ctx.strokeRect(this.menu[i].x, this.menu[i].y, size, size);
     window.numberOtherDraws += 2;
@@ -175,15 +186,12 @@ UiBuildMenu.prototype.touchEnd = function(e, shortTouch) {
       if (r.x <= t.clientX && t.clientX <= r.x + r.size &&
           r.y <= t.clientY && t.clientY <= r.y + r.size) {
         if (this.selectedIndex == i) {
-          this.setSelectedEntity();
+          this.setSelectedEntry();
           break;
         }
-        this.setSelectedEntity(r.entity);
+        this.setSelectedEntry(r);
         break;
       }
-    }
-    if (this.multiBuild) {
-      this.multiBuild = false;
     }
   }
   if (this.dragX) {
@@ -198,48 +206,42 @@ UiBuildMenu.prototype.touchLong = function(e) {
     if (!r.size) continue;
     if (r.x <= t.clientX && t.clientX <= r.x + r.size &&
         r.y <= t.clientY && t.clientY <= r.y + r.size) {
-      this.multiBuild = true;
-      this.setSelectedEntity(r.entity);
+      this.setSelectedEntry(r);
       break;
     }
   }
 };
 
-UiBuildMenu.prototype.setSelectedEntity = function(entity) {
-  if (!entity) {
+UiBuildMenu.prototype.setSelectedEntry = function(entry) {
+  if (!entry) {
     this.selectedIndex = -1;
-    if (this.multiBuild) {
-      this.multiBuild = false;
-    }
     this.ui.gameMapInput.resetMode();
     return;
   }
-  const i = this.menu.findIndex(r => r.entity == entity);
+  const i = this.menu.indexOf(entry);
   if (i == -1) return;
   this.selectedIndex = i;
   if (this.x != i) {
     this.dx = Math.sign(i - this.x) * Math.sqrt(Math.abs(i - this.x) * 2 * DEACC);
   }
   
-  if (entity.name == NAME.offshorePump) {
-    this.ui.gameMapInput.setOffshorePumpMode();
+  if (entry.entity?.name == NAME.offshorePump) {
+    this.ui.gameMapInput.setOffshorePumpMode(entry.entity);
   } else {
     this.ui.gameMapInput.resetMode();
   }
 };
 
-UiBuildMenu.prototype.getSelectedEntity = function() {
-  return this.menu[this.selectedIndex]?.entity;
+UiBuildMenu.prototype.getSelectedEntry = function() {
+  return this.menu[this.selectedIndex];
 };
 
 UiBuildMenu.prototype.entityBuilt = function() {
-  if (!this.multiBuild) {
-    this.setSelectedEntity();
-  }
+  
 };
 
 UiBuildMenu.prototype.reset = function() {
-  this.setSelectedEntity();
+  this.setSelectedEntry();
 };
 
 export {UiBuildMenu};

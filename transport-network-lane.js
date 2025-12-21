@@ -349,8 +349,10 @@ Lane.prototype.update = function(time, dt) {
       if (belt.type == TYPE.splitter &&
           (entity == belt.data.leftBeltOutput ||
           entity == belt.data.rightBeltOutput ||
-          (this == belt.data.leftOutLane &&
-          (belt.direction&0x1 ? (entity.y == belt.y) == (belt.direction == 1) : (entity.x == belt.x) == (belt.direction == 0)))))
+          ((this == belt.data.leftOutLane) ==
+          (belt.direction&0x1 ?
+              (entity.y == belt.y) == (belt.direction == 1) :
+              (entity.x == belt.x) == (belt.direction == 0)))))
         continue;
       const positionForBelt = ((belt.direction + 2) % 4) * 3 + 1 - flowSign;
       const wait = entity.beltInsert(items[0], time, belt, positionForBelt);

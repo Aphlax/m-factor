@@ -30,7 +30,7 @@ function Game(canvas) {
   
   this.storage.initialize();
   this.loadMap(0, new GameMap(this.seed, MAP.nauvis)
-      .centerView(canvas));
+      .setViewFromCanvas(canvas));
   this.mode = MODE.loading;
 }
 

@@ -1,4 +1,4 @@
-import {MapGenerator} from './map-generator.js';
+import {MapGenerator, TestGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {S} from './sprite-definitions.js';
 import {TYPE, STATE, MAX_SIZE, MAX_LOGISTIC_CONNECTION, MAX_UNDERGROUND_CONNECTION, ENERGY, DIRECTIONS, MAX_WIRE_REACH, MAX_SHADOW, MAX_ELECTRIC_SUPPLY} from './entity-properties.js';
@@ -34,12 +34,16 @@ GameMap.prototype.initialize = function() {
   this.mapGenerator.initialize();
 };
 
-GameMap.prototype.centerView = function(canvas) {
-  this.view.x = Math.floor(-canvas.width / 2);
-  this.view.y = Math.floor(-canvas.height / 2);
+GameMap.prototype.setViewFromCanvas = function(canvas) {
   this.view.width = canvas.width;
   this.view.height = canvas.height;
-  this.view.scale = 24;
+  return this.centerView(0, 0);
+};
+
+GameMap.prototype.centerView = function(x, y, scale = 24) {
+  this.view.x = Math.floor(x * scale - this.view.width / 2);
+  this.view.y = Math.floor(y * scale - this.view.height / 2);
+  this.view.scale = scale;
   return this;
 };
 
@@ -609,6 +613,31 @@ GameMap.prototype.tryCreateEntity = function(screenX, screenY, direction, entity
   }
 };
 
+GameMap.prototype.canPlaceEntities = function(entities, x, y) {
+  for (let entity of entities) {
+    const def = ENTITIES.get(entity.name);
+    if (def.type == TYPE.offshorePump) {
+      const x = entity.x + (entity.direction == 3 ? 1 : 0);
+      const y = entity.y + (entity.direction == 0 ? 1 : 0);
+      if (this.canPlaceOffshorePump(x, y) != entity.direction)
+        return false;
+    } else {
+      const width = def.size ? def.size[entity.direction].width : def.width;
+      const height = def.size ? def.size[entity.direction].height : def.height;
+      if (!this.canPlace(entity.x + x, entity.y + y, width, height))
+        return false;
+    }
+  }
+  return true;
+};
+
+GameMap.prototype.pasteEntities = function(entities, x, y, time) {
+  for (let ent of entities) {
+    const entity = {...ent, x: ent.x + x, y: ent.y + y};
+    this.createEntity(entity, time);
+  }
+};
+
 /** Returns the direction it is possible to place, otherwise -1. */
 GameMap.prototype.canPlaceOffshorePump = function(x, y) {
   if (this.getTerrainAt(x, y) < S.water) return -1;
@@ -670,12 +699,5 @@ GameMap.prototype.createSmoke = function(x, y, time, duration) {
     this.chunks.get(cx).get(cy).particles.push(p);
   }
 };
-
-function TestGenerator() {}
-TestGenerator.prototype.initialize = function() {};
-TestGenerator.prototype.generateTiles = function() {
-  return new Array(SIZE).fill(0).map(_ => new Array(SIZE).fill(0));
-};
-TestGenerator.prototype.generateResources = function() {};
 
 export {GameMap};
