@@ -1,7 +1,7 @@
 import {TYPE, DIRECTION, DIRECTIONS} from './entity-properties.js';
 import {COLOR} from './ui-properties.js';
 import {S} from './sprite-pool.js';
-import {BeltDrag, MultiBuild, UndergroundExit, OffshorePump} from './game-map-input-modes.js';
+import {BeltDrag, MultiBuild, SnakeBelt, UndergroundExit, OffshorePump} from './game-map-input-modes.js';
 
 const MIN_SCALE = 16;
 const MAX_SCALE = 32;
@@ -19,6 +19,7 @@ function GameMapInput(ui) {
   this.multiBuild = new MultiBuild(ui);
   this.undergroundExit = new UndergroundExit(ui);
   this.offshorePump = new OffshorePump(ui);
+  this.snakeBelt = new SnakeBelt(ui);
 }
 
 GameMapInput.prototype.set = function(gameMap) {
@@ -28,6 +29,7 @@ GameMapInput.prototype.set = function(gameMap) {
   this.multiBuild.set(gameMap);
   this.undergroundExit.set(gameMap);
   this.offshorePump.set(gameMap);
+  this.snakeBelt.set(gameMap);
 };
 
 GameMapInput.prototype.draw = function(ctx) {
@@ -36,8 +38,9 @@ GameMapInput.prototype.draw = function(ctx) {
 };
 
 GameMapInput.prototype.touchStart = function(e) {
+  const firstTouch = e.touches.length == 1;
   if (this.current?.touchStart)
-    this.current.touchStart(e.touches[0].clientX, e.touches[0].clientY);
+    this.current.touchStart(e.touches[0].clientX, e.touches[0].clientY, firstTouch);
   this.setTouches(e);
 };
 
@@ -47,13 +50,13 @@ GameMapInput.prototype.touchStart = function(e) {
 */
 GameMapInput.prototype.touchMove = function(e, longTouch) {
   let i = -1;
-  if ((!this.current ||
+  const isClickMode = !this.current ||
       this.current == this.undergroundExit ||
-      this.current == this.offshorePump) && !longTouch) {
+      this.current == this.offshorePump ||
+      (this.current == this.snakeBelt && !this.snakeBelt.active)
+  if (isClickMode && !longTouch) {
     i = 0;
-  } else if (this.current &&
-      this.current != this.undergroundExit &&
-      this.current != this.offshorePump) {
+  } else if (!isClickMode) {
     i = 1;
   }
   if (e.touches[i]) {
@@ -82,12 +85,11 @@ GameMapInput.prototype.touchMove = function(e, longTouch) {
 };
 
 GameMapInput.prototype.touchEnd = function(e, shortTouch) {
-  const last = !e.touches.length;
-  if (this.current?.touchEnd &&
-      !(this.current = this.current.touchEnd(
-      this.touches[0].x, this.touches[0].y,
-      shortTouch, last))) {
-    
+  const lastTouch = !e.touches.length;
+  if (this.current?.touchEnd) {
+    this.current = this.current.touchEnd(
+        this.touches[0].x, this.touches[0].y,
+        shortTouch, lastTouch);
   } else if (!this.current && shortTouch) {
     const entity = this.gameMap.getSelectedEntity(
         this.touches[0].x, this.touches[0].y);
@@ -108,6 +110,9 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
         this.current = this.undergroundExit.initialize(
             entry.entity, this.touches[0].x,
             this.touches[0].y, entity.direction);
+      } else if (entity?.type == TYPE.belt &&
+          !entity.data.beltOutput) {
+        this.current = this.snakeBelt.initialize(entity);
       }
     } else {
       this.ui.window.set();
