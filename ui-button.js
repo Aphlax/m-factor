@@ -9,6 +9,8 @@ const BUTTON = {
   deleteEntity: 2,
   gameMenu: 3,
   windUp: 4,
+  snakeBelt: 5,
+  connectUnderground: 6,
 };
 
 function UiButton(parent, x, y) {
@@ -111,6 +113,12 @@ UiButton.prototype.touchEnd = function(e) {
     if (entity.state == STATE.noEnergy) {
       entity.nextUpdate = this.parent.ui.game.playTime;
     }
+  } else if (this.name == BUTTON.snakeBelt) {
+    const entity = this.parent.selectedEntity;
+    this.parent.ui.gameMapInput.setSnakeBeltMode(entity);
+  } else if (this.name == BUTTON.connectUnderground) {
+    const entity = this.parent.selectedEntity;
+    this.parent.ui.gameMapInput.setUndergroundExitMode(entity);
   }
 };
 

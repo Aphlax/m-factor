@@ -1,16 +1,23 @@
 import {TYPE, DIRECTION, DIRECTIONS} from './entity-properties.js';
-import {S} from './sprite-pool.js';
+import {S, SPRITES} from './sprite-pool.js';
 import {COLOR} from './ui-properties.js';
+
+/**
+ * - poles with coverage
+ * - inserter with no duplicates
+ * - underground chaining
+ */
 
 function MultiBuild(ui) {
   this.ui = ui;
 }
 
-SnakeBelt.prototype.set =
+MultiBuild.prototype.set =
 BeltDrag.prototype.set =
+SnakeBelt.prototype.set =
+UndergroundChain.prototype.set =
 UndergroundExit.prototype.set =
-OffshorePump.prototype.set =
-MultiBuild.prototype.set = function(gameMap) {
+OffshorePump.prototype.set = function(gameMap) {
   this.gameMap = gameMap;
   this.view = gameMap.view;
 };
@@ -68,20 +75,37 @@ MultiBuild.prototype.touchEnd = function(sx, sy, shortTouch, last) {
 MultiBuild.prototype.draw = function(ctx) {
   ctx.strokeStyle = COLOR.buildPlanner;
   ctx.lineWidth = 1;
+  const s = this.view.scale, ox = -this.view.x, oy = -this.view.y;
   const eps = 0.08 * this.view.scale;
   const {width, height} = this.entity.size ?
       this.entity.size[this.ui.rotateButton.direction] :
       this.entity;
-  const dx = -((this.direction - 2) % 2),
-      dy = (this.direction - 1) % 2;
+  const {dx, dy} = DIRECTIONS[this.direction];
   for (let i = 0; i < this.length; i++) {
     const x = Math.floor((this.x +
-        i * dx * width) * this.view.scale - this.view.x),
+        i * dx * width) * s + ox),
         y = Math.floor((this.y +
-        i * dy * height) * this.view.scale - this.view.y);
+        i * dy * height) * s + oy);
     ctx.strokeRect(x + eps, y + eps,
-        width * this.view.scale - 2 * eps,
-        height * this.view.scale - 2 * eps);
+        width * s - 2 * eps,
+        height * s - 2 * eps);
+  }
+  if (this.length > 1) {
+    if (width > 1) {
+      ctx.font = s > 22 ? "20px monospace" : "14px monospace";
+    } else {
+      ctx.font = s > 22 ? "14px monospace" : "10px monospace";
+    }
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = COLOR.buildPlanner;
+    const nr = Math.ceil((this.length + 1) / 8);
+    for (let i = 0; i < nr; i++) {
+      ctx.fillText(this.length,
+          (this.x + width * ((i * 8 - (i ? 1 : 0)) * dx + 0.5)) * s + ox,
+          (this.y + height * ((i * 8 - (i ? 1 : 0)) * dy + 0.5)) * s + oy);
+    }
+    ctx.textAlign = "start";
   }
 };
 
@@ -191,8 +215,9 @@ BeltDrag.prototype.draw = function(ctx) {
 
 function SnakeBelt(ui) {
   this.ui = ui;
+  this.icon = undefined;
 }
-const SNAKE_DELTA = 16; // Pixels for drag snaking.
+const SNAKE_DELTA = 12; // Pixels for drag snaking.
 const SNAKE_START = {x: 25, y: 75};
 
 SnakeBelt.prototype.initialize = function(entity) {
@@ -201,6 +226,9 @@ SnakeBelt.prototype.initialize = function(entity) {
   this.nodes = [new Node(entity.x, entity.y, entity.direction)];
   this.lastX = 0;
   this.lastY = 0;
+  if (!this.icon) {
+    this.icon = SPRITES.get(S.snakeIcon);
+  }
   return this;
 };
 
@@ -316,6 +344,10 @@ SnakeBelt.prototype.draw = function(ctx) {
     ctx.moveTo(x * s + s * 4 / 5 + ox, y * s + s + oy);
     ctx.lineTo(cx - 8.5, cy - 18.5);
     ctx.stroke();
+    const icon = this.icon;
+    ctx.drawImage(icon.image,
+        icon.x, icon.y, icon.width, icon.height,
+        cx - 12, cy - 12, 24, 24);
     return;
   }
   
@@ -419,16 +451,167 @@ function Node(x, y, direction) {
   this.length = 1;
 }
 
+function UndergroundChain(ui) {
+  this.ui = ui;
+  this.placeable = [true];
+  this.gaps = [];
+}
+
+UndergroundChain.prototype.initialize = function(entity, sx, sy) {
+  this.entity = entity;
+  this.x = Math.floor((sx + this.view.x) / this.view.scale);
+  this.y = Math.floor((sy + this.view.y) / this.view.scale);
+  if (!this.gameMap.canPlace(this.x, this.y, 1, 1))
+    return;
+  this.direction = 0;
+  this.length = 1;
+  this.placeable.length = 1;
+  this.gaps.length = 0;
+  return this;
+};
+
+UndergroundChain.prototype.touchMove = function(sx, sy) {
+  const diffX = (sx + this.view.x) / this.view.scale -
+      this.x - 0.5;
+  const diffY = (sy + this.view.y) / this.view.scale  -
+      this.y - 0.5;
+  const oldDirection = this.direction;
+  if (Math.abs(diffX) < Math.abs(diffY)) {
+    this.direction = diffY < 0 ?
+        DIRECTION.north : DIRECTION.south;
+  } else {
+    this.direction = diffX > 0 ?
+        DIRECTION.east : DIRECTION.west;
+  }
+  const oldLength = oldDirection != this.direction ?
+      1 : this.length;
+  this.length = Math.round(Math.max(
+      Math.abs(diffX), Math.abs(diffY)) + 0.5);
+  const {dx, dy} = DIRECTIONS[this.direction];
+  for (let i = oldLength; i < this.length; i++) {
+    this.placeable[i] = this.gameMap.canPlace(
+        this.x + i * dx, this.y + i * dy, 1, 1);
+  }
+  this.gaps.length = 0;
+  let current = 1;
+  outer:
+  while (current < this.length) {
+    const step = Math.min(this.entity.maxUndergroundGap,
+        this.length - current - 1);
+    for (let i = step; i >= 0; i--) {
+      if (current + i == this.length) {
+        this.gaps.push(i);
+        return;
+      }
+      if (this.placeable[current + i] && this.placeable[current + i + 1]) {
+        this.gaps.push(i);
+        current += i + 2;
+        continue outer;
+      }
+    }
+    this.gaps.push(step);
+    current += step + 2;
+  }
+};
+
+UndergroundChain.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
+  if (shortTouch || !lastTouch) return this;
+  const start = {
+    name: this.entity.name,
+    direction: this.entity.type == TYPE.pipeToGround ?
+        (this.direction + 2) % 4 : this.direction,
+  };
+  const end = {
+    name: this.entity.name,
+    direction: this.direction,
+    data: this.entity.type == TYPE.undergroundBelt ?
+        {undergroundUp: true} : undefined,
+  };
+  const {dx, dy} = DIRECTIONS[this.direction];
+  const entities = [];
+  entities.push({x: this.x, y: this.y, ...start});
+  let current = 1;
+  for (let gap of this.gaps) {
+    current += gap;
+    const x = this.x + current * dx,
+        y = this.y + current * dy;
+    if (this.placeable[current])
+      entities.push({x: x, y: y, ...end});
+    if (current >= this.length - 2) break;
+    if (this.placeable[current + 1])
+      entities.push({x: x + dx, y: y + dy, ...start});
+    current += 2;
+  }
+  this.gameMap.pasteEntities(entities, 0, 0);
+};
+
+UndergroundChain.prototype.draw = function(ctx) {
+  const s = this.view.scale, half = s / 2;
+  const ox = -this.view.x;
+  const oy = -this.view.y;
+  const {dx, dy} = DIRECTIONS[this.direction];
+  const px = -dy, py = dx;
+  ctx.strokeStyle = COLOR.buildPlanner;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(this.x * s + ox, this.y * s + oy, s, s);
+  let current = 1
+  ctx.setLineDash([3, 2]);
+  ctx.beginPath();
+  for (let gap of this.gaps) {
+    const x = (this.x + current * dx) * s + ox + half,
+        y = (this.y + current * dy) * s + oy + half;
+    ctx.moveTo(x - (dx + px) * half, y - (dy + py) * half);
+    ctx.lineTo(x + gap * dx * s - (dx + px) * half,
+        y + gap * dy * s - (dy + py) * half);
+    ctx.moveTo(x - (dx - px) * half, y - (dy - py) * half);
+    ctx.lineTo(x + gap * dx * s - (dx - px) * half,
+        y + gap * dy * s - (dy - py) * half);
+    current += gap + 2;
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  current = 1;
+  let lastValid = true;
+  for (let gap of this.gaps) {
+    current += gap;
+    const x = (this.x + current * dx) * s + ox + half,
+        y = (this.y + current * dy) * s + oy + half;
+    const isValid = this.placeable[current] &&
+        ((current == this.length - 1) || this.placeable[current + 1]);
+    if (isValid != lastValid) {
+      lastValid = isValid;
+      ctx.stroke();
+      ctx.strokeStyle = isValid ?
+        COLOR.buildPlanner : COLOR.buildPlannerInvalid;
+      ctx.beginPath();
+    }
+    const l = current + 2 >= this.length ? 1 : 2;
+    ctx.moveTo(x - (dx + px) * half, y - (dy + py) * half);
+    ctx.lineTo(x + l * dx * s - (dx + px) * half,
+        y + l * dy * s - (dy + py) * half);
+    ctx.lineTo(x + l * dx * s - (dx - px) * half,
+        y + l * dy * s - (dy - py) * half);
+    ctx.lineTo(x - (dx - px) * half, y - (dy - py) * half);
+    ctx.lineTo(x - (dx + px) * half, y - (dy + py) * half);
+    current += 2;
+  }
+  ctx.stroke();
+};
+
 function UndergroundExit(ui) {
   this.ui = ui;
 }
 
-UndergroundExit.prototype.initialize = function(entity, sx, sy, direction) {
+UndergroundExit.prototype.initialize = function(entity) {
   this.entity = entity;
-  const {dx, dy} = DIRECTIONS[direction];
-  this.x = Math.floor((sx + this.view.x) / this.view.scale) + dx;
-  this.y = Math.floor((sy + this.view.y) / this.view.scale) + dy;
-  this.direction = direction;
+  this.direction = (entity.direction +
+      (entity.type == TYPE.pipeToGround ||
+      (entity.type == TYPE.undergroundBelt &&
+      entity.data.undergroundUp) ? 2 : 0)) % 4;
+  const {dx, dy} = DIRECTIONS[this.direction];
+  this.x = entity.x + dx;
+  this.y = entity.y + dy;
   return this;
 };
 
@@ -439,16 +622,18 @@ UndergroundExit.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
   const dx = x - this.x,
       dy = y - this.y,
       d = this.direction,
-      length = this.entity.maxUndergroundGap + 1;
+      length = this.entity.data.maxUndergroundGap + 1;
   if (d&0x1 ? dy == 0 && dx * -((d - 2) % 2) >= 0 &&
       dx * -((d - 2) % 2) < length :
       dx == 0 && dy * ((d - 1) % 2) >= 0 &&
       dy * ((d - 1) % 2) < length) {
     if (this.gameMap.canPlace(x, y, 1, 1)) {
-      const data = this.entity.type == TYPE.undergroundBelt ?
+      const data = this.entity.type == TYPE.undergroundBelt &&
+          !this.entity.data.undergroundUp ?
           {undergroundUp: true} : undefined;
-      const direction = this.entity.type == TYPE.undergroundBelt ?
-          this.direction : (this.direction + 2) % 4;
+      const direction = (this.direction +
+          (this.entity.type == TYPE.undergroundBelt &&
+          this.entity.data.undergroundUp ? 2 : 0)) % 4;
       this.gameMap.createEntity({
         name: this.entity.name,
         x, y, direction, data});
@@ -457,21 +642,22 @@ UndergroundExit.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
 };
 
 UndergroundExit.prototype.draw = function(ctx) {
+  const s = this.view.scale, half = s / 2;
+  const ox = -this.view.x;
+  const oy = -this.view.y;
   ctx.strokeStyle = COLOR.buildPlanner;
   ctx.lineWidth = 1;
   const d = this.direction;
-  const x1 = Math.floor(this.x *
-      this.view.scale - this.view.x);
+  const x1 = Math.floor(this.x * s + ox);
   const x2 = x1 - ((d - 2) % 2) *
-      this.entity.maxUndergroundGap * this.view.scale;
-  const y1 = Math.floor(this.y *
-      this.view.scale - this.view.y);
+      this.entity.data.maxUndergroundGap * s;
+  const y1 = Math.floor(this.y * s + oy);
   const y2 = y1 + ((d - 1) % 2) *
-      this.entity.maxUndergroundGap * this.view.scale;
+      this.entity.data.maxUndergroundGap * s;
   ctx.strokeRect(
       Math.min(x1, x2), Math.min(y1, y2),
-      Math.abs(x1 - x2) + this.view.scale,
-      Math.abs(y1 - y2) + this.view.scale);
+      Math.abs(x1 - x2) + s,
+      Math.abs(y1 - y2) + s);
 };
 
 function OffshorePump(ui) {
@@ -511,28 +697,31 @@ OffshorePump.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
 };
 
 OffshorePump.prototype.draw = function(ctx) {
+  const s = this.view.scale;
+  const vx = this.view.x;
+  const vy = this.view.y;
   ctx.strokeStyle = COLOR.buildPlanner;
   ctx.lineWidth = 1;
   const eps = 0.08 * this.view.scale;
-  const xStart = Math.floor(this.view.x / this.view.scale) - 1;
-  const xEnd = Math.ceil((this.view.x + this.view.width) / this.view.scale) + 1;
-  const yStart = Math.floor(this.view.y / this.view.scale) - 1;
-  const yEnd = Math.ceil((this.view.y + this.view.height) / this.view.scale) + 1;
+  const xStart = Math.floor(vx / s) - 1;
+  const xEnd = Math.ceil((vx + this.view.width) / s) + 1;
+  const yStart = Math.floor(vy / s) - 1;
+  const yEnd = Math.ceil((vy + this.view.height) / s) + 1;
   for (let x = xStart; x < xEnd; x++) {
     for (let y = yStart; y < yEnd; y++) {
       const direction = this.gameMap.canPlaceOffshorePump(x, y);
       if (direction == -1) continue;
       
-      const x1 = Math.floor(x * this.view.scale - this.view.x);
-      const x2 = x1 - ((direction - 2) % 2) * this.view.scale;
-      const y1 = Math.floor(y * this.view.scale - this.view.y);
-      const y2 = y1 + ((direction - 1) % 2) * this.view.scale;
+      const x1 = Math.floor(x * s - vx);
+      const x2 = x1 - ((direction - 2) % 2) * s;
+      const y1 = Math.floor(y * s - vy);
+      const y2 = y1 + ((direction - 1) % 2) * s;
       ctx.strokeRect(
           Math.min(x1, x2) + eps, Math.min(y1, y2) + eps,
-          Math.abs(x1 - x2) + this.view.scale - 2 * eps,
-          Math.abs(y1 - y2) + this.view.scale - 2 * eps);
+          Math.abs(x1 - x2) + s - 2 * eps,
+          Math.abs(y1 - y2) + s - 2 * eps);
     }
   }
 };
 
-export {BeltDrag, MultiBuild, SnakeBelt, UndergroundExit, OffshorePump};
+export {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, OffshorePump};

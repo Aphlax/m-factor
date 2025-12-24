@@ -223,14 +223,27 @@ UiWindow.prototype.initialize = function() {
     inventory: new UiInventory(this, 10, 40),
   });
   
-  this.entityUis.set(TYPE.belt, {});
   this.entityUis.set(TYPE.inserter, {});
   this.entityUis.set(TYPE.offshorePump, {});
   this.entityUis.set(TYPE.boiler, {});
   this.entityUis.set(TYPE.electricPole, {});
-  this.entityUis.set(TYPE.undergroundBelt, {});
   this.entityUis.set(TYPE.pipeToGround, {});
   this.entityUis.set(TYPE.splitter, {});
+  
+  this.entityUis.set(TYPE.belt, {
+    snake: new UiButton(this, this.canvasWidth - 96, 86)
+        .setButton(BUTTON.snakeBelt, S.snakeIcon),
+  });
+  
+  this.entityUis.set(TYPE.undergroundBelt, {
+    connectUnderground: new UiButton(this, this.canvasWidth - 96, 86)
+        .setButton(BUTTON.connectUnderground, S.undergroundConnectIcon),
+  });
+  
+  this.entityUis.set(TYPE.pipeToGround, {
+    connectUnderground: new UiButton(this, this.canvasWidth - 96, 86)
+        .setButton(BUTTON.connectUnderground, S.undergroundConnectIcon),
+  });
   
   this.entityUis.set(TYPE.furnace, {
     input: new UiInventory(this, 10, 40),
@@ -322,8 +335,17 @@ UiWindow.prototype.set = function(selectedEntity) {
     this.entityUi.fluidIndicator.set(selectedEntity);
   } else if (selectedEntity.type == TYPE.generator) {
     this.entityUi.input.set(selectedEntity.inputFluidTank);
+  } else if (selectedEntity.type == TYPE.undergroundBelt) {
+    this.entityUi.connectUnderground.setButton(
+        (selectedEntity.data.undergroundUp ?
+        !selectedEntity.data.beltInput :
+        !selectedEntity.data.beltOutput) ?
+        BUTTON.connectUnderground : BUTTON.none);
+  } else if (selectedEntity.type == TYPE.pipeToGround) {
+    this.entityUi.connectUnderground.setButton(
+        !selectedEntity.data.pipes[1] ?
+        BUTTON.connectUnderground : BUTTON.none);
   }
-  
   
   this.showDefaultUi = !!selectedEntity.type;
   for (let c of this.defaultUi.all) {

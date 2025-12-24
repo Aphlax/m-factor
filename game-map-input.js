@@ -1,7 +1,7 @@
 import {TYPE, DIRECTION, DIRECTIONS} from './entity-properties.js';
 import {COLOR} from './ui-properties.js';
 import {S} from './sprite-pool.js';
-import {BeltDrag, MultiBuild, SnakeBelt, UndergroundExit, OffshorePump} from './game-map-input-modes.js';
+import {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, OffshorePump} from './game-map-input-modes.js';
 
 const MIN_SCALE = 16;
 const MAX_SCALE = 32;
@@ -15,21 +15,23 @@ function GameMapInput(ui) {
   this.touches = new Array(3).fill(0).map(() => ({id: 0, x: 0, y: 0}));
   this.current = undefined;
   
-  this.beltDrag = new BeltDrag(ui);
   this.multiBuild = new MultiBuild(ui);
+  this.snakeBelt = new SnakeBelt(ui);
+  this.beltDrag = new BeltDrag(ui);
+  this.undergroundChain = new UndergroundChain(ui);
   this.undergroundExit = new UndergroundExit(ui);
   this.offshorePump = new OffshorePump(ui);
-  this.snakeBelt = new SnakeBelt(ui);
 }
 
 GameMapInput.prototype.set = function(gameMap) {
   this.gameMap = gameMap;
   this.view = gameMap.view;
-  this.beltDrag.set(gameMap);
   this.multiBuild.set(gameMap);
+  this.snakeBelt.set(gameMap);
+  this.beltDrag.set(gameMap);
+  this.undergroundChain.set(gameMap);
   this.undergroundExit.set(gameMap);
   this.offshorePump.set(gameMap);
-  this.snakeBelt.set(gameMap);
 };
 
 GameMapInput.prototype.draw = function(ctx) {
@@ -107,9 +109,10 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
       if (entity?.type == TYPE.undergroundBelt &&
           !entity.data.undergroundUp &&
           !entity.data.beltOutput) {
-        this.current = this.undergroundExit.initialize(
-            entry.entity, this.touches[0].x,
-            this.touches[0].y, entity.direction);
+        this.current = this.undergroundExit.initialize(entity);
+      } else if (entity?.type == TYPE.pipeToGround &&
+          !entity.data.pipes[1]) {
+        this.current = this.undergroundExit.initialize(entity);
       } else if (entity?.type == TYPE.belt &&
           !entity.data.beltOutput) {
         this.current = this.snakeBelt.initialize(entity);
@@ -130,6 +133,9 @@ GameMapInput.prototype.touchLong = function(e) {
     if (entity) {
       if (entity.type == TYPE.belt) {
         this.current = this.beltDrag.initialize(entity, e.touches[0].clientX, e.touches[0].clientY);
+      } else if (entity.type == TYPE.undergroundBelt ||
+          entity.type == TYPE.pipeToGround) {
+        this.current = this.undergroundChain.initialize(entity, e.touches[0].clientX, e.touches[0].clientY);
       } else if (entity.type != TYPE.offshorePump) {
         this.current = this.multiBuild.initialize(entity, e.touches[0].clientX, e.touches[0].clientY);
       }
@@ -147,6 +153,16 @@ GameMapInput.prototype.mouseWheel = function(e) {
 
 GameMapInput.prototype.setOffshorePumpMode = function(entity) {
   this.current = this.offshorePump.initialize(entity);
+};
+
+GameMapInput.prototype.setSnakeBeltMode = function(entity) {
+  this.ui.window.set();
+  this.current = this.snakeBelt.initialize(entity);
+};
+
+GameMapInput.prototype.setUndergroundExitMode = function(entity) {
+  this.ui.window.set();
+  this.current = this.undergroundExit.initialize(entity);
 };
 
 GameMapInput.prototype.resetMode = function() {
