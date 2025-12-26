@@ -1,11 +1,7 @@
-import {TYPE, DIRECTION, DIRECTIONS} from './entity-properties.js';
+import {TYPE, DIRECTION, DIRECTIONS, COLOR as ENTITY_COLOR} from './entity-properties.js';
 import {S, SPRITES} from './sprite-pool.js';
 import {COLOR} from './ui-properties.js';
 
-/**
- * - poles with coverage
- * - inserter with no duplicates
- */
 
 function MultiBuild(ui) {
   this.ui = ui;
@@ -17,6 +13,7 @@ SnakeBelt.prototype.set =
 UndergroundChain.prototype.set =
 UndergroundExit.prototype.set =
 InserterDrag.prototype.set =
+PowerPoleDrag.prototype.set =
 OffshorePump.prototype.set = function(gameMap) {
   this.gameMap = gameMap;
   this.view = gameMap.view;
@@ -61,15 +58,17 @@ MultiBuild.prototype.touchEnd = function(sx, sy, shortTouch, last) {
       this.entity;
   const dx = -((this.direction - 2) % 2),
       dy = (this.direction - 1) % 2;
+  const entities = [];
   for (let i = 0; i < this.length; i++) {
     const x = this.x + i * dx * width,
         y = this.y + i * dy * height;
     if (!this.gameMap.canPlace(x, y, width, height))
       continue;
-    this.gameMap.createEntity({
+    entities.push({
         x, y, direction: this.ui.rotateButton.direction,
         name: this.entity.name});
   }
+  this.gameMap.pasteEntities(entities, 0, 0);
 };
 
 MultiBuild.prototype.draw = function(ctx) {
@@ -90,23 +89,22 @@ MultiBuild.prototype.draw = function(ctx) {
         width * s - 2 * eps,
         height * s - 2 * eps);
   }
-  if (this.length > 1) {
-    if (width > 1) {
-      ctx.font = s > 22 ? "20px monospace" : "14px monospace";
-    } else {
-      ctx.font = s > 22 ? "14px monospace" : "10px monospace";
-    }
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = COLOR.buildPlanner;
-    const nr = Math.ceil((this.length + 1) / 8);
-    for (let i = 0; i < nr; i++) {
-      ctx.fillText(this.length,
-          (this.x + width * ((i * 8 - (i ? 1 : 0)) * dx + 0.5)) * s + ox,
-          (this.y + height * ((i * 8 - (i ? 1 : 0)) * dy + 0.5)) * s + oy);
-    }
-    ctx.textAlign = "start";
+  if (this.length <= 1) return;
+  if (width > 1) {
+    ctx.font = s > 22 ? "20px monospace" : "14px monospace";
+  } else {
+    ctx.font = s > 22 ? "14px monospace" : "10px monospace";
   }
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = COLOR.buildPlanner;
+  const nr = Math.ceil((this.length + 1) / 8);
+  for (let i = 0; i < nr; i++) {
+    ctx.fillText(this.length,
+        (this.x + width * ((i * 8 - (i ? 1 : 0)) * dx + 0.5)) * s + ox,
+        (this.y + height * ((i * 8 - (i ? 1 : 0)) * dy + 0.5)) * s + oy);
+  }
+  ctx.textAlign = "start";
 };
 
 function BeltDrag(ui) {
@@ -157,23 +155,22 @@ BeltDrag.prototype.touchMove = function(sx, sy) {
 
 BeltDrag.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
   if (!lastTouch) return this;
+  const entities = [];
   for (let i = 0; i < this.length; i++) {
     const x = this.x - i * ((this.direction - 2) % 2);
     const y = this.y + i * ((this.direction - 1) % 2);
-    if (!this.gameMap.canPlace(x, y, 1, 1)) {
+    if (!this.gameMap.canPlace(x, y, 1, 1))
       break;
-    }
-    this.gameMap.createEntity({
+    entities.push({
         name: this.entity.name, x, y,
         direction: this.direction});
   }
-  return undefined;
+  this.gameMap.pasteEntities(entities, 0, 0);
 };
 
 BeltDrag.prototype.draw = function(ctx) {
   const s = this.view.scale, half = s / 2;;
-  const ox = -this.view.x;
-  const oy = -this.view.y;
+  const ox = -this.view.x, oy = -this.view.y;
   ctx.strokeStyle = COLOR.buildPlanner;
   ctx.lineWidth = 1;
   const d = this.direction;
@@ -353,19 +350,6 @@ SnakeBelt.prototype.draw = function(ctx) {
   
   // Draw box.
   ctx.beginPath();
-  {
-    const first = this.nodes[0];
-    const {dx, dy} = DIRECTIONS[first.direction];
-    const px = -dy, py = dx;
-    const sx = first.x * s + ox + half;
-    const sy = first.y * s + oy + half;
-    ctx.moveTo(sx - half * px, sy - half * py);
-    ctx.lineTo(sx - half * dx - half * px,
-        sy - half * dy - half * py);
-    ctx.lineTo(sx - half * dx + half * px,
-        sy - half * dy + half * py);
-    ctx.lineTo(sx + half * px, sy + half * py);
-  }
   for (let i = 0; i < this.nodes.length; i++) {
     const node = this.nodes[i], prev = this.nodes[i - 1], next = this.nodes[i + 1];
     const {dx, dy} = DIRECTIONS[node.direction];
@@ -375,6 +359,14 @@ SnakeBelt.prototype.draw = function(ctx) {
     const segLen = (node.length - (next ? 0 : 0.5)) * s;
     const fromDir = ((node.direction - (prev?.direction ?? (node.direction + 2)) + 4) % 4) - 2;
     const toDir = (((next?.direction ?? (node.direction + 2)) - node.direction + 4) % 4) - 2;
+    if (!prev) {
+      ctx.moveTo(sx - half * px, sy - half * py);
+      ctx.lineTo(sx - half * dx - half * px,
+          sy - half * dy - half * py);
+      ctx.lineTo(sx - half * dx + half * px,
+          sy - half * dy + half * py);
+      ctx.lineTo(sx + half * px, sy + half * py);
+    }
     ctx.moveTo(sx + half * (fromDir * dx - px), 
         sy + half * (fromDir * dy - py));
     ctx.lineTo(sx + segLen * dx - half * (toDir * dx + px), 
@@ -383,17 +375,12 @@ SnakeBelt.prototype.draw = function(ctx) {
         sy - half * (fromDir * dy - py));
     ctx.lineTo(sx + segLen * dx + half * (toDir * dx + px), 
         sy + segLen * dy + half * (toDir * dy + py));
-  }
-  {
-    const last = this.nodes[this.nodes.length - 1];
-    const {dx, dy} = DIRECTIONS[last.direction];
-    const px = -dy, py = dx;
-    const sx = (last.x + (last.length - 1) * dx) * s + ox + half;
-    const sy = (last.y + (last.length - 1) * dy) * s + oy + half;
-    ctx.moveTo(sx + half * dx - half * px,
-        sy + half * dy - half * py);
-    ctx.lineTo(sx + half * dx + half * px,
-        sy + half * dy + half * py);
+    if (!next) {
+      const ex = sx + (node.length - 0.5) * dx * s;
+      const ey = sy + (node.length - 0.5) * dy * s;
+      ctx.moveTo(ex - half * px, ey - half * py);
+      ctx.lineTo(ex + half * px, ey + half * py);
+    }
   }
   ctx.stroke();
   // Draw arrow.
@@ -748,7 +735,7 @@ InserterDrag.prototype.draw = function(ctx) {
   ctx.strokeStyle = COLOR.buildPlanner;
   ctx.lineWidth = 1;
   const s = this.view.scale, ox = -this.view.x, oy = -this.view.y;
-  const eps = 0.08 * this.view.scale, half = s / 2, q = s / 4;
+  const eps = 0.08 * s, half = s / 2, q = s / 4;
   const {dx, dy} = DIRECTIONS[this.direction];
   const {dx: idx, dy: idy} = DIRECTIONS[this.inserterDirection];
   const ipx = -idy, ipy = idx;
@@ -763,12 +750,14 @@ InserterDrag.prototype.draw = function(ctx) {
         s - 2 * eps,
         s - 2 * eps);
     ctx.moveTo(x - idx * s + half, y - idy * s + half);
-    ctx.lineTo(x + half - idx * s * 0.42, y + half - idy * s * 0.42);
-    ctx.moveTo(x + half + idx * s * 0.42, y + half + idy * s * 0.42);
+    ctx.lineTo(x + half - idx * (half - eps), y + half - idy * (half - eps));
+    ctx.moveTo(x + half + idx * (half - eps), y + half + idy * (half - eps));
     ctx.lineTo(x + idx * s + half, y + idy * s + half);
-    ctx.moveTo(x + idx * (s - q) + half - ipx * q, y + idy * (s - q) + half - ipy * q);
+    ctx.moveTo(x + idx * (s - q) + half - ipx * q,
+        y + idy * (s - q) + half - ipy * q);
     ctx.lineTo(x + idx * s + half, y + idy * s + half);
-    ctx.lineTo(x + idx * (s - q) + half + ipx * q, y + idy * (s - q) + half + ipy * q);
+    ctx.lineTo(x + idx * (s - q) + half + ipx * q,
+        y + idy * (s - q) + half + ipy * q);
   }
   ctx.stroke();
   if (this.positions.length && this.positions[0] == 0 && this.length > 1) {
@@ -779,9 +768,88 @@ InserterDrag.prototype.draw = function(ctx) {
     ctx.textBaseline = "middle";
     ctx.fillStyle = COLOR.buildPlanner;
     ctx.fillText(i,
-        this.x * s + ox + s / 2, this.y * s + oy + s / 2);
+        this.x * s + ox + half, this.y * s + oy + half);
     ctx.textAlign = "start";
   }
+};
+
+function PowerPoleDrag(ui) {
+  this.ui = ui;
+  this.positions = [{}];
+}
+
+PowerPoleDrag.prototype.initialize = function(entity, sx, sy) {
+  this.x = Math.floor((sx + this.view.x) / this.view.scale);
+  this.y = Math.floor((sy + this.view.y) / this.view.scale);
+  this.entity = entity;
+  this.positions.length = 1;
+  this.positions[0].x = this.x;
+  this.positions[0].y = this.y;
+  return this;
+};
+
+PowerPoleDrag.prototype.touchMove = function(sx, sy) {
+  this.x = Math.floor((sx + this.view.x) / this.view.scale);
+  this.y = Math.floor((sy + this.view.y) / this.view.scale);
+  const last = this.positions[this.positions.length - 1];
+  if ((last.x - this.x) ** 2 + (last.y - this.y) ** 2 >=
+      this.entity.wireReach ** 2) {
+    outer:
+    for (let i = 0; i < this.entity.wireReach; i++) {
+      const p = i / (2 * this.entity.wireReach);
+      const x = Math.round(p * last.x + (1 - p) * this.x);
+      const y = Math.round(p * last.y + (1 - p) * this.y);
+      if ((last.x - x) ** 2 + (last.y - y) ** 2 >
+          this.entity.wireReach ** 2)
+        continue;
+      if (!this.gameMap.canPlace(x, y, 1, 1))
+        continue;
+      for (let pole of this.positions) {
+        if (x == pole.x && y == pole.y)
+          continue outer;
+      }
+      this.positions.push({x, y});
+      break;
+    }
+  }
+};
+
+PowerPoleDrag.prototype.touchEnd = function(sx, sy, shortTouch, last) {
+  if (!last) return this;
+  const entities = [];
+  for (let {x, y} of this.positions) {
+    if (!this.gameMap.canPlace(x, y, 1, 1))
+      continue;
+    entities.push(
+        {name: this.entity.name, x, y, direction: 0});
+  }
+  this.gameMap.pasteEntities(entities, 0, 0);
+};
+
+PowerPoleDrag.prototype.draw = function(ctx) {
+  if (!this.positions.length) return;
+  ctx.strokeStyle = COLOR.buildPlanner;
+  ctx.lineWidth = 1;
+  const s = this.view.scale, ox = -this.view.x, oy = -this.view.y;
+  const eps = 0.08 * s, half = s / 2;
+  ctx.beginPath();
+  for (let {x, y} of this.positions) {
+    ctx.rect(x * s + ox + eps, y * s + oy + eps,
+        s - 2 * eps, s - 2 * eps);
+  }
+  ctx.stroke();
+  ctx.font = s > 22 ? "14px monospace" : "10px monospace";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = COLOR.buildPlanner;
+  const nr = Math.ceil((this.positions.length + 1) / 8);
+  for (let i = 0; i < nr; i++) {
+    const position = this.positions[(i * 8 - (i ? 1 : 0))];
+    ctx.fillText(this.positions.length,
+        position.x * s + ox + half,
+        position.y * s + oy + half);
+  }
+  ctx.textAlign = "start";
 };
 
 function OffshorePump(ui) {
@@ -848,4 +916,4 @@ OffshorePump.prototype.draw = function(ctx) {
   }
 };
 
-export {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, InserterDrag, OffshorePump};
+export {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, InserterDrag, PowerPoleDrag, OffshorePump};

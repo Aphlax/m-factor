@@ -1,7 +1,7 @@
 import {TYPE, DIRECTION, DIRECTIONS} from './entity-properties.js';
 import {COLOR} from './ui-properties.js';
 import {S} from './sprite-pool.js';
-import {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, InserterDrag, OffshorePump} from './game-map-input-modes.js';
+import {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, InserterDrag, PowerPoleDrag, OffshorePump} from './game-map-input-modes.js';
 
 const MIN_SCALE = 16;
 const MAX_SCALE = 32;
@@ -21,6 +21,7 @@ function GameMapInput(ui) {
   this.undergroundChain = new UndergroundChain(ui);
   this.undergroundExit = new UndergroundExit(ui);
   this.inserterDrag = new InserterDrag(ui);
+  this.powerPoleDrag = new PowerPoleDrag(ui);
   this.offshorePump = new OffshorePump(ui);
 }
 
@@ -33,6 +34,7 @@ GameMapInput.prototype.set = function(gameMap) {
   this.undergroundChain.set(gameMap);
   this.undergroundExit.set(gameMap);
   this.offshorePump.set(gameMap);
+  this.powerPoleDrag.set(gameMap);
   this.inserterDrag.set(gameMap);
 };
 
@@ -140,6 +142,8 @@ GameMapInput.prototype.touchLong = function(e) {
         this.current = this.undergroundChain.initialize(entity, e.touches[0].clientX, e.touches[0].clientY);
       } else if (entity.type == TYPE.inserter) {
         this.current = this.inserterDrag.initialize(entity, e.touches[0].clientX, e.touches[0].clientY);
+      } else if (entity.type == TYPE.electricPole) {
+        this.current = this.powerPoleDrag.initialize(entity, e.touches[0].clientX, e.touches[0].clientY);
       } else if (entity.type != TYPE.offshorePump) {
         this.current = this.multiBuild.initialize(entity, e.touches[0].clientX, e.touches[0].clientY);
       }

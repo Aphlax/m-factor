@@ -1,5 +1,5 @@
 import {SPRITES} from './sprite-pool.js';
-import {TYPE, STATE, DIRECTION, MAX_SHADOW} from './entity-properties.js';
+import {TYPE, STATE, DIRECTION, COLOR, MAX_SHADOW} from './entity-properties.js';
 import {ITEMS} from './item-definitions.js';
 
 /*
@@ -13,17 +13,6 @@ import {ITEMS} from './item-definitions.js';
   
   
 */
-
-const COLOR = {
-  greenHighlight: "#33EE00",
-  greenHighlightBorder: "#44AA00",
-  yellowHighlight: "#EEEE00",
-  yellowHighlightBorder: "#FFAA00",
-  wire: "#EEAA22",
-  shadow: "#000000",
-  powerSupplyArea: "#88AAFF40",
-  mineDrillArea: "#AADDFF30",
-};
 
 export function draw(ctx, view, time) {
   if ((this.x + this.width + 1) * view.scale <= view.x)

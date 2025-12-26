@@ -92,6 +92,17 @@ export const DIRECTIONS = [
   {dx: -1, dy: 0},
 ];
 
+export const COLOR = {
+  greenHighlight: "#33EE00",
+  greenHighlightBorder: "#44AA00",
+  yellowHighlight: "#EEEE00",
+  yellowHighlightBorder: "#FFAA00",
+  wire: "#EEAA22",
+  shadow: "#000000",
+  powerSupplyArea: "#88AAFF40",
+  mineDrillArea: "#AADDFF30",
+};
+
 export const RESOURCE_NAMES = {
   iron: 1,
   copper: 2,
