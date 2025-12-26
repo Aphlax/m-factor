@@ -5,7 +5,6 @@ import {COLOR} from './ui-properties.js';
 /**
  * - poles with coverage
  * - inserter with no duplicates
- * - underground chaining
  */
 
 function MultiBuild(ui) {
@@ -17,6 +16,7 @@ BeltDrag.prototype.set =
 SnakeBelt.prototype.set =
 UndergroundChain.prototype.set =
 UndergroundExit.prototype.set =
+InserterDrag.prototype.set =
 OffshorePump.prototype.set = function(gameMap) {
   this.gameMap = gameMap;
   this.view = gameMap.view;
@@ -431,15 +431,15 @@ SnakeBelt.prototype.draw = function(ctx) {
     const px = -dy, py = dx;
     const tx = (last.x + last.length * dx) * s + ox + half;
     const ty = (last.y + last.length * dy) * s + oy + half;
-    const headLen = 0.625 * s;
-    const backLen = 0.875 * s;
-    const wingW = 0.25 * s;
-    ctx.lineTo(tx - headLen * dx, ty - headLen * dy);
-    ctx.moveTo(tx - backLen * dx - wingW * px, 
-        ty - backLen * dy - wingW * py);
-    ctx.lineTo(tx - headLen * dx, ty - headLen * dy);
-    ctx.lineTo(tx - backLen * dx + wingW * px, 
-        ty - backLen * dy + wingW * py);
+    const head = 0.625 * s;
+    const back = 0.875 * s;
+    const wing = 0.25 * s;
+    ctx.lineTo(tx - head * dx, ty - head * dy);
+    ctx.moveTo(tx - back * dx - wing * px, 
+        ty - back * dy - wing * py);
+    ctx.lineTo(tx - head * dx, ty - head * dy);
+    ctx.lineTo(tx - back * dx + wing * px, 
+        ty - back * dy + wing * py);
   }
   ctx.stroke();
 };
@@ -660,6 +660,130 @@ UndergroundExit.prototype.draw = function(ctx) {
       Math.abs(y1 - y2) + s);
 };
 
+function InserterDrag(ui) {
+  this.ui = ui;
+  this.positions = [];
+}
+
+InserterDrag.prototype.initialize = function(entity, sx, sy) {
+  this.x = Math.floor((sx + this.view.x) / this.view.scale);
+  this.y = Math.floor((sy + this.view.y) / this.view.scale);
+  this.entity = entity;
+  this.inserterDirection = this.direction =
+      this.ui.rotateButton.direction;
+  this.positions.length = 0;
+  this.input = undefined;
+  this.output = undefined;
+  this.length = 0;
+  return this;
+};
+
+InserterDrag.prototype.touchMove = function(sx, sy) {
+  const x = (sx + this.view.x) / this.view.scale;
+  const y = (sy + this.view.y) / this.view.scale;
+  const diffX = x - this.x - 0.5,
+      diffY = y - this.y - 0.5;
+  const oldDirection = this.direction;
+  let oldLength = this.length;
+  if (Math.abs(diffX) < Math.abs(diffY)) {
+    this.direction = diffY < 0 ?
+        DIRECTION.north : DIRECTION.south;
+    this.length = Math.round(Math.abs(diffY) + 1);
+  } else {
+    this.direction = diffX > 0 ?
+        DIRECTION.east : DIRECTION.west;
+    this.length = Math.round(Math.abs(diffX) + 1);
+  }
+  if (oldDirection != this.direction) {
+    oldLength = 0;
+    this.positions.length = 0;
+    this.input = undefined;
+    this.output = undefined;
+  }
+  const {dx, dy} = DIRECTIONS[this.direction];
+  const {dx: idx, dy: idy} = DIRECTIONS[this.inserterDirection];
+  for (let i = oldLength; i < this.length; i++) {
+    if (this.positions[this.positions.length - 1] > i)
+      continue;
+    const x = this.x + i * dx, y = this.y + i * dy;
+    if (!this.gameMap.canPlace(x, y, 1, 1))
+      continue;
+    let input = this.gameMap.getEntityAt(x - idx, y - idy);
+    if (input?.type == TYPE.belt ||
+        input?.type == TYPE.undergroundBelt) {
+      input = input.data.lane;
+    }
+    let output = this.gameMap.getEntityAt(x + idx, y + idy);
+    if (output?.type == TYPE.belt ||
+        output?.type == TYPE.undergroundBelt) {
+      output = output.data.lane;
+    }
+    if ((input || output) &&
+        this.input == input && this.output == output)
+      continue;
+    this.input = input;
+    this.output = output;
+    this.positions.push(i);
+  }
+};
+
+InserterDrag.prototype.touchEnd = function(sx, sy, shortTouch, last) {
+  if (!last) return this;
+  const {dx, dy} = DIRECTIONS[this.direction];
+  const entities = [];
+  for (let i of this.positions) {
+    if (i >= this.length) break;
+    const x = this.x + i * dx,
+        y = this.y + i * dy;
+    if (!this.gameMap.canPlace(x, y, 1, 1))
+      continue;
+    entities.push({
+        name: this.entity.name, x, y,
+        direction: this.inserterDirection});
+  }
+  this.gameMap.pasteEntities(entities, 0, 0);
+};
+
+InserterDrag.prototype.draw = function(ctx) {
+  ctx.strokeStyle = COLOR.buildPlanner;
+  ctx.lineWidth = 1;
+  const s = this.view.scale, ox = -this.view.x, oy = -this.view.y;
+  const eps = 0.08 * this.view.scale, half = s / 2, q = s / 4;
+  const {dx, dy} = DIRECTIONS[this.direction];
+  const {dx: idx, dy: idy} = DIRECTIONS[this.inserterDirection];
+  const ipx = -idy, ipy = idx;
+  ctx.beginPath();
+  for (let i of this.positions) {
+    if (i >= this.length) break;
+    const x = Math.floor((this.x +
+        i * dx) * s + ox),
+        y = Math.floor((this.y +
+        i * dy) * s + oy);
+    ctx.rect(x + eps, y + eps,
+        s - 2 * eps,
+        s - 2 * eps);
+    ctx.moveTo(x - idx * s + half, y - idy * s + half);
+    ctx.lineTo(x + half - idx * s * 0.42, y + half - idy * s * 0.42);
+    ctx.moveTo(x + half + idx * s * 0.42, y + half + idy * s * 0.42);
+    ctx.lineTo(x + idx * s + half, y + idy * s + half);
+    ctx.moveTo(x + idx * (s - q) + half - ipx * q, y + idy * (s - q) + half - ipy * q);
+    ctx.lineTo(x + idx * s + half, y + idy * s + half);
+    ctx.lineTo(x + idx * (s - q) + half + ipx * q, y + idy * (s - q) + half + ipy * q);
+  }
+  ctx.stroke();
+  if (this.positions.length && this.positions[0] == 0 && this.length > 1) {
+    let i = 0;
+    while (this.positions[i] < this.length) i++;
+    ctx.font = s > 22 ? "14px monospace" : "10px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = COLOR.buildPlanner;
+    ctx.fillText(i,
+        this.x * s + ox + s / 2, this.y * s + oy + s / 2);
+    ctx.textAlign = "start";
+  }
+};
+
 function OffshorePump(ui) {
   this.ui = ui;
 }
@@ -724,4 +848,4 @@ OffshorePump.prototype.draw = function(ctx) {
   }
 };
 
-export {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, OffshorePump};
+export {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, InserterDrag, OffshorePump};
