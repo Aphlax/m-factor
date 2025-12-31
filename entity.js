@@ -149,6 +149,9 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.energySource = def.energySource;
     this.energyDrain = def.energyDrain;
     this.energyConsumption = def.energyConsumption;
+    if (data?.recipe) {
+      this.setRecipe(data.recipe, time);
+    }
   } else if (this.type == TYPE.chest) {
     this.inputInventory = this.outputInventory =
         new Inventory(def.capacity);
@@ -270,6 +273,15 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.data.rightInLane = undefined;
     this.data.rightOutLane = undefined;
     this.updateBeltSprites();
+    if (data?.inputPriority) {
+      this.data.inputPriority = data.inputPriority;
+    }
+    if (data?.outputPriority) {
+      this.data.outputPriority = data.outputPriority;
+    }
+    if (data?.itemFilter) {
+      this.data.itemFilter = data.itemFilter;
+    }
   }
   return this;
 };

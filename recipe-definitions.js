@@ -241,6 +241,19 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1],
     duration: 500,
   },
+  {
+    prototypeName: "splitter",
+    inputs: [
+      {item: I.electronicCircuit, amount: 5},
+      {item: I.ironPlate, amount: 5},
+      {item: I.transportBelt, amount: 4},
+    ],
+    outputs: [
+      {item: I.splitter, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 1000,
+  },
   
   
   {

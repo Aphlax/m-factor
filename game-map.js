@@ -173,6 +173,10 @@ GameMap.prototype.draw = function(ctx, time) {
               entity.data.recipe) {
             entity.drawRecipe(ctx, this.view, entity.data.recipe);
           }
+          if (entity.type == TYPE.splitter &&
+              entity.data.itemFilter) {
+            entity.drawSplitterFilter(ctx, this.view);
+          }
         }
       }
     }
@@ -598,7 +602,7 @@ GameMap.prototype.getSelectedEntity = function(screenX, screenY) {
       this.getResourceAt(Math.floor(x), Math.floor(y));
 };
 
-GameMap.prototype.tryCreateEntity = function(screenX, screenY, direction, entityDef, data) {
+GameMap.prototype.tryCreateEntityFromScreen = function(screenX, screenY, direction, entityDef, data) {
   direction = entityDef.rotatable ? direction : 0;
   const {width, height} = !entityDef.size ? entityDef :
       entityDef.size[direction];
@@ -622,8 +626,7 @@ GameMap.prototype.canPlaceEntities = function(entities, x, y) {
       if (this.canPlaceOffshorePump(x, y) != entity.direction)
         return false;
     } else {
-      const width = def.size ? def.size[entity.direction].width : def.width;
-      const height = def.size ? def.size[entity.direction].height : def.height;
+      const {width, height} = def.size ? def.size[entity.direction] : def;
       if (!this.canPlace(entity.x + x, entity.y + y, width, height))
         return false;
     }
@@ -631,7 +634,7 @@ GameMap.prototype.canPlaceEntities = function(entities, x, y) {
   return true;
 };
 
-GameMap.prototype.pasteEntities = function(entities, x, y, time) {
+GameMap.prototype.createEntities = function(entities, x = 0, y = 0, time = undefined) {
   for (let ent of entities) {
     const entity = {...ent, x: ent.x + x, y: ent.y + y};
     this.createEntity(entity, time);

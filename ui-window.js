@@ -1,5 +1,5 @@
 import {UiInventory, UiFluidInventory} from './ui-inventory.js';
-import {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator} from './ui-components.js';
+import {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority} from './ui-components.js';
 import {UiButton, BUTTON} from './ui-button.js';
 import {UiChoice, CHOICE} from './ui-choice.js';
 import {COLOR} from './ui-properties.js';
@@ -228,7 +228,6 @@ UiWindow.prototype.initialize = function() {
   this.entityUis.set(TYPE.boiler, {});
   this.entityUis.set(TYPE.electricPole, {});
   this.entityUis.set(TYPE.pipeToGround, {});
-  this.entityUis.set(TYPE.splitter, {});
   
   this.entityUis.set(TYPE.belt, {
     snake: new UiButton(this, this.canvasWidth - 96, 86)
@@ -238,6 +237,12 @@ UiWindow.prototype.initialize = function() {
   this.entityUis.set(TYPE.undergroundBelt, {
     connectUnderground: new UiButton(this, this.canvasWidth - 96, 86)
         .setButton(BUTTON.connectUnderground, S.undergroundConnectIcon),
+  });
+  
+  this.entityUis.set(TYPE.splitter, {
+    priority: new UiSplitterPriority(this, 10, 40),
+    filterChoice: new UiChoice(this, this.canvasWidth + 10, 40)
+        .setWidth(this.canvasWidth - 20),
   });
   
   this.entityUis.set(TYPE.pipeToGround, {
@@ -345,6 +350,8 @@ UiWindow.prototype.set = function(selectedEntity) {
     this.entityUi.connectUnderground.setButton(
         !selectedEntity.data.pipes[1] ?
         BUTTON.connectUnderground : BUTTON.none);
+  } else if (selectedEntity.type == TYPE.splitter) {
+    this.entityUi.priority.set(selectedEntity);
   }
   
   this.showDefaultUi = !!selectedEntity.type;

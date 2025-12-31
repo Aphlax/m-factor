@@ -1,10 +1,11 @@
 import {COLOR} from './ui-properties.js';
 import {RECIPES} from './recipe-definitions.js';
 import {ITEMS} from './item-definitions.js';
-import {SPRITES} from './sprite-pool.js';
+import {SPRITES, S} from './sprite-pool.js';
 
 const CHOICE = {
   assemblerRecipe: 1,
+  splitterItemFilter: 2,
 };
 
 function UiChoice(parent, x, y) {
@@ -37,6 +38,21 @@ UiChoice.prototype.setChoice = function(choice, entity) {
           }
           i++;
         }
+      }
+    } else if (choice == CHOICE.splitterItemFilter) {
+      if (!this.choices[0]) this.choices[0] = {};
+      this.choices[0].sprite = SPRITES.get(S.crossIcon);
+      this.choices[0].value = undefined;
+      i++;
+      for (let itemDef of ITEMS.values()) {
+        const sprite = SPRITES.get(itemDef.sprite);
+        if (!this.choices[i]) {
+          this.choices.push({sprite, value: itemDef.name});
+        } else {
+          this.choices[i].sprite = sprite;
+          this.choices[i].value = itemDef.name;
+        }
+        i++;
       }
     }
     this.choices.length = i;
@@ -118,6 +134,16 @@ UiChoice.prototype.touchEnd = function(e) {
     this.entity.setRecipe(
         this.choices[this.pressedIndex].value,
         this.parent.ui.game.playTime);
+    // This extends the window to default height.
+    this.parent.yTarget = this.parent.canvasHeight;
+    this.parent.set(this.entity);
+    this.parent.x = -this.parent.canvasWidth;
+  } else if (this.mode == CHOICE.splitterItemFilter) {
+    this.entity.data.itemFilter = 
+        this.choices[this.pressedIndex].value;
+    if (!this.entity.data.outputPriority) {
+      this.entity.data.outputPriority = -1;
+    }
     // This extends the window to default height.
     this.parent.yTarget = this.parent.canvasHeight;
     this.parent.set(this.entity);

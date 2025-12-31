@@ -2,6 +2,7 @@ import {GameMap, MAP} from './game-map.js';
 import {Chunk} from './chunk.js';
 import {ENTITIES, PROTO_TO_NAME} from './entity-definitions.js';
 import {TYPE, ENERGY, STATE} from './entity-properties.js';
+import {ITEMS, PROTO_TO_ITEM} from './item-definitions.js';
 import {PROTO_TO_RECIPE} from './recipe-definitions.js';
 import {COLOR} from './ui-properties.js';
 
@@ -173,6 +174,8 @@ Storage.prototype.serializeMap = function(gameMap) {
       .map(lane => ({
         x: lane.belts[0].x,
         y: lane.belts[0].y,
+        splitterLeft: lane.belts[0].type == TYPE.splitter ?
+            lane.belts[0].data.leftOutLane == lane : undefined,
         minusFlow: lane.minusFlow,
         minusItems: lane.minusItems,
         plusFlow: lane.plusFlow,
@@ -227,6 +230,14 @@ Storage.prototype.serializeEntity = function(index, entity) {
         {recipe: entity.data.recipe.prototypeName} : {}),
     ...(entity.type == TYPE.undergroundBelt ?
         {type: entity.data.undergroundUp ? "output" : "input"} : {}),
+    ...(entity.type == TYPE.splitter ? {
+        ...(entity.data.inputPriority ?
+          {input_priority: ["left", "", "right"][entity.data.inputPriority + 1]} : {}),
+        ...(entity.data.outputPriority ?
+          {output_priority: ["left", "", "right"][entity.data.outputPriority + 1]} : {}),
+        ...(entity.data.itemFilter ?
+          {filter: ITEMS.get(entity.data.itemFilter).prototypeName} : {}),
+      } : {}),
     
     // Non-blueprintable.
     ...(entity.type == TYPE.inserter ||
@@ -286,6 +297,8 @@ Storage.prototype.serializeFluidTank = function(fluidTank) {
   }));
 };
 
+const SPLITTER_PRIORITY = new Map([["left", -1], ["none", 0], ["right", 1]]);
+
 Storage.prototype.deserializeMap = function(map) {
   const gameMap = new GameMap(map.seed, MAP.nauvis);
   gameMap.initialize();
@@ -305,15 +318,20 @@ Storage.prototype.deserializeMap = function(map) {
     const {width, height} = def.size ? def.size[direction] : def;
     const x = e.position.x - Math.floor(width / 2),
         y = e.position.y - Math.floor(height / 2);
+    
     const data = {
+      ...(def.type == TYPE.assembler && e.recipe ?
+          {recipe: PROTO_TO_RECIPE.get(e.recipe)} : {}),
       ...(def.type == TYPE.undergroundBelt ?
           {undergroundUp: e.type == "output"} : {}),
+      ...(def.type == TYPE.splitter ?
+          {
+            inputPriority: SPLITTER_PRIORITY.get(e.input_priority),
+            outputPriority: SPLITTER_PRIORITY.get(e.output_priority),
+            itemFilter: e.filter ? PROTO_TO_ITEM.get(e.filter).name : undefined,
+          } : {}),
     };
-    const entity = gameMap.createEntity({name, x, y, direction, data});
-    if (entity.type == TYPE.assembler && e.recipe) {
-      entity.setRecipe(PROTO_TO_RECIPE.get(e.recipe));
-    }
-    e.entity = entity;
+    e.entity = gameMap.createEntity({name, x, y, direction, data});
   }
   for (let e of map.entities) {
     // Separate loop to prevent connecting from changing timings.
@@ -321,15 +339,24 @@ Storage.prototype.deserializeMap = function(map) {
   }
   for (let lane of map.transportNetworkLanes) {
     const belt = gameMap.getEntityAt(lane.x, lane.y);
-    if (belt != belt.data.lane.belts[0]) {
-      // Circular lane, make it start at correct belt.
-      gameMap.transportNetwork.lanes.push(
-          belt.data.lane.split(belt, gameMap.transportNetwork.laneId++));
+    if (belt.type != TYPE.splitter) {
+      if (belt != belt.data.lane.belts[0]) {
+        // Circular lane, make it start at correct belt.
+        gameMap.transportNetwork.lanes.push(
+            belt.data.lane.split(belt, gameMap.transportNetwork.laneId++));
+      }
+      belt.data.lane.minusFlow.push(...lane.minusFlow);
+      belt.data.lane.minusItems.push(...lane.minusItems);
+      belt.data.lane.plusFlow.push(...lane.plusFlow);
+      belt.data.lane.plusItems.push(...lane.plusItems);
+    } else {
+      const outLane = lane.splitterLeft ?
+          belt.data.leftOutLane : belt.data.rightOutLane;
+      outLane.minusFlow.push(...lane.minusFlow);
+      outLane.minusItems.push(...lane.minusItems);
+      outLane.plusFlow.push(...lane.plusFlow);
+      outLane.plusItems.push(...lane.plusItems);
     }
-    belt.data.lane.minusFlow.push(...lane.minusFlow);
-    belt.data.lane.minusItems.push(...lane.minusItems);
-    belt.data.lane.plusFlow.push(...lane.plusFlow);
-    belt.data.lane.plusItems.push(...lane.plusItems);
   }
   for (let channel of map.fluidNetworkChannels) {
     const pipe = gameMap.getEntityAt(channel.x, channel.y);

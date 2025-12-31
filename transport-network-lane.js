@@ -270,12 +270,16 @@ Lane.prototype.update = function(time, dt) {
           this.id < this.endSplitterData.rightInLane.id) {
         continue;
       }
-      const fromLeft = flowSign == FLOW.minus ?
+      const fromLeft = this.endSplitterData.inputPriority ?
+          this.endSplitterData.inputPriority == -1 :
+          (flowSign == FLOW.minus ?
           this.endSplitterData.minusFromLeft :
-          this.endSplitterData.plusFromLeft;
-      const toLeft = flowSign == FLOW.minus ?
+          this.endSplitterData.plusFromLeft);
+      const toLeft = this.endSplitterData.outputPriority ?
+          this.endSplitterData.outputPriority == -1 :
+          (flowSign == FLOW.minus ?
           this.endSplitterData.minusToLeft :
-          this.endSplitterData.plusToLeft;
+          this.endSplitterData.plusToLeft);
       const positionForBelt = (3 * belt.direction + 7 - 3 * flowSign) % 12;
       let si = false, so = false, first = false; // Swap input/output.
       for (let i = 0; i < 2; i++) {
@@ -288,10 +292,12 @@ Lane.prototype.update = function(time, dt) {
             inLane.minusItems : inLane.plusItems;
         if (!inFlow.length || inFlow[0]) continue;
         
+        const hasFilter = !!this.endSplitterData.itemFilter,
+            matchesFilter = hasFilter && this.endSplitterData.itemFilter == inItems[0];
         const lane = toLeft ?
             this.endSplitterData.leftOutLane :
             this.endSplitterData.rightOutLane;
-        if (!first) {
+        if (!first && (!hasFilter || matchesFilter)) {
           first = true;
           const wait = lane.insertItem(inItems[0], belt, time, positionForBelt);
           if (!wait) {
@@ -305,6 +311,9 @@ Lane.prototype.update = function(time, dt) {
             continue;
           }
         }
+        if (hasFilter && matchesFilter)
+          continue;
+        
         const other = !toLeft ?
             this.endSplitterData.leftOutLane :
             this.endSplitterData.rightOutLane;

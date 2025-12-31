@@ -1,6 +1,7 @@
 import {COLOR} from './ui-properties.js';
 import {STATE} from './entity-properties.js';
 import {SPRITES} from './sprite-pool.js';
+import {CHOICE} from './ui-choice.js';
 import {ITEMS, FLUIDS, I} from './item-definitions.js';
 
 function UiProgress(parent, x, y) {
@@ -194,4 +195,130 @@ UiFluidIndicator.prototype.draw = function(ctx, time) {
   window.numberImageDraws++;
 };
 
-export {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator};
+function UiSplitterPriority(parent, x, y, label) {
+  this.parent = parent;
+  this.x = x;
+  this.y = y;
+  this.entity = undefined;
+  this.pressed = 0;
+}
+
+const SPLITTER_BUTTON_WIDTH = [47, 48, 57];
+
+UiSplitterPriority.prototype.set = function(entity) {
+  this.entity = entity;
+};
+
+UiSplitterPriority.prototype.draw = function(ctx, time) {
+  if (!this.entity) return;
+  const x = Math.floor(this.parent.x + this.x),
+        y = Math.floor(this.parent.y + this.y);
+  
+  ctx.fillStyle = COLOR.background3;
+  ctx.fillRect(x + 70, y, 160, 40);
+  ctx.fillRect(x + 70, y + 46, 160, 40);
+  ctx.fillRect(x + 70 + 164, y, 40, 40);
+  
+  ctx.fillStyle = COLOR.buttonBackgroundPressed;
+  if (this.pressed == 7) {
+    ctx.fillRect(x + 70 + 164, y, 40, 40);
+  } else if (this.pressed) {
+    const sel = (this.pressed - 1) % 3;
+    let i = 0, dx = 0, dy = this.pressed <= 3 ? 0 : 46;
+    while (i < sel) dx += SPLITTER_BUTTON_WIDTH[i++];
+    ctx.fillRect(x + 72 + i * 2 + dx, y + 2 + dy, SPLITTER_BUTTON_WIDTH[i], 36);
+  }
+  
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = COLOR.border2;
+  ctx.strokeRect(x + 70, y, 160, 40);
+  ctx.strokeRect(x + 70, y + 46, 160, 40);
+  ctx.strokeRect(x + 70 + 164, y, 40, 40);
+  
+  ctx.fillStyle = COLOR.buttonBackground;
+  ctx.strokeStyle = COLOR.buttonBorder;
+  const outSel = 1 + (this.entity.data.outputPriority ?? 0);
+  let i = 0, dx = 0;
+  while (i < outSel) dx += SPLITTER_BUTTON_WIDTH[i++];
+  if (this.pressed != outSel + 1)
+    ctx.fillRect(x + 72 + i * 2 + dx, y + 2, SPLITTER_BUTTON_WIDTH[i], 36);
+  ctx.strokeRect(x + 72 + i * 2 + dx, y + 2, SPLITTER_BUTTON_WIDTH[i], 36);
+  const inSel = 1 + (this.entity.data.inputPriority ?? 0);
+  i = 0, dx = 0;
+  while (i < inSel) dx += SPLITTER_BUTTON_WIDTH[i++];
+  if (this.pressed != inSel + 4)
+    ctx.fillRect(x + 72 + i * 2 + dx, y + 48, SPLITTER_BUTTON_WIDTH[i], 36);
+  ctx.strokeRect(x + 72 + i * 2 + dx, y + 48, SPLITTER_BUTTON_WIDTH[i], 36);
+  
+  ctx.fillStyle = COLOR.primary;
+  ctx.font = "16px monospace";
+  ctx.textBaseline = "middle";
+  ctx.fillText("OUTPUT", x, y + 22);
+  ctx.fillText("LEFT", x + 76, y + 22);
+  ctx.fillText("-", x + 140, y + 22);
+  ctx.fillText("RIGHT", x + 176, y + 22);
+  ctx.fillText("INPUT", x, y + 68);
+  ctx.fillText("LEFT", x + 76, y + 68);
+  ctx.fillText("-", x + 140, y + 68);
+  ctx.fillText("RIGHT", x + 176, y + 68);
+  window.numberOtherDraws += 19;
+  
+  if (this.entity.data.itemFilter) {
+    const item = ITEMS.get(this.entity.data.itemFilter);
+    const sprite = item && SPRITES.get(item.sprite);
+    ctx.drawImage(sprite.image,
+        sprite.x, sprite.y,
+        sprite.width, sprite.height,
+        x + 70 + 164 + 4, y + 5, 32, 32);
+    window.numberImageDraws++;
+  }
+}
+
+UiSplitterPriority.prototype.touchStart = function(e) {
+  if (!this.entity) return;
+  const x = Math.floor(this.parent.x + this.x),
+        y = Math.floor(this.parent.y + this.y);
+  const {clientX: px, clientY: py} = e.touches[0];
+ 
+  if (x + 70 > px || px > x + 274 ||
+      y > py || py > y + 86 ||
+      (py > y + 40 && py < y + 46)) return;
+  if (px > x + 230) {
+    this.pressed = py <= y + 40 ? 7 : 0;
+    return;
+  }
+  const dy = py <= y + 40 ? 0 : 3;
+  this.pressed = dy + (px < x + 120 ? 1 :
+      (px < x + 170 ? 2 : 3));
+};
+
+UiSplitterPriority.prototype.touchMove = function(e) {
+  if (this.pressed) {
+    this.pressed = 0;
+  }
+};
+
+UiSplitterPriority.prototype.touchEnd = function(e) {
+  if (!this.pressed) return;
+  if (this.pressed == 7) {
+    this.parent.entityUi.filterChoice.setChoice(
+        CHOICE.splitterItemFilter, this.entity);
+    this.parent.xTarget = -this.parent.canvasWidth;
+    this.parent.yTarget = Math.max(150, this.parent.canvasHeight - 44 -
+          46 * Math.ceil(this.parent.entityUi.filterChoice.choices.length / 8));
+    this.parent.animationSpeed = (this.parent.yTarget - this.parent.y) / 100;
+    this.pressed = 0;
+    return;
+  } else if (this.pressed <= 3) {
+    this.entity.data.outputPriority = this.pressed - 2;
+    if (this.entity.data.itemFilter &&
+        !this.entity.data.outputPriority) {
+      this.entity.data.itemFilter = undefined;
+    }
+  } else {
+    this.entity.data.inputPriority = this.pressed - 5;
+  }
+  this.pressed = 0;
+}
+
+export {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority};

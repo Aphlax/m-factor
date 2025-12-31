@@ -437,6 +437,35 @@ export function drawRecipe(ctx, view, recipe) {
   ctx.shadowBlur = 0;
 }
 
+export function drawSplitterFilter(ctx, view) {
+  const s = view.scale, half = s / 2;
+  const ox = -view.x, oy = -view.y;
+  const left = this.data.outputPriority == -1;
+  const dx = (this.direction == 0 && !left) ||
+      (this.direction == 2 && left) ? 1 : 0;
+  const dy = (this.direction == 1 && !left) ||
+      (this.direction == 3 && left) ? 1 : 0;
+  const x = (this.x + dx) * s + ox + half;
+  const y = (this.y + dy) * s + oy + half;
+  const size = Math.min(8, 0.3125 * view.scale);
+  if (x + size <= 0 || x - size > view.width)
+    return;
+  if (y + size <= 0 || y - size > view.height)
+    return;
+  const itemDef = ITEMS.get(this.data.itemFilter);
+  const sprite = SPRITES.get(itemDef.sprite);
+  ctx.shadowColor = "#000000";
+  ctx.shadowBlur = 8;
+  ctx.drawImage(sprite.image,
+      sprite.x, sprite.y,
+      sprite.width, sprite.height,
+      Math.floor(x - size), Math.floor(y - size),
+      Math.ceil(size * 2), Math.ceil(size * 2));
+  window.numberImageDraws++;
+  ctx.shadowColor = undefined;
+  ctx.shadowBlur = 0;
+}
+
 export function drawWireConnections(ctx, view, shadow) {
   ctx.lineCap = "round";
   ctx.strokeStyle = !shadow ? COLOR.wire : COLOR.shadow;

@@ -68,7 +68,7 @@ MultiBuild.prototype.touchEnd = function(sx, sy, shortTouch, last) {
         x, y, direction: this.ui.rotateButton.direction,
         name: this.entity.name});
   }
-  this.gameMap.pasteEntities(entities, 0, 0);
+  this.gameMap.createEntities(entities);
 };
 
 MultiBuild.prototype.draw = function(ctx) {
@@ -165,7 +165,7 @@ BeltDrag.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
         name: this.entity.name, x, y,
         direction: this.direction});
   }
-  this.gameMap.pasteEntities(entities, 0, 0);
+  this.gameMap.createEntities(entities);
 };
 
 BeltDrag.prototype.draw = function(ctx) {
@@ -313,7 +313,7 @@ SnakeBelt.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
           direction: node.direction});
     }
   }
-  this.gameMap.pasteEntities(entities, 0, 0);
+  this.gameMap.createEntities(entities);
 };
 
 SnakeBelt.prototype.draw = function(ctx) {
@@ -529,7 +529,7 @@ UndergroundChain.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
       entities.push({x: x + dx, y: y + dy, ...start});
     current += 2;
   }
-  this.gameMap.pasteEntities(entities, 0, 0);
+  this.gameMap.createEntities(entities);
 };
 
 UndergroundChain.prototype.draw = function(ctx) {
@@ -728,7 +728,7 @@ InserterDrag.prototype.touchEnd = function(sx, sy, shortTouch, last) {
         name: this.entity.name, x, y,
         direction: this.inserterDirection});
   }
-  this.gameMap.pasteEntities(entities, 0, 0);
+  this.gameMap.createEntities(entities);
 };
 
 InserterDrag.prototype.draw = function(ctx) {
@@ -823,7 +823,7 @@ PowerPoleDrag.prototype.touchEnd = function(sx, sy, shortTouch, last) {
     entities.push(
         {name: this.entity.name, x, y, direction: 0});
   }
-  this.gameMap.pasteEntities(entities, 0, 0);
+  this.gameMap.createEntities(entities);
 };
 
 PowerPoleDrag.prototype.draw = function(ctx) {

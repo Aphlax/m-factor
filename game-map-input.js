@@ -107,7 +107,7 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
       }
     } else if (entry?.entity) {
       const d = this.ui.rotateButton.direction;
-      const entity = this.gameMap.tryCreateEntity(
+      const entity = this.gameMap.tryCreateEntityFromScreen(
           this.touches[0].x, this.touches[0].y,
           d, entry.entity);
       if (entity?.type == TYPE.undergroundBelt &&

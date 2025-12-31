@@ -12,9 +12,9 @@ export function scenario(gameMap, time) {
 
 function speedrun(map, time) {
   map.centerView(0, 0);
-  map.pasteEntities([
+  map.createEntities([
     
-  ], 0, 0);
+  ]);
 }
 
 function productionTest(gameMap, time) {
