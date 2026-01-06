@@ -68,11 +68,11 @@ SpritePool.prototype.draw = function(ctx, time) {
   ctx.fillStyle = "lightgrey";
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   
-  let sprite = S.electricMiningDrillE;
-  let shadow = S.electricMiningDrillShadowE;
-  const animShad = true;
+  let sprite = S.longHandedInserterHand;
+  let shadow = 0;//S.electricMiningDrillShadowE;
+  const animShad = false;
   let light = 0; // S.boilerLightW;
-  let size = [32*3, 32*3], xlen = 5, ylen = 2;
+  let size = [32*1, 32*1], xlen = 3, ylen = 1;
   for (let i = 0; i < xlen; i++) {
     for (let j = 0; j < ylen; j++) {
       let s = {left: 0, right: 0, top: 0, bottom: 0, ...this.get(sprite+i*ylen+j)};
@@ -114,7 +114,7 @@ SpritePool.prototype.draw = function(ctx, time) {
   ctx.font = "18px arial";
   ctx.fillText(txt, 10, 20);
   
-  //return;
+  return;
   let a = xlen*ylen;
   
   ctx.fillStyle = "orange";

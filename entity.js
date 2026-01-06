@@ -93,12 +93,15 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.taskEnd = this.nextUpdate = time;
     this.taskStart = time - def.taskDuration;
     this.taskDuration = def.taskDuration;
+    this.data.inserterReach = def.inserterReach;
     this.data.inserterHandSprites = def.inserterHandSprites;
     this.data.inserterItem = 0;
     this.data.inserterPickupBend =
         INSERTER_PICKUP_BEND[(direction + 2) % 4];
     this.energySource = def.energySource;
-    this.energyDrain = def.energyDrain;
+    if (def.energySource == ENERGY.electric) {
+      this.energyDrain = def.energyDrain;
+    }
     this.energyConsumption = def.energyConsumption;
     if (data?.itemFilters) {
       this.data.itemFilters = data.itemFilters;
@@ -117,6 +120,9 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.data.mineOutputX = def.mineOutput[direction].x;
     this.data.mineOutputY = def.mineOutput[direction].y;
     this.energySource = def.energySource;
+    if (def.energySource == ENERGY.electric) {
+      this.energyDrain = def.energyDrain;
+    }
     this.energyConsumption = def.energyConsumption;
   } else if (this.type == TYPE.furnace) {
     this.state = STATE.missingItem;
@@ -295,12 +301,17 @@ Entity.prototype.update = function(gameMap, time) {
     let state, nextUpdate = NEVER;
     inserter: {
       if ((this.state == STATE.running && !this.data.inserterItem) ||
+          (this.state == STATE.noEnergy && this.energySource == ENERGY.windUp) ||
           this.state == STATE.missingItem ||
           this.state == STATE.noOutput ||
           this.state == STATE.outputFull) {
         if (!this.outputEntities.length || !this.inputEntities.length) {
           state = !this.outputEntities.length ?
               STATE.noOutput : STATE.missingItem;
+          break inserter;
+        }
+        if (this.energySource == ENERGY.windUp && this.energyStored < 1) {
+          state = STATE.noEnergy;
           break inserter;
         }
         const [inputEntity] = this.inputEntities;
@@ -350,6 +361,9 @@ Entity.prototype.update = function(gameMap, time) {
             state = STATE.missingItem;
             break inserter;
           }
+        }
+        if (this.energySource == ENERGY.windUp) { 
+          this.energyStored--;
         }
         this.data.inserterItem = inserterItem;
         state = STATE.running;

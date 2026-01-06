@@ -17,7 +17,10 @@ const BUILD_MENU = [
   NAME.transportBelt,
   NAME.undergroundBelt,
   NAME.splitter,
+  NAME.burnerInserter,
   NAME.inserter,
+  NAME.fastInserter,
+  NAME.longHandedInserter,
   NAME.smallElectricPole,
   NAME.pipe,
   NAME.pipeToGround,
@@ -46,7 +49,7 @@ const DEACC = 50;
   turbines, solars, boilers, accumulator, light, powerpoles 9
   atomic reactor & co 4
   logic, speaker, light, wire 7
-  walls, gate, turrets 7
+  walls, turrets 7
 */
 
 function UiBuildMenu(ui, canvas) {
@@ -58,6 +61,7 @@ function UiBuildMenu(ui, canvas) {
     const x = 0, y = 0, size = 0;
     if (entry > 0) {
       const entity = ENTITIES.get(entry);
+      if (!entity) throw new Error(`Can not find ${entry}.`);
       return {sprite: entity.icon, entity, x, y, size};
     } else {
       const sprite = TOOL_ICON.get(entry);

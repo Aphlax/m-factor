@@ -303,8 +303,10 @@ export function updateBeltSprites() {
 }
 
 export function connectInserter(other, time) {
-  const dx = -(this.direction - 2) % 2;
-  const dy = (this.direction - 1) % 2;
+  const dx = (-(this.direction - 2) % 2) *
+      this.data.inserterReach;
+  const dy = ((this.direction - 1) % 2) *
+      this.data.inserterReach;
   if (other.x <= this.x + dx &&
       other.x + other.width > this.x + dx &&
       other.y <= this.y + dy &&

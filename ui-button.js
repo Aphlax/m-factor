@@ -102,7 +102,8 @@ UiButton.prototype.touchEnd = function(e) {
   } else if (this.name == BUTTON.windUp) {
     const entity = this.parent.selectedEntity;
     entity.energyStored += Math.round(1 / entity.energyConsumption);
-    const limit = entity.type == TYPE.mine ? 150 : 10;
+    const limit = entity.type == TYPE.mine ||
+        entity.type == TYPE.inserter ? 150 : 10;
     if (entity.energyStored > limit) {
       entity.energyStored = limit;
     }

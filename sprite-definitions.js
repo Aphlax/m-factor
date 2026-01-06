@@ -93,8 +93,8 @@ export const S = {
   
   woodenChest: 15000,
   woodenChestShadow: 15001,
-  inserter: 15002,
-  inserterHand: 15006,
+  inserter: 15002, // 4
+  inserterHand: 15006, // 3
   stoneFurnace: 15009,
   lab: 15010, // 33
   labShadow: 15043,
@@ -154,6 +154,12 @@ export const S = {
   electricMiningDrillShadowS: 15163, // 10
   electricMiningDrillW: 15173, // 10
   electricMiningDrillShadowW: 15183, // 10
+  burnerInserter: 15193, // 4
+  burnerInserterHand: 15197, // 3
+  fastInserter: 15200, // 4
+  fastInserterHand: 15204, // 3
+  longHandedInserter: 15207, // 4
+  longHandedInserterHand: 15211, // 3
   
   ironOreItem: 16000,
   copperOreItem: 16000 + 1,
@@ -187,6 +193,9 @@ export const S = {
   pipeToGroundItem: 16100 + 22,
   electricMiningDrillItem: 16100 + 23,
   splitterItem: 16100 + 24,
+  burnerInserterItem: 16100 + 25,
+  fastInserterItem: 16100 + 26,
+  longHandedInserterItem: 16100 + 27,
   
   gearIcon: 16500,
   burnerDrillIcon: 16500 + 1,
@@ -212,6 +221,9 @@ export const S = {
   copyIcon: 16500 + 21,
   snakeIcon: 16500 + 22,
   undergroundConnectIcon: 16500 + 23,
+  burnerInserterIcon: 16500 + 24,
+  fastInserterIcon: 16500 + 25,
+  longHandedInserterIcon: 16500 + 26,
   
   smoke: 17000,
   
@@ -692,6 +704,54 @@ export const SPRITES = [
     path: "graphics/entities/splitter/splitter-west.png",
     sprites: entitySprites(S.splitterW, 46, 76, 8, 4, 3, 11, 10, 2, true),
   },
+  {
+    path: "graphics/entities/burner-inserter/burner-inserter-platform.png",
+    sprites: entitySprites(S.burnerInserter, 46, 46, 4, 1, 5, 9, 5, 9),
+  },
+  {
+    path: "graphics/entities/burner-inserter/burner-inserter-hand-base.png",
+    sprites: entitySprites(S.burnerInserterHand, 8, 32, 1, 1, -12, -12, 0, 0),
+  },
+  {
+    path: "graphics/entities/burner-inserter/burner-inserter-hand-open.png",
+    sprites: entitySprites(S.burnerInserterHand + 1, 18, 44, 1, 1, -7, -7, 0, 12),
+  },
+  {
+    path: "graphics/entities/burner-inserter/burner-inserter-hand-closed.png",
+    sprites: entitySprites(S.burnerInserterHand + 2, 18, 44, 1, 1, -7, -7, 0, 12),
+  },
+  {
+    path: "graphics/entities/fast-inserter/fast-inserter-platform.png",
+    sprites: entitySprites(S.fastInserter, 46, 46, 4, 1, 5, 9, 5, 9),
+  },
+  {
+    path: "graphics/entities/fast-inserter/fast-inserter-hand-base.png",
+    sprites: entitySprites(S.fastInserterHand, 8, 32, 1, 1, -12, -12, 0, 0),
+  },
+  {
+    path: "graphics/entities/fast-inserter/fast-inserter-hand-open.png",
+    sprites: entitySprites(S.fastInserterHand + 1, 18, 44, 1, 1, -7, -7, 0, 12),
+  },
+  {
+    path: "graphics/entities/fast-inserter/fast-inserter-hand-closed.png",
+    sprites: entitySprites(S.fastInserterHand + 2, 18, 44, 1, 1, -7, -7, 0, 12),
+  },
+  {
+    path: "graphics/entities/long-handed-inserter/long-handed-inserter-platform.png",
+    sprites: entitySprites(S.longHandedInserter, 46, 46, 4, 1, 5, 9, 5, 9),
+  },
+  {
+    path: "graphics/entities/long-handed-inserter/long-handed-inserter-hand-base.png",
+    sprites: entitySprites(S.longHandedInserterHand, 8, 32, 1, 1, -12, -12, 0, 0),
+  },
+  {
+    path: "graphics/entities/long-handed-inserter/long-handed-inserter-hand-open.png",
+    sprites: entitySprites(S.longHandedInserterHand + 1, 18, 44, 1, 1, -7, -7, 0, 12),
+  },
+  {
+    path: "graphics/entities/long-handed-inserter/long-handed-inserter-hand-closed.png",
+    sprites: entitySprites(S.longHandedInserterHand + 2, 18, 44, 1, 1, -7, -7, 0, 12),
+  },
   
   // Items.
   {
@@ -816,7 +876,18 @@ export const SPRITES = [
     path: "graphics/items/splitter.png",
     sprites: itemSprites(S.splitterItem, S.splitterIcon),
   },
-  
+  {
+    path: "graphics/items/burner-inserter.png",
+    sprites: itemSprites(S.burnerInserterItem, S.burnerInserterIcon),
+  },
+  {
+    path: "graphics/items/fast-inserter.png",
+    sprites: itemSprites(S.fastInserterItem, S.fastInserterIcon),
+  },
+  {
+    path: "graphics/items/long-handed-inserter.png",
+    sprites: itemSprites(S.longHandedInserterItem, S.longHandedInserterIcon),
+  },
   
   // Misc.
   {

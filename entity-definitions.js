@@ -105,6 +105,7 @@ export const ENTITIES = new Map([
     energyDrain: 0.4, // kW
     energyConsumption: 4.6, // kW
     
+    inserterReach: 1,
     inserterHandSprites: S.inserterHand,
     taskDuration: 400,
   }],
@@ -502,6 +503,77 @@ export const ENTITIES = new Map([
       [south]: [S.transportBeltBeginS, S.transportBeltEndS],
       [west]: [S.transportBeltBeginW, S.transportBeltEndW],
     },
+  }],
+  [NAME.burnerInserter,
+  {
+    label: 'Wind up Inserter',
+    prototypeName: "burner-inserter",
+    type: TYPE.inserter,
+    width: 1,
+    height: 1,
+    rotatable: true,
+    icon: S.burnerInserterIcon,
+    sprites: {
+      [north]: [S.burnerInserter],
+      [east]: [S.burnerInserter + 1],
+      [south]: [S.burnerInserter + 2],
+      [west]: [S.burnerInserter + 3],
+    },
+    animationLength: 0,
+    energySource: ENERGY.windUp,
+    energyConsumption: 1 / 15,
+    
+    inserterReach: 1,
+    inserterHandSprites: S.burnerInserterHand,
+    taskDuration: 372,
+  }],
+  [NAME.fastInserter,
+  {
+    label: 'Fast Inserter',
+    prototypeName: "fast-inserter",
+    type: TYPE.inserter,
+    width: 1,
+    height: 1,
+    rotatable: true,
+    icon: S.fastInserterIcon,
+    sprites: {
+      [north]: [S.fastInserter],
+      [east]: [S.fastInserter + 1],
+      [south]: [S.fastInserter + 2],
+      [west]: [S.fastInserter + 3],
+    },
+    animationLength: 0,
+    energySource: ENERGY.electric,
+    energyDrain: 0.5, // kW
+    energyConsumption: 20.5, // kW
+    
+    inserterReach: 1,
+    inserterHandSprites: S.fastInserterHand,
+    taskDuration: 140,
+  }],
+  [NAME.longHandedInserter,
+  {
+    label: 'Long Inserter',
+    prototypeName: "long-handed-inserter",
+    type: TYPE.inserter,
+    width: 1,
+    height: 1,
+    rotatable: true,
+    icon: S.longHandedInserterIcon,
+    sprites: {
+      [north]: [S.longHandedInserter],
+      [east]: [S.longHandedInserter + 1],
+      [south]: [S.longHandedInserter + 2],
+      [west]: [S.longHandedInserter + 3],
+    },
+    animationLength: 0,
+    energySource: ENERGY.electric,
+    energyDrain: 0.4, // kW
+    energyConsumption: 7.6, // kW
+    
+    inserterReach: 2,
+    inserterHandSprites: S.longHandedInserterHand,
+    taskDuration: 280,
   }],
 ]);
 

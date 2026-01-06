@@ -36,6 +36,9 @@ export const NAME = {
   pipeToGround: 15,
   electricMiningDrill: 16,
   splitter: 17,
+  burnerInserter: 18,
+  fastInserter: 19,
+  longHandedInserter: 20,
 };
 
 /** Never value for next update. 285 years from now. */

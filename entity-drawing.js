@@ -232,6 +232,7 @@ export function drawInserterHand(ctx, view, time) {
   const base = SPRITES.get(this.data.inserterHandSprites);
   const hand = SPRITES.get(this.data.inserterHandSprites +
       (this.data.inserterItem ? 2 : 1));
+  const reach = this.data.inserterReach;
   
   let p;
   if (this.state == STATE.running) {
@@ -264,11 +265,11 @@ export function drawInserterHand(ctx, view, time) {
       (this.x + 0.5) * view.scale - view.x,
       (this.y + 0.5) * view.scale - view.y);
   ctx.rotate((-0.5 + angle + bend) * Math.PI);
-  ctx.translate(0, 24 * scale * baseScale);
+  ctx.translate(0, 24 * scale * baseScale * reach);
   ctx.rotate((1 - bend * 1.9) * Math.PI);
   
   if (this.data.inserterItem) {
-    ctx.translate(0, -40 * scale * handScale);
+    ctx.translate(0, -40 * scale * handScale * reach);
     ctx.rotate(this.data.inserterPickupBend * Math.PI);
     const item = SPRITES.get(ITEMS.get(this.data.inserterItem).sprite);
     ctx.drawImage(item.image,
@@ -277,16 +278,16 @@ export function drawInserterHand(ctx, view, time) {
         16 * scale, 16 * scale);
     window.numberImageDraws++;
     ctx.rotate(-this.data.inserterPickupBend * Math.PI);
-    ctx.translate(0, 40 * scale * handScale);
+    ctx.translate(0, 40 * scale * handScale * reach);
   }
   
   ctx.scale(1, handScale);
   ctx.drawImage(hand.image,
       hand.x, hand.y, hand.width, hand.height,
       -9 * scale,
-      -40 * scale,
+      -40 * scale * reach,
       hand.width * scale,
-      hand.height * scale);
+      hand.height * scale * reach);
   window.numberImageDraws++;
   ctx.scale(1, 1 / handScale);
   
@@ -297,7 +298,7 @@ export function drawInserterHand(ctx, view, time) {
       -4 * scale,
       -4 * scale,
       base.width * scale,
-      base.height * scale);
+      base.height * scale * reach);
   window.numberImageDraws++;
   ctx.setTransform();
 }

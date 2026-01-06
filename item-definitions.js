@@ -31,6 +31,9 @@ export const I = {
   undergroundBelt: 112,
   pipeToGround: 113,
   splitter: 114,
+  burnerInserter: 115,
+  fastInserter: 116,
+  longHandedInserter: 117,
 };
 
 export const ITEMS = new Map([
@@ -200,6 +203,24 @@ export const ITEMS = new Map([
     sprite: S.splitterItem,
     stacksize: 50,
     prototypeName: "splitter",
+  }],
+  [I.burnerInserter,
+  {
+    sprite: S.burnerInserterItem,
+    stacksize: 50,
+    prototypeName: "burner-inserter",
+  }],
+  [I.fastInserter,
+  {
+    sprite: S.fastInserterItem,
+    stacksize: 50,
+    prototypeName: "fast-inserter",
+  }],
+  [I.longHandedInserter,
+  {
+    sprite: S.longHandedInserterItem,
+    stacksize: 50,
+    prototypeName: "long-handed-inserter",
   }],
 ]);
 

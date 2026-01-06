@@ -254,6 +254,44 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1],
     duration: 1000,
   },
+  {
+    prototypeName: "burner-inserter",
+    inputs: [
+      {item: I.ironGear, amount: 1},
+      {item: I.ironPlate, amount: 1},
+    ],
+    outputs: [
+      {item: I.burnerInserter, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 500,
+  },
+  {
+    prototypeName: "fast-inserter",
+    inputs: [
+      {item: I.electronicCircuit, amount: 2},
+      {item: I.inserter, amount: 1},
+      {item: I.ironPlate, amount: 2},
+    ],
+    outputs: [
+      {item: I.fastInserter, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 500,
+  },
+  {
+    prototypeName: "long-handed-inserter",
+    inputs: [
+      {item: I.inserter, amount: 1},
+      {item: I.ironGear, amount: 1},
+      {item: I.ironPlate, amount: 1},
+    ],
+    outputs: [
+      {item: I.longHandedInserter, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 500,
+  },
   
   
   {
