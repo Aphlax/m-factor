@@ -1,4 +1,4 @@
-import {TYPE} from './entity-properties.js';
+import {TYPE, NEVER} from './entity-properties.js';
 import {SPRITES} from './sprite-pool.js';
 import {ITEMS} from './item-definitions.js';
 
@@ -166,7 +166,7 @@ Lane.prototype.insertItem = function(item, belt, time, positionForBelt) {
  * returns a negative item id if extracted.
  * returns a positive wait time in ms if no item.
  */
-Lane.prototype.extractItem = function(items, belt, time, positionForBelt) {
+Lane.prototype.extractItem = function(inserter, belt, time, positionForBelt) {
   let minusSide;
   const turnBelt = (belt.direction -
       (belt.data.beltInput?.direction ??
@@ -185,7 +185,6 @@ Lane.prototype.extractItem = function(items, belt, time, positionForBelt) {
   const startFlowSign = minusSide ? FLOW.minus : FLOW.plus;
   let waitTime = Math.ceil(1000 / belt.data.beltSpeed);
   
-  laneLoop:
   for (let flowSign of FLOWS) {
     flowSign *= -startFlowSign;
     const flow = flowSign == FLOW.minus ?
@@ -193,6 +192,7 @@ Lane.prototype.extractItem = function(items, belt, time, positionForBelt) {
     const flowItems = flowSign == FLOW.minus ?
         this.minusItems : this.plusItems;
     
+    if (!flow.length) continue;
     let dte = this.endSplitterData ? -0.5 : 0;
     let dteLength = 1;
     if (turnBelt) {
@@ -214,33 +214,53 @@ Lane.prototype.extractItem = function(items, belt, time, positionForBelt) {
       }
     }
     
-    for (let i = 0; i < flow.length; i++) {
-      const itemPos = flow[i] + 0.125;
-      if (itemPos > dte + dteLength) {
-        const wait = Math.ceil(Math.min(itemPos - dte - dteLength, 1) / belt.data.beltSpeed * 1000);
-        if (wait < waitTime) {
-          waitTime = wait;
+    let a = 0, aDist, aIndex,
+        b = 0, bDist, bIndex,
+        c = 0, cDist, cIndex,
+        pos = -0.125, i = 0;
+    for (; i < flow.length; i++) {
+      pos += flow[i] + 0.25;
+      const item = flowItems[i];
+      if (pos > dte + dteLength) break;
+      
+      if (pos > dte) {
+        const dist = Math.abs(pos - dte - dteLength / 2);
+        if (!a || (a == item && dist < aDist)) {
+          a = item; aIndex = i; aDist = dist; continue;
         }
-        continue laneLoop;
+        if (a == item) continue;
+        if (!b || (b == item && dist < bDist)) {
+          b = item; bIndex = i; bDist = dist; continue;
+        }
+        if (b == item) continue;
+        if (!c || (c == item && dist < cDist)) {
+          c = item; cIndex = i; cDist = dist; continue;
+        }
+        if (c == item) continue;
+        break;
       }
-      if (itemPos > dte && itemPos <= dte + dteLength &&
-          (items == -1 || items.includes(flowItems[i]))) {
-        // Check if next item has better position.
-        if (i + 1 < flow.length && itemPos + flow[i + 1] + 0.25 < dte + dteLength * 0.5 &&
-            (items == -1 || items.includes(flowItems[i + 1]))) {
-          dte -= flow[i] + 0.25;
-          continue;
-        }
-        // Extract this item.
-        const [len] = flow.splice(i, 1),
-            [item] = flowItems.splice(i, 1);
-        if (i < flow.length) {
-          flow[i] += len + 0.25;
-        }
-        return -item;
-      }
-      dte -= flow[i] + 0.25;
     }
+    if (!a) {
+      // No item there to take.
+      if (i == flow.length) pos = dte + dteLength + 1;
+      const wait = Math.ceil(Math.min(
+          pos - dte - dteLength, 1) / belt.data.beltSpeed * 1000);
+      if (wait < waitTime) {
+        waitTime = wait;
+      }
+      continue;
+    }
+    const res = inserter.inserterAllowsItems(a, b, c);
+    if (res == -1) return NEVER;
+    if (!res) continue;
+    const index = res == a ? aIndex : (res == b ? bIndex : cIndex);
+    // Extract this item.
+    const [len] = flow.splice(index, 1),
+        [item] = flowItems.splice(index, 1);
+    if (index < flow.length) {
+      flow[index] += len + 0.25;
+    }
+    return -item;
   }
   return waitTime;
 }

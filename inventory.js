@@ -8,52 +8,72 @@ function Inventory(capacity) {
 }
 
 /**
- * Which items can be put in here by inserter.
- * -1 for all, otherwise an array.
+ * Returns the itemId of an allowed item,
+ * otherwise returns -1 if the inventory
+ * is full or 0 if none of the items can be
+ * inserted.
  */
-Inventory.prototype.insertWants = function() {
-  if (this.filters && this.filters.length > this.capacity) {
-    if (this.items.length < this.capacity) {
-      return this.filters.map(f => f.item);
-    }
-    const result = []; // oh no.
-    for (let i = 0, j = 0; j < this.filters.length; j++) {
-      while (i < this.items.length &&
-          this.items[i] < this.filters[j]) {
-        i++;
-      }
-      if (i == this.items.length) return result;
-      if (this.items[i] != this.filters[j].item ||
-          this.amounts[i] >= this.filters[j].amount * 2)
-        continue;
-      result.push(this.items[i]);
-    }
-    return result;
-  }
-  if (this.filters) {
-    const result = []; // oh no.
+Inventory.prototype.allowsItems = function(a, b, c) {
+  if (this.filters && this.filters.length == this.capacity) {
+    // Filtered slots
+    let full = true;
     for (let i = 0; i < this.filters.length; i++) {
+      const filter = this.filters[i].item;
       if (!this.items[i] ||
           this.amounts[i] < this.filters[i].amount * 2) {
-        result.push(this.filters[i].item);
+        if (filter == a) return a;
+        if (filter == b) return b;
+        if (filter == c) return c;
+        full = false;
       }
     }
-    return result;
+    return full ? -1 : 0;
+  }
+  if (this.filters) {
+    if (this.items.length < this.capacity) {
+      for (let filter of this.filters) {
+        if (a == filter.item) return a;
+        if (b == filter.item) return b;
+        if (c == filter.item) return c;
+      }
+      return 0;
+    }
+    // All slots occupied, e.g. fuel slot with one present.
+    let full = true;
+    for (let i = 0; i < this.items.length; i++) {
+      const item = this.items[i];
+      for (let filter of this.filters) {
+        if (item == filter.item) {
+          if (this.amounts[i] < filter.amount * 2) {
+            if (item == a || item == b || item == c) {
+              return item;
+            }
+            full = false;
+          }
+          break;
+        }
+      }
+    }
+    return full ? -1 : 0;
   }
   if (this.items.length < this.capacity) {
-    return -1;
+    return a;
   }
-  const result = []; // oh no.
-  let stackSize = 0;
+  // Each spot is full, ckeck if a stack is incomplete.
+  let stackSize = 0, full = true;
   for (let i = 0; i < this.items.length; i++) {
-    if (!i || this.items[i] == this.items[i - 1]) {
-      stackSize = ITEMS.get(this.items[i]).stackSize;
+    const item = this.items[i];
+    if (!i || item != this.items[i - 1]) {
+      stackSize = ITEMS.get(item).stackSize;
     }
     if (this.amounts[i] < stackSize) {
-      result.push(this.items[i]);
+      if (item == a) return a;
+      if (item == b) return b;
+      if (item == c) return c;
+      full = false;
     }
   }
-  return result;
+  return full ? -1 : 0;
 };
 
 Inventory.prototype.insert = function(item, amount) {

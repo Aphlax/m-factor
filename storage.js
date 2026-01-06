@@ -238,6 +238,10 @@ Storage.prototype.serializeEntity = function(index, entity) {
         ...(entity.data.itemFilter ?
           {filter: ITEMS.get(entity.data.itemFilter).prototypeName} : {}),
       } : {}),
+    ...(entity.type == TYPE.inserter && entity.data.itemFilters ? {
+        filters: entity.data.itemFilters.map((item, i) =>
+            ({item: ITEMS.get(item), index: i + 1})).filter(f => f.item),
+        filter_mode: entity.data.filterMode ? "whitelist" : "blacklist"} : {}),
     
     // Non-blueprintable.
     ...(entity.type == TYPE.inserter ||
@@ -330,6 +334,10 @@ Storage.prototype.deserializeMap = function(map) {
             outputPriority: SPLITTER_PRIORITY.get(e.output_priority),
             itemFilter: e.filter ? PROTO_TO_ITEM.get(e.filter).name : undefined,
           } : {}),
+      ...(def.type == TYPE.inserter && e.filters ? {
+          itemFilters: e.filters.reduce((arr, f) =>
+              { arr[f.index - 1] = PROTO_TO_ITEM.get(f.item).name; return arr; }, []),
+          filterMode: e.filter_mode == "whitelist"} : {}),
     };
     e.entity = gameMap.createEntity({name, x, y, direction, data});
   }

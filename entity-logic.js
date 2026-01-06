@@ -35,32 +35,55 @@ export function insert(item, amount, time) {
 };
 
 /**
- * What does this entity want to have inserted?
- * Either an array of items or -1 for anything.
+ * Returns the itemId of an allowed item,
+ * otherwise returns -1 if the ouputEntity
+ * is full or 0 if none of the items can be
+ * inserted.
  */
-export function insertWants() {
-  if (this.type == TYPE.belt ||
-      this.type == TYPE.undergroundBelt) {
-    return -1;
-  } else if (this.type == TYPE.assembler) {
-    const wants = this.outputInventory.insertWants();
-    if (wants != -1 && !wants.length) {
-      return wants;
+export function inserterAllowsItems(a, b, c) {
+  const filters = this.data.itemFilters;
+  if (filters) {
+    if (c && filters.includes(c) == !this.data.filterMode) {
+      c = 0;
     }
-    return this.inputInventory.insertWants();
-  } else if (this.energySource == ENERGY.burner) {
-    if (!this.inputInventory) {
-      return this.fuelInventory.insertWants();
+    if (b && filters.includes(b) == !this.data.filterMode) {
+      b = c; c = 0;
     }
-    const wants = this.inputInventory.insertWants();
-    const fuel = this.fuelInventory.insertWants();
-    if (wants == -1 || fuel == -1 ) return -1;
-    return !fuel.length ? wants : !wants.length ? fuel :
-        [...wants, ...fuel];
-  } else if (this.inputInventory) {
-    return this.inputInventory.insertWants();
+    if (filters.includes(a) == !this.data.filterMode) {
+      a = b; b = c; c = 0;
+    }
   }
-  return [];
+  if (!a) return 0;
+  const [outputEntity] = this.outputEntities;
+  if (outputEntity.type == TYPE.belt ||
+      outputEntity.type == TYPE.undergroundBelt ||
+      outputEntity.type == TYPE.splitter) {
+    return a;
+  } else if (outputEntity.type == TYPE.assembler) {
+    const out = outputEntity.outputInventory;
+    if (!out.filters) return 0;
+    let full = true;
+    for (let i = 0; i < out.filters.length; i++) {
+      if (!out.items[i] ||
+          out.amounts[i] < out.filters[i].amount * 2) {
+        full = false;
+      }
+    }
+    if (full) return -1;
+    return outputEntity.inputInventory.allowsItems(a, b, c);
+  } else if (outputEntity.inputInventory &&
+      outputEntity.energySource == ENERGY.burner) {
+    const input = outputEntity.inputInventory.allowsItems(a, b, c);
+    if (input > 0) return input;
+    const fuel = outputEntity.fuelInventory.allowsItems(a, b, c);
+    if (fuel > 0) return fuel;
+    return input && fuel ? -1 : 0;
+  } else if (outputEntity.energySource == ENERGY.burner) {
+    return outputEntity.fuelInventory.allowsItems(a, b, c);
+  } else if (outputEntity.inputInventory) {
+    return outputEntity.inputInventory.allowsItems(a, b, c);
+  }
+  return 0;
 }
 
 export function extract(item, amount, time) {
@@ -118,16 +141,16 @@ export function beltInsert(item, time, origin, positionForBelt) {
  * returns a negative item id if extracted.
  * returns a positive wait time in ms if no item.
  */
-export function beltExtract(items, time, origin, positionForBelt) {
+export function beltExtract(inserter, time, positionForBelt) {
   let lane;
   if (this.type != TYPE.splitter) {
     lane = this.data.lane;
-  } else if (this.direction&0x1 ? (origin.y <= this.y) == (this.direction == 1) : (origin.x <= this.x) == (this.direction == 0)) {
+  } else if (this.direction&0x1 ? (inserter.y <= this.y) == (this.direction == 1) : (inserter.x <= this.x) == (this.direction == 0)) {
     lane = this.data.leftOutLane;
   } else {
     lane = this.data.rightOutLane;
   }
-  const waitOrItem = lane.extractItem(items, this, time, positionForBelt);
+  const waitOrItem = lane.extractItem(inserter, this, time, positionForBelt);
   if (waitOrItem < 0) {
     for (let inputEntity of this.inputEntities) {
       if (inputEntity.state == STATE.itemReady) {

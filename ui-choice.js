@@ -6,6 +6,7 @@ import {SPRITES, S} from './sprite-pool.js';
 const CHOICE = {
   assemblerRecipe: 1,
   splitterItemFilter: 2,
+  inserterItemFilter: 3,
 };
 
 function UiChoice(parent, x, y) {
@@ -15,14 +16,16 @@ function UiChoice(parent, x, y) {
   
   this.mode = 0;
   this.entity = undefined;
+  this.data = undefined;
   this.choices = [];
   this.width = 10000;
   
   this.pressedIndex = -1;
 }
 
-UiChoice.prototype.setChoice = function(choice, entity) {
+UiChoice.prototype.openChoice = function(choice, entity, data) {
   this.mode = choice;
+  this.data = data;
   if (entity.name != this.entity?.name) {
     let i = 0;
     if (choice == CHOICE.assemblerRecipe) {
@@ -39,7 +42,8 @@ UiChoice.prototype.setChoice = function(choice, entity) {
           i++;
         }
       }
-    } else if (choice == CHOICE.splitterItemFilter) {
+    } else if (choice == CHOICE.splitterItemFilter ||
+        choice == CHOICE.inserterItemFilter) {
       if (!this.choices[0]) this.choices[0] = {};
       this.choices[0].sprite = SPRITES.get(S.crossIcon);
       this.choices[0].value = undefined;
@@ -58,6 +62,11 @@ UiChoice.prototype.setChoice = function(choice, entity) {
     this.choices.length = i;
   }
   this.entity = entity;
+  
+  this.parent.xTarget = -this.parent.canvasWidth;
+  this.parent.yTarget = Math.max(150, this.parent.canvasHeight - 44 -
+        46 * Math.ceil(this.choices.length / 8));
+  this.parent.animationSpeed = (this.parent.yTarget - this.parent.y) / 100;
   return this;
 };
 
@@ -130,25 +139,45 @@ UiChoice.prototype.touchEnd = function(e) {
   
   if (this.pressedIndex == -1) return;
   
-  if (this.mode == CHOICE.assemblerRecipe) {
-    this.entity.setRecipe(
-        this.choices[this.pressedIndex].value,
-        this.parent.ui.game.playTime);
-    // This extends the window to default height.
-    this.parent.yTarget = this.parent.canvasHeight;
-    this.parent.set(this.entity);
-    this.parent.x = -this.parent.canvasWidth;
-  } else if (this.mode == CHOICE.splitterItemFilter) {
-    this.entity.data.itemFilter = 
-        this.choices[this.pressedIndex].value;
-    if (!this.entity.data.outputPriority) {
-      this.entity.data.outputPriority = -1;
+  actions: {
+    if (this.mode == CHOICE.assemblerRecipe) {
+      this.entity.setRecipe(
+          this.choices[this.pressedIndex].value,
+          this.parent.ui.game.playTime);
+    } else if (this.mode == CHOICE.splitterItemFilter) {
+      this.entity.data.itemFilter = 
+          this.choices[this.pressedIndex].value;
+      if (this.entity.data.itemFilter &&
+          !this.entity.data.outputPriority) {
+        this.entity.data.outputPriority = -1;
+      }
+    } else if (this.mode == CHOICE.inserterItemFilter) {
+      const sel = this.choices[this.pressedIndex].value;
+      const filters = this.entity.data.itemFilters;
+      if (!sel) {
+        if (!filters) break actions;
+        this.entity.data.itemFilters[this.data] = undefined;
+        for (let i = 0; i < 5; i++) {
+          if (filters[i]) break actions;
+        }
+        this.entity.data.itemFilters = undefined;
+        break actions;
+      }
+      if (!filters) {
+        this.entity.data.itemFilters = [];
+      } else {
+        for (let i = 0; i < 5; i++) {
+          if (filters[i] == sel) break actions;
+        }
+      }
+      this.entity.data.itemFilters[this.data] = sel;
     }
-    // This extends the window to default height.
-    this.parent.yTarget = this.parent.canvasHeight;
-    this.parent.set(this.entity);
-    this.parent.x = -this.parent.canvasWidth;
   }
+  
+  // This extends the window to default height.
+  this.parent.yTarget = this.parent.canvasHeight;
+  this.parent.set(this.entity);
+  this.parent.x = -this.parent.canvasWidth;
   
   this.pressedIndex = -1;
 };

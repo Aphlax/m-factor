@@ -100,6 +100,10 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.energySource = def.energySource;
     this.energyDrain = def.energyDrain;
     this.energyConsumption = def.energyConsumption;
+    if (data?.itemFilters) {
+      this.data.itemFilters = data.itemFilters;
+      this.data.filterMode = data.filterMode;
+    }
   } else if (this.type == TYPE.mine) {
     this.state = STATE.noEnergy;
     this.taskStart = time;
@@ -303,17 +307,16 @@ Entity.prototype.update = function(gameMap, time) {
         const [outputEntity] = this.outputEntities;
         let inserterItem = undefined;
         
-        const wants = outputEntity.insertWants();
-        if (wants != -1 && !wants.length) {
-          state = STATE.outputFull;
-          break inserter;
-        }
         if (inputEntity.type == TYPE.belt ||
             inputEntity.type == TYPE.undergroundBelt ||
             inputEntity.type == TYPE.splitter) {
           const positionForBelt = this.direction * 3 + 1;
           const waitOrItem = inputEntity.beltExtract(
-              wants, this.nextUpdate, this, positionForBelt);
+              this, this.nextUpdate, positionForBelt);
+          if (waitOrItem == NEVER) {
+            state = STATE.outputFull;
+            break inserter;
+          }
           if (waitOrItem >= 0) {
             state = STATE.missingItem;
             nextUpdate = this.nextUpdate + waitOrItem;
@@ -321,14 +324,25 @@ Entity.prototype.update = function(gameMap, time) {
           }
           inserterItem = -waitOrItem;
         } else {
-          for (let i = 0; i < inputEntity.outputInventory.items.length; i++) {
-            const item = inputEntity.outputInventory.items[i];
-            if ((i && item == inputEntity.outputInventory.items[i - 1]) ||
-                (wants != -1 && !wants.includes(item))) {
-              continue;
+          const items = inputEntity.outputInventory.items;
+          for (let i = 0; i < items.length; i++) {
+            let a = 0, b = 0, c = 0;
+            for (; !c && i < items.length; i++) {
+              const item = items[i];
+              if (item == a || item == b || item == c)
+                continue;
+              if (!a) { a = item; continue; }
+              if (!b) { b = item; continue; }
+              if (!c) { c = item; continue; }
             }
-            if (inputEntity.extract(item, 1, this.nextUpdate)) {
-              inserterItem = item;
+            while (i + 1 < items.length && c && c == items[i + 1]) i++;
+            const res = this.inserterAllowsItems(a, b, c);
+            if (res == -1) {
+              state = STATE.outputFull;
+              break inserter;
+            }
+            if (res && inputEntity.extract(res, 1, this.nextUpdate)) {
+              inserterItem = res;
               break;
             }
           }

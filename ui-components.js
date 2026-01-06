@@ -195,7 +195,7 @@ UiFluidIndicator.prototype.draw = function(ctx, time) {
   window.numberImageDraws++;
 };
 
-function UiSplitterPriority(parent, x, y, label) {
+function UiSplitterPriority(parent, x, y) {
   this.parent = parent;
   this.x = x;
   this.y = y;
@@ -301,12 +301,8 @@ UiSplitterPriority.prototype.touchMove = function(e) {
 UiSplitterPriority.prototype.touchEnd = function(e) {
   if (!this.pressed) return;
   if (this.pressed == 7) {
-    this.parent.entityUi.filterChoice.setChoice(
+    this.parent.entityUi.filterChoice.openChoice(
         CHOICE.splitterItemFilter, this.entity);
-    this.parent.xTarget = -this.parent.canvasWidth;
-    this.parent.yTarget = Math.max(150, this.parent.canvasHeight - 44 -
-          46 * Math.ceil(this.parent.entityUi.filterChoice.choices.length / 8));
-    this.parent.animationSpeed = (this.parent.yTarget - this.parent.y) / 100;
     this.pressed = 0;
     return;
   } else if (this.pressed <= 3) {
@@ -321,4 +317,108 @@ UiSplitterPriority.prototype.touchEnd = function(e) {
   this.pressed = 0;
 }
 
-export {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority};
+function UiInserterFilters(parent, x, y) {
+  this.parent = parent;
+  this.x = x;
+  this.y = y;
+  this.entity = undefined;
+  this.pressed = 0;
+}
+
+UiInserterFilters.prototype.set = function(entity) {
+  this.entity = entity;
+};
+
+UiInserterFilters.prototype.draw = function(ctx, time) {
+  if (!this.entity) return;
+  const x = Math.floor(this.parent.x + this.x),
+        y = Math.floor(this.parent.y + this.y);
+  const filters = this.entity.data.itemFilters;
+  const mode = this.entity.data.filterMode;
+  
+  ctx.fillStyle = COLOR.background3;
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = COLOR.border2;
+  ctx.fillRect(x, y, 126, 40);
+  ctx.strokeRect(x, y, 126, 40);
+  for (let i = 0; i < 5; i++) {
+    ctx.fillRect(x + 130 + i * 44, y, 40, 40);
+    ctx.strokeRect(x + 130 + i * 44, y, 40, 40);
+  }
+  
+  if (filters) {
+    ctx.fillStyle = COLOR.buttonBackground;
+    ctx.strokeStyle = COLOR.buttonBorder;
+    ctx.fillRect(x + 2 + (mode ? 0 : 1) * 62, y + 2, 60, 36);
+    ctx.strokeRect(x + 2 + (mode ? 0 : 1) * 62, y + 2, 60, 36);
+  }
+  
+  ctx.fillStyle = COLOR.buttonBackgroundPressed;
+  if (this.pressed && this.pressed <= 2) {
+    ctx.fillRect(x + 2 + (this.pressed - 1) * 62, y + 2, 60, 36);
+  } else if (this.pressed) {
+    ctx.fillRect(x + 131 + (this.pressed - 3) * 44, y + 1, 38, 38);
+  }
+  
+  ctx.fillStyle = COLOR.primary;
+  ctx.font = "16px monospace";
+  ctx.textBaseline = "middle";
+  ctx.fillText("ALLOW", x + 6, y + 22);
+  ctx.fillText("BLOCK", x + 71, y + 22);
+  window.numberOtherDraws += 19;
+  
+  if (filters) {
+    for (let i = 0; i < 5; i++) {
+      if (!filters[i]) continue;
+      const item = ITEMS.get(filters[i]);
+      const sprite = item && SPRITES.get(item.sprite);
+      ctx.drawImage(sprite.image,
+          sprite.x, sprite.y,
+          sprite.width, sprite.height,
+          x + 130 + i * 44 + 4, y + 5, 32, 32);
+      window.numberImageDraws++;
+    }
+  }
+}
+
+UiInserterFilters.prototype.touchStart = function(e) {
+  if (!this.entity) return;
+  const x = Math.floor(this.parent.x + this.x),
+        y = Math.floor(this.parent.y + this.y);
+  const {clientX: px, clientY: py} = e.touches[0];
+ 
+  if (px < x || px > x + 347 ||
+      py < y || py > y + 40) return;
+  if (px < x + 126) {
+    this.pressed = 1 + Math.floor((px - x) / 63);
+  } else {
+    this.pressed = 3 + Math.floor((px - x - 128) / 44);
+  }
+};
+
+UiInserterFilters.prototype.touchMove = function(e) {
+  if (this.pressed) {
+    this.pressed = 0;
+  }
+};
+
+UiInserterFilters.prototype.touchEnd = function(e) {
+  if (!this.pressed) return;
+  if (this.pressed <= 2) {
+    if (!this.entity.data.itemFilters) {
+      this.parent.entityUi.filterChoice.openChoice(
+          CHOICE.inserterItemFilter, this.entity, 0);
+    }
+    this.entity.data.filterMode = !(this.pressed - 1);
+    this.pressed = 0;
+    return;
+  }
+  if (this.entity.data.filterMode === undefined) {
+    this.entity.data.filterMode = true;
+  }
+  this.parent.entityUi.filterChoice.openChoice(
+      CHOICE.inserterItemFilter, this.entity, this.pressed - 3);
+  this.pressed = 0;
+}
+
+export {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters};

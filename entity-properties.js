@@ -42,7 +42,7 @@ export const NAME = {
 export const NEVER = Math.floor(Number.MAX_SAFE_INTEGER / 1000);
 
 /** Maximal width/length of any entity. */
-export const MAX_SIZE = 3;
+export const MAX_SIZE = 5;
 
 /** Maximal length of inserter arm. */
 export const MAX_LOGISTIC_CONNECTION = 2;

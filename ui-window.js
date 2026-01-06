@@ -1,5 +1,5 @@
 import {UiInventory, UiFluidInventory} from './ui-inventory.js';
-import {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority} from './ui-components.js';
+import {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters} from './ui-components.js';
 import {UiButton, BUTTON} from './ui-button.js';
 import {UiChoice, CHOICE} from './ui-choice.js';
 import {COLOR} from './ui-properties.js';
@@ -223,7 +223,6 @@ UiWindow.prototype.initialize = function() {
     inventory: new UiInventory(this, 10, 40),
   });
   
-  this.entityUis.set(TYPE.inserter, {});
   this.entityUis.set(TYPE.offshorePump, {});
   this.entityUis.set(TYPE.boiler, {});
   this.entityUis.set(TYPE.electricPole, {});
@@ -241,6 +240,12 @@ UiWindow.prototype.initialize = function() {
   
   this.entityUis.set(TYPE.splitter, {
     priority: new UiSplitterPriority(this, 10, 40),
+    filterChoice: new UiChoice(this, this.canvasWidth + 10, 40)
+        .setWidth(this.canvasWidth - 20),
+  });
+  
+  this.entityUis.set(TYPE.inserter, {
+    filters: new UiInserterFilters(this, 10, 40),
     filterChoice: new UiChoice(this, this.canvasWidth + 10, 40)
         .setWidth(this.canvasWidth - 20),
   });
@@ -326,7 +331,7 @@ UiWindow.prototype.set = function(selectedEntity) {
         46 * (selectedEntity.inputInventory.capacity +
         selectedEntity.outputInventory.capacity);
     if (!selectedEntity.data.recipe) {
-      this.entityUi.recipeChoice.setChoice(
+      this.entityUi.recipeChoice.openChoice(
           CHOICE.assemblerRecipe, selectedEntity);
       this.x = this.xTarget = -this.canvasWidth;
       this.yTarget = Math.max(MIN_Y, this.canvasHeight - 50 -
@@ -352,6 +357,8 @@ UiWindow.prototype.set = function(selectedEntity) {
         BUTTON.connectUnderground : BUTTON.none);
   } else if (selectedEntity.type == TYPE.splitter) {
     this.entityUi.priority.set(selectedEntity);
+  } else if (selectedEntity.type == TYPE.inserter) {
+    this.entityUi.filters.set(selectedEntity);
   }
   
   this.showDefaultUi = !!selectedEntity.type;
