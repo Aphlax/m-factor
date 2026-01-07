@@ -6,11 +6,7 @@ import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
 import {FluidNetwork} from './fluid-network.js';
 import {ElectricNetwork} from './electric-network.js';
-
-/* Optimizations
-- store expired particles per chunk.
-- store expired entities by chunk.
-*/
+import {SETTINGS} from './storage.js';
 
 export const MAP = {
   nauvis: 0,
@@ -168,6 +164,7 @@ GameMap.prototype.draw = function(ctx, time) {
       for (let entity of chunk.entities) {
         if (entity.type != TYPE.belt) {
           entity.draw(ctx, this.view, time);
+          if (!SETTINGS.altMode) continue;
           if ((entity.type == TYPE.furnace ||
               entity.type == TYPE.assembler) &&
               entity.data.recipe) {
@@ -308,7 +305,7 @@ GameMap.prototype.getEntitiesIn = function(x, y, width, height, entityType) {
   const cx2 = Math.floor((x + width) / SIZE);
   const cy1 = Math.floor((y - MAX_SIZE) / SIZE);
   const cy2 = Math.floor((y + height) / SIZE);
-  const result = [];
+  const result = []; // Oh no.
   for (let i = cx1; i <= cx2; i++) {
     if (!this.chunks.has(i)) continue;
     const chunks = this.chunks.get(i);
@@ -317,8 +314,8 @@ GameMap.prototype.getEntitiesIn = function(x, y, width, height, entityType) {
       for (let entity of chunks.get(j).entities) {
         if (entityType && entity.type != entityType)
           continue;
-        if (x + width < entity.x || x > entity.x + entity.width ||
-            y + height < entity.y || y > entity.y + entity.height)
+        if (x + width <= entity.x || x >= entity.x + entity.width ||
+            y + height <= entity.y || y >= entity.y + entity.height)
           continue;
         result.push(entity);
       }
@@ -328,11 +325,18 @@ GameMap.prototype.getEntitiesIn = function(x, y, width, height, entityType) {
 };
 
 GameMap.prototype.connectEntity = function(entity, time) {
-  const isElectric = entity.energySource == ENERGY.electric ||
-    entity.type == TYPE.electricPole;
+  const isPole = entity.type == TYPE.electricPole;
+  const isElectric = isPole ||
+      entity.energySource == ENERGY.electric ||
+      entity.type == TYPE.generator;
+  const isUnderground = entity.type == TYPE.undergroundBelt ||
+      entity.type == TYPE.pipeToGround;
   const l = MAX_LOGISTIC_CONNECTION;
-  const r = Math.max(isElectric ? MAX_ELECTRIC_SUPPLY : 0,
-      l, MAX_UNDERGROUND_CONNECTION);
+  const r = Math.max(l,
+      isElectric ? MAX_ELECTRIC_SUPPLY : 0,
+      isUnderground ? entity.data.maxUndergroundGap + 1 : 0,
+      isPole ? entity.data.wireReach : 0);
+  const poleConnections = isPole ? [] : undefined;
   const cx1 = Math.floor((entity.x - r - MAX_SIZE) / SIZE);
   const cx2 = Math.floor((entity.x + entity.width + r - 1) / SIZE);
   const cy1 = Math.floor((entity.y - r - MAX_SIZE) / SIZE);
@@ -361,6 +365,9 @@ GameMap.prototype.connectEntity = function(entity, time) {
           other.electricConnections.push(entity);
           continue;
         }
+        if (isPole && other.type == TYPE.electricPole) {
+          poleConnections.push(other);
+        }
         if (entity.type == TYPE.undergroundBelt &&
             other.type == TYPE.undergroundBelt &&
             (entity.x == other.x || entity.y == other.y)) {
@@ -371,7 +378,7 @@ GameMap.prototype.connectEntity = function(entity, time) {
             (entity.x == other.x || entity.y == other.y)) {
           entity.connectPipeToGround(other, this.fluidNetwork);
         }
-        // From here on only check for local (short) connections.
+        // From here on only check for logistic (short) connections.
         if (!(entity.x + entity.width > other.x && entity.x < other.x + other.width &&
             entity.y + entity.height + l > other.y && entity.y - l < other.y + other.height) &&
             !(entity.x + entity.width + l > other.x && entity.x - l < other.x + other.width &&
@@ -449,8 +456,8 @@ GameMap.prototype.connectEntity = function(entity, time) {
       return;
     }
   }
-  if (entity.type == TYPE.electricPole) {
-    this.electricNetwork.addPole(entity, time);
+  if (isPole) {
+    this.electricNetwork.addPole(entity, poleConnections, time);
     for (let other of entity.electricConnections) {
       if (other.energySource == ENERGY.electric) {
         this.electricNetwork.modifyConsumer(other, time);

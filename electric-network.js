@@ -1,18 +1,16 @@
 import {Grid} from './electric-network-grid.js';
 import {TYPE, STATE, NEVER, MIN_SATISFACTION} from './entity-properties.js';
+import {SETTINGS} from './storage.js';
 
 function ElectricNetwork(gameMap) {
   this.gameMap = gameMap;
   this.grids = [];
 }
 
-ElectricNetwork.prototype.addPole = function(entity, time) {
+ElectricNetwork.prototype.addPole = function(entity, poleConnections, time) {
   const reach = entity.data.wireReach;
-  const area = [entity.x - reach, entity.y - reach, reach * 2, reach * 2];
-  // TODO: poles should be connected in gameMap.conmectEntity.
-  const poles = this.gameMap.getEntitiesIn(...area, TYPE.electricPole);
   const distList = [];
-  for (let pole of poles) {
+  for (let pole of poleConnections) {
     if (pole == entity) continue;
     const minReach = reach <= pole.data.wireReach ?
         reach : pole.data.wireReach;
@@ -24,7 +22,7 @@ ElectricNetwork.prototype.addPole = function(entity, time) {
     if (dist > minReach * minReach)
       continue;
     let i = 0;
-    while (dist > distList[i * 2]) i++;
+    while (i * 2 < distList.length && dist > distList[i * 2]) i++;
     distList.splice(i* 2, 0, dist, pole);
   }
   let connected = false;
@@ -219,7 +217,7 @@ ElectricNetwork.prototype.update = function(time, dt) {
 };
 
 ElectricNetwork.prototype.draw = function(ctx, view) {
-  return;
+  if (!SETTINGS.debugPoles) return;
   for (let i = 0; i < this.grids.length; i++) {
     this.grids[i].draw(ctx, view);
     ctx.fillStyle = this.grids[i].color;

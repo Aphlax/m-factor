@@ -334,9 +334,6 @@ UiWindow.prototype.set = function(selectedEntity) {
       this.entityUi.recipeChoice.openChoice(
           CHOICE.assemblerRecipe, selectedEntity);
       this.x = this.xTarget = -this.canvasWidth;
-      this.yTarget = Math.max(MIN_Y, this.canvasHeight - 50 -
-          46 * Math.ceil(this.entityUi.recipeChoice.choices.length / 8));
-      this.animationSpeed = (this.yTarget - this.y) / 100;
     }
   } else if (selectedEntity.type == TYPE.lab) {
     this.entityUi.inventory.set(selectedEntity.inputInventory);
@@ -344,7 +341,8 @@ UiWindow.prototype.set = function(selectedEntity) {
   } else if (selectedEntity.type == TYPE.pipe) {
     this.entityUi.fluidIndicator.set(selectedEntity);
   } else if (selectedEntity.type == TYPE.generator) {
-    this.entityUi.input.set(selectedEntity.inputFluidTank);
+    this.entityUi.input.set(this.ui.game.settings.debugPipes ?
+        selectedEntity.inputFluidTank : undefined);
   } else if (selectedEntity.type == TYPE.undergroundBelt) {
     this.entityUi.connectUnderground.setButton(
         (selectedEntity.data.undergroundUp ?

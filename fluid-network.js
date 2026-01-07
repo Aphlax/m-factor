@@ -1,5 +1,6 @@
 import {Channel} from './fluid-network-channel.js';
 import {TYPE} from './entity-properties.js';
+import {SETTINGS} from './storage.js';
 
 function FluidNetwork() {
   this.channels = [];
@@ -98,7 +99,7 @@ FluidNetwork.prototype.update = function(time, dt) {
 };
 
 FluidNetwork.prototype.draw = function(ctx, view) {
-  return;
+  if (!SETTINGS.debugPipes) return;
   for (let channel of this.channels) {
     channel.draw(ctx, view);
   }

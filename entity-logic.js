@@ -118,10 +118,16 @@ export function beltInsert(item, time, origin, positionForBelt) {
   let lane;
   if (this.type != TYPE.splitter) {
     lane = this.data.lane;
-  } else if (this.direction&0x1 ? (origin.y <= this.y) == (this.direction == 1) : (origin.x <= this.x) == (this.direction == 0)) {
-    lane = this.data.leftInLane;
   } else {
-    lane = this.data.rightInLane;
+    const dir = this.direction,
+        ic = dir&0x1 ? origin.y : origin.x,
+        tc = dir&0x1 ? this.y : this.x;
+    const swap = origin.type == TYPE.inserter &&
+        origin.data.inserterReach == 2 &&
+        (ic == tc - 1 || ic == tc + 2);
+    lane = swap != ((ic <= tc) == (dir < 2)) ?
+        this.data.leftInLane :
+        this.data.rightInLane;
   }
   const wait = lane.insertItem(item, this, time, positionForBelt);
   if (!wait) {
@@ -145,10 +151,15 @@ export function beltExtract(inserter, time, positionForBelt) {
   let lane;
   if (this.type != TYPE.splitter) {
     lane = this.data.lane;
-  } else if (this.direction&0x1 ? (inserter.y <= this.y) == (this.direction == 1) : (inserter.x <= this.x) == (this.direction == 0)) {
-    lane = this.data.leftOutLane;
   } else {
-    lane = this.data.rightOutLane;
+    const dir = this.direction,
+        ic = dir&0x1 ? inserter.y : inserter.x,
+        tc = dir&0x1 ? this.y : this.x;
+    const swap = inserter.data.inserterReach == 2 &&
+        (ic == tc - 1 || ic == tc + 2);
+    lane = swap != ((ic <= tc) == (dir < 2)) ?
+        this.data.leftOutLane :
+        this.data.rightOutLane;
   }
   const waitOrItem = lane.extractItem(inserter, this, time, positionForBelt);
   if (waitOrItem < 0) {

@@ -19,6 +19,8 @@ export const COLOR = {
   buildSingleBorder: "#00FF80B0",
   buildMultiBorder: "#FF4080B0",
   longTouchIndicator: "#EFEFFF",
+  scrim: "#00000060",
   buildPlanner: "#00FF88",
   buildPlannerInvalid: "#FF0000",
+  buildPlannerHighlight: "#FFAA00",
 };

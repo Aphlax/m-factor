@@ -1,7 +1,7 @@
 import {TYPE, DIRECTION, DIRECTIONS} from './entity-properties.js';
 import {COLOR} from './ui-properties.js';
 import {S} from './sprite-pool.js';
-import {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, InserterDrag, PowerPoleDrag, OffshorePump} from './game-map-input-modes.js';
+import {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, InserterDrag, PowerPoleDrag, GridDrag, OffshorePump} from './game-map-input-modes.js';
 
 const MIN_SCALE = 16;
 const MAX_SCALE = 32;
@@ -22,12 +22,15 @@ function GameMapInput(ui) {
   this.undergroundExit = new UndergroundExit(ui);
   this.inserterDrag = new InserterDrag(ui);
   this.powerPoleDrag = new PowerPoleDrag(ui);
+  this.gridDrag = new GridDrag(ui);
   this.offshorePump = new OffshorePump(ui);
 }
 
 GameMapInput.prototype.set = function(gameMap) {
   this.gameMap = gameMap;
   this.view = gameMap.view;
+  this.current = undefined;
+  
   this.multiBuild.set(gameMap);
   this.snakeBelt.set(gameMap);
   this.beltDrag.set(gameMap);
@@ -35,6 +38,7 @@ GameMapInput.prototype.set = function(gameMap) {
   this.undergroundExit.set(gameMap);
   this.offshorePump.set(gameMap);
   this.powerPoleDrag.set(gameMap);
+  this.gridDrag.set(gameMap);
   this.inserterDrag.set(gameMap);
 };
 
@@ -59,7 +63,8 @@ GameMapInput.prototype.touchMove = function(e, longTouch) {
   const isClickMode = !this.current ||
       this.current == this.undergroundExit ||
       this.current == this.offshorePump ||
-      (this.current == this.snakeBelt && !this.snakeBelt.active)
+      (this.current == this.snakeBelt && !this.snakeBelt.active) ||
+      (this.current == this.gridDrag && !this.gridDrag.active);
   if (isClickMode && !longTouch) {
     i = 0;
   } else if (!isClickMode) {
@@ -120,6 +125,8 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
       } else if (entity?.type == TYPE.belt &&
           !entity.data.beltOutput) {
         this.current = this.snakeBelt.initialize(entity);
+      } else if (entity?.type == TYPE.electricPole) {
+        this.current = this.gridDrag.initialize(entity);
       }
     } else {
       this.ui.window.set();

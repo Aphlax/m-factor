@@ -224,6 +224,7 @@ export const S = {
   burnerInserterIcon: 16500 + 24,
   fastInserterIcon: 16500 + 25,
   longHandedInserterIcon: 16500 + 26,
+  gridDragIcon: 16500 + 27,
   
   smoke: 17000,
   
@@ -921,6 +922,10 @@ export const SPRITES = [
   {
     path: "graphics/icons/undergroundConnect.png",
     sprites: sprites(S.undergroundConnectIcon, 32, 32, 1, 1),
+  },
+  {
+    path: "graphics/icons/gridDrag.png",
+    sprites: sprites(S.gridDragIcon, 32, 32, 1, 1),
   },
 ];
 

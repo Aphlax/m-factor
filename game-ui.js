@@ -43,6 +43,7 @@ function GameUi(game, canvas) {
 
 GameUi.prototype.setMap = function(gameMap) {
   this.gameMapInput.set(gameMap);
+  this.buildMenu.reset();
   this.window.set();
   this.window.y = this.window.canvasHeight;
 };

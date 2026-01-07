@@ -1,6 +1,7 @@
 import {TYPE, NEVER} from './entity-properties.js';
 import {SPRITES} from './sprite-pool.js';
 import {ITEMS} from './item-definitions.js';
+import {SETTINGS} from './storage.js';
 
 const FLOW = {
   minus: -1, plus: 1
@@ -491,7 +492,7 @@ Lane.prototype.draw = function(ctx, view) {
     }
   }
   
-  return;
+  if (!SETTINGS.debugBelts) return;
   // Debug.
   ctx.beginPath();
   ctx.moveTo(

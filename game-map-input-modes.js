@@ -1,4 +1,4 @@
-import {TYPE, DIRECTION, DIRECTIONS, COLOR as ENTITY_COLOR} from './entity-properties.js';
+import {TYPE, DIRECTION, DIRECTIONS, COLOR as ENTITY_COLOR, ENERGY} from './entity-properties.js';
 import {S, SPRITES} from './sprite-pool.js';
 import {COLOR} from './ui-properties.js';
 
@@ -14,6 +14,7 @@ UndergroundChain.prototype.set =
 UndergroundExit.prototype.set =
 InserterDrag.prototype.set =
 PowerPoleDrag.prototype.set =
+GridDrag.prototype.set =
 OffshorePump.prototype.set = function(gameMap) {
   this.gameMap = gameMap;
   this.view = gameMap.view;
@@ -75,7 +76,7 @@ MultiBuild.prototype.draw = function(ctx) {
   ctx.strokeStyle = COLOR.buildPlanner;
   ctx.lineWidth = 1;
   const s = this.view.scale, ox = -this.view.x, oy = -this.view.y;
-  const eps = 0.08 * this.view.scale;
+  const eps = 0.08 * s;
   const {width, height} = this.entity.size ?
       this.entity.size[this.ui.rotateButton.direction] :
       this.entity;
@@ -832,10 +833,11 @@ PowerPoleDrag.prototype.draw = function(ctx) {
   ctx.lineWidth = 1;
   const s = this.view.scale, ox = -this.view.x, oy = -this.view.y;
   const eps = 0.08 * s, half = s / 2;
+  const {width, height} = this.entity;
   ctx.beginPath();
   for (let {x, y} of this.positions) {
-    ctx.rect(x * s + ox + eps, y * s + oy + eps,
-        s - 2 * eps, s - 2 * eps);
+    ctx.roundRect(x * s + ox + eps, y * s + oy + eps,
+        width * s - 2 * eps, height * s - 2 * eps, 2 * eps);
   }
   ctx.stroke();
   ctx.font = s > 22 ? "14px monospace" : "10px monospace";
@@ -846,11 +848,184 @@ PowerPoleDrag.prototype.draw = function(ctx) {
   for (let i = 0; i < nr; i++) {
     const position = this.positions[(i * 8 - (i ? 1 : 0))];
     ctx.fillText(this.positions.length,
-        position.x * s + ox + half,
-        position.y * s + oy + half);
+        position.x * s + ox + width * half,
+        position.y * s + oy + height * half);
   }
   ctx.textAlign = "start";
 };
+
+function GridDrag(ui) {
+  this.ui = ui;
+  this.icon = undefined;
+}
+const GRID_DELTA = 26; // Pixels for drag grid step.
+const GRID_START = {x: 25, y: 75};
+
+GridDrag.prototype.initialize = function(entity) {
+  this.entity = entity;
+  this.active = false;
+  this.points = [new Point(entity.x, entity.y, entity.direction)];
+  this.lastX = 0;
+  this.lastY = 0;
+  if (!this.icon) {
+    this.icon = SPRITES.get(S.gridDragIcon);
+  }
+  return this;
+};
+
+GridDrag.prototype.touchStart = function(sx, sy, firstTouch) {
+  const {x, y} = this.points[0];
+  const cx = (x + 1) * this.view.scale - this.view.x + GRID_START.x,
+      cy = (y + 1) * this.view.scale - this.view.y + GRID_START.y;
+  if (firstTouch && !this.active &&
+      Math.sqrt((sx - cx) ** 2 + (sy - cy) ** 2) < 22) {
+    this.active = true;
+    this.lastX = sx;
+    this.lastY = sy;
+  }
+};
+
+GridDrag.prototype.touchMove = function(sx, sy) {
+  if (!this.active) return;
+  const pdx = sx - this.lastX,
+      pdy = sy - this.lastY;
+  if (Math.abs(pdx) < GRID_DELTA &&
+      Math.abs(pdy) < GRID_DELTA)
+    return;
+  this.lastX = sx;
+  this.lastY = sy;
+  let dir;
+  if (Math.abs(pdx) > Math.abs(pdy)) {
+    dir = pdx > 0 ? DIRECTION.east : DIRECTION.west;
+  } else {
+    dir = pdy > 0 ? DIRECTION.south : DIRECTION.north;
+  }
+  const last = this.points[this.points.length - 1];
+  if (this.points.length > 1 &&
+      (dir + 2) % 4 == last.direction) {
+    this.points.pop();
+    return;
+  }
+  const {x, y} = last, {dx, dy} = DIRECTIONS[dir];
+  const reach = this.entity.data.wireReach;
+  const area = this.entity.data.powerSupplyArea;
+  const x2 = x + dx * reach, y2 = y + dy * reach;
+  const size = area * 2 + this.entity.width; // Assumes width == height.
+  const len = reach - size;
+  const ex = x - area + (dir&0x1 ? (dir == 1 ? size : -len) : 0),
+      ey = y - area + (dir&0x1 ? 0 : (dir == 2 ? size : -len));
+  const entities = this.gameMap.getEntitiesIn(ex, ey, dir&0x1 ? len : size, dir&0x1 ? size : len);
+  let setback = 0;
+  for (let entity of entities) {
+    if (entity.type != TYPE.generator &&
+        entity.energySource != ENERGY.electric)
+      continue;
+    if (entity.data.grid) continue;
+    if (x - area + size > entity.x && x - area < entity.x + entity.width &&
+        y - area + size > entity.y && y - area < entity.y + entity.height)
+      continue;
+    if (x2 - area + size > entity.x && x2 - area < entity.x + entity.width &&
+        y2 - area + size > entity.y && y2 - area < entity.y + entity.height)
+      continue;
+    const shift = dir == 0 ? entity.y - y2 - area :
+        (dir == 1 ? x2 - area - entity.x - entity.width :
+        (dir == 2 ? y2 - area - entity.y - entity.heigth :
+       /*dir == 3*/ entity.x - x2 - area));
+    if (shift + 1 > setback) setback = shift + 1;
+    if (setback >= len) break;
+  }
+  for (let i = 0; i < reach - setback; i++) {
+    const dist = reach - setback - i;
+    if (!this.gameMap.canPlace(x + dx * dist, y + dy * dist,
+        this.entity.width, this.entity.height))
+      continue;
+    this.points.push(new Point(x + dx * dist, y + dy * dist, dir));
+    return;
+  }
+  this.points.push(new Point(x2, y2, dir, false));
+};
+
+GridDrag.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
+  if (!lastTouch) return this;
+  if (!this.active) {
+    return !shortTouch ? this : undefined;
+  }
+  if (shortTouch) {
+    this.active = false;
+    return this;
+  }
+  const entities = [];
+  outer:
+  for (let {x, y} of this.points) {
+    if (!this.gameMap.canPlace(x, y, this.entity.width, this.entity.height))
+      continue;
+    for (let e of entities) {
+      if (e.x == x && e.y == y) continue outer;
+    }
+    entities.push(
+        {name: this.entity.name, x, y, direction: 0});
+  }
+  this.gameMap.createEntities(entities);
+};
+
+GridDrag.prototype.draw = function(ctx) {
+  const ox = -this.view.x, oy = -this.view.y;
+  const s = this.view.scale, half = s / 2, eps = 0.08 * s;
+  ctx.strokeStyle = COLOR.buildPlanner;
+  ctx.lineWidth = 1;
+  if (!this.active) {
+    const {x, y} = this.points[0];
+    ctx.beginPath();
+    ctx.roundRect(x * s + ox + eps, y * s + oy + eps, s - 2 * eps, s - 2 * eps, 2 * eps);
+    const cx = x * s + s + ox + GRID_START.x,
+        cy = y * s + s + oy + GRID_START.y, pi = Math.PI;
+    ctx.moveTo(cx + 20, cy);
+    ctx.arc(cx, cy, 20, 0, 2 * pi);
+    ctx.stroke(); ctx.beginPath();
+    ctx.arc(cx, cy, 23, -0.1 * pi, 0.1 * pi);
+    ctx.stroke(); ctx.beginPath();
+    ctx.arc(cx, cy, 23, 0.4 * pi, 0.6 * pi);
+    ctx.stroke(); ctx.beginPath();
+    ctx.arc(cx, cy, 23, 0.9 * pi, 1.1 * pi);
+    ctx.stroke(); ctx.beginPath();
+    ctx.arc(cx, cy, 23, 1.4 * pi, 1.6 * pi);
+    ctx.moveTo(x * s + s * 4 / 5 + ox, y * s + s + oy - eps);
+    ctx.lineTo(cx - 8.5, cy - 18.5);
+    ctx.stroke();
+    const icon = this.icon;
+    ctx.drawImage(icon.image,
+        icon.x, icon.y, icon.width, icon.height,
+        cx - 12, cy - 12, 24, 24);
+    return;
+  }
+  
+  const area = this.entity.data.powerSupplyArea;
+  ctx.fillStyle = ENTITY_COLOR.powerSupplyArea;
+  ctx.beginPath();
+  let lastValid = true;
+  for (let i = 0; i < this.points.length; i++) {
+    const {x, y, valid} = this.points[i];
+    ctx.fillRect((x - area) * s + ox, (y - area) * s + oy,
+        (area * 2 + this.entity.width) * s, (area * 2 + this.entity.height) * s);
+    if (valid != lastValid) {
+      lastValid = valid;
+      ctx.stroke();
+      ctx.strokeStyle = valid ?
+        COLOR.buildPlanner : COLOR.buildPlannerInvalid;
+      ctx.beginPath();
+    }
+    ctx.roundRect(x * s + ox + eps, y * s + oy + eps,
+        this.entity.width * s - 2 * eps, this.entity.height * s - 2 * eps, 2 * eps);
+  }
+  ctx.stroke();
+};
+
+function Point(x, y, direction, valid = true) {
+  this.x = x;
+  this.y = y;
+  this.direction = direction;
+  this.valid = valid;
+}
 
 function OffshorePump(ui) {
   this.ui = ui;
@@ -889,12 +1064,11 @@ OffshorePump.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
 };
 
 OffshorePump.prototype.draw = function(ctx) {
-  const s = this.view.scale;
+  const s = this.view.scale, eps = 0.08 * s;
   const vx = this.view.x;
   const vy = this.view.y;
   ctx.strokeStyle = COLOR.buildPlanner;
   ctx.lineWidth = 1;
-  const eps = 0.08 * this.view.scale;
   const xStart = Math.floor(vx / s) - 1;
   const xEnd = Math.ceil((vx + this.view.width) / s) + 1;
   const yStart = Math.floor(vy / s) - 1;
@@ -916,4 +1090,4 @@ OffshorePump.prototype.draw = function(ctx) {
   }
 };
 
-export {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, InserterDrag, PowerPoleDrag, OffshorePump};
+export {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, InserterDrag, PowerPoleDrag, GridDrag, OffshorePump};

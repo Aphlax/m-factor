@@ -60,40 +60,42 @@ import {Game} from "./game.js";
     totalDrawTime += draw;
     if (draw > drawTime) drawTime = draw;
     
-    ctx.font = "24px Arial";
-    ctx.fillStyle = "black";
-    ctx.textBaseline = "alphabetic";
-    ctx.textAlign = "end";
-    ctx.fillText(frameRate + "", canvas.width - 60, 24);
-    ctx.fillText((game.playTime / 1000).toFixed(1), canvas.width - 60, 48);
-    ctx.fillText(window.numberImageDraws + " dI", canvas.width - 60, 72);
-    ctx.fillText(window.numberOtherDraws + " dO", canvas.width - 60, 96);
-    ctx.textAlign = "start";
-    ctx.fillText((Math.round(maxUpdateTime * 10) / 10) + "/" +
-        (Math.round(maxDrawTime * 10) / 10), 40, 55);
-    if (game.debug !== undefined) {
-      ctx.fillText(game.debug, 4, 28);
+    if (game.settings?.debugInfo) {
+      ctx.font = "24px Arial";
+      ctx.fillStyle = "black";
+      ctx.textBaseline = "alphabetic";
+      ctx.textAlign = "end";
+      ctx.fillText(frameRate + "", canvas.width - 60, 24);
+      ctx.fillText((game.playTime / 1000).toFixed(1), canvas.width - 60, 48);
+      ctx.fillText(window.numberImageDraws + " dI", canvas.width - 60, 72);
+      ctx.fillText(window.numberOtherDraws + " dO", canvas.width - 60, 96);
+      ctx.textAlign = "start";
+      ctx.fillText((Math.round(maxUpdateTime * 10) / 10) + "/" +
+          (Math.round(maxDrawTime * 10) / 10), 40, 55);
+      if (game.debug !== undefined) {
+        ctx.fillText(game.debug, 4, 28);
+      }
+      
+      ctx.beginPath();
+      ctx.arc(20, 50, 15, 0, 2 * Math.PI, false);
+      ctx.fillStyle = "lightgray";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(20, 50);
+      ctx.arc(20, 50, 15, 0, 2 * Math.PI * avgUpdateTime / 11.1, false);
+      ctx.lineTo(20, 50);
+      ctx.fillStyle = "green";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(20, 50);
+      ctx.arc(20, 50, 15, 2 * Math.PI * avgUpdateTime / 11.1, 2 * Math.PI * (avgDrawTime + avgUpdateTime) / 11.1, false);
+      ctx.lineTo(20, 50);
+      ctx.fillStyle = "orange";
+      ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "black";
+      ctx.stroke();
     }
-    
-    ctx.beginPath();
-    ctx.arc(20, 50, 15, 0, 2 * Math.PI, false);
-    ctx.fillStyle = "lightgray";
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(20, 50);
-    ctx.arc(20, 50, 15, 0, 2 * Math.PI * avgUpdateTime / 11.1, false);
-    ctx.lineTo(20, 50);
-    ctx.fillStyle = "green";
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(20, 50);
-    ctx.arc(20, 50, 15, 2 * Math.PI * avgUpdateTime / 11.1, 2 * Math.PI * (avgDrawTime + avgUpdateTime) / 11.1, false);
-    ctx.lineTo(20, 50);
-    ctx.fillStyle = "orange";
-    ctx.fill();
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "black";
-    ctx.stroke();
     
     window.requestAnimationFrame(loop);
   }

@@ -2,16 +2,18 @@
 
 import {GameMap, MAP} from './game-map.js';
 import {GameUi} from './game-ui.js';
-import {GameMenu} from './game-menu.js';
-import {Storage} from './storage.js';
+import {UiPauseMenu, UiSettingsMenu} from './game-menu.js';
+import {Storage, STORAGE} from './storage.js';
 import {SPRITES} from './sprite-pool.js';
 import {scenario} from './scenario.js';
+import {GameMapConverter} from './game-map-converter.js';
 import {STATE} from './entity-properties.js';
 
 const MODE = {
   loading: 0,
   playing: 2,
-  gameMenu: 3,
+  pauseMenu: 3,
+  settingsMenu: 4,
 };
 
 function Game(canvas) {
@@ -19,23 +21,27 @@ function Game(canvas) {
   this.mode = MODE.loading;
   this.spritePool = SPRITES;
   this.spritePool.load();
-  this.ui = new GameUi(this, canvas);
-  this.gameMenu = new GameMenu(this, canvas);
   this.storage = new Storage(this);
+  this.converter = new GameMapConverter();
+  this.storage.initialize();
+  this.settings = this.storage.loadSettings();
+  
+  this.ui = new GameUi(this, canvas);
+  this.pauseMenu = new UiPauseMenu(this, canvas);
+  this.settingsMenu = new UiSettingsMenu(this, canvas);
   this.gameMap = undefined;
   
   this.setupScenario = true;
   this.lastUpdate = 0;
   this.playTime = 0;
   
-  this.storage.initialize();
-  this.loadMap(0, new GameMap(this.seed, MAP.nauvis)
+  this.loadMap(new GameMap(this.seed, MAP.nauvis)
       .setViewFromCanvas(canvas));
   this.mode = MODE.loading;
 }
 
-Game.prototype.loadMap = function(time, gameMap) {
-  this.playTime = time;
+Game.prototype.loadMap = function(gameMap) {
+  this.playTime = gameMap.playTime;
   this.gameMap = gameMap;
   this.gameMap.initialize();
   this.ui.setMap(gameMap);
@@ -83,52 +89,74 @@ Game.prototype.draw = function(ctx, time) {
     this.ui.draw(ctx, this.playTime);
   } else if (this.mode == MODE.loading) {
     this.spritePool.draw(ctx, time);
-  } else if (this.mode == MODE.gameMenu) {
+    this.storage.draw(ctx, time);
+  } else if (this.mode == MODE.pauseMenu) {
     this.gameMap.drawGround(ctx, this.playTime);
     this.gameMap.draw(ctx, this.playTime);
     this.ui.window.draw(ctx, this.playTime);
-    this.gameMenu.draw(ctx);
+    this.pauseMenu.draw(ctx);
+    this.storage.draw(ctx, time);
+  } else if (this.mode == MODE.settingsMenu) {
+    this.settingsMenu.draw(ctx);
     this.storage.draw(ctx, time);
   }
 };
 
 Game.prototype.openMenu = function() {
-  this.mode = MODE.gameMenu;
+  this.mode = MODE.pauseMenu;
 };
 
 Game.prototype.continuePlay = function() {
   this.mode = MODE.playing;
 };
 
+Game.prototype.openSettings = function() {
+  this.mode = MODE.settingsMenu;
+  this.settingsMenu.initialize();
+};
+
 Game.prototype.saveGame = function() {
-  this.storage.save("", this.playTime, this.gameMap);
+  const save = {
+    name: "",
+    map: this.converter.serializeMap(this.gameMap),
+  };
+  this.storage.save(STORAGE.saves, save);
 };
 
 Game.prototype.loadGame = function() {
-  this.storage.load("");
+  this.storage.load(STORAGE.saves, "").then(save => {
+    const gameMap = this.converter.deserializeMap(save.map);
+    this.loadMap(gameMap);
+  });
 };
 
 Game.prototype.touchStart = function(e) {
   if (this.mode == MODE.playing) {
     this.ui.touchStart(e);
-  } else if (this.mode == MODE.gameMenu) {
-    this.gameMenu.touchStart(e);
+  } else if (this.mode == MODE.pauseMenu) {
+    this.pauseMenu.touchStart(e);
+  } else if (this.mode == MODE.settingsMenu) {
+    this.settingsMenu.touchStart(e);
   }
 };
 
 Game.prototype.touchMove = function(e) {
   if (this.mode == MODE.playing) {
     this.ui.touchMove(e);
-  } else if (this.mode == MODE.gameMenu) {
-    this.gameMenu.touchMove(e);
+  } else if (this.mode == MODE.pauseMenu) {
+    this.pauseMenu.touchMove(e);
+  } else if (this.mode == MODE.settingsMenu) {
+    this.settingsMenu.touchMove(e);
   }
 };
 
 Game.prototype.touchEnd = function(e) {
   if (this.mode == MODE.playing) {
     this.ui.touchEnd(e);
-  } else if (this.mode == MODE.gameMenu) {
-    this.gameMenu.touchEnd(e);
+  } else if (this.mode == MODE.pauseMenu) {
+    this.pauseMenu.touchEnd(e);
+  } else if (this.mode == MODE.settingsMenu) {
+    this.settingsMenu.touchEnd(e);
   }
 };
 
