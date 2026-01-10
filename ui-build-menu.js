@@ -1,17 +1,15 @@
-import {COLOR} from './ui-properties.js';
+import {COLOR, TOOL} from './ui-properties.js';
 import {S, SPRITES} from './sprite-pool.js';
 import {NAME} from './entity-properties.js';
 import {ENTITIES} from './entity-definitions.js';
 
-const TOOL = {
-  copy: -1,
-};
-
 const TOOL_ICON = new Map([
   [TOOL.copy, S.copyIcon],
+  [TOOL.paste, S.pasteIcon],
 ]);
 
 const BUILD_MENU = [
+  TOOL.paste,
   TOOL.copy,
   NAME.woodenChest,
   NAME.transportBelt,
@@ -231,6 +229,8 @@ UiBuildMenu.prototype.setSelectedEntry = function(entry) {
   
   if (entry.entity?.name == NAME.offshorePump) {
     this.ui.gameMapInput.setOffshorePumpMode(entry.entity);
+  } else if (entry.tool == TOOL.paste) {
+    this.ui.gameMapInput.setPasteTool();
   } else {
     this.ui.gameMapInput.resetMode();
   }
@@ -238,6 +238,16 @@ UiBuildMenu.prototype.setSelectedEntry = function(entry) {
 
 UiBuildMenu.prototype.getSelectedEntry = function() {
   return this.menu[this.selectedIndex];
+};
+
+UiBuildMenu.prototype.trySelectEntry = function(name) {
+  if (!name) return;
+  for (let entry of this.menu) {
+    if (entry.entity?.name == name || entry.tool == name) {
+      this.setSelectedEntry(entry);
+      break;
+    }
+  }
 };
 
 UiBuildMenu.prototype.entityBuilt = function() {

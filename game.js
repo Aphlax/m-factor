@@ -6,7 +6,7 @@ import {UiPauseMenu, UiSettingsMenu} from './game-menu.js';
 import {Storage, STORAGE} from './storage.js';
 import {SPRITES} from './sprite-pool.js';
 import {scenario} from './scenario.js';
-import {GameMapConverter} from './game-map-converter.js';
+import {GMC} from './game-map-converter.js';
 import {STATE} from './entity-properties.js';
 
 const MODE = {
@@ -22,7 +22,6 @@ function Game(canvas) {
   this.spritePool = SPRITES;
   this.spritePool.load();
   this.storage = new Storage(this);
-  this.converter = new GameMapConverter();
   this.storage.initialize();
   this.settings = this.storage.loadSettings();
   
@@ -118,14 +117,14 @@ Game.prototype.openSettings = function() {
 Game.prototype.saveGame = function() {
   const save = {
     name: "",
-    map: this.converter.serializeMap(this.gameMap),
+    map: GMC.serializeMap(this.gameMap),
   };
   this.storage.save(STORAGE.saves, save);
 };
 
 Game.prototype.loadGame = function() {
   this.storage.load(STORAGE.saves, "").then(save => {
-    const gameMap = this.converter.deserializeMap(save.map);
+    const gameMap = GMC.deserializeMap(save.map);
     this.loadMap(gameMap);
   });
 };

@@ -230,6 +230,10 @@ SnakeBelt.prototype.initialize = function(entity) {
   return this;
 };
 
+SnakeBelt.prototype.isClickMode = function() {
+  return !this.active;
+}
+
 SnakeBelt.prototype.touchStart = function(sx, sy, firstTouch) {
   const {x, y} = this.nodes[0];
   const cx = (x + 1) * this.view.scale - this.view.x + SNAKE_START.x,
@@ -603,6 +607,10 @@ UndergroundExit.prototype.initialize = function(entity) {
   return this;
 };
 
+UndergroundExit.prototype.isClickMode = function() {
+  return true;
+}
+
 UndergroundExit.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
   if (!shortTouch) return this;
   const x = Math.floor((sx + this.view.x) / this.view.scale);
@@ -858,7 +866,7 @@ function GridDrag(ui) {
   this.ui = ui;
   this.icon = undefined;
 }
-const GRID_DELTA = 26; // Pixels for drag grid step.
+const GRID_DELTA = 40; // Pixels for drag grid step.
 const GRID_START = {x: 25, y: 75};
 
 GridDrag.prototype.initialize = function(entity) {
@@ -872,6 +880,10 @@ GridDrag.prototype.initialize = function(entity) {
   }
   return this;
 };
+
+GridDrag.prototype.isClickMode = function() {
+  return !this.active;
+}
 
 GridDrag.prototype.touchStart = function(sx, sy, firstTouch) {
   const {x, y} = this.points[0];
@@ -1035,6 +1047,10 @@ OffshorePump.prototype.initialize = function(entity) {
   this.entity = entity;
   return this;
 };
+
+OffshorePump.prototype.isClickMode = function() {
+  return true;
+}
 
 OffshorePump.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
   if (!shortTouch) return this;

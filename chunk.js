@@ -1,4 +1,5 @@
 import {SPRITES} from './sprite-pool.js';
+import {SETTINGS} from './storage.js';
 
 export const SIZE = 32;
 
@@ -44,6 +45,7 @@ Chunk.prototype.drawTerrain = function(ctx, view) {
     }
   }
   
+  if (!SETTINGS.debugInfo) return;
   // Chunk boundaries.
   const lx = this.x * SIZE * view.scale - view.x,
       ly = this.y * SIZE * view.scale - view.y;

@@ -1,4 +1,9 @@
 
+export const TOOL = {
+  copy: -1,
+  paste: -2,
+};
+
 export const COLOR = {
   background1: "#333335",
   background2: "#373739",
@@ -23,4 +28,8 @@ export const COLOR = {
   buildPlanner: "#00FF88",
   buildPlannerInvalid: "#FF0000",
   buildPlannerHighlight: "#FFAA00",
+  copyTool: "#00CCFF",
+  copyToolBackdrop: "#80F4FF10",
+  copyToolBackground: "#80F4FF60",
+  blueprintTool: "#0000AA",
 };

@@ -225,6 +225,8 @@ export const S = {
   fastInserterIcon: 16500 + 25,
   longHandedInserterIcon: 16500 + 26,
   gridDragIcon: 16500 + 27,
+  pasteIcon: 16500 + 28,
+  tickIcon: 16500 + 29,
   
   smoke: 17000,
   
@@ -926,6 +928,14 @@ export const SPRITES = [
   {
     path: "graphics/icons/gridDrag.png",
     sprites: sprites(S.gridDragIcon, 32, 32, 1, 1),
+  },
+  {
+    path: "graphics/icons/paste.png",
+    sprites: sprites(S.pasteIcon, 64, 64, 1, 1),
+  },
+  {
+    path: "graphics/icons/tick.png",
+    sprites: sprites(S.tickIcon, 64, 64, 1, 1),
   },
 ];
 

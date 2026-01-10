@@ -434,12 +434,12 @@ Entity.prototype.update = function(gameMap, time) {
         let resource, n = this.data.drillArea ** 2;
         for (let i = 1; i <= n; i++) {
           resource = this.data.mineResources[(this.data.minePattern + i) % n];
-          if (resource) {
+          if (resource?.amount) {
             this.data.minePattern = (this.data.minePattern + i) % n;
             break;
           }
         }
-        if (!resource) {
+        if (!resource?.amount) {
           state = STATE.mineEmpty;
           break mine;
         }
@@ -455,7 +455,6 @@ Entity.prototype.update = function(gameMap, time) {
             resource.amount == 250000) {
           resource.sprite--;
         } else if (!resource.amount) {
-          this.data.mineResources[this.data.minePattern] = undefined;
           const xstart = Math.floor(this.x - (this.data.drillArea - this.width) / 2),
               ystart = Math.floor(this.y -  (this.data.drillArea - this.height) / 2);
           xloop:

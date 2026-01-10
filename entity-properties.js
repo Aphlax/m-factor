@@ -100,6 +100,8 @@ export const COLOR = {
   greenHighlightBorder: "#44AA00",
   yellowHighlight: "#EEEE00",
   yellowHighlightBorder: "#FFAA00",
+  redHighlight: "#AA0000",
+  redHighlightBorder: "#FF0000",
   wire: "#EEAA22",
   shadow: "#000000",
   powerSupplyArea: "#88AAFF40",

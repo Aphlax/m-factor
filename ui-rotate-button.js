@@ -36,23 +36,23 @@ UiRotateButton.prototype.inBounds = function(t) {
 
 UiRotateButton.prototype.touchStart = function(e) {
   if (e.touches.length == 1) {
-    this.setDirection(e.touches[0]);
+    this.setDirectionFromTouch(e.touches[0]);
   }
 };
 
 UiRotateButton.prototype.touchMove = function(e, longTouch) {
-  this.setDirection(e.touches[0]);
+  this.setDirectionFromTouch(e.touches[0]);
 };
 
 UiRotateButton.prototype.touchEnd = function(e, shortTouch) {
-  this.setDirection(e.changedTouches[0]);
+  this.setDirectionFromTouch(e.changedTouches[0]);
 };
 
 UiRotateButton.prototype.touchLong = function(e) {
   
 };
 
-UiRotateButton.prototype.setDirection = function(t) {
+UiRotateButton.prototype.setDirectionFromTouch = function(t) {
   const dx = t.clientX - this.x, dy = t.clientY - this.y;
   if (Math.abs(dx) > Math.abs(dy)) {
     this.direction = dx > 0 ? DIRECTION.east : DIRECTION.west;
