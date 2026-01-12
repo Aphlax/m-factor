@@ -2,7 +2,7 @@ import {TYPE, DIRECTION, DIRECTIONS} from './entity-properties.js';
 import {COLOR, TOOL} from './ui-properties.js';
 import {S} from './sprite-pool.js';
 import {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, InserterDrag, PowerPoleDrag, GridDrag, OffshorePump} from './game-map-input-modes.js';
-import {CopyTool, PasteTool} from './game-map-input-tools.js';
+import {SelectionTool, SELECTION_TYPE, PasteTool} from './game-map-input-tools.js';
 
 const MIN_SCALE = 16;
 const MAX_SCALE = 32;
@@ -26,7 +26,7 @@ function GameMapInput(ui) {
   this.gridDrag = new GridDrag(ui);
   this.offshorePump = new OffshorePump(ui);
   
-  this.copyTool = new CopyTool(ui);
+  this.selectionTool = new SelectionTool(ui);
   this.pasteTool = new PasteTool(ui);
 }
 
@@ -45,7 +45,7 @@ GameMapInput.prototype.set = function(gameMap) {
   this.gridDrag.set(gameMap);
   this.offshorePump.set(gameMap);
   
-  this.copyTool.set(gameMap);
+  this.selectionTool.set(gameMap);
   this.pasteTool.set(gameMap);
 };
 
@@ -111,7 +111,11 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
     const entity = this.gameMap.getSelectedEntity(sx, sy);
     const entry = this.ui.buildMenu.getSelectedEntry();
     if (entry?.tool == TOOL.copy) {
-      this.current = this.copyTool.initialize(sx, sy, false);
+      this.current = this.selectionTool.initialize(
+          sx, sy, SELECTION_TYPE.copy, false);
+    } else if (entry?.tool == TOOL.bulldoze) {
+      this.current = this.selectionTool.initialize(
+          sx, sy, SELECTION_TYPE.bulldoze, false);
     } else if (entity?.type || (entity && !entry)) {
       this.ui.window.set(entity);
       if (entry) {
@@ -169,7 +173,11 @@ GameMapInput.prototype.touchLong = function(e) {
       }
     } else {
       if (entry.tool == TOOL.copy) {
-        this.current = this.copyTool.initialize(sx, sy, true);
+        this.current = this.selectionTool.initialize(
+            sx, sy, SELECTION_TYPE.copy, true);
+      } else if (entry.tool == TOOL.bulldoze) {
+        this.current = this.selectionTool.initialize(
+            sx, sy, SELECTION_TYPE.bulldoze, true);
       }
     }
   }

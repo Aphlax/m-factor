@@ -229,6 +229,8 @@ export const S = {
   tickIcon: 16500 + 29,
   moveIcon: 16500 + 30,
   copyWhiteIcon: 16500 + 31,
+  bulldozeIcon: 16500 + 32,
+  bulldozeWhiteIcon: 16500 + 33,
   
   smoke: 17000,
   
@@ -946,6 +948,14 @@ export const SPRITES = [
   {
     path: "graphics/icons/copy-white.png",
     sprites: sprites(S.copyWhiteIcon, 64, 64, 1, 1),
+  },
+  {
+    path: "graphics/icons/bulldoze.png",
+    sprites: sprites(S.bulldozeIcon, 64, 64, 1, 1),
+  },
+  {
+    path: "graphics/icons/bulldoze-white.png",
+    sprites: sprites(S.bulldozeWhiteIcon, 64, 64, 1, 1),
   },
 ];
 

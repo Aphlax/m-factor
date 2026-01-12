@@ -6,9 +6,11 @@ import {ENTITIES} from './entity-definitions.js';
 const TOOL_ICON = new Map([
   [TOOL.copy, S.copyIcon],
   [TOOL.paste, S.pasteIcon],
+  [TOOL.bulldoze, S.bulldozeIcon],
 ]);
 
 const BUILD_MENU = [
+  TOOL.bulldoze,
   TOOL.paste,
   TOOL.copy,
   NAME.woodenChest,

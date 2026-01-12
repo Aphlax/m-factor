@@ -2,6 +2,7 @@
 export const TOOL = {
   copy: -1,
   paste: -2,
+  bulldoze: -3,
 };
 
 export const COLOR = {
@@ -32,5 +33,8 @@ export const COLOR = {
   copyToolBackdrop: "#80A0FF20",
   copyToolBackground: "#80A0FF60",
   copyToolTransparent: "#66AAFF00",
+  bulldozeTool: "#FF6666",
+  bulldozeToolBackdrop: "#FF606020",
+  bulldozeToolBackground: "#FF606060",
   blueprintTool: "#0000AA",
 };

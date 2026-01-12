@@ -641,10 +641,16 @@ GameMap.prototype.canPlaceEntities = function(entities, x, y) {
   return true;
 };
 
-GameMap.prototype.createEntities = function(entities, x = 0, y = 0, time = undefined) {
+GameMap.prototype.createEntities = function(entities, x = 0, y = 0, time) {
   for (let ent of entities) {
     const entity = {...ent, x: ent.x + x, y: ent.y + y};
     this.createEntity(entity, time);
+  }
+};
+
+GameMap.prototype.deleteEntities = function(entities, time) {
+  for (let entity of entities) {
+    this.deleteEntity(entity, time);
   }
 };
 
