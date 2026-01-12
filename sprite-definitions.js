@@ -228,6 +228,7 @@ export const S = {
   pasteIcon: 16500 + 28,
   tickIcon: 16500 + 29,
   moveIcon: 16500 + 30,
+  copyWhiteIcon: 16500 + 31,
   
   smoke: 17000,
   
@@ -941,6 +942,10 @@ export const SPRITES = [
   {
     path: "graphics/icons/move.png",
     sprites: sprites(S.moveIcon, 32, 32, 1, 1),
+  },
+  {
+    path: "graphics/icons/copy-white.png",
+    sprites: sprites(S.copyWhiteIcon, 64, 64, 1, 1),
   },
 ];
 

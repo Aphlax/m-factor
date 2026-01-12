@@ -110,7 +110,9 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
   } else if (!this.current && shortTouch) {
     const entity = this.gameMap.getSelectedEntity(sx, sy);
     const entry = this.ui.buildMenu.getSelectedEntry();
-    if (entity?.type || (entity && !entry)) {
+    if (entry?.tool == TOOL.copy) {
+      this.current = this.copyTool.initialize(sx, sy, false);
+    } else if (entity?.type || (entity && !entry)) {
       this.ui.window.set(entity);
       if (entry) {
         this.ui.buildMenu.reset();
@@ -167,7 +169,7 @@ GameMapInput.prototype.touchLong = function(e) {
       }
     } else {
       if (entry.tool == TOOL.copy) {
-        this.current = this.copyTool.initialize(sx, sy);
+        this.current = this.copyTool.initialize(sx, sy, true);
       }
     }
   }

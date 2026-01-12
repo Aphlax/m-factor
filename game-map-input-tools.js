@@ -1,5 +1,5 @@
 import {ENTITIES} from './entity-definitions.js';
-import {COLOR as ENTITY_COLOR} from './entity-properties.js';
+import {COLOR as ENTITY_COLOR, DIRECTIONS} from './entity-properties.js';
 import {SPRITES, S} from './sprite-pool.js';
 import {TOOL, COLOR} from './ui-properties.js';
 import {GMC} from './game-map-converter.js';
@@ -12,45 +12,151 @@ function CopyTool(ui) {
   this.ui = ui;
 }
 
+const COPY_MODE = {
+  drag: 1,
+  sit: 2,
+  copyButton: 3,
+  diagonalDrag: 4, // and 5, 6, 7.
+  sideDrag: 8, // and 9, 10, 11.
+};
+
+const COPY_OK_BUTTON = {x: -40, y: -230};
+
 CopyTool.prototype.set =
 PasteTool.prototype.set = function(gameMap) {
   this.gameMap = gameMap;
   this.view = gameMap.view;
 };
 
-CopyTool.prototype.initialize = function(sx, sy) {
+CopyTool.prototype.initialize = function(sx, sy, drag) {
+  if (!this.copyWhiteSprite) {
+    this.copyWhiteSprite = SPRITES.get(S.copyWhiteIcon);
+  }
   this.x1 = this.x2 = Math.floor((sx + this.view.x) / this.view.scale);
   this.y1 = this.y2 = Math.floor((sy + this.view.y) / this.view.scale);
   this.entities = [];
   this.entityDisplay = [];
+  this.mode = drag ? COPY_MODE.drag : COPY_MODE.sit;
   return this;
 };
 
-CopyTool.prototype.touchMove = function(sx, sy) {
-  this.x2 = Math.floor((sx + this.view.x) / this.view.scale);
-  this.y2 = Math.floor((sy + this.view.y) / this.view.scale);
-  this.entities = this.gameMap.getEntitiesIn(
-      Math.min(this.x1, this.x2), Math.min(this.y1, this.y2),
-      Math.abs(this.x1 - this.x2) + 1, Math.abs(this.y1 - this.y2) + 1);
-  const display = new Map();
-  for (let entity of this.entities) {
-    if (display.has(entity.name)) {
-      display.get(entity.name).amount++;
-      continue;
+CopyTool.prototype.isClickMode = function() {
+  return this.mode == COPY_MODE.sit;
+}
+
+CopyTool.prototype.touchStart = function(sx, sy, firstTouch) {
+  if (!firstTouch) return;
+  if (this.mode != COPY_MODE.sit) return;
+  {
+    const {x: dx, y: dy} = COPY_OK_BUTTON;
+    const x = this.view.width + dx, y = this.view.height + dy;
+    if ((sx - x)**2 + (sy - y)**2 < 26**2) {
+      this.mode = COPY_MODE.copyButton;
     }
-    const name = entity.name;
-    const def = ENTITIES.get(name);
-    const sprite = SPRITES.get(def.icon);
-    display.set(name, {name, sprite, amount: 1});
   }
-  this.entityDisplay = [...display.values()]
-      .sort((a, b) => a.amount != b.amount ?
-        -a.amount + b.amount : a.name - b.name);
+  
+  const s = this.view.scale, ox = -this.view.x, oy = -this.view.y;
+  {
+    const x1 = Math.min(this.x1, this.x2),
+        y1 = Math.min(this.y1, this.y2),
+        x2 = Math.max(this.x1, this.x2) + 1,
+        y2 = Math.max(this.y1, this.y2) + 1;
+    for (let i = 0; i < 4; i++) {
+      const dx = i < 2 ? 20 : -20, dy = i == 1 || i == 2 ? 20 : -20;
+      const xs = i < 2 ? x2 : x1, ys = i == 1 || i == 2 ? y2 : y1;
+      const x = xs * s + ox + dx, y = ys * s + oy + dy;
+      if ((sx - x)**2 + (sy - y)**2 < 400) {
+        this.mode = COPY_MODE.diagonalDrag + i;
+        break;
+      }
+    }
+  }
+  
+  {
+    const x1 = Math.min(this.x1, this.x2) * s + ox,
+        y1 = Math.min(this.y1, this.y2) * s + oy,
+        x2 = (Math.max(this.x1, this.x2) + 1) * s + ox,
+        y2 = (Math.max(this.y1, this.y2) + 1) * s + oy;
+    let x = this.view.width * 0.5,
+        y = this.view.height * 0.4;
+    if (x < x1 + 60) x = x1 + 60;
+    if (x > x2 - 60) x = x2 - 60;
+    if (y < y1 + 60) y = y1 + 60;
+    if (y > y2 - 60) y = y2 - 60;
+    for (let i = 0; i < 4; i++) {
+      if (i&0x1 ? y2 - y1 < 120 : x2 - x1 < 120)
+        continue;
+      const {dx, dy} = DIRECTIONS[i];
+      const px = -dy * 40, py = dx * 40;
+      let bx, by;
+      if (i == 0) { bx = x; by = y1 - 22; }
+      if (i == 1) { bx = x2 + 22; by = y; }
+      if (i == 2) { bx = x; by = y2 + 22; }
+      if (i == 3) { bx = x1 - 22; by = y; }
+      const maxX = i&0x1 ? 22 : 44, maxY = i&0x1 ? 44 : 22;
+      if (Math.abs(sx - bx) < maxX && Math.abs(sy - by) < maxY) {
+        this.mode = COPY_MODE.sideDrag + i;
+        break;
+      }
+    }
+  }
+};
+
+CopyTool.prototype.touchMove = function(sx, sy) {
+  if (this.mode == COPY_MODE.copyButton) {
+    this.mode = COPY_MODE.sit;
+  } else if (this.mode != COPY_MODE.sit) {
+    const x = Math.floor((sx + this.view.x) / this.view.scale);
+    const y = Math.floor((sy + this.view.y) / this.view.scale);
+    if (this.mode == COPY_MODE.drag) {
+      this.x2 = x
+      this.y2 = y
+    }
+    if (this.mode == COPY_MODE.diagonalDrag + 0 ||
+        this.mode == COPY_MODE.diagonalDrag + 3 ||
+        this.mode == COPY_MODE.sideDrag + 0) {
+      this.y1 = Math.min(this.y2, y);
+    }
+    if (this.mode == COPY_MODE.diagonalDrag + 0 ||
+        this.mode == COPY_MODE.diagonalDrag + 1 ||
+        this.mode == COPY_MODE.sideDrag + 1) {
+      this.x2 = Math.max(this.x1, x);
+    }
+    if (this.mode == COPY_MODE.diagonalDrag + 1 ||
+        this.mode == COPY_MODE.diagonalDrag + 2 ||
+        this.mode == COPY_MODE.sideDrag + 2) {
+      this.y2 = Math.max(this.y1, y);
+    }
+    if (this.mode == COPY_MODE.diagonalDrag + 2 ||
+        this.mode == COPY_MODE.diagonalDrag + 3 ||
+        this.mode == COPY_MODE.sideDrag + 3) {
+      this.x1 = Math.min(this.x2, x);
+    }
+    this.entities = this.gameMap.getEntitiesIn(
+        Math.min(this.x1, this.x2), Math.min(this.y1, this.y2),
+        Math.abs(this.x1 - this.x2) + 1, Math.abs(this.y1 - this.y2) + 1);
+    const display = new Map();
+    for (let entity of this.entities) {
+      if (display.has(entity.name)) {
+        display.get(entity.name).amount++;
+        continue;
+      }
+      const name = entity.name;
+      const def = ENTITIES.get(name);
+      const sprite = SPRITES.get(def.icon);
+      display.set(name, {name, sprite, amount: 1});
+    }
+    this.entityDisplay = [...display.values()]
+        .sort((a, b) => a.amount != b.amount ?
+          -a.amount + b.amount : a.name - b.name);
+  }
 };
 
 CopyTool.prototype.touchEnd = function(sx, sy, shortTouch, last) {
   if (!last) return this;
-  if (this.entities.length) {
+  if ((this.mode == COPY_MODE.drag ||
+      this.mode == COPY_MODE.copyButton)  &&
+      this.entities.length) {
     let {x, y} = this.entities[0];
     for (let e of this.entities) {
       if (e.x < x) x = e.x;
@@ -63,6 +169,15 @@ CopyTool.prototype.touchEnd = function(sx, sy, shortTouch, last) {
     CLIPBOARD.value = entities;
     this.ui.buildMenu.trySelectEntry(TOOL.paste);
     return this.ui.gameMapInput.pasteTool;
+  } else if (this.mode == COPY_MODE.sit) {
+    if (shortTouch) {
+      return;
+    }
+    return this;
+  } else if (this.mode >= COPY_MODE.diagonalDrag &&
+      this.mode < COPY_MODE.sideDrag + 4) {
+    this.mode = COPY_MODE.sit;
+    return this;
   }
 };
 
@@ -88,15 +203,87 @@ CopyTool.prototype.draw = function(ctx) {
   
   {
     const x = Math.min(this.x1, this.x2),
-          y = Math.min(this.y1, this.y2),
-          w = Math.abs(this.x1 - this.x2) + 1,
-          h = Math.abs(this.y1 - this.y2) + 1;
+        y = Math.min(this.y1, this.y2),
+        w = Math.abs(this.x1 - this.x2) + 1,
+        h = Math.abs(this.y1 - this.y2) + 1;
     ctx.strokeStyle = COLOR.copyToolBackdrop;
     ctx.lineWidth = 4;
     ctx.strokeRect(x * s + ox + 3, y * s + oy + 3, w * s - 6, h * s - 6);
     ctx.strokeStyle = COLOR.copyTool;
     ctx.lineWidth = 1;
     ctx.strokeRect(x * s + ox, y * s + oy, w * s, h * s);
+  }
+  
+  if (this.mode == COPY_MODE.sit) {
+    const x1 = Math.min(this.x1, this.x2) * s + ox,
+        y1 = Math.min(this.y1, this.y2) * s + oy,
+        x2 = (Math.max(this.x1, this.x2) + 1) * s + ox,
+        y2 = (Math.max(this.y1, this.y2) + 1) * s + oy;
+    ctx.beginPath();
+    for (let i = 0; i < 4; i++) {
+      const dx = i < 2 ? 20 : -20, dy = i == 1 || i == 2 ? 20 : -20;
+      const px = -dy * 0.6, py = dx * 0.6;
+      const x = i < 2 ? x2 : x1, y = i == 1 || i == 2 ? y2 : y1;
+      ctx.moveTo(x + 0.7 * dx + px, y + 0.7 * dy + py);
+      ctx.lineTo(x + 0.7 * dx - px, y + 0.7 * dy - py);
+      ctx.moveTo(x + 1.0 * dx + 0.8 * px, y + 1.0 * dy + 0.8 * py);
+      ctx.lineTo(x + 1.0 * dx - 0.8 * px, y + 1.0 * dy - 0.8 * py);
+      ctx.moveTo(x + 1.3 * dx + 0.6 * px, y + 1.3 * dy + 0.6 * py);
+      ctx.lineTo(x + 1.3 * dx - 0.6 * px, y + 1.3 * dy - 0.6 * py);
+    }
+    ctx.strokeStyle = COLOR.copyTool;
+    ctx.stroke();
+  }
+  
+  if (this.mode == COPY_MODE.sit) {
+    const x1 = Math.min(this.x1, this.x2) * s + ox,
+        y1 = Math.min(this.y1, this.y2) * s + oy,
+        x2 = (Math.max(this.x1, this.x2) + 1) * s + ox,
+        y2 = (Math.max(this.y1, this.y2) + 1) * s + oy;
+    let x = this.view.width * 0.5,
+        y = this.view.height * 0.4;
+    if (x < x1 + 60) x = x1 + 60;
+    if (x > x2 - 60) x = x2 - 60;
+    if (y < y1 + 60) y = y1 + 60;
+    if (y > y2 - 60) y = y2 - 60;
+    ctx.beginPath();
+    for (let i = 0; i < 4; i++) {
+      const {dx, dy} = DIRECTIONS[i];
+      const px = -dy * 40, py = dx * 40;
+      let bx, by;
+      if (i == 0) { bx = x; by = y1 - 29; }
+      if (i == 1) { bx = x2 + 29; by = y; }
+      if (i == 2) { bx = x; by = y2 + 29; }
+      if (i == 3) { bx = x1 - 29; by = y; }
+      if (i&0x1 ? y2 - y1 < 120 : x2 - x1 < 120)
+        continue;
+      
+      ctx.moveTo(bx + -8.5 * dx + px, by + -8.5 * dy + py);
+      ctx.lineTo(bx + -8.5 * dx - px, by + -8.5 * dy - py);
+      ctx.moveTo(bx + 0 * dx + 0.8 * px, by + 0 * dy + 0.8 * py);
+      ctx.lineTo(bx + 0 * dx - 0.8 * px, by + 0 * dy - 0.8 * py);
+      ctx.moveTo(bx + 8.5 * dx + 0.6 * px, by + 8.5 * dy + 0.6 * py);
+      ctx.lineTo(bx + 8.5 * dx - 0.6 * px, by + 8.5 * dy - 0.6 * py);
+    }
+    ctx.strokeStyle = COLOR.copyTool;
+    ctx.stroke();
+  }
+  
+  {
+    const {x: dx, y: dy} = COPY_OK_BUTTON;
+    const x = this.view.width + dx, y = this.view.height + dy;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = COLOR.copyTool;
+    ctx.fillStyle = this.mode == COPY_MODE.copyButton ?
+        COLOR.buildBackground : COLOR.copyToolBackground;
+    ctx.beginPath();
+    ctx.arc(x, y, 26, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+    const icon = this.copyWhiteSprite;
+    ctx.drawImage(icon.image,
+        icon.x, icon.y, icon.width, icon.height,
+        x - 20, y - 20, 40, 40);
   }
   
   if (!this.entityDisplay.length) return;
@@ -131,7 +318,7 @@ const PASTE_MODE = {
   none: 0,
   noPaste: 1,
   centerScreen: 2,
-  dropping: 3,
+  sit: 3,
   adjust: 4,
 };
 
@@ -286,13 +473,13 @@ PasteTool.prototype.touchEnd = function(sx, sy, shortTouch, last) {
       return;
     }
     if (this.pressedButton == 2) {
-      this.mode = PASTE_MODE.dropping;
+      this.mode = PASTE_MODE.sit;
     }
     this.pressedButton = 0;
     return this;
   }
   if (this.mode == PASTE_MODE.adjust) {
-    this.mode = PASTE_MODE.dropping;
+    this.mode = PASTE_MODE.sit;
   }
   if (this.mode == PASTE_MODE.noPaste) {
     if (!shortTouch) return this;
