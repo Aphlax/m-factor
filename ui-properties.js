@@ -28,8 +28,9 @@ export const COLOR = {
   buildPlanner: "#00FF88",
   buildPlannerInvalid: "#FF0000",
   buildPlannerHighlight: "#FFAA00",
-  copyTool: "#00CCFF",
-  copyToolBackdrop: "#80F4FF10",
-  copyToolBackground: "#80F4FF60",
+  copyTool: "#66AAFF",
+  copyToolBackdrop: "#80A0FF20",
+  copyToolBackground: "#80A0FF60",
+  copyToolTransparent: "#66AAFF00",
   blueprintTool: "#0000AA",
 };
