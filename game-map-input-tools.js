@@ -116,13 +116,11 @@ SelectionTool.prototype.touchStart = function(sx, sy, firstTouch) {
     for (let i = 0; i < 4; i++) {
       if (i&0x1 ? y2 - y1 < 120 : x2 - x1 < 120)
         continue;
-      const {dx, dy} = DIRECTIONS[i];
-      const px = -dy * 40, py = dx * 40;
       let bx, by;
-      if (i == 0) { bx = x; by = y1 - 22; }
-      if (i == 1) { bx = x2 + 22; by = y; }
-      if (i == 2) { bx = x; by = y2 + 22; }
-      if (i == 3) { bx = x1 - 22; by = y; }
+      if (i == 0) { bx = x; by = y1 - 24; }
+      if (i == 1) { bx = x2 + 24; by = y; }
+      if (i == 2) { bx = x; by = y2 + 24; }
+      if (i == 3) { bx = x1 - 24; by = y; }
       const maxX = i&0x1 ? 22 : 44, maxY = i&0x1 ? 44 : 22;
       if (Math.abs(sx - bx) < maxX && Math.abs(sy - by) < maxY) {
         this.mode = SELECTION_MODE.sideDrag + i;
@@ -186,7 +184,7 @@ SelectionTool.prototype.touchEnd = function(sx, sy, shortTouch, last) {
       return this.ui.gameMapInput.pasteTool;
     } else if (this.type == SELECTION_TYPE.bulldoze) {
       this.gameMap.deleteEntities(this.entities);
-      this.ui.buildMenu.reset();
+      return;
     }
   } else if (this.mode == SELECTION_MODE.sit) {
     if (shortTouch) {
@@ -278,15 +276,15 @@ SelectionTool.prototype.draw = function(ctx) {
     if (y > y2 - 60) y = y2 - 60;
     ctx.beginPath();
     for (let i = 0; i < 4; i++) {
+      if (i&0x1 ? y2 - y1 < 120 : x2 - x1 < 120)
+        continue;
       const {dx, dy} = DIRECTIONS[i];
       const px = -dy * 40, py = dx * 40;
       let bx, by;
-      if (i == 0) { bx = x; by = y1 - 29; }
-      if (i == 1) { bx = x2 + 29; by = y; }
-      if (i == 2) { bx = x; by = y2 + 29; }
-      if (i == 3) { bx = x1 - 29; by = y; }
-      if (i&0x1 ? y2 - y1 < 120 : x2 - x1 < 120)
-        continue;
+      if (i == 0) { bx = x; by = y1 - 28; }
+      if (i == 1) { bx = x2 + 28; by = y; }
+      if (i == 2) { bx = x; by = y2 + 28; }
+      if (i == 3) { bx = x1 - 28; by = y; }
       
       ctx.moveTo(bx + -8.5 * dx + px, by + -8.5 * dy + py);
       ctx.lineTo(bx + -8.5 * dx - px, by + -8.5 * dy - py);

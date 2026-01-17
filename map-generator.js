@@ -27,10 +27,19 @@ const TERRAIN = [
   {id: S.redDesert3, s: 0.005, p: 0.5},
 ];
 
+const MAP_COLOR = [
+  {start: S.dirt1, end: S.grass1, color: "#404499"},
+  {start: S.grass1, end: S.sand1, color: "#303890"},
+  {start: S.sand1, end: S.redDesert0, color: "#403099"},
+  {start: S.redDesert0, end: S.water, color: "#380099"},
+  {start: S.water, end: S.water + 16, color: "#0000CC"},
+];
+
 const RESOURCES = [
   {
     id: RESOURCE_NAMES.iron,
     sprite: S.ironOre,
+    color: "#9999AA",
     startingDist: 40,
     startingSize: 0.41,
     scale: 0.0093,
@@ -40,6 +49,7 @@ const RESOURCES = [
   {
     id: RESOURCE_NAMES.copper,
     sprite: S.copperOre,
+    color: "#BB6600",
     startingDist: 37,
     startingSize: 0.37,
     scale: 0.0103,
@@ -49,6 +59,7 @@ const RESOURCES = [
   {
     id: RESOURCE_NAMES.coal,
     sprite: S.coal,
+    color: "#000800",
     startingDist: 50,
     startingSize: 0.38,
     scale: 0.0112,
@@ -58,6 +69,7 @@ const RESOURCES = [
   {
     id: RESOURCE_NAMES.stone,
     sprite: S.stone,
+    color: "#AA8855",
     startingDist: 80,
     startingSize: 0.3,
     scale: 0.01405,
@@ -220,4 +232,4 @@ TestGenerator.prototype.generateTiles = function() {
 TestGenerator.prototype.generateResources = function() {};
 
 
-export {MapGenerator, TestGenerator};
+export {MapGenerator, TestGenerator, MAP_COLOR, RESOURCES};

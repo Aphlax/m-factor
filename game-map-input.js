@@ -4,7 +4,8 @@ import {S} from './sprite-pool.js';
 import {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, InserterDrag, PowerPoleDrag, GridDrag, OffshorePump} from './game-map-input-modes.js';
 import {SelectionTool, SELECTION_TYPE, PasteTool} from './game-map-input-tools.js';
 
-const MIN_SCALE = 16;
+const MIN_SCALE = 4;
+const MAP_SCALE_BOUNDRY = 16;
 const MAX_SCALE = 32;
 
 function GameMapInput(ui) {
@@ -14,6 +15,7 @@ function GameMapInput(ui) {
   this.ui = ui;
   
   this.touches = new Array(3).fill(0).map(() => ({id: 0, x: 0, y: 0}));
+  this.mapUnlocked = false;
   this.current = undefined;
   
   this.multiBuild = new MultiBuild(ui);
@@ -56,8 +58,13 @@ GameMapInput.prototype.draw = function(ctx) {
 
 GameMapInput.prototype.touchStart = function(e) {
   const firstTouch = e.touches.length == 1;
-  if (this.current?.touchStart)
-    this.current.touchStart(e.touches[0].clientX, e.touches[0].clientY, firstTouch);
+  if (this.current) {
+    this.current.touchStart?.(e.touches[0].clientX, e.touches[0].clientY, firstTouch);
+  }
+  if (firstTouch) {
+    this.mapUnlocked =
+        this.view.scale <= MAP_SCALE_BOUNDRY;
+  }
   this.setTouches(e);
 };
 
@@ -85,10 +92,14 @@ GameMapInput.prototype.touchMove = function(e, longTouch) {
       const dist = Math.sqrt((sx1 - sx2)**2 + (sy1 - sy2)**2);
       const oldDist = Math.sqrt((osx1 - osx2)**2 + (osy1 - osy2)**2);
       let scale = this.view.scale * dist / oldDist;
-      scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale)) / this.view.scale;
+      const min = this.mapUnlocked ? MIN_SCALE : MAP_SCALE_BOUNDRY;
+      scale = Math.min(MAX_SCALE, Math.max(min, scale)) / this.view.scale;
       this.view.scale *= scale;
       this.view.x = Math.round((this.view.x + mx / 2) * scale - mx + omx);
       this.view.y = Math.round((this.view.y + my / 2) * scale - my + omy);
+      if (this.mapUnlocked && this.view.scale > MAP_SCALE_BOUNDRY) {
+        this.mapUnlocked = false;
+      }
     } else {
       const dx = e.touches[i].clientX - this.touches[i].x;
       this.view.x = Math.round(this.view.x - dx);
@@ -227,4 +238,4 @@ GameMapInput.prototype.setTouches = function(e) {
   }
 };
 
-export {GameMapInput};
+export {GameMapInput, MIN_SCALE, MAP_SCALE_BOUNDRY};

@@ -8,6 +8,8 @@ import {SPRITES} from './sprite-pool.js';
 import {scenario} from './scenario.js';
 import {GMC} from './game-map-converter.js';
 import {STATE} from './entity-properties.js';
+import {MAP_SCALE_BOUNDRY} from './game-map-input.js';
+
 
 const MODE = {
   loading: 0,
@@ -82,16 +84,24 @@ Game.prototype.update = function(time) {
 
 Game.prototype.draw = function(ctx, time) {
   if (this.mode == MODE.playing) {
-    this.gameMap.drawGround(ctx, this.playTime);
-    this.ui.drawGroundIndicators(ctx);
-    this.gameMap.draw(ctx, this.playTime);
+    if (this.gameMap.view.scale >= MAP_SCALE_BOUNDRY) {
+      this.gameMap.drawGround(ctx, this.playTime);
+      this.ui.drawGroundIndicators(ctx);
+      this.gameMap.draw(ctx, this.playTime);
+    } else {
+      this.gameMap.drawMap(ctx, this.playTime);
+    }
     this.ui.draw(ctx, this.playTime);
   } else if (this.mode == MODE.loading) {
     this.spritePool.draw(ctx, time);
     this.storage.draw(ctx, time);
   } else if (this.mode == MODE.pauseMenu) {
-    this.gameMap.drawGround(ctx, this.playTime);
-    this.gameMap.draw(ctx, this.playTime);
+    if (this.gameMap.view.scale >= MAP_SCALE_BOUNDRY) {
+      this.gameMap.drawGround(ctx, this.playTime);
+      this.gameMap.draw(ctx, this.playTime);
+    } else {
+      this.gameMap.drawMap(ctx);
+    }
     this.ui.window.draw(ctx, this.playTime);
     this.pauseMenu.draw(ctx);
     this.storage.draw(ctx, time);

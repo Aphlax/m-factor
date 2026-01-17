@@ -61,19 +61,47 @@ import {Game} from "./game.js";
     if (draw > drawTime) drawTime = draw;
     
     if (game.settings?.debugInfo) {
-      ctx.font = "24px Arial";
+      ctx.fillStyle = "#FFFFFF40";
+      ctx.fillRect(canvas.width - 105, 80, 105, 280);
       ctx.fillStyle = "black";
       ctx.textBaseline = "alphabetic";
       ctx.textAlign = "end";
-      ctx.fillText(frameRate + "", canvas.width - 60, 24);
+      ctx.font = "24px Arial";
       ctx.fillText((game.playTime / 1000).toFixed(1), canvas.width - 60, 48);
-      ctx.fillText(window.numberImageDraws + " dI", canvas.width - 60, 72);
-      ctx.fillText(window.numberOtherDraws + " dO", canvas.width - 60, 96);
+      ctx.font = "18px Arial";
+      ctx.fillText(window.numberGroundDraws ?? 0, canvas.width - 60, 120);
+      ctx.fillText(window.numberEntityDraws ?? 0, canvas.width - 60, 140);
+      ctx.fillText(window.numberItemDraws ?? 0, canvas.width - 60, 160);
+      ctx.fillText(window.numberParticleDraws ?? 0, canvas.width - 60, 180);
+      ctx.fillText(window.numberImageDraws, canvas.width - 60, 200);
+      ctx.fillText(window.numberOtherDraws, canvas.width - 60, 220);
+      
+      ctx.fillText((window.timeBelts ?? 0).toFixed(1), canvas.width - 60, 270);
+      ctx.fillText((window.timeFluids ?? 0).toFixed(1), canvas.width - 60, 290);
+      ctx.fillText((window.timeElectric ?? 0).toFixed(1), canvas.width - 60, 310);
+      ctx.fillText((window.timeEntities ?? 0).toFixed(1), canvas.width - 60, 330);
+      ctx.fillText((window.timeMapGen ?? 0).toFixed(1), canvas.width - 60, 350);
       ctx.textAlign = "start";
-      ctx.fillText((Math.round(maxUpdateTime * 10) / 10) + "/" +
-          (Math.round(maxDrawTime * 10) / 10), 40, 55);
+      ctx.fillText("Draws", canvas.width - 56, 100);
+      ctx.fillText("Ground", canvas.width - 56, 120);
+      ctx.fillText("Entity", canvas.width - 56, 140);
+      ctx.fillText("Item", canvas.width - 56, 160);
+      ctx.fillText("Particle", canvas.width - 56, 180);
+      ctx.fillText("Total Img", canvas.width - 56, 200);
+      ctx.fillText("Other", canvas.width - 56, 220);
+      
+      ctx.fillText("Update", canvas.width - 56, 250);
+      ctx.fillText("Belts", canvas.width - 56, 270);
+      ctx.fillText("Fluids", canvas.width - 56, 290);
+      ctx.fillText("Electric", canvas.width - 56, 310);
+      ctx.fillText("Entities", canvas.width - 56, 330);
+      ctx.fillText("MapGen", canvas.width - 56, 350);
+      ctx.font = "24px Arial";
+      ctx.fillText(frameRate + "", 4, 28);
+      ctx.fillText(maxUpdateTime.toFixed(1) + "/" +
+          maxDrawTime.toFixed(1), 40, 55);
       if (game.debug !== undefined) {
-        ctx.fillText(game.debug, 4, 28);
+        ctx.fillText(game.debug, 44, 28);
       }
       
       ctx.beginPath();

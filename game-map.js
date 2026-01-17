@@ -45,9 +45,16 @@ GameMap.prototype.centerView = function(x, y, scale = 24) {
 
 GameMap.prototype.update = function(time, dt) {
   this.playTime = time;
+  const timestampBegin = performance.now();
   this.transportNetwork.update(time, dt);
+  const timestampBelts = performance.now();
+  window.timeBelts = timestampBelts - timestampBegin;
   this.fluidNetwork.update(time, dt);
+  const timestampFluids = performance.now();
+  window.timeFluids = timestampFluids - timestampBelts;
   this.electricNetwork.update(time, dt);
+  const timestampElectric = performance.now();
+  window.timeElectric = timestampElectric - timestampFluids;
   for (let chunks of this.chunks.values()) {
     for (let chunk of chunks.values()) {
       for (let entity of chunk.entities) {
@@ -76,20 +83,25 @@ GameMap.prototype.update = function(time, dt) {
       }
     }
   }
+  const timestampEntities = performance.now();
+  window.timeEntities = timestampEntities - timestampElectric;
   
   // Generate missing chunks.
   const size = SIZE * this.view.scale;
   const viewX = Math.floor(this.view.x / size),
       viewY = Math.floor(this.view.y / size);
   for (let x = 0; x <= Math.ceil(this.view.width / size); x++) {
-	for (let y = 0; y <= Math.ceil(this.view.height / size); y++) {
+  for (let y = 0; y <= Math.ceil(this.view.height / size); y++) {
       this.generateChunk(viewX + x, viewY + y);
     }
   }
+  const timestampMapGen = performance.now();
+  window.timeMapGen = timestampMapGen - timestampEntities;
 };
 
 GameMap.prototype.drawGround = function(ctx, time) {
   const size = SIZE * this.view.scale;
+  const before = window.numberImageDraws;
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x) continue;
     if (x * size > this.view.width + this.view.x) continue;
@@ -108,10 +120,12 @@ GameMap.prototype.drawGround = function(ctx, time) {
       chunk.drawResources(ctx, this.view);
     }
   }
+  window.numberGroundDraws = window.numberImageDraws - before;
 }
 
 GameMap.prototype.draw = function(ctx, time) {
   const size = SIZE * this.view.scale;
+  const countBeforeEntities = window.numberImageDraws;
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x - this.view.scale * MAX_SIZE) continue;
     if (x * size > this.view.width + this.view.x) continue;
@@ -127,7 +141,9 @@ GameMap.prototype.draw = function(ctx, time) {
       }
     }
   }
+  const countBeforeItems = window.numberImageDraws;
   this.transportNetwork.draw(ctx, this.view);
+  window.numberItemDraws = window.numberImageDraws - countBeforeItems;
   ctx.globalAlpha = 0.5;
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x - this.view.scale * (MAX_SIZE + MAX_SHADOW)) continue;
@@ -204,8 +220,11 @@ GameMap.prototype.draw = function(ctx, time) {
       }
     }
   }
+  window.numberEntityDraws = window.numberImageDraws -
+      countBeforeEntities - window.numberItemDraws;
   this.fluidNetwork.draw(ctx, this.view);
   this.electricNetwork.draw(ctx, this.view);
+  const countBeforeParticles = window.numberImageDraws;
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x - this.view.scale * 7) continue;
     if (x * size > this.view.width + this.view.x) continue;
@@ -213,6 +232,20 @@ GameMap.prototype.draw = function(ctx, time) {
   	if ((y + 1) * size <= this.view.y - this.view.scale * 7) continue;
       if (y * size > this.view.height + this.view.y + this.view.scale * 7) continue;
       chunk.drawParticles(ctx, this.view, time);
+    }
+  }
+  window.numberParticleDraws = window.numberImageDraws - countBeforeParticles;
+};
+
+GameMap.prototype.drawMap = function(ctx) {
+  const size = SIZE * this.view.scale;
+  for (let [x, chunks] of this.chunks.entries()) {
+    if ((x + 1) * size <= this.view.x) continue;
+    if (x * size > this.view.width + this.view.x) continue;
+    for (let [y, chunk] of chunks.entries()) {
+  	if ((y + 1) * size <= this.view.y) continue;
+      if (y * size > this.view.height + this.view.y) continue;
+      chunk.drawMap(ctx, this.view);
     }
   }
 };
@@ -580,9 +613,11 @@ GameMap.prototype.generateChunk = function(cx, cy) {
 
 GameMap.prototype.getTerrainAt = function(x, y) {
   const cx = Math.floor(x / SIZE);
-  if (!this.chunks.has(cx)) return;
   const cy = Math.floor(y / SIZE);
-  if (!this.chunks.get(cx).has(cy)) return;
+  if (!this.chunks.has(cx) ||
+      !this.chunks.get(cx).has(cy)) {
+    this.generateChunk(cx, cy);
+  }
   const chunk = this.chunks.get(cx).get(cy);
   return chunk.tiles[x - cx * SIZE][y - cy * SIZE];
 };

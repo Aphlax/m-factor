@@ -218,11 +218,12 @@ ElectricNetwork.prototype.update = function(time, dt) {
 
 ElectricNetwork.prototype.draw = function(ctx, view) {
   if (!SETTINGS.debugPoles) return;
+  ctx.font = "24px Arial";
   for (let i = 0; i < this.grids.length; i++) {
     this.grids[i].draw(ctx, view);
     ctx.fillStyle = this.grids[i].color;
-    ctx.fillRect(10, 76 + i * 20, 10, 10);
-    ctx.fillText((Math.floor(this.grids[i].satisfaction * 1000) / 10) + "", 25, 90 + i * 20);
+    ctx.fillRect(10, 76 + i * 25, 10, 10);
+    ctx.fillText((Math.floor(this.grids[i].satisfaction * 1000) / 10) + "", 25, 90 + i * 25);
   }
 };
 

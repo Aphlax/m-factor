@@ -23,6 +23,8 @@ GMC.serializeMap = function(gameMap) {
         x: cx, y: cy,
         tiles: chunk.tiles,
         resources: chunk.resources,
+        mapBlocks: chunk.mapBlocks,
+        mapResources: chunk.mapResources,
       });
     }
   }
@@ -250,6 +252,7 @@ GMC.deserializeMap = function(map) {
   }
   for (let channel of map.fluidNetworkChannels) {
     const pipe = gameMap.getEntityAt(channel.x, channel.y);
+    if (!pipe) continue;
     pipe.data.channel.fluid = channel.fluid;
     pipe.data.channel.amount = channel.amount;
   }
