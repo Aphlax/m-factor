@@ -28,11 +28,12 @@ const TERRAIN = [
 ];
 
 const MAP_COLOR = [
-  {start: S.dirt1, end: S.grass1, color: "#404499"},
-  {start: S.grass1, end: S.sand1, color: "#303890"},
-  {start: S.sand1, end: S.redDesert0, color: "#403099"},
-  {start: S.redDesert0, end: S.water, color: "#380099"},
-  {start: S.water, end: S.water + 16, color: "#0000CC"},
+  {start: S.dirt1, end: S.grass1, color: "#604520"},
+  {start: S.grass1, end: S.sand1, color: "#403810"},
+  {start: S.sand1, end: S.redDesert0, color: "#906540"},
+  {start: S.redDesert0, end: S.water, color: "#503518"},
+  {start: S.water, end: S.deepWater, color: "#305060"},
+  {start: S.deepWater, end: S.deepWater + 8, color: "#204050"},
 ];
 
 const RESOURCES = [

@@ -3,6 +3,7 @@ import {SETTINGS} from './storage.js';
 import {MAP_COLOR, RESOURCES} from './map-generator.js';
 
 export const SIZE = 32;
+const MINIMAP_SIZE = 8;
 
 /**
  * Part of the game map.
@@ -15,6 +16,8 @@ function Chunk(cx, cy) {
   this.resources = undefined;
   this.mapBlocks = [];
   this.mapResources = undefined;
+  this.minimapBlocks = [];
+  this.minimapResources = undefined;
   this.entities = [];
   this.particles = [];
 }
@@ -27,8 +30,8 @@ Chunk.prototype.generate = function(mapGenerator) {
   for (let x = 0; x < SIZE; x++) {
     let last = undefined;
     for (let y = 0; y < SIZE; y++) {
-      const {color} = MAP_COLOR.find(range =>
-          this.tiles[x][y] < range.end);
+      const tile = this.tiles[x][y];
+      const {color} = MAP_COLOR.find(range => tile < range.end);
       if (color == last?.color) {
         last.height++;
       } else {
@@ -37,6 +40,42 @@ Chunk.prototype.generate = function(mapGenerator) {
       }
     }
   }
+  
+  const factor = SIZE / MINIMAP_SIZE;
+  const counts = [];
+  this.minimapBlocks = [];
+  for (let i = 0; i < MINIMAP_SIZE; i++) {
+    let last = undefined;
+    for (let j = 0; j < MINIMAP_SIZE; j++) {
+      const x = i * factor, y = j * factor;
+      counts.length = 0;
+      colorSearch:
+      for (let k = 0; k < factor**2; k++) {
+        const dx = k % factor, dy = Math.floor(k / factor);
+        const tile = this.tiles[x + dx][y + dy];
+        const {color} = MAP_COLOR.find(range => tile < range.end);
+        for (let l = 0; l < counts.length; l += 2) {
+          if (counts[l] != color) continue;
+          counts[l + 1]++;
+          continue colorSearch;
+        }
+        counts.push(color, 1);
+      }
+      let color, count = 0;
+      for (let l = 0; l < counts.length; l += 2) {
+        if (counts[l + 1] < count) continue;
+        count = counts[l + 1];
+        color = counts[l];
+      }
+      if (color == last?.color) {
+        last.height += factor;
+      } else {
+        last = {x, y, width: factor, height: factor, color};
+        this.minimapBlocks.push(last);
+      }
+    }
+  }
+  
   if (this.resources) {
     this.mapResources = [];
     for (let x = 0; x < SIZE; x++) {
@@ -51,6 +90,41 @@ Chunk.prototype.generate = function(mapGenerator) {
           const {color} = RESOURCES.find(r => r.id == res.id);
           last = {x, y, width: 1, height: 1, color};
           this.mapResources.push(last);
+        }
+      }
+    }
+    
+    this.minimapResources = [];
+    for (let i = 0; i < MINIMAP_SIZE; i++) {
+      let last, lastId = undefined;
+      for (let j = 0; j < MINIMAP_SIZE; j++) {
+        const x = i * factor, y = j * factor;
+        counts.length = 0;
+        colorSearch:
+        for (let k = 0; k < factor**2; k++) {
+          const dx = k % factor, dy = Math.floor(k / factor);
+          const res = this.resources[x + dx]?.[y + dy];
+          if (!res) continue;
+          for (let l = 0; l < counts.length; l += 2) {
+            if (counts[l] != res.id) continue;
+            counts[l + 1]++;
+            continue colorSearch;
+          }
+          counts.push(res.id, 1);
+        }
+        let resId = 0, count = 8;
+        for (let l = 0; l < counts.length; l += 2) {
+          if (counts[l + 1] < count) continue;
+          count = counts[l + 1];
+          resId = counts[l];
+        }
+        if (!resId) continue;
+        if (resId == lastId && last.y == y - 1) {
+          last.height += factor;
+        } else {
+          const {color} = RESOURCES.find(r => r.id == resId);
+          last = {x, y, width: factor, height: factor, color};
+          this.minimapResources.push(last);
         }
       }
     }
@@ -102,8 +176,9 @@ Chunk.prototype.drawMap = function(ctx, view) {
   const xEnd = Math.ceil((vx + vw) / s) - x0;
   const yStart = Math.floor(vy / s) - y0;
   const yEnd = Math.ceil((vy + vh) / s) - y0;
+  const blocks = s < 4 ? this.minimapBlocks : this.mapBlocks;
   let lastColor = undefined;
-  for (let {x, y, width, height, color} of this.mapBlocks) {
+  for (let {x, y, width, height, color} of blocks) {
     if (x > xEnd || x + width < xStart ||
         y > yEnd || y + height < yStart) continue;
     if (color != lastColor) {
@@ -120,8 +195,8 @@ Chunk.prototype.drawMap = function(ctx, view) {
       const sx = x0 * s - vx, sy = y0 * s - vy;
       const sz = s > 8 ? 10 : 6, szsz = 2 * sz;
       const ss = Math.ceil(SIZE * s / szsz) * szsz;
-      const sxs = Math.floor((x0 * s) / szsz) * szsz - vx;
-      const sys = Math.floor((y0 * s) / szsz) * szsz - vy;
+      const sxs = Math.floor(Math.floor((x0 * s) / szsz) * szsz - vx);
+      const sys = Math.floor(Math.floor((y0 * s) / szsz) * szsz - vy);
       for(let x = sxs; x <= sxs + ss + sz; x += szsz) {
         ctx.rect(x, sy, sz, ss);
         window.numberOtherDraws++;
@@ -132,7 +207,8 @@ Chunk.prototype.drawMap = function(ctx, view) {
       }
       ctx.clip("evenodd");
     }
-    for (let {x, y, width, height, color} of this.mapResources) {
+    const blocks = s < 4 ? this.minimapResources : this.mapResources;
+    for (let {x, y, width, height, color} of blocks) {
       if (x > xEnd || x + width < xStart ||
           y > yEnd || y + height < yStart) continue;
       if (color != lastColor) {

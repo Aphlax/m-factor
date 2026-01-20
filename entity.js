@@ -72,6 +72,7 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
   this.animationLength = def.animationLength ?? 0;
   this.animationSpeed = def.animationSpeed ?? 1;
   this.spriteShadowAnimation = !def.noShadowAnimation;
+  this.mapColor = def.mapColor;
   this.inputEntities.length = 0;
   this.outputEntities.length = 0;
   this.electricConnections.length = 0;

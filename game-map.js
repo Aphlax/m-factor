@@ -1,5 +1,6 @@
 import {MapGenerator, TestGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
+import {MINIMAP_SCALE_BOUNDRY} from './game-map-input.js';
 import {S} from './sprite-definitions.js';
 import {TYPE, STATE, MAX_SIZE, MAX_LOGISTIC_CONNECTION, MAX_UNDERGROUND_CONNECTION, ENERGY, DIRECTIONS, MAX_WIRE_REACH, MAX_SHADOW, MAX_ELECTRIC_SUPPLY} from './entity-properties.js';
 import {Entity} from './entity.js';
@@ -86,13 +87,15 @@ GameMap.prototype.update = function(time, dt) {
   const timestampEntities = performance.now();
   window.timeEntities = timestampEntities - timestampElectric;
   
-  // Generate missing chunks.
-  const size = SIZE * this.view.scale;
-  const viewX = Math.floor(this.view.x / size),
-      viewY = Math.floor(this.view.y / size);
-  for (let x = 0; x <= Math.ceil(this.view.width / size); x++) {
-  for (let y = 0; y <= Math.ceil(this.view.height / size); y++) {
-      this.generateChunk(viewX + x, viewY + y);
+  if (this.view.scale >= MINIMAP_SCALE_BOUNDRY) {
+    // Generate missing chunks.
+    const size = SIZE * this.view.scale;
+    const viewX = Math.floor(this.view.x / size),
+        viewY = Math.floor(this.view.y / size);
+    for (let x = 0; x <= Math.ceil(this.view.width / size); x++) {
+      for (let y = 0; y <= Math.ceil(this.view.height / size); y++) {
+        this.generateChunk(viewX + x, viewY + y);
+      }
     }
   }
   const timestampMapGen = performance.now();
@@ -238,14 +241,38 @@ GameMap.prototype.draw = function(ctx, time) {
 };
 
 GameMap.prototype.drawMap = function(ctx) {
-  const size = SIZE * this.view.scale;
+  const {x: vx, y: vy, width: vw, height: vh, scale: s} = this.view;
+  const size = SIZE * s;
   for (let [x, chunks] of this.chunks.entries()) {
-    if ((x + 1) * size <= this.view.x) continue;
-    if (x * size > this.view.width + this.view.x) continue;
+    if ((x + 1) * size <= vx || x * size > vx + vw) continue;
     for (let [y, chunk] of chunks.entries()) {
-  	if ((y + 1) * size <= this.view.y) continue;
-      if (y * size > this.view.height + this.view.y) continue;
+  	if ((y + 1) * size <= vy || y * size > vy + vh) continue;
       chunk.drawMap(ctx, this.view);
+    }
+  }
+  this.transportNetwork.drawMap(ctx, this.view);
+  let lastColor = undefined;
+  for (let [x, chunks] of this.chunks.entries()) {
+    if ((x + 1) * size <= vx - s || x * size > vx + vw + s) continue;
+    for (let [y, chunk] of chunks.entries()) {
+  	if ((y + 1) * size <= vy - s || y * size > vy + vh + s) continue;
+      for (let {type, x: ex, y: ey, width, height, mapColor} of chunk.entities) {
+        if (type == TYPE.belt ||
+            type == TYPE.undergroundBelt ||
+            (s < MINIMAP_SCALE_BOUNDRY &&
+            (type == TYPE.chest ||
+            type == TYPE.inserter ||
+            type == TYPE.electricPole ||
+            type == TYPE.undergroundBelt ||
+            type == TYPE.splitter ||
+            type == TYPE.pipe ||
+            type == TYPE.pipeToGround))) continue;
+        if (mapColor != lastColor) {
+          ctx.fillStyle = lastColor = mapColor;
+        }
+        ctx.fillRect(Math.floor(ex * s - vx), Math.floor(ey * s - vy),
+            Math.ceil(width * s), Math.ceil(height * s));
+      }
     }
   }
 };

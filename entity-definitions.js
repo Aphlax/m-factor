@@ -21,6 +21,7 @@ export const ENTITIES = new Map([
       [west]: [S.burnerDrillW, S.burnerDrillShadowW],
     },
     animationLength: 32,
+    mapColor: "#006094",
     energySource: ENERGY.windUp,
     energyConsumption: 1 / 8, // 8 ops/wind.
     
@@ -49,6 +50,7 @@ export const ENTITIES = new Map([
       [west]: [S.woodenChest, S.woodenChestShadow],
     },
     animationLength: 0,
+    mapColor: "#006094",
     
     capacity: 8,
   }],
@@ -68,6 +70,7 @@ export const ENTITIES = new Map([
       [west]: [S.transportBeltW],
     },
     animationLength: 0,
+    mapColor: "#D0A040",
     
     beltSpeed: 1.875, // 15 = 1.875 * 8
     beltAnimation: 16,
@@ -101,6 +104,7 @@ export const ENTITIES = new Map([
       [west]: [S.inserter + 3],
     },
     animationLength: 0,
+    mapColor: "#006094",
     energySource: ENERGY.electric,
     energyDrain: 0.4, // kW
     energyConsumption: 4.6, // kW
@@ -126,6 +130,7 @@ export const ENTITIES = new Map([
     },
     animationLength: 48,
     animationSpeed: 0.6,
+    mapColor: "#006094",
     energySource: ENERGY.burner,
     energyConsumption: 90, // kW
     
@@ -154,6 +159,7 @@ export const ENTITIES = new Map([
       [west]: [S.assemblingMachine1, S.assemblingMachine1Shadow],
     },
     animationLength: 32,
+    mapColor: "#006094",
     energySource: ENERGY.electric,
     energyDrain: 2.5, // kW
     energyConsumption: 78.5, // kW
@@ -177,6 +183,7 @@ export const ENTITIES = new Map([
     },
     animationLength: 33,
     noShadowAnimation: true,
+    mapColor: "#006094",
     
     taskDuration: 9800,
     energyConsumption: 60, // kW
@@ -202,6 +209,7 @@ export const ENTITIES = new Map([
     },
     animationLength: 32,
     animationSpeed: 0.5,
+    mapColor: "#006094",
     
     recipe: WATER_PUMPING_RECIPE,
     fluidOutputs: {
@@ -242,6 +250,7 @@ export const ENTITIES = new Map([
       S.pipeCross,
     ],
     animationLength: 0,
+    mapColor: "#4080A4",
     
     pipeConnections: {
       [north]: [{x: 0, y: -1}, {x: 1, y: 0}, {x: 0, y: 1}, {x: -1, y: 0}],
@@ -275,6 +284,7 @@ export const ENTITIES = new Map([
     },
     animationLength: 32,
     noShadowAnimation: true,
+    mapColor: "#006094",
     animationSpeed: 0.6,
     energySource: ENERGY.burner,
     energyConsumption: 1800, // kW
@@ -315,6 +325,7 @@ export const ENTITIES = new Map([
       [west]: [S.steamEngineH, S.steamEngineShadowH],
     },
     animationLength: 32,
+    mapColor: "#006094",
     
     pipeConnections: {
       [north]: [{x: 1, y: -1}, {x: 1, y: 5}],
@@ -342,6 +353,7 @@ export const ENTITIES = new Map([
       [west]: [S.smallElectricPole, S.smallElectricPoleShadow],
     },
     animationLength: 0,
+    mapColor: "#006094",
     
     wireReach: 7,
     powerSupplyArea: 2,
@@ -365,6 +377,7 @@ export const ENTITIES = new Map([
     },
     animationLength: 12,
     animationSpeed: 1,
+    mapColor: "#006094",
     energySource: ENERGY.electric,
     energyConsumption: 186, // kW
     energyDrain: 6, // kW
@@ -393,6 +406,7 @@ export const ENTITIES = new Map([
       [south]: [S.undergroundBeltSI],
       [west]: [S.undergroundBeltWI],
     },
+    mapColor: "#D0A040",
     
     beltSpeed: 1.875, // 15 = 1.875 * 8
     beltAnimation: 16,
@@ -427,6 +441,7 @@ export const ENTITIES = new Map([
       [west]: [S.pipeToGroundW],
     },
     animationLength: 0,
+    mapColor: "#4080A4",
     
     pipeConnections: {
       [north]: [{x: 0, y: -1}, {x: 0, y: Infinity}],
@@ -453,6 +468,7 @@ export const ENTITIES = new Map([
       [west]: [S.electricMiningDrillW, S.electricMiningDrillShadowW],
     },
     animationLength: 10,
+    mapColor: "#006094",
     energySource: ENERGY.electric,
     energyConsumption: 90, // kW
     energyDrain: 0, // kW
@@ -487,6 +503,7 @@ export const ENTITIES = new Map([
     },
     animationLength: 32,
     animationSpeed: 2,
+    mapColor: "#FFD000",
     
     beltSpeed: 1.875, // 15 = 1.875 * 8
     beltAnimation: 16,
@@ -520,6 +537,7 @@ export const ENTITIES = new Map([
       [west]: [S.burnerInserter + 3],
     },
     animationLength: 0,
+    mapColor: "#006094",
     energySource: ENERGY.windUp,
     energyConsumption: 1 / 15,
     
@@ -543,6 +561,7 @@ export const ENTITIES = new Map([
       [west]: [S.fastInserter + 3],
     },
     animationLength: 0,
+    mapColor: "#006094",
     energySource: ENERGY.electric,
     energyDrain: 0.5, // kW
     energyConsumption: 20.5, // kW
@@ -567,6 +586,7 @@ export const ENTITIES = new Map([
       [west]: [S.longHandedInserter + 3],
     },
     animationLength: 0,
+    mapColor: "#006094",
     energySource: ENERGY.electric,
     energyDrain: 0.4, // kW
     energyConsumption: 7.6, // kW

@@ -1,4 +1,4 @@
-import {TYPE, NEVER} from './entity-properties.js';
+import {TYPE, NEVER, DIRECTIONS} from './entity-properties.js';
 import {SPRITES} from './sprite-pool.js';
 import {ITEMS} from './item-definitions.js';
 import {SETTINGS} from './storage.js';
@@ -533,6 +533,32 @@ Lane.prototype.draw = function(ctx, view) {
   ctx.lineWidth = 2;
   ctx.stroke();
   window.numberOtherDraws++;
+};
+
+Lane.prototype.drawMap = function(ctx, view) {
+  const {ox = -view.x, oy = -view.y, width: vw, height: vh, scale: s} = view;
+  ctx.beginPath();
+  for (let i = 0; i < this.nodes.length; i++) {
+    const {x, y, direction, length, gaps} = this.nodes[i];
+    const {dx, dy} = DIRECTIONS[direction];
+    ctx.lineTo((x + 0.5) * s + ox, (y + 0.5) * s + oy);
+    for (let i = 0; i < gaps.length; i += 2) {
+      ctx.lineTo((x + 0.5 + gaps[i] * dx) * s + ox,
+          (y + 0.5 + gaps[i] * dy) * s + oy);
+      ctx.moveTo((x + 0.5 + (gaps[i] + gaps[i + 1]) * dx) * s + ox,
+          (y + 0.5 + (gaps[i] + gaps[i + 1]) * dy) * s + oy);
+    }
+    if (i == this.nodes.length - 1) {
+      ctx.lineTo((x + 0.5 + (length - 1) * dx) * s + ox,
+          (y + 0.5 + (length - 1) * dy) * s + oy);
+    }
+  }
+  ctx.strokeStyle = "#D0A040";
+  ctx.lineWidth = s;
+  ctx.lineJoin = "miter";
+  ctx.lineCap = "square";
+  ctx.stroke();
+  ctx.lineCap = "butt";
 };
 
 Lane.prototype.extendEnd = function(belt) {

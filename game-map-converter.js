@@ -25,6 +25,8 @@ GMC.serializeMap = function(gameMap) {
         resources: chunk.resources,
         mapBlocks: chunk.mapBlocks,
         mapResources: chunk.mapResources,
+        minimapBlocks: chunk.minimapBlocks,
+        minimapResources: chunk.minimapResources,
       });
     }
   }
@@ -252,7 +254,7 @@ GMC.deserializeMap = function(map) {
   }
   for (let channel of map.fluidNetworkChannels) {
     const pipe = gameMap.getEntityAt(channel.x, channel.y);
-    if (!pipe) continue;
+    if (!pipe) continue;  // TODO: Fix pipe placment.
     pipe.data.channel.fluid = channel.fluid;
     pipe.data.channel.amount = channel.amount;
   }

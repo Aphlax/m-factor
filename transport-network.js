@@ -345,4 +345,11 @@ TransportNetwork.prototype.draw = function(ctx, view) {
   }
 };
 
+TransportNetwork.prototype.drawMap = function(ctx, view) {
+  for (let lane of this.lanes) {
+    if (!lane.nodes.length) continue;
+    lane.drawMap(ctx, view);
+  }
+};
+
 export {TransportNetwork};

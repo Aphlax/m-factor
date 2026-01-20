@@ -1,5 +1,5 @@
 import {SPRITES} from './sprite-pool.js';
-import {TYPE, STATE, DIRECTION, COLOR, MAX_SHADOW} from './entity-properties.js';
+import {TYPE, STATE, DIRECTION, COLOR, MAX_HEIGHT, MAX_SHADOW} from './entity-properties.js';
 import {ITEMS} from './item-definitions.js';
 
 /*
@@ -15,13 +15,11 @@ import {ITEMS} from './item-definitions.js';
 */
 
 export function draw(ctx, view, time) {
-  if ((this.x + this.width + 1) * view.scale <= view.x)
+  const {x: vx, y: vy, width: vw, height: vh, scale: s} = view;
+  const {x, y, width, height} = this;
+  if (x * s > vx + vw || (x + width + 1) * s <= vx)
     return;
-  if (this.x * view.scale > view.x + view.width)
-    return;
-  if ((this.y + this.height) * view.scale <= view.y)
-    return;
-  if ((this.y - 1) * view.scale > view.y + view.height)
+  if ((y - MAX_HEIGHT) * s > vy + vh || (y + height) * s <= vy)
     return;
   let animation = this.animation;
   if (this.animationLength && (this.state == STATE.running)) {
@@ -42,21 +40,19 @@ export function draw(ctx, view, time) {
     });
     ctx.strokeStyle = "red";
     ctx.lineWidth = 5;
-    ctx.strokeRect(this.x * view.scale - view.x,
-      this.y * view.scale - view.y,
-      this.width * view.scale,
-      this.height * view.scale);
+    ctx.strokeRect(x * s - vx, y * s - vy,
+      width * s, height * s);
     throw new Error("Missing sprite!");
   }
-  const xScale = this.width * view.scale /
+  const xScale = width * s /
       (sprite.width - sprite.left - sprite.right);
-  const yScale = this.height * view.scale /
+  const yScale = height * s /
       (sprite.height - sprite.top - sprite.bottom);
   ctx.drawImage(sprite.image,
       sprite.x, sprite.y, sprite.width, sprite.height,
-      Math.floor(this.x * view.scale - view.x -
+      Math.floor(x * s - vx -
           sprite.left * xScale),
-      Math.floor(this.y * view.scale - view.y -
+      Math.floor(y * s - vy -
           sprite.top * yScale),
       Math.ceil(sprite.width * xScale),
       Math.ceil(sprite.height * yScale));
@@ -64,13 +60,11 @@ export function draw(ctx, view, time) {
 };
 
 export function drawShadow(ctx, view, time) {
-  if ((this.x + this.width + MAX_SHADOW) * view.scale <= view.x)
+  const {x: vx, y: vy, width: vw, height: vh, scale: s} = view;
+  const {x, y, width, height} = this;
+  if (x * s > vx + vw || (x + width + MAX_SHADOW) * s <= vx)
     return;
-  if (this.x * view.scale > view.x + view.width)
-    return;
-  if ((this.y + this.height) * view.scale <= view.y)
-    return;
-  if (this.y * view.scale > view.y + view.height)
+  if (y * s > vy + vh || (y + height) * s <= vy)
     return;
   let animation = this.spriteShadowAnimation ? this.animation : 0;
   if (this.animationLength && this.state == STATE.running && this.spriteShadowAnimation) {
@@ -91,21 +85,19 @@ export function drawShadow(ctx, view, time) {
     });
     ctx.strokeStyle = "red";
     ctx.lineWidth = 5;
-    ctx.strokeRect(this.x * view.scale - view.x,
-      this.y * view.scale - view.y,
-      this.width * view.scale,
-      this.height * view.scale);
+    ctx.strokeRect(x * s - vx, y * s - vy,
+      width * s, height * s);
     throw new Error("Missing shadow sprite!");
   }
-  const xScale = this.width * view.scale /
+  const xScale = width * s /
       (sprite.width - sprite.left - sprite.right);
-  const yScale = this.height * view.scale /
+  const yScale = height * s /
       (sprite.height - sprite.top - sprite.bottom);
   ctx.drawImage(sprite.image,
       sprite.x, sprite.y, sprite.width, sprite.height,
-      Math.floor(this.x * view.scale - view.x -
+      Math.floor(x * s - vx -
           sprite.left * xScale),
-      Math.floor(this.y * view.scale - view.y -
+      Math.floor(y * s - vy -
           sprite.top * yScale),
       Math.ceil(sprite.width * xScale),
       Math.ceil(sprite.height * yScale));
@@ -113,107 +105,105 @@ export function drawShadow(ctx, view, time) {
 };
 
 export function drawBelt(ctx, view, time) {
-  if ((this.x + this.width + 0.1) * view.scale <= view.x)
+  const {x: vx, y: vy, width: vw, height: vh, scale: s} = view;
+  const {x, y, width, height, direction: dir} = this;
+  if (x * s > vx + vw || (x + width + 0.1) * s <= vx)
     return;
-  if (this.x * view.scale > view.x + view.width)
-    return;
-  if ((this.y + this.height) * view.scale <= view.y)
-    return;
-  if ((this.y - 1) * view.scale > view.y + view.height)
+  if ((y - 1) * s > vy + vh || (y + height) * s <= vy)
     return;
   let animation = Math.floor(
       time * this.data.beltAnimationSpeed / 60) % this.data.beltAnimation;
   const sprite = SPRITES.get(this.data.beltSprite + animation);
-  const xScale = view.scale /
+  const xScale = s /
       (sprite.width - sprite.left - sprite.right);
-  const yScale = view.scale /
+  const yScale = s /
       (sprite.height - sprite.top - sprite.bottom);
   ctx.drawImage(sprite.image,
       sprite.x, sprite.y, sprite.width, sprite.height,
-      Math.floor(this.x * view.scale - view.x -
+      Math.floor(x * s - vx -
           sprite.left * xScale),
-      Math.floor(this.y * view.scale - view.y -
+      Math.floor(y * s - vy -
           sprite.top * yScale),
       Math.ceil(sprite.width * xScale),
       Math.ceil(sprite.height * yScale));
   window.numberImageDraws++;
   if (this.data.beltEndSprite) {
-    const s = SPRITES.get(this.data.beltEndSprite + animation);
-    const x = this.x - (this.direction - 2) % 2;
-    const y = this.y + (this.direction - 1) % 2;
-    ctx.drawImage(s.image,
-        s.x, s.y, s.width, s.height,
-        Math.floor(x * view.scale - view.x - s.left * xScale),
-        Math.floor(y * view.scale - view.y - s.top * yScale),
-        Math.ceil(s.width * xScale),
-        Math.ceil(s.height * yScale));
+    const spr = SPRITES.get(this.data.beltEndSprite + animation);
+    const x2 = x - (dir - 2) % 2;
+    const y2 = y + (dir - 1) % 2;
+    ctx.drawImage(spr.image,
+        spr.x, spr.y, spr.width, spr.height,
+        Math.floor(x2 * s - vx - spr.left * xScale),
+        Math.floor(y2 * s - vy - spr.top * yScale),
+        Math.ceil(spr.width * xScale),
+        Math.ceil(spr.height * yScale));
     window.numberImageDraws++;
   }
   if (this.data.beltBeginSprite) {
-    const s = SPRITES.get(this.data.beltBeginSprite + animation);
-    const x = this.x + (this.direction - 2) % 2;
-    const y = this.y - (this.direction - 1) % 2;
-    ctx.drawImage(s.image,
-        s.x, s.y, s.width, s.height,
-        Math.floor(x * view.scale - view.x - s.left * xScale),
-        Math.floor(y * view.scale - view.y - s.top * yScale),
-        Math.ceil(s.width * xScale),
-        Math.ceil(s.height * yScale));
+    const spr = SPRITES.get(this.data.beltBeginSprite + animation);
+    const x2 = x + (dir - 2) % 2;
+    const y2 = y - (dir - 1) % 2;
+    ctx.drawImage(spr.image,
+        spr.x, spr.y, spr.width, spr.height,
+        Math.floor(x2 * s - vx - spr.left * xScale),
+        Math.floor(y2 * s - vy - spr.top * yScale),
+        Math.ceil(spr.width * xScale),
+        Math.ceil(spr.height * yScale));
     window.numberImageDraws++;
   }
   if (this.type == TYPE.splitter) {
-    const dx = this.direction % 2 ? 0 : 1,
-        dy = this.direction % 2 ? 1 : 0;
+    const dx = dir % 2 ? 0 : 1,
+        dy = dir % 2 ? 1 : 0;
     ctx.drawImage(sprite.image,
         sprite.x, sprite.y, sprite.width, sprite.height,
-        Math.floor((this.x + dx) * view.scale - view.x -
+        Math.floor((x + dx) * s - vx -
             sprite.left * xScale),
-        Math.floor((this.y + dy) * view.scale - view.y -
+        Math.floor((y + dy) * s - vy -
             sprite.top * yScale),
         Math.ceil(sprite.width * xScale),
         Math.ceil(sprite.height * yScale));
     window.numberImageDraws++;
     if (this.data.otherBeltEndSprite) {
-      const s = SPRITES.get(this.data.otherBeltEndSprite + animation);
-      const x = this.x + dx - (this.direction - 2) % 2;
-      const y = this.y + dy + (this.direction - 1) % 2;
-      ctx.drawImage(s.image,
-          s.x, s.y, s.width, s.height,
-          Math.floor(x * view.scale - view.x - s.left * xScale),
-          Math.floor(y * view.scale - view.y - s.top * yScale),
-          Math.ceil(s.width * xScale),
-          Math.ceil(s.height * yScale));
+      const spr = SPRITES.get(this.data.otherBeltEndSprite + animation);
+      const x2 = x + dx - (dir - 2) % 2;
+      const y2 = y + dy + (dir - 1) % 2;
+      ctx.drawImage(spr.image,
+          spr.x, spr.y, spr.width, spr.height,
+          Math.floor(x2 * s - vx - spr.left * xScale),
+          Math.floor(y2 * s - vy - spr.top * yScale),
+          Math.ceil(spr.width * xScale),
+          Math.ceil(spr.height * yScale));
       window.numberImageDraws++;
     }
     if (this.data.otherBeltBeginSprite) {
-      const s = SPRITES.get(this.data.otherBeltBeginSprite + animation);
-      const x = this.x + dx + (this.direction - 2) % 2;
-      const y = this.y + dy - (this.direction - 1) % 2;
-      ctx.drawImage(s.image,
-          s.x, s.y, s.width, s.height,
-          Math.floor(x * view.scale - view.x - s.left * xScale),
-          Math.floor(y * view.scale - view.y - s.top * yScale),
-          Math.ceil(s.width * xScale),
-          Math.ceil(s.height * yScale));
+      const spr = SPRITES.get(this.data.otherBeltBeginSprite + animation);
+      const x2 = x + dx + (dir - 2) % 2;
+      const y2 = y + dy - (dir - 1) % 2;
+      ctx.drawImage(spr.image,
+          spr.x, spr.y, spr.width, spr.height,
+          Math.floor(x2 * s - vx - spr.left * xScale),
+          Math.floor(y2 * s - vy - spr.top * yScale),
+          Math.ceil(spr.width * xScale),
+          Math.ceil(spr.height * yScale));
       window.numberImageDraws++;
     }
   }
   if (this.data.beltExtraRightSprite) {
-    const s = SPRITES.get(this.data.beltExtraRightSprite + animation);
-    ctx.drawImage(s.image,
-        s.x, s.y, s.width, s.height,
-        Math.floor(this.x * view.scale - view.x - s.left * xScale),
-        Math.floor(this.y * view.scale - view.y - s.top * yScale),
-        Math.ceil(s.width * xScale),
-        Math.ceil(s.height * yScale));
+    const spr = SPRITES.get(this.data.beltExtraRightSprite + animation);
+    ctx.drawImage(spr.image,
+        spr.x, spr.y, spr.width, spr.height,
+        Math.floor(x * s - vx - spr.left * xScale),
+        Math.floor(y * s - vy - spr.top * yScale),
+        Math.ceil(spr.width * xScale),
+        Math.ceil(spr.height * yScale));
     window.numberImageDraws++;
   }
   if (this.data.beltExtraLeftSprite) {
     const s = SPRITES.get(this.data.beltExtraLeftSprite + animation);
     ctx.drawImage(s.image,
         s.x, s.y, s.width, s.height,
-        Math.floor(this.x * view.scale - view.x - s.left * xScale),
-        Math.floor(this.y * view.scale - view.y - s.top * yScale),
+        Math.floor(x * s - vx - s.left * xScale),
+        Math.floor(y * s - vy - s.top * yScale),
         Math.ceil(s.width * xScale),
         Math.ceil(s.height * yScale));
     window.numberImageDraws++;
@@ -221,18 +211,16 @@ export function drawBelt(ctx, view, time) {
 }
 
 export function drawInserterHand(ctx, view, time) {
-  if ((this.x + 2) * view.scale <= view.x)
+  const {x: vx, y: vy, width: vw, height: vh, scale: s} = view;
+  const {x, y, direction: dir} = this;
+  const reach = this.data.inserterReach;
+  if ((x + 1 + reach) * s <= vx || (x - reach) * s > vx + vw)
     return;
-  if ((this.x - 1) * view.scale > view.x + view.width)
-    return;
-  if ((this.y + 2) * view.scale <= view.y)
-    return;
-  if ((this.y - 1) * view.scale > view.y + view.height)
+  if ((y + 1 + reach) * s <= vy || (y - reach) * s > vy + vh)
     return;
   const base = SPRITES.get(this.data.inserterHandSprites);
   const hand = SPRITES.get(this.data.inserterHandSprites +
       (this.data.inserterItem ? 2 : 1));
-  const reach = this.data.inserterReach;
   
   let p;
   if (this.state == STATE.running) {
@@ -246,24 +234,23 @@ export function drawInserterHand(ctx, view, time) {
   }
   const smooth = p < 0.5 ? 2 * p * p : 1 - Math.pow(2 - 2 * p, 2) / 2;
   let angle;
-  if (this.direction == DIRECTION.north) {
+  if (dir == DIRECTION.north) {
     angle = 0.5 - smooth;
-  } else if (this.direction == DIRECTION.east) {
+  } else if (dir == DIRECTION.east) {
     angle = 1 + smooth;
-  } else if (this.direction == DIRECTION.south) {
+  } else if (dir == DIRECTION.south) {
     angle = -0.5 + smooth;
-  } else if (this.direction == DIRECTION.west) {
+  } else if (dir == DIRECTION.west) {
     angle = 2 - smooth;
   }
   
-  const scale = view.scale / 32;
+  const scale = s / 32;
   const bend = -0.22 * Math.cos(angle * Math.PI);
   const handScale = 0.55 + 0.2 * Math.sin(angle * Math.PI) +
       0.1 * Math.cos(angle * 2 * Math.PI);
   const baseScale = 0.55 - 0.2 * Math.sin(angle * Math.PI);
-  ctx.translate(
-      (this.x + 0.5) * view.scale - view.x,
-      (this.y + 0.5) * view.scale - view.y);
+  ctx.translate((x + 0.5) * s - vx,
+      (y + 0.5) * s - vy);
   ctx.rotate((-0.5 + angle + bend) * Math.PI);
   ctx.translate(0, 24 * scale * baseScale * reach);
   ctx.rotate((1 - bend * 1.9) * Math.PI);
@@ -303,29 +290,29 @@ export function drawInserterHand(ctx, view, time) {
   ctx.setTransform();
 }
 
-
 export function drawSelection(ctx, view) {
-  const x = this.x * view.scale - view.x;
-  const width = (this.width ?? 1) * view.scale;
-  const y = this.y * view.scale - view.y;
-  const height = (this.height ?? 1) * view.scale;
-  if (x + width <= -2 || x > view.width + 2 ||
-      y + height <= -2 || y > view.height + 2)
+  const {x: vx, y: vy, width: vw, height: vh, scale: s} = view;
+  const {x, y, width, height} = this;
+  const sx = x * s - vx, sy = y * s - vy;
+  const sw = (width ?? 1) * s,
+      sh = (height ?? 1) * s;
+  if (sx + sw <= -2 || sx > vw + 2 ||
+      sy + sh <= -2 || sy > vh + 2)
     return;
-  const d = 0.3 * view.scale;
+  const eps = 0.3 * s;
   ctx.beginPath();
-  ctx.moveTo(x, y + d);
-  ctx.lineTo(x, y);
-  ctx.lineTo(x + d, y);
-  ctx.moveTo(x + width, y + d);
-  ctx.lineTo(x + width, y);
-  ctx.lineTo(x + width - d, y);
-  ctx.moveTo(x, y + height - d);
-  ctx.lineTo(x, y + height);
-  ctx.lineTo(x + d, y + height);
-  ctx.moveTo(x + width, y + height - d);
-  ctx.lineTo(x + width, y + height);
-  ctx.lineTo(x + width - d, y + height);
+  ctx.moveTo(sx, sy + eps);
+  ctx.lineTo(sx, sy);
+  ctx.lineTo(sx + eps, sy);
+  ctx.moveTo(sx + sw, sy + eps);
+  ctx.lineTo(sx + sw, sy);
+  ctx.lineTo(sx + sw - eps, sy);
+  ctx.moveTo(sx, sy + sh - eps);
+  ctx.lineTo(sx, sy + sh);
+  ctx.lineTo(sx + eps, sy + sh);
+  ctx.moveTo(sx + sw, sy + sh - eps);
+  ctx.lineTo(sx + sw, sy + sh);
+  ctx.lineTo(sx + sw - eps, sy + sh);
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
   ctx.strokeStyle = COLOR.yellowHighlightBorder;

@@ -4,7 +4,8 @@ import {S} from './sprite-pool.js';
 import {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, InserterDrag, PowerPoleDrag, GridDrag, OffshorePump} from './game-map-input-modes.js';
 import {SelectionTool, SELECTION_TYPE, PasteTool} from './game-map-input-tools.js';
 
-const MIN_SCALE = 4;
+const MIN_SCALE = 1;
+const MINIMAP_SCALE_BOUNDRY = 4;
 const MAP_SCALE_BOUNDRY = 16;
 const MAX_SCALE = 32;
 
@@ -238,4 +239,4 @@ GameMapInput.prototype.setTouches = function(e) {
   }
 };
 
-export {GameMapInput, MIN_SCALE, MAP_SCALE_BOUNDRY};
+export {GameMapInput, MIN_SCALE, MAP_SCALE_BOUNDRY, MINIMAP_SCALE_BOUNDRY};
