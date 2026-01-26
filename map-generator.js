@@ -1,4 +1,5 @@
 import {PerlinNoise} from './perlin-noise.js';
+import {PointNoise} from './point-noise.js';
 import {createRand, createSeedRand} from './utils.js';
 import {S} from './sprite-pool.js';
 import {RESOURCE_NAMES, resourceSprite} from './entity-properties.js';
@@ -31,7 +32,7 @@ const MAP_COLOR = [
   {start: S.dirt1, end: S.grass1, color: "#604520"},
   {start: S.grass1, end: S.sand1, color: "#403810"},
   {start: S.sand1, end: S.redDesert0, color: "#906540"},
-  {start: S.redDesert0, end: S.water, color: "#503518"},
+  {start: S.redDesert0, end: S.water, color: "#584020"},
   {start: S.water, end: S.deepWater, color: "#305060"},
   {start: S.deepWater, end: S.deepWater + 8, color: "#204050"},
 ];
@@ -40,57 +41,61 @@ const RESOURCES = [
   {
     id: RESOURCE_NAMES.iron,
     sprite: S.ironOre,
-    color: "#9999AA",
     startingDist: 40,
-    startingSize: 0.41,
-    scale: 0.0093,
-    limit: 0.927,
-    quantity: 1,
+    frequency: 1,
+    size: 1,
   },
   {
     id: RESOURCE_NAMES.copper,
     sprite: S.copperOre,
-    color: "#BB6600",
     startingDist: 37,
-    startingSize: 0.37,
-    scale: 0.0103,
-    limit: 0.934,
-    quantity: 0.95,
+    frequency: 1,
+    size: 0.95,
   },
   {
     id: RESOURCE_NAMES.coal,
     sprite: S.coal,
-    color: "#000800",
     startingDist: 50,
-    startingSize: 0.38,
-    scale: 0.0112,
-    limit: 0.938,
-    quantity: 0.92,
+    frequency: 0.9,
+    size: 0.92,
   },
   {
     id: RESOURCE_NAMES.stone,
     sprite: S.stone,
-    color: "#AA8855",
     startingDist: 80,
-    startingSize: 0.3,
-    scale: 0.01405,
-    limit: 0.947,
-    quantity: 0.85,
+    frequency: 0.75,
+    size: 0.85,
+  },
+  {
+    id: RESOURCE_NAMES.crudeOil,
+    sprite: S.crudeOil,
+    startingDist: 500,
+    frequency: 0.6,
+    size: 1.15,
   },
 ];
 
-const starterLimit = dist => dist <= 20 ? 0.4 :
-    dist <= 40 ? 0.4 + (dist - 20) / 100 :
-    dist <= 60 ? 0.6 + (dist - 40) / 33 : 2;
-const resourceLimit = (dist, limit) => dist <= 100 ? 2 :
-    dist <= 170 ? 1.3 - (dist - 100) / 70 * (1.3 - limit) :
-    limit;
-const lakeLimit = dist => dist <= 150 ? 2 :
-    dist <= 160 ? 1.2 - (dist - 150) / 25 :
-    dist <= 560 ? 0.8 - (dist - 170) / 2000 :
-    dist <= 1500 ? 0.6 :
-    dist <= 2000 ? 0.6 - (dist - 1500) / 5000 :
-    0.5;
+const TOTAL_RESOURCE_FREQUENCY =
+    RESOURCES.map(r => r.frequency)
+    .reduce((a, b) => a + b);
+const CUMULATIVE_RESOURCE_FREQUENCY =
+    RESOURCES.map(r => r.frequency / TOTAL_RESOURCE_FREQUENCY)
+    .reduce((agg, a) => agg.push((agg[agg.length - 1] ?? 0) + a) && agg, []);
+
+const RESOURCE_COLORS = new Map([
+  [RESOURCE_NAMES.iron, "#9999AA"],
+  [RESOURCE_NAMES.copper, "#BB6600"],
+  [RESOURCE_NAMES.coal, "#000800"],
+  [RESOURCE_NAMES.stone, "#AA8855"],
+  [RESOURCE_NAMES.crudeOil, "#DD00DD"],
+]);
+
+const PATCH_LIMITS = [4**2, 0.2, 5.5**2, 0.4, 8**2, 0.6, 10**2, 1.2, 10.1**2, 2];
+const LAKE_LIMITS = [130**2, 1.5, 160**2, 0.8, 560**2, 0.75, 1500**2, 0.75, 2000**2, 0.7];
+const RESOURCE_FREQUENCY = [150**2, 0, 151**2, 1, 3000**2, 0.25];
+const RESOURCE_SIZE = [100**2, 1, 500**2, 1.2, 8000**2, 2.4];
+const RESOURCE_AMOUNT = [100**2, 1, 250**2, 1.35, 2000**2, 8, 8000**2, 80, 30000**2, 240];
+
 
 function MapGenerator(seed) {
   this.seed = seed;
@@ -111,88 +116,52 @@ MapGenerator.prototype.initialize = function() {
   for (let r of RESOURCES) {
     this.resources.push({
         ...r,
-        noise: new PerlinNoise(randSeed(),
-            r.scale, 8, 2, 0.55),
         pos: createStarterPos(rand, r.startingDist, 50,
             this.starterLakePos, this.resources.map(r => r.pos)),
       });
   }
-}
-
-MapGenerator.prototype.generateResources = function (cx, cy, tiles) {
-  const resources = [];
-  for (let i = 0; i < 32; i++) {
-    for (let j = 0; j < 32; j++) {
-      if (tiles[i][j] >= S.water) continue;
-      const x = cx * 32 + i, y = cy * 32 + j;
-      const d = Math.sqrt(x**2 + y**2);
-      for (let r of this.resources) {
-        let resource = -1;
-        if (d <= 150) {
-          resource = r.noise.get(x * 4.07 + 1000, y * 4)
-              - starterLimit(dist(r.pos, {x, y}) / r.startingSize);
-          resource = resource > 0 ? Math.min(0.2, resource) / 0.2 : resource;
-        }
-        if (d > 100 && resource < 0) {
-          resource = r.noise.get(x, y) - resourceLimit(d, r.limit);
-          resource = resource > 0 ? resource / (1 - r.limit) : resource;
-        }
-        if (resource > 0) {
-          if (!resources[i]) resources[i] = [];
-          const amount = Math.floor((0.1 + resource)**2
-              * r.quantity * (10 + Math.max(12, Math.sqrt(d)) / 4)
-              * 80 + this.tileOffsets[j][i] * 1.5);
-          const variation = r.sprite
-              + (this.tileOffsets[i][j] & 7) * 8;
-          resources[i][j] = {
-            id: r.id,
-            amount,
-            x, y,
-            variation,
-            sprite: variation + resourceSprite(amount),
-          };
-          break;
-        }
-      }
-    }
-  }
-  return resources.some(a => a?.length) ? resources : undefined;
+  this.resourcePointNoise = new PointNoise(rand(), 60, 0.04);
+  this.resourceNoise = new PerlinNoise(randSeed(),
+      0.025, 5, 2, 0.65)
+  this.crudeOilNoise = new PointNoise(rand(), 4, 0.1);
 }
 
 MapGenerator.prototype.generateTiles = function (cx, cy) {
   const tiles = new Array(32).fill(0).map(a => []);
   for (let i = 0; i < 32; i++) {
+    tileLoop:
     for (let j = 0; j < 32; j++) {
       const x = cx * 32 + i, y = cy * 32 + j;
-      let tile = this.lake(x, y) + (this.tileOffsets[i][j] & 7);
-      if (!tile) tile = this.terrain(x, y) + this.tileOffsets[i][j];
+      const tile = this.lake(x, y) + (this.tileOffsets[i][j] & 7);
+      if (tile) {
+        tiles[i].push(tile);
+        continue;
+      }
       
-      tiles[i].push(tile);
+      for (let k in TERRAIN) {
+        if (this.terrainNoises[k].get(x, y) < TERRAIN[k].p) continue;
+        tiles[i].push(TERRAIN[k].id + this.tileOffsets[i][j]);
+        continue tileLoop;
+      }
+      
+      tiles[i].push(DEFAULT_TERRAIN + this.tileOffsets[i][j]);
     }
   }
   return tiles;
 }
 
-MapGenerator.prototype.terrain = function(x, y) {
-  for (let i in TERRAIN) {
-    if (this.terrainNoises[i].get(x, y) >= TERRAIN[i].p)
-      return TERRAIN[i].id;
-  }
-  return DEFAULT_TERRAIN;
-}
-
 MapGenerator.prototype.lake = function(x, y) {
-  const d = Math.sqrt(x**2 + y**2);
+  const d = x**2 + y**2;
   let lake = 0;
-  if (d <= 150) {
-    const starterLakeDist =
-        Math.sqrt((x - this.starterLakePos.x) ** 2 +
-        (y - this.starterLakePos.y) ** 2);
+  if (d <= 150**2) {
+    const {x: px, y: py} = this.starterLakePos;
     lake = this.lakeNoise.get(x * 2 + 1000, y * 2.1) -
-        starterLimit(dist(this.starterLakePos, {x, y}));
+        sqIp(((x - px)**2 + (y - py)**2) / 5**2, PATCH_LIMITS);
   } else {
-    lake = this.lakeNoise.get(x, y) - lakeLimit(d);
+    lake = this.lakeNoise.get(x, y) -
+        sqIp(d, LAKE_LIMITS);
   }
+  
   if (lake > -0.05) {
     if (lake < 0) {
       if (this.lakeNoise.get(x * 0.7 + 100, y * 0.7) > 0.4 - lake * 5) {
@@ -207,9 +176,89 @@ MapGenerator.prototype.lake = function(x, y) {
   }
 }
 
-function createStarterPos(rand, x, dx, lake, others) {
+MapGenerator.prototype.generateResources = function (cx, cy, tiles) {
+  const resourcePoints = this.resourcePointNoise.get(cx * 32 - 60, cy * 32 - 60, 152, 152);
+  const crudeOilPoints = this.crudeOilNoise.get(cx * 32, cy * 32, 32, 32);
+  const resources = [];
+  for (let k = 0; ; k++) {
+    let px, py, res, sqPatchDist;
+    if (k < resourcePoints.length) {
+      const {x: ppx, y: ppy, value} = resourcePoints[k];
+      px = ppx; py = ppy;
+      sqPatchDist = px**2 + py**2;
+      if (sqPatchDist < 100**2 && k < resourcePoints.length) continue;
+      const freq = sqIp(sqPatchDist, RESOURCE_FREQUENCY);
+      if (value > freq) continue;
+      let i = -1;
+      while (CUMULATIVE_RESOURCE_FREQUENCY[++i] < value / freq);
+      res = RESOURCES[i];
+      if (res.id == RESOURCE_NAMES.crudeOil &&
+          sqPatchDist < res.startingDist**2) continue;
+    } else {
+      if ((cx * 32 + 16)**2 + (cy * 32 + 16)**2 > 150**2) break;
+      const k_ = k - resourcePoints.length;
+      if (k_ >= this.resources.length) break;
+      res = this.resources[k_];
+      px = res.pos.x; py = res.pos.y;
+      sqPatchDist = px**2 + py**2;
+    }
+    
+    const patchSize = Math.min(60, 25 * res.size * sqIp(sqPatchDist, RESOURCE_SIZE));
+    for (let i = 0; i < 32; i++) {
+      for (let j = 0; j < 32; j++) {
+        if (tiles[i][j] >= S.water) continue;
+        const x = cx * 32 + i, y = cy * 32 + j;
+        const dist = ((x - px)**2 + (y - py)**2)**0.5;
+        if (dist > patchSize) continue;
+        
+        if (res.id == RESOURCE_NAMES.crudeOil) {
+          let hit = false;
+          for (let {x: ox, y: oy, value: oValue} of crudeOilPoints) {
+            if (Math.floor(ox) != x || Math.floor(oy) != y) continue;
+            if (oValue < sqIp(dist**1.08 / patchSize * 10**2, PATCH_LIMITS)) break;
+            hit = true;
+            break;
+          }
+          if (!hit) continue;
+          const patchAmount = sqIp(sqPatchDist, RESOURCE_AMOUNT);
+          const amount = Math.floor(
+              res.size * ((patchAmount + 2)**0.6) +
+              this.tileOffsets[j][i] * 0.2);
+          if (!resources[i]) resources[i] = [];
+          if (resources[i][j]?.amount >= amount) continue;
+          resources[i][j] = {
+            id: res.id, x, y, amount,
+            sprite: res.sprite + (this.tileOffsets[i][j] & 3),
+          };
+          continue;
+        }
+        
+        const randomOffset = res.id * 555;
+        const score = this.resourceNoise.get(x + randomOffset, y) -
+            sqIp(dist / patchSize * 10**2, PATCH_LIMITS);
+        if (score < 0) continue;
+        const patchAmount = sqIp(sqPatchDist, RESOURCE_AMOUNT);
+        const amount = Math.floor(
+            (Math.min(score, 0.3) / 0.3) *
+            res.size * patchAmount * 500 +
+            this.tileOffsets[j][i] * 1.5 + 1);
+        if (!resources[i]) resources[i] = [];
+        if (resources[i][j]?.amount >= amount) continue;
+        resources[i][j] = {
+          id: res.id,
+          x, y, amount,
+          sprite: res.sprite + resourceSprite(amount) +
+              (this.tileOffsets[i][j] & 7) * 8,
+        };
+      }
+    }
+  }
+  return resources.some(a => a?.length) ? resources : undefined;
+}
+
+function createStarterPos(rand, r, dr, lake, others) {
   while(true) {
-    let phi = rand() * 2 * Math.PI, a = x + (2 * rand() - 1) * dx;
+    let phi = rand() * 2 * Math.PI, a = r + (2 * rand() - 1) * dr;
     const pos = {x: Math.cos(phi) * a, y: Math.sin(phi) * a};
     if (lake && dist(pos, lake) < 60) {
       continue;
@@ -225,12 +274,30 @@ function dist(a, b) {
   return Math.sqrt((a.x - b.x)**2 + (a.y - b.y)**2);
 }
 
+/** Interpolation using square distances. */
+function sqIp(d, limits) {
+  for (let i = 0; i < limits.length; i += 2) {
+    if (d < limits[i]) {
+      if (!i) {
+        return limits[1];
+      } else {
+        return limits[i - 1] +
+            (d - limits[i - 2]) / (limits[i] - limits[i - 2]) *
+            (limits[i + 1] - limits[i - 1]);
+      }
+      break;
+    } else if (i == limits.length - 2) {
+      return limits[i + 1];
+    }
+  }
+}
+
 function TestGenerator() {}
 TestGenerator.prototype.initialize = function() {};
 TestGenerator.prototype.generateTiles = function() {
-  return new Array(32).fill(0).map(_ => new Array(32).fill(0));
+  return new Array(32).fill(0).map(_ => new Array(32).fill(DEFAULT_TERRAIN));
 };
 TestGenerator.prototype.generateResources = function() {};
 
 
-export {MapGenerator, TestGenerator, MAP_COLOR, RESOURCES};
+export {MapGenerator, TestGenerator, MAP_COLOR, RESOURCE_COLORS};

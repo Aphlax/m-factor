@@ -62,6 +62,7 @@ import {Game} from "./game.js";
     
     if (game.settings?.debugInfo) {
       ctx.fillStyle = "#FFFFFF40";
+      ctx.fillRect(2, 6, 32, 26);
       ctx.fillRect(canvas.width - 105, 80, 105, 280);
       ctx.fillStyle = "black";
       ctx.textBaseline = "alphabetic";

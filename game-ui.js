@@ -9,6 +9,7 @@ import {SPRITES} from './sprite-pool.js';
 import {ITEMS} from './item-definitions.js';
 import {COLOR} from './ui-properties.js';
 import {S} from './sprite-pool.js';
+import {GameMap, MAP} from './game-map.js';
 
 const MODE = {
   none: 0,
@@ -117,7 +118,7 @@ GameUi.prototype.draw = function(ctx, time) {
 
 GameUi.prototype.touchStart = function(e) {
   if (e.touches.length == 1) {
-    this.longTouchEnd = this.lastUpdate + LONG_TOUCH_DURATION
+    this.longTouchEnd = this.lastUpdate + LONG_TOUCH_DURATION;
     this.longTouchEvent.touches[0].clientX =
         e.touches[0].clientX;
     this.longTouchEvent.touches[0].clientY =
@@ -130,6 +131,10 @@ GameUi.prototype.touchStart = function(e) {
     }
   }
   if (this.mode == MODE.none) {
+    if (e.touches[0].clientX < 120 && e.touches[0].clientY < 60) {
+      this.game.loadMap(new GameMap(Math.floor(Math.random() * 1000), MAP.nauvis)
+          .setViewFromCanvas(canvas));
+    }
     if (e.touches[0].clientY >= this.window.y) {
       this.mode = MODE.window;
     } else if (this.buildMenu.inBounds(e.touches[0])) {

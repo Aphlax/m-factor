@@ -1,5 +1,5 @@
 import {COLOR} from './ui-properties.js';
-import {STATE} from './entity-properties.js';
+import {STATE, RESOURCE_NAMES} from './entity-properties.js';
 import {SPRITES} from './sprite-pool.js';
 import {CHOICE} from './ui-choice.js';
 import {ITEMS, FLUIDS, I} from './item-definitions.js';
@@ -88,7 +88,9 @@ UiResource.prototype.draw = function(ctx) {
   ctx.font = "16px monospace";
   ctx.textBaseline = "middle";
   ctx.fillStyle = COLOR.primary;
-  ctx.fillText(this.resource.amount, x + 48, y + 21);
+  const text = this.resource.amount +
+      (this.resource.id == RESOURCE_NAMES.crudeOil ? "/s" : "");
+  ctx.fillText(text, x + 48, y + 21);
   window.numberOtherDraws += 3;
 };
 

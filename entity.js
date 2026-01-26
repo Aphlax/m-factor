@@ -449,24 +449,15 @@ Entity.prototype.update = function(gameMap, time) {
         resource.amount--;
         if (resource.amount == 25 ||
             resource.amount == 100 ||
-            resource.amount == 500 ||
-            resource.amount == 2500 ||
-            resource.amount == 10000 ||
-            resource.amount == 50000 ||
-            resource.amount == 250000) {
+            resource.amount == 400 ||
+            resource.amount == 2000 ||
+            resource.amount == 8000 ||
+            resource.amount == 40000 ||
+            resource.amount == 200000) {
           resource.sprite--;
         } else if (!resource.amount) {
-          const xstart = Math.floor(this.x - (this.data.drillArea - this.width) / 2),
-              ystart = Math.floor(this.y -  (this.data.drillArea - this.height) / 2);
-          xloop:
-          for (let dx = 0; dx < this.data.drillArea; dx++) {
-            for (let dy = 0; dy < this.data.drillArea; dy++) {
-              if (gameMap.getResourceAt(xstart + dx, ystart + dy) == resource) {
-                gameMap.getResourceAt(xstart + dx, ystart + dy, /*remove*/ true);
-                break xloop;
-              }
-            }
-          }
+          gameMap.getResourceAt(resource.x, resource.y,
+              /*remove*/ true);
         }
         
         this.data.minedResource = resource.id;

@@ -1,6 +1,7 @@
 import {SPRITES} from './sprite-pool.js';
 import {SETTINGS} from './storage.js';
-import {MAP_COLOR, RESOURCES} from './map-generator.js';
+import {MAP_COLOR, RESOURCE_COLORS} from './map-generator.js';
+import {RESOURCE_NAMES} from './entity-properties.js';
 
 export const SIZE = 32;
 const MINIMAP_SIZE = 8;
@@ -84,11 +85,16 @@ Chunk.prototype.generate = function(mapGenerator) {
       for (let y = 0; y < SIZE; y++) {
         const res = this.resources[x][y];
         if (!res) continue;
+        if (res.id == RESOURCE_NAMES.crudeOil) {
+          const color = RESOURCE_COLORS.get(res.id);
+          const oil = {x: x - 1, y: y - 1, width: 3, height: 3, color, clipped: false};
+          this.mapResources.push(oil);
+        }
         if (res.id == lastId && last.y == y - 1) {
           last.height++;
         } else {
-          const {color} = RESOURCES.find(r => r.id == res.id);
-          last = {x, y, width: 1, height: 1, color};
+          const color = RESOURCE_COLORS.get(res.id);
+          last = {x, y, width: 1, height: 1, color, clipped: true};
           this.mapResources.push(last);
         }
       }
@@ -110,7 +116,8 @@ Chunk.prototype.generate = function(mapGenerator) {
             counts[l + 1]++;
             continue colorSearch;
           }
-          counts.push(res.id, 1);
+          const count = res.id == RESOURCE_NAMES.crudeOil ? 9 : 1;
+          counts.push(res.id, count);
         }
         let resId = 0, count = 8;
         for (let l = 0; l < counts.length; l += 2) {
@@ -122,8 +129,9 @@ Chunk.prototype.generate = function(mapGenerator) {
         if (resId == lastId && last.y == y - 1) {
           last.height += factor;
         } else {
-          const {color} = RESOURCES.find(r => r.id == resId);
-          last = {x, y, width: factor, height: factor, color};
+          const color = RESOURCE_COLORS.get(resId);
+          const clipped = resId != RESOURCE_NAMES.crudeOil;
+          last = {x, y, width: factor, height: factor, color, clipped};
           this.minimapResources.push(last);
         }
       }
@@ -188,7 +196,8 @@ Chunk.prototype.drawMap = function(ctx, view) {
         Math.ceil(width * s), Math.ceil(height * s));
     window.numberOtherDraws++;
   }
-  if (this.mapResources) {
+  const resourceBlocks = s < 4 ? this.minimapResources : this.mapResources;
+  if (resourceBlocks) {
     ctx.save();
     {
       ctx.beginPath();
@@ -197,18 +206,17 @@ Chunk.prototype.drawMap = function(ctx, view) {
       const ss = Math.ceil(SIZE * s / szsz) * szsz;
       const sxs = Math.floor(Math.floor((x0 * s) / szsz) * szsz - vx);
       const sys = Math.floor(Math.floor((y0 * s) / szsz) * szsz - vy);
-      for(let x = sxs; x <= sxs + ss + sz; x += szsz) {
+      for(let x = sxs; x <= sxs + ss; x += szsz) {
         ctx.rect(x, sy, sz, ss);
         window.numberOtherDraws++;
       }
-      for(let y = sys; y <= sys + ss + sz; y += szsz) {
+      for(let y = sys; y <= sys + ss; y += szsz) {
         ctx.rect(sx, y, ss, sz);
         window.numberOtherDraws++;
       }
       ctx.clip("evenodd");
     }
-    const blocks = s < 4 ? this.minimapResources : this.mapResources;
-    for (let {x, y, width, height, color} of blocks) {
+    for (let {x, y, width, height, color, clipped} of resourceBlocks) {
       if (x > xEnd || x + width < xStart ||
           y > yEnd || y + height < yStart) continue;
       if (color != lastColor) {
@@ -248,14 +256,14 @@ Chunk.prototype.drawResources = function(ctx, view) {
     for (let y = yStart; y < yEnd; y++) {
       const r = this.resources[x][y];
       if (!r) continue;
+      const sx = Math.floor((x0 + x - 0.25) * s - vx),
+          sy = Math.floor((y0 + y - 0.25) * s - vy);
       const sprite = SPRITES.get(r.sprite);
       ctx.drawImage(
           sprite.image,
           sprite.x, sprite.y,
           sprite.width, sprite.height,
-          Math.floor((x0 + x - 0.25) * s - vx),
-          Math.floor((y0 + y - 0.25) * s - vy),
-          resourceSize, resourceSize);
+          sx, sy, resourceSize, resourceSize);
       window.numberImageDraws++;
     }
   }

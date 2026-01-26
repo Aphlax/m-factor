@@ -118,6 +118,7 @@ export const RESOURCE_NAMES = {
   copper: 2,
   coal: 3,
   stone: 4,
+  crudeOil: 5,
 };
 
 export const RESOURCE_LABELS = {
@@ -125,16 +126,17 @@ export const RESOURCE_LABELS = {
   [RESOURCE_NAMES.copper]: "Copper ore",
   [RESOURCE_NAMES.coal]: "Coal",
   [RESOURCE_NAMES.stone]: "Stone",
+  [RESOURCE_NAMES.crudeOil]: "Crude oil",
 };
 
 export function resourceSprite(amount) {
   return amount <= 25 ? 0 :
       amount <= 100 ? 1 :
-      amount <= 500 ? 2 :
-      amount <= 2500 ? 3 :
-      amount <= 10000 ? 4 :
-      amount <= 50000 ? 5 :
-      amount <= 250000 ? 6 : 7;
+      amount <= 400 ? 2 :
+      amount <= 2000 ? 3 :
+      amount <= 8000 ? 4 :
+      amount <= 40000 ? 5 :
+      amount <= 200000 ? 6 : 7;
 }
 
 export const MINE_PATTERN = {

@@ -21,6 +21,7 @@ function GameMap(seed, type) {
   this.view = {};
   this.playTime = 0;
   this.chunks = new Map(); // 2-D map of coordinate -> chunk
+  this.chunkGenerationQueue = [];
   this.transportNetwork = new TransportNetwork();
   this.fluidNetwork = new FluidNetwork();
   this.electricNetwork = new ElectricNetwork(this);
@@ -87,16 +88,42 @@ GameMap.prototype.update = function(time, dt) {
   const timestampEntities = performance.now();
   window.timeEntities = timestampEntities - timestampElectric;
   
-  if (this.view.scale >= MINIMAP_SCALE_BOUNDRY) {
-    // Generate missing chunks.
-    const size = SIZE * this.view.scale;
-    const viewX = Math.floor(this.view.x / size),
-        viewY = Math.floor(this.view.y / size);
-    for (let x = 0; x <= Math.ceil(this.view.width / size); x++) {
-      for (let y = 0; y <= Math.ceil(this.view.height / size); y++) {
-        this.generateChunk(viewX + x, viewY + y);
+  // Generate missing chunks.
+  const {x: vx, y: vy, width: vw, height: vh, scale: s} = this.view;
+  const size = SIZE * s, q = this.chunkGenerationQueue;
+  if (s >= MINIMAP_SCALE_BOUNDRY) {
+    const vcx = Math.floor(vx / size),
+        vcy = Math.floor(vy / size);
+    for (let x = 0; x <= Math.ceil(vw / size); x++) {
+      yLoop:
+      for (let y = 0; y <= Math.ceil(vh / size); y++) {
+        const cx = vcx + x, cy = vcy + y;
+        if (this.chunks.has(cx) && this.chunks.get(cx).has(cy)) continue;
+        for (let i = 0; i < q.length; i += 2) {
+          if (q[i] == cx && q[i + 1] == cy) continue yLoop;
+        }
+        q.push(cx, cy);
       }
     }
+  }
+  if (q.length) {
+    let dist = Infinity, index;
+    const cvx = (vx + vw / 2 - 0.5) / size,
+        cvy = (vy + vh / 2 - 0.5) / size;
+    for (let i = 0; i < q.length; i += 2) {
+      if ((q[i] + 1) * size < vx || q[i] * size > vx + vw ||
+          (q[i + 1] + 1) * size < vy || q[i + 1] * size > vy + vh) {
+        q.splice(i, 2);
+        i -= 2;
+        continue;
+      }
+      const d = (q[i] - cvx)**2 + (q[i + 1] - cvy)**2;
+      if (d > dist) continue;
+      dist = d;
+      index = i;
+    }
+    this.generateChunk(q[index], q[index + 1]);
+    q.splice(index, 2);
   }
   const timestampMapGen = performance.now();
   window.timeMapGen = timestampMapGen - timestampEntities;

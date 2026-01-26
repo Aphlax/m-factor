@@ -29,20 +29,13 @@ export function draw(ctx, view, time) {
   }
   const sprite = SPRITES.get(this.sprite + animation);
   if (!sprite) {
-    console.log({
-      animation,
-      time,
-      taskStart: this.taskStart,
-      thisAnimation: this.animation,
-      spriteBase: this.sprite,
-      spriteId: this.sprite + animation,
-      entity: this,
-    });
-    ctx.strokeStyle = "red";
-    ctx.lineWidth = 5;
+    ctx.strokeStyle = ctx.fillStyle = "red";
+    ctx.lineWidth = 2;
     ctx.strokeRect(x * s - vx, y * s - vy,
-      width * s, height * s);
-    throw new Error("Missing sprite!");
+        width * s, height * s);
+    ctx.fillText(this.sprite + animation,
+        x * s - vx + 10, y * s - vy + 10);
+    return;
   }
   const xScale = width * s /
       (sprite.width - sprite.left - sprite.right);
@@ -74,20 +67,13 @@ export function drawShadow(ctx, view, time) {
   }
   const sprite = SPRITES.get(this.spriteShadow + animation);
   if (!sprite) {
-    console.log({
-      animation,
-      time,
-      taskStart: this.taskStart,
-      thisAnimation: this.animation,
-      spriteBase: this.spriteShadow,
-      spriteId: this.spriteShadow + animation,
-      entity: this,
-    });
-    ctx.strokeStyle = "red";
-    ctx.lineWidth = 5;
+    ctx.strokeStyle = ctx.fillStyle = "red";
+    ctx.lineWidth = 2;
     ctx.strokeRect(x * s - vx, y * s - vy,
-      width * s, height * s);
-    throw new Error("Missing shadow sprite!");
+        width * s, height * s);
+    ctx.fillText((this.sprite + animation),
+        x * s - vx + 10, y * s - vy + 10);
+    return;
   }
   const xScale = width * s /
       (sprite.width - sprite.left - sprite.right);

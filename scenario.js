@@ -20,28 +20,27 @@ function speedrun(map, time) {
 function productionTest(gameMap, time) {
   gameMap.centerView(-15, 34);
   
-  const e = (name, x, y, direction) => gameMap.createEntity({name, x, y, direction}, time);
+  const e = (name, x, y, direction, data) => gameMap.createEntity({name, x, y, direction, data}, time);
   const l = (x, y, d, l) => createLane(gameMap, x, y, d, l, time);
   const p = (x, y, d, l) => createPipe(gameMap, x, y, d, l, time);
   const el = (x, y, d, l, s) => createPoles(gameMap, x, y, d, l, s, time);
   
   for (let i = 0; i < 5; i++) {
-    e(NAME.burnerDrill, -10, -7 + 2 * i, 3)
-        .energyStored = 150;
-    e(NAME.burnerDrill, -13, -6 + 2 * i, 1)
-        .energyStored = 150;
+    e(NAME.electricMiningDrill, -6 + 3 * i, 0, 2);
+    e(NAME.electricMiningDrill, -40 + 3 * i, -23, 2);
   }
-  l(-11, -6, 2, 17);
+  l(7, 3, 3, 18);
+  l(-11, 3, 2, 8);
   l(-11, 11, 3, 1);
+  el(7, -1, 3, 4);
   
-  for (let i = 0; i < 5; i++) {
-    e(NAME.burnerDrill, -20, -15 + 2 * i, 3)
-        .energyStored = 150;
-    e(NAME.burnerDrill, -23, -15 + 2 * i, 1)
-        .energyStored = 150;
-  }
+  l(-39, -20, 1, 18);
+  l(-21, -20, 2, 1);
+  e(NAME.undergroundBelt, -21, -19, 2, {});
+  e(NAME.undergroundBelt, -21, -16, 2, {undergroundUp: true});
   l(-21, -15, 2, 26);
   l(-21, 11, 1, 1);
+  el(-37, -19, 1, 4);
   
   for (let i = 0; i < 8; i++) {
     e(NAME.burnerDrill, -80, 34 + 2 * i, 1)
@@ -119,8 +118,8 @@ function productionTest(gameMap, time) {
   e(NAME.inserter, 34, 24, 1);
   el(34, 22);
   
-  e(NAME.offshorePump, 41, 35, 3);
-  p(40, 35, 3, 5);
+  e(NAME.offshorePump, 38, 35, 3);
+  p(37, 35, 3, 2);
   p(35, 35, 0, 10);
   e(NAME.boiler, 35, 23, 1)
       .fuelInventory.insert(I.coal, 5);

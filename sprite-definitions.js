@@ -160,6 +160,7 @@ export const S = {
   fastInserterHand: 15204, // 3
   longHandedInserter: 15207, // 4
   longHandedInserterHand: 15211, // 3
+  crudeOil: 15214, // 4
   
   ironOreItem: 16000,
   copperOreItem: 16000 + 1,
@@ -336,6 +337,10 @@ export const SPRITES = [
   {
     path: "graphics/resources/stone.png",
     sprites: resourceSprites(32 * 16, 8, 8),
+  },
+  {
+    path: "graphics/resources/crude-oil.png",
+    sprites: entitySprites(S.crudeOil, 74, 60, 4, 1, 19, 23, 14, 14),
   },
   {
     path: "graphics/entities/burner-mining-drill/burner-mining-drill-N.png",
