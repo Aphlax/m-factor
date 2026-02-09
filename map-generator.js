@@ -75,6 +75,37 @@ const RESOURCES = [
   },
 ];
 
+const TREES = [
+  [
+    [S.tree01a, S.tree01aShadow],
+    [S.tree01b, S.tree01bShadow],
+    [S.tree01c, S.tree01cShadow],
+    [S.tree01d, S.tree01dShadow],
+    [S.tree01e, S.tree01eShadow],
+  ],
+  [
+    [S.tree02a, S.tree02aShadow],
+    [S.tree02b, S.tree02bShadow],
+    [S.tree02c, S.tree02cShadow],
+    [S.tree02d, S.tree02dShadow],
+    [S.tree02e, S.tree02eShadow],
+  ],
+  [
+    [S.tree03a, S.tree03aShadow],
+    [S.tree03b, S.tree03bShadow],
+    [S.tree03c, S.tree03cShadow],
+    [S.tree03d, S.tree03dShadow],
+    [S.tree03e, S.tree03eShadow],
+  ],
+  [
+    [S.tree04a, S.tree04aShadow],
+    [S.tree04b, S.tree04bShadow],
+    [S.tree04c, S.tree04cShadow],
+    [S.tree04d, S.tree04dShadow],
+    [S.tree04e, S.tree04eShadow],
+  ],
+];
+
 const TOTAL_RESOURCE_FREQUENCY =
     RESOURCES.map(r => r.frequency)
     .reduce((a, b) => a + b);
@@ -124,6 +155,8 @@ MapGenerator.prototype.initialize = function() {
   this.resourceNoise = new PerlinNoise(randSeed(),
       0.025, 5, 2, 0.65)
   this.crudeOilNoise = new PointNoise(rand(), 4, 0.1);
+  this.treePointNoise = new PointNoise(rand(), 2, 0.8);
+  this.treeNoise = new PerlinNoise(randSeed());
 }
 
 MapGenerator.prototype.generateTiles = function (cx, cy) {
@@ -255,6 +288,43 @@ MapGenerator.prototype.generateResources = function (cx, cy, tiles) {
   }
   return resources.some(a => a?.length) ? resources : undefined;
 }
+
+MapGenerator.prototype.generateTrees = function(cx, cy, tiles, resources) {
+  const treePoints = this.treePointNoise.get(cx * 32, cy * 32, 32, 32);
+  const result = [], temp = [];
+  treeLoop:
+  for (let {x, y, value} of treePoints) {
+    let x_ = Math.round(x - cx * 32), y_ = Math.round(y - cy * 32);
+    if ((x_ && y_ && tiles[x_ - 1][y_ - 1] >= S.water) ||
+        (x_ && y_ < 32 && tiles[x_ - 1][y_] >= S.water) ||
+        (x_ < 32 && y_ && tiles[x_][y_ - 1] >= S.water) ||
+        (x_ < 32 && y_ < 32 && tiles[x_][y_] >= S.water)) continue;
+    if ((x_ && y_ && resources?.[x_ - 1]?.[y_ - 1]) ||
+        (x_ && resources?.[x_ - 1]?.[y_]) ||
+        (y_ && resources?.[x_]?.[y_ - 1]) ||
+        (resources?.[x_]?.[y_])) continue;
+    const score = this.treeNoise.get(x, y);
+    const limit = (score - 0.6) * 2.5;
+    if (value > limit) continue;
+    temp.length = 0; let total = 0;
+    for (let i = 0; i < TREES.length; i++) {
+      const v = this.treeNoise.get(x / 20 + i * 1000, y / 20 + 1000);
+      const vv = v**10;
+      temp.push(vv);
+      total += vv;
+    }
+    let i = 0, v = value / limit * total;
+    while (true) {
+      if (v < temp[i]) break;
+      v -= temp[i];
+      if (++i == temp.length) continue treeLoop;
+    }
+    const sprites = TREES[i][Math.floor(v / temp[i] * TREES[i].length)];
+    if (!sprites) continue;
+    result.push({x, y, sprites});
+  }
+  return result;
+};
 
 function createStarterPos(rand, r, dr, lake, others) {
   while(true) {

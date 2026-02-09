@@ -15,6 +15,7 @@ function Chunk(cx, cy) {
   this.y = cy;
   this.tiles = [];
   this.resources = undefined;
+  this.trees = [];
   this.mapBlocks = [];
   this.mapResources = undefined;
   this.minimapBlocks = [];
@@ -26,6 +27,7 @@ function Chunk(cx, cy) {
 Chunk.prototype.generate = function(mapGenerator) {
   this.tiles = mapGenerator.generateTiles(this.x, this.y);
   this.resources = mapGenerator.generateResources(this.x, this.y, this.tiles);
+  this.trees = mapGenerator.generateTrees(this.x, this.y, this.tiles, this.resources);
   
   this.mapBlocks = [];
   for (let x = 0; x < SIZE; x++) {
@@ -229,6 +231,15 @@ Chunk.prototype.drawMap = function(ctx, view) {
     ctx.restore();
   }
   
+  ctx.fillStyle = "#11800088";
+  for (let {x, y} of this.trees) {
+    ctx.fillRect(
+        Math.floor((x - 1) * s - vx),
+        Math.floor((y - 1) * s - vy),
+        Math.ceil(2 * s), Math.ceil(2 * s));
+    window.numberOtherDraws++;
+  }
+  
   if (!SETTINGS.debugInfo) return;
   // Chunk boundaries.
   const lx = x0 * s - vx, ly = y0 * s - vy;
@@ -266,6 +277,29 @@ Chunk.prototype.drawResources = function(ctx, view) {
           sx, sy, resourceSize, resourceSize);
       window.numberImageDraws++;
     }
+  }
+};
+
+Chunk.prototype.drawTrees = function(ctx, view, index) {
+  const {x: vx, y: vy, width: vw, height: vh, scale: s} = view;
+  for (let tree of this.trees) {
+    const sprite = SPRITES.get(tree.sprites[index]);
+    const xScale = s /
+        (sprite.width - sprite.left - sprite.right);
+    const yScale = s /
+        (sprite.height - sprite.top - sprite.bottom);
+    const sx = Math.floor((tree.x - 0.5) * s - vx -
+            sprite.left * xScale),
+        sy = Math.floor((tree.y - 0.5) * s - vy -
+            sprite.top * yScale),
+        sw = Math.ceil(sprite.width * xScale),
+        sh = Math.ceil(sprite.height * yScale);
+    if (sx > vw || sx < -sw || sy > vh || sy < -sh) continue;
+    ctx.drawImage(
+        sprite.image,
+        sprite.x, sprite.y,
+        sprite.width, sprite.height,
+        sx, sy, sw, sh);
   }
 };
 

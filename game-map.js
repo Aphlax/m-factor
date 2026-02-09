@@ -2,7 +2,7 @@ import {MapGenerator, TestGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {MINIMAP_SCALE_BOUNDRY} from './game-map-input.js';
 import {S} from './sprite-definitions.js';
-import {TYPE, STATE, MAX_SIZE, MAX_LOGISTIC_CONNECTION, MAX_UNDERGROUND_CONNECTION, ENERGY, DIRECTIONS, MAX_WIRE_REACH, MAX_SHADOW, MAX_ELECTRIC_SUPPLY} from './entity-properties.js';
+import {TYPE, STATE, MAX_SIZE, MAX_LOGISTIC_CONNECTION, MAX_UNDERGROUND_CONNECTION, ENERGY, DIRECTIONS, MAX_WIRE_REACH, MAX_SHADOW, MAX_ELECTRIC_SUPPLY, MAX_TREE_SIZE} from './entity-properties.js';
 import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
 import {FluidNetwork} from './fluid-network.js';
@@ -176,6 +176,15 @@ GameMap.prototype.draw = function(ctx, time) {
   window.numberItemDraws = window.numberImageDraws - countBeforeItems;
   ctx.globalAlpha = 0.5;
   for (let [x, chunks] of this.chunks.entries()) {
+    if ((x + 1) * size <= this.view.x - this.view.scale * MAX_TREE_SIZE) continue;
+    if (x * size > this.view.width + this.view.x) continue;
+    for (let [y, chunk] of chunks.entries()) {
+  	if ((y + 1) * size <= this.view.y - this.view.scale * 2) continue;
+      if (y * size > this.view.height + this.view.y + 1 * this.view.scale) continue;
+      chunk.drawTrees(ctx, this.view, /*shadow*/ 1);
+    }
+  }
+  for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= this.view.x - this.view.scale * (MAX_SIZE + MAX_SHADOW)) continue;
     if (x * size > this.view.width + this.view.x) continue;
     for (let [y, chunk] of chunks.entries()) {
@@ -248,6 +257,15 @@ GameMap.prototype.draw = function(ctx, time) {
           entity.drawWireConnections(ctx, this.view);
         }
       }
+    }
+  }
+  for (let [x, chunks] of this.chunks.entries()) {
+    if ((x + 1) * size <= this.view.x - this.view.scale * 2) continue;
+    if (x * size > this.view.width + this.view.x) continue;
+    for (let [y, chunk] of chunks.entries()) {
+  	if ((y + 1) * size <= this.view.y - this.view.scale * 2) continue;
+      if (y * size > this.view.height + this.view.y + MAX_TREE_SIZE * this.view.scale) continue;
+      chunk.drawTrees(ctx, this.view, /*shadow*/ 0);
     }
   }
   window.numberEntityDraws = window.numberImageDraws -

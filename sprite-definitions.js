@@ -161,6 +161,46 @@ export const S = {
   longHandedInserter: 15207, // 4
   longHandedInserterHand: 15211, // 3
   crudeOil: 15214, // 4
+  tree01a: 15218, // 4
+  tree01b: 15222, // 4
+  tree01c: 15226, // 4
+  tree01d: 15230, // 4
+  tree01e: 15234, // 4
+  tree02a: 15238, // 4
+  tree02b: 15242, // 4
+  tree02c: 15246, // 4
+  tree02d: 15250, // 4
+  tree02e: 15254, // 4
+  tree03a: 15258, // 4
+  tree03b: 15262, // 4
+  tree03c: 15266, // 4
+  tree03d: 15270, // 4
+  tree03e: 15274, // 4
+  tree04a: 15278, // 4
+  tree04b: 15282, // 4
+  tree04c: 15286, // 4
+  tree04d: 15290, // 4
+  tree04e: 15294, // 4
+  tree01aShadow: 15298, // 4
+  tree01bShadow: 15302, // 4
+  tree01cShadow: 15306, // 4
+  tree01dShadow: 15310, // 4
+  tree01eShadow: 15314, // 4
+  tree02aShadow: 15318, // 4
+  tree02bShadow: 15322, // 4
+  tree02cShadow: 15326, // 4
+  tree02dShadow: 15330, // 4
+  tree02eShadow: 15334, // 4
+  tree03aShadow: 15338, // 4
+  tree03bShadow: 15342, // 4
+  tree03cShadow: 15346, // 4
+  tree03dShadow: 15350, // 4
+  tree03eShadow: 15354, // 4
+  tree04aShadow: 15358, // 4
+  tree04bShadow: 15362, // 4
+  tree04cShadow: 15366, // 4
+  tree04dShadow: 15370, // 4
+  tree04eShadow: 15374, // 4
   
   ironOreItem: 16000,
   copperOreItem: 16000 + 1,
@@ -342,6 +382,169 @@ export const SPRITES = [
     path: "graphics/resources/crude-oil.png",
     sprites: entitySprites(S.crudeOil, 74, 60, 4, 1, 19, 23, 14, 14),
   },
+  {
+    path: "graphics/resources/trees/tree-01-a.png",
+    sprites: entitySprites(S.tree01a, 93, 171, 3, 1, 32, 29, 140, -1),
+  },
+  {
+    path: "graphics/resources/trees/tree-01-b.png",
+    sprites: entitySprites(S.tree01b, 91, 165, 3, 1, 29, 30, 134, -1),
+  },
+  {
+    path: "graphics/resources/trees/tree-01-c.png",
+    sprites: entitySprites(S.tree01c, 93, 167, 3, 1, 32, 29, 135, 0),
+  },
+  {
+    path: "graphics/resources/trees/tree-01-d.png",
+    sprites: entitySprites(S.tree01d, 95, 166, 3, 1, 31, 32, 135, -1),
+  },
+  {
+    path: "graphics/resources/trees/tree-01-e.png",
+    sprites: entitySprites(S.tree01e, 97, 165, 3, 1, 30, 35, 132, 1),
+  },
+  {
+    path: "graphics/resources/trees/tree-02-a.png",
+    sprites: entitySprites(S.tree02a, 93, 171, 3, 1, 32, 29, 140, -1),
+  },
+  {
+    path: "graphics/resources/trees/tree-02-b.png",
+    sprites: entitySprites(S.tree02b, 92, 142, 3, 1, 32, 28, 114, -4),
+  },
+  {
+    path: "graphics/resources/trees/tree-02-c.png",
+    sprites: entitySprites(S.tree02c, 90, 144, 3, 1, 32, 26, 115, -3),
+  },
+  {
+    path: "graphics/resources/trees/tree-02-d.png",
+    sprites: entitySprites(S.tree02d, 90, 173, 3, 1, 24, 34, 139, 2),
+  },
+  {
+    path: "graphics/resources/trees/tree-02-e.png",
+    sprites: entitySprites(S.tree02e, 98, 150, 3, 1, 34, 32, 120, -2),
+  },
+  {
+    path: "graphics/resources/trees/tree-03-a.png",
+    sprites: entitySprites(S.tree03a, 141, 174, 3, 1, 60, 49, 135, 7),
+  },
+  {
+    path: "graphics/resources/trees/tree-03-b.png",
+    sprites: entitySprites(S.tree03b, 171, 179, 3, 1, 38, 101, 141, 6),
+  },
+  {
+    path: "graphics/resources/trees/tree-03-c.png",
+    sprites: entitySprites(S.tree03c, 184, 153, 3, 1, 63, 89, 117, 4),
+  },
+  {
+    path: "graphics/resources/trees/tree-03-d.png",
+    sprites: entitySprites(S.tree03d, 103, 145, 3, 1, 27, 44, 107, 6),
+  },
+  {
+    path: "graphics/resources/trees/tree-03-e.png",
+    sprites: entitySprites(S.tree03e, 117, 130, 3, 1, 30, 55, 96, 2),
+  },
+  {
+    path: "graphics/resources/trees/tree-04-a.png",
+    sprites: entitySprites(S.tree04a, 108, 165, 3, 1, 41, 35, 123, 10),
+  },
+  {
+    path: "graphics/resources/trees/tree-04-b.png",
+    sprites: entitySprites(S.tree04b, 92, 170, 3, 1, 29, 31, 130, 8),
+  },
+  {
+    path: "graphics/resources/trees/tree-04-c.png",
+    sprites: entitySprites(S.tree04c, 104, 169, 3, 1, 32, 40, 133, 4),
+  },
+  {
+    path: "graphics/resources/trees/tree-04-d.png",
+    sprites: entitySprites(S.tree04d, 119, 158, 3, 1, 47, 40, 123, 3),
+  },
+  {
+    path: "graphics/resources/trees/tree-04-e.png",
+    sprites: entitySprites(S.tree04e, 110, 172, 3, 1, 43, 35, 136, 4),
+  },
+  {
+    path: "graphics/resources/trees/tree-01-a-shadow.png",
+    sprites: entitySprites(S.tree01aShadow, 163, 67, 4, 1, 5, 126, 19, 16),
+  },
+  {
+    path: "graphics/resources/trees/tree-01-b-shadow.png",
+    sprites: entitySprites(S.tree01bShadow, 159, 67, 4, 1, 2, 125, 19, 16),
+  },
+  {
+    path: "graphics/resources/trees/tree-01-c-shadow.png",
+    sprites: entitySprites(S.tree01cShadow, 155, 65, 4, 1, 4, 119, 14, 19),
+  },
+  {
+    path: "graphics/resources/trees/tree-01-d-shadow.png",
+    sprites: entitySprites(S.tree01dShadow, 145, 67, 4, 1, 3, 110, 20, 15),
+  },
+  {
+    path: "graphics/resources/trees/tree-01-e-shadow.png",
+    sprites: entitySprites(S.tree01eShadow, 159, 69, 4, 1, -2, 129, 18, 19),
+  },
+  {
+    path: "graphics/resources/trees/tree-02-a-shadow.png",
+    sprites: entitySprites(S.tree02aShadow, 196, 64, 4, 1, -8, 172, 18, 14),
+  },
+  {
+    path: "graphics/resources/trees/tree-02-b-shadow.png",
+    sprites: entitySprites(S.tree02bShadow, 186, 68, 4, 1, -8, 162, 18, 18),
+  },
+  {
+    path: "graphics/resources/trees/tree-02-c-shadow.png",
+    sprites: entitySprites(S.tree02cShadow, 176, 64, 4, 1, -2, 146, 18, 14),
+  },
+  {
+    path: "graphics/resources/trees/tree-02-d-shadow.png",
+    sprites: entitySprites(S.tree02dShadow, 200, 66, 4, 1, -13, 181, 21, 13),
+  },
+  {
+    path: "graphics/resources/trees/tree-02-e-shadow.png",
+    sprites: entitySprites(S.tree02eShadow, 204, 70, 4, 1, -12, 184, 12, 26),
+  },
+  {
+    path: "graphics/resources/trees/tree-03-a-shadow.png",
+    sprites: entitySprites(S.tree03aShadow, 153, 101, 4, 1, -5, 126, 50, 19),
+  },
+  {
+    path: "graphics/resources/trees/tree-03-b-shadow.png",
+    sprites: entitySprites(S.tree03bShadow, 203, 117, 4, 1, -2, 173, 55, 30),
+  },
+  {
+    path: "graphics/resources/trees/tree-03-c-shadow.png",
+    sprites: entitySprites(S.tree03cShadow, 323, 97, 4, 1, 177, 114, 24, 41),
+  },
+  {
+    path: "graphics/resources/trees/tree-03-d-shadow.png",
+    sprites: entitySprites(S.tree03dShadow, 159, 79, 4, 1, -3, 130, 25, 22),
+  },
+  {
+    path: "graphics/resources/trees/tree-03-e-shadow.png",
+    sprites: entitySprites(S.tree03eShadow, 167, 69, 4, 1, -7, 142, 18, 19),
+  },
+  {
+    path: "graphics/resources/trees/tree-04-a-shadow.png",
+    sprites: entitySprites(S.tree04aShadow, 160, 66, 4, 1, -3, 131, 21, 13),
+  },
+  {
+    path: "graphics/resources/trees/tree-04-b-shadow.png",
+    sprites: entitySprites(S.tree04bShadow, 154, 78, 4, 1, -8, 130, 28, 18),
+  },
+  {
+    path: "graphics/resources/trees/tree-04-c-shadow.png",
+    sprites: entitySprites(S.tree04cShadow, 158, 70, 4, 1, -8, 134, 21, 17),
+  },
+  {
+    path: "graphics/resources/trees/tree-04-d-shadow.png",
+    sprites: entitySprites(S.tree04dShadow, 158, 78, 4, 1, -4, 130, 23, 23),
+  },
+  {
+    path: "graphics/resources/trees/tree-04-e-shadow.png",
+    sprites: entitySprites(S.tree04eShadow, 138, 88, 4, 1, -4, 110, 32, 24),
+  },
+  
+  // Entities.
+  
   {
     path: "graphics/entities/burner-mining-drill/burner-mining-drill-N.png",
     sprites: entitySprites(36 * 16, 87, 95, 4, 8, 12, 11, 18, 13),

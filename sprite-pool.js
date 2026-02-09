@@ -65,10 +65,11 @@ SpritePool.prototype.draw = function(ctx, time) {
       
   // Debug.
   if (this.current != this.total) return;
+  ctx.lineWidth = 1;
   ctx.fillStyle = "lightgrey";
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   
-  let sprite = S.longHandedInserterHand;
+  let sprite = S.tree01a;
   let shadow = 0;//S.electricMiningDrillShadowE;
   const animShad = false;
   let light = 0; // S.boilerLightW;

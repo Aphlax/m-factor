@@ -59,6 +59,9 @@ export const MAX_HEIGHT = 2;
 /** Longest extra length of any shadow. */
 export const MAX_SHADOW = 3;
 
+/** Highest tree. */
+export const MAX_TREE_SIZE = 8;
+
 /** Maximal wire reach of any pole. */
 export const MAX_WIRE_REACH = 7;
 
