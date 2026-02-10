@@ -1,6 +1,6 @@
 import {COLOR} from './ui-properties.js';
 import {STATE, RESOURCE_NAMES} from './entity-properties.js';
-import {SPRITES} from './sprite-pool.js';
+import {SPRITES, S} from './sprite-pool.js';
 import {CHOICE} from './ui-choice.js';
 import {ITEMS, FLUIDS, I} from './item-definitions.js';
 
@@ -423,4 +423,84 @@ UiInserterFilters.prototype.touchEnd = function(e) {
   this.pressed = 0;
 }
 
-export {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters};
+function UiTree(parent, x, y) {
+  this.parent = parent;
+  this.x = x;
+  this.y = y;
+  this.maxProgress = 0;
+  this.tree = undefined;
+  this.progress = 0;
+  this.pressed = false;
+}
+
+UiTree.prototype.set = function(tree) {
+  if (this.tree != tree) {
+    this.progress = 0;
+  }
+  this.tree = tree;
+};
+
+UiTree.prototype.setMaxProgress = function(maxProgress) {
+  this.maxProgress = maxProgress;
+  return this;
+};
+
+UiTree.prototype.draw = function(ctx, realTime) {
+  const x = Math.floor(this.parent.x + this.x),
+        y = Math.floor(this.parent.y + this.y);
+  
+  ctx.fillStyle = this.pressed ?
+      COLOR.buttonBackgroundPressed :
+      COLOR.buttonBackground;
+  ctx.fillRect(x - 44, y, 88, 88);
+  
+  const sprite = SPRITES.get(S.chopIcon);
+  ctx.drawImage(sprite.image,
+      sprite.x, sprite.y,
+      sprite.width, sprite.height,
+      x - 38, y + 4, 80, 80);
+  window.numberImageDraws++;
+  if (this.progress) {
+    ctx.fillStyle = COLOR.buttonBackgroundPressed;
+    ctx.beginPath();
+    ctx.moveTo(x, y + 44);
+    ctx.arc(x, y + 44, 40, -0.5 * Math.PI,
+        (this.progress / this.maxProgress * 2 - 0.5) * Math.PI);
+    ctx.fill();
+  }
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = COLOR.buttonBorder;
+  ctx.strokeRect(x - 44, y, 88, 88);
+  window.numberOtherDraws += 2;
+};
+
+UiTree.prototype.touchStart = function(e) {
+  if (!this.tree) return;
+  const x = Math.floor(this.parent.x + this.x),
+        y = Math.floor(this.parent.y + this.y);
+  const {clientX: px, clientY: py} = e.touches[0];
+ 
+  if (px < x - 44 || px > x + 44 ||
+      py < y || py > y + 88) return;
+  this.pressed = true;
+};
+
+UiTree.prototype.touchMove = function(e) {
+  if (this.pressed) {
+    this.pressed = false;
+  }
+};
+
+UiTree.prototype.touchEnd = function(e) {
+  if (!this.pressed) return;
+  this.pressed = false;
+  
+  if (++this.progress == this.maxProgress) {
+    this.parent.ui.game.gameMap.getTreeAt(
+        this.tree.x, this.tree.y, /*remove*/ true);
+    this.parent.set();
+  }
+}
+
+
+export {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTree};

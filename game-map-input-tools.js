@@ -1,5 +1,5 @@
 import {ENTITIES} from './entity-definitions.js';
-import {COLOR as ENTITY_COLOR, DIRECTIONS} from './entity-properties.js';
+import {COLOR as ENTITY_COLOR, DIRECTIONS, NATURAL} from './entity-properties.js';
 import {SPRITES, S} from './sprite-pool.js';
 import {TOOL, COLOR} from './ui-properties.js';
 import {GMC} from './game-map-converter.js';
@@ -55,9 +55,11 @@ SelectionTool.prototype.isClickMode = function() {
 };
 
 SelectionTool.prototype.computeEntities = function() {
-  this.entities = this.gameMap.getEntitiesIn(
-      Math.min(this.x1, this.x2), Math.min(this.y1, this.y2),
-      Math.abs(this.x1 - this.x2) + 1, Math.abs(this.y1 - this.y2) + 1);
+  const x = Math.min(this.x1, this.x2),
+      y = Math.min(this.y1, this.y2),
+      w = Math.abs(this.x1 - this.x2) + 1,
+      h = Math.abs(this.y1 - this.y2) + 1;
+  this.entities = this.gameMap.getEntitiesIn(x, y, w, h);
   const display = new Map();
   for (let entity of this.entities) {
     if (display.has(entity.name)) {
@@ -68,6 +70,14 @@ SelectionTool.prototype.computeEntities = function() {
     const def = ENTITIES.get(name);
     const sprite = SPRITES.get(def.icon);
     display.set(name, {name, sprite, amount: 1});
+  }
+  const trees = this.type != SELECTION_TYPE.bulldoze ? [] :
+      this.gameMap.getTreesIn(x, y, w, h);
+  if (trees.length) {
+    this.entities.push(...trees);
+    const sprite = SPRITES.get(S.treeIcon);
+    display.set(NATURAL.tree,
+        {name: NATURAL.tree, sprite, amount: trees.length});
   }
   this.entityDisplay = [...display.values()]
       .sort((a, b) => a.amount != b.amount ?
@@ -183,7 +193,10 @@ SelectionTool.prototype.touchEnd = function(sx, sy, shortTouch, last) {
       this.ui.buildMenu.trySelectEntry(TOOL.paste);
       return this.ui.gameMapInput.pasteTool;
     } else if (this.type == SELECTION_TYPE.bulldoze) {
-      this.gameMap.deleteEntities(this.entities);
+      this.gameMap.deleteEntities(this.entities.filter(e => e.type));
+      for (let tree of this.entities.filter(e => !e.type)) {
+        this.gameMap.getTreeAt(tree.x, tree.y, /*remove*/ true);
+      }
       return;
     }
   } else if (this.mode == SELECTION_MODE.sit) {
@@ -213,7 +226,8 @@ SelectionTool.prototype.draw = function(ctx) {
       ENTITY_COLOR.greenHighlightBorder : ENTITY_COLOR.redHighlightBorder;
   for (let entity of this.entities) {
     const x1 = entity.x * s + ox, y1 = entity.y * s + oy,
-        x2 = x1 + entity.width * s, y2 = y1 + entity.height * s,
+        x2 = x1 + (entity.width ?? 1) * s,
+        y2 = y1 + (entity.height ?? 1) * s,
         d = 0.3 * s;
     ctx.beginPath();
     ctx.moveTo(x1, y1 + d); ctx.lineTo(x1, y1); ctx.lineTo(x1 + d, y1);
@@ -553,6 +567,7 @@ PasteTool.prototype.draw = function(ctx) {
         Math.floor(y1 - sprite.top * yScale),
         Math.ceil(sprite.width * xScale),
         Math.ceil(sprite.height * yScale));
+    window.numberImageDraws++;
     if (state != 1) {
       if (state != lastState) {
         ctx.globalAlpha = 1;
@@ -627,6 +642,7 @@ PasteTool.prototype.draw = function(ctx) {
     ctx.drawImage(icon.image,
         icon.x, icon.y, icon.width, icon.height,
         x - 20, y - 20, 40, 40);
+    window.numberImageDraws++;
   }
   
   if (this.mode != PASTE_MODE.adjust) {

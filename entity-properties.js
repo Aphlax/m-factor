@@ -116,6 +116,11 @@ export const COLOR = {
   mineDrillArea: "#AADDFF30",
 };
 
+export const NATURAL = {
+  resource: -1,
+  tree: -2,
+};
+
 export const RESOURCE_NAMES = {
   iron: 1,
   copper: 2,

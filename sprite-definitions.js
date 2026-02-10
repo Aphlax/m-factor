@@ -259,19 +259,21 @@ export const S = {
   pipeToGroundIcon: 16500 + 18,
   electricMiningDrillIcon: 16500 + 19,
   splitterIcon: 16500 + 20,
-  copyIcon: 16500 + 21,
-  snakeIcon: 16500 + 22,
-  undergroundConnectIcon: 16500 + 23,
-  burnerInserterIcon: 16500 + 24,
-  fastInserterIcon: 16500 + 25,
-  longHandedInserterIcon: 16500 + 26,
-  gridDragIcon: 16500 + 27,
-  pasteIcon: 16500 + 28,
-  tickIcon: 16500 + 29,
-  moveIcon: 16500 + 30,
-  copyWhiteIcon: 16500 + 31,
-  bulldozeIcon: 16500 + 32,
-  bulldozeWhiteIcon: 16500 + 33,
+  copyIcon: 16521,
+  snakeIcon: 16522,
+  undergroundConnectIcon: 16523,
+  burnerInserterIcon: 16524,
+  fastInserterIcon: 16525,
+  longHandedInserterIcon: 16526,
+  gridDragIcon: 16527,
+  pasteIcon: 16528,
+  tickIcon: 16529,
+  moveIcon: 16530,
+  copyWhiteIcon: 16531,
+  bulldozeIcon: 16532,
+  bulldozeWhiteIcon: 16533,
+  treeIcon: 16534,
+  chopIcon: 16535,
   
   smoke: 17000,
   
@@ -1103,6 +1105,10 @@ export const SPRITES = [
     path: "graphics/items/long-handed-inserter.png",
     sprites: itemSprites(S.longHandedInserterItem, S.longHandedInserterIcon),
   },
+  {
+    path: "graphics/items/tree.png",
+    sprites: itemSprites(undefined, S.treeIcon),
+  },
   
   // Misc.
   {
@@ -1165,6 +1171,10 @@ export const SPRITES = [
     path: "graphics/icons/bulldoze-white.png",
     sprites: sprites(S.bulldozeWhiteIcon, 64, 64, 1, 1),
   },
+  {
+    path: "graphics/icons/chop.png",
+    sprites: sprites(S.chopIcon, 80, 80, 1, 1),
+  },
 ];
 
 function sprites(id, width, height, xCount, yCount) {
@@ -1217,7 +1227,7 @@ function halfBeltSprites(id, width, height,
 
 function itemSprites(id, iconId) {
   return [
-    {id, ...rect(64)},
+    ...(id ? [{id, ...rect(64)}] : []),
     ...(iconId ? [{id: iconId, ...rect(0, 0, 64, 64)}] : []),
   ];
 }

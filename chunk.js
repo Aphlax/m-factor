@@ -234,8 +234,8 @@ Chunk.prototype.drawMap = function(ctx, view) {
   ctx.fillStyle = "#11800088";
   for (let {x, y} of this.trees) {
     ctx.fillRect(
-        Math.floor((x - 1) * s - vx),
-        Math.floor((y - 1) * s - vy),
+        Math.floor((x - 0.5) * s - vx),
+        Math.floor((y - 0.5) * s - vy),
         Math.ceil(2 * s), Math.ceil(2 * s));
     window.numberOtherDraws++;
   }
@@ -288,9 +288,9 @@ Chunk.prototype.drawTrees = function(ctx, view, index) {
         (sprite.width - sprite.left - sprite.right);
     const yScale = s /
         (sprite.height - sprite.top - sprite.bottom);
-    const sx = Math.floor((tree.x - 0.5) * s - vx -
+    const sx = Math.floor(tree.x * s - vx -
             sprite.left * xScale),
-        sy = Math.floor((tree.y - 0.5) * s - vy -
+        sy = Math.floor(tree.y * s - vy -
             sprite.top * yScale),
         sw = Math.ceil(sprite.width * xScale),
         sh = Math.ceil(sprite.height * yScale);

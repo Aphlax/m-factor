@@ -276,6 +276,7 @@ export function drawInserterHand(ctx, view, time) {
   ctx.setTransform();
 }
 
+// This function is also called for resources and trees.
 export function drawSelection(ctx, view) {
   const {x: vx, y: vy, width: vw, height: vh, scale: s} = view;
   const {x, y, width, height} = this;

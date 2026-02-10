@@ -294,15 +294,15 @@ MapGenerator.prototype.generateTrees = function(cx, cy, tiles, resources) {
   const result = [], temp = [];
   treeLoop:
   for (let {x, y, value} of treePoints) {
-    let x_ = Math.round(x - cx * 32), y_ = Math.round(y - cy * 32);
-    if ((x_ && y_ && tiles[x_ - 1][y_ - 1] >= S.water) ||
-        (x_ && y_ < 32 && tiles[x_ - 1][y_] >= S.water) ||
-        (x_ < 32 && y_ && tiles[x_][y_ - 1] >= S.water) ||
-        (x_ < 32 && y_ < 32 && tiles[x_][y_] >= S.water)) continue;
-    if ((x_ && y_ && resources?.[x_ - 1]?.[y_ - 1]) ||
-        (x_ && resources?.[x_ - 1]?.[y_]) ||
-        (y_ && resources?.[x_]?.[y_ - 1]) ||
-        (resources?.[x_]?.[y_])) continue;
+    let x_ = Math.floor(x - cx * 32), y_ = Math.floor(y - cy * 32);
+    if ((tiles[x_][y_] >= S.water) ||
+        (y_ < 31 && tiles[x_][y_ + 1] >= S.water) ||
+        (x_ < 31 && tiles[x_ + 1][y_] >= S.water) ||
+        (x_ < 31 && y_ < 31 && tiles[x_ + 1][y_ + 1] >= S.water)) continue;
+    if ((resources?.[x_]?.[y_]) ||
+        (resources?.[x_]?.[y_ + 1]) ||
+        (resources?.[x_ + 1]?.[y_]) ||
+        (resources?.[x_ + 1]?.[y_ + 1])) continue;
     const score = this.treeNoise.get(x, y);
     const limit = (score - 0.6) * 2.5;
     if (value > limit) continue;

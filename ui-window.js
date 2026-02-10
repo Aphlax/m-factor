@@ -1,10 +1,11 @@
 import {UiInventory, UiFluidInventory} from './ui-inventory.js';
-import {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters} from './ui-components.js';
+import {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTree} from './ui-components.js';
 import {UiButton, BUTTON} from './ui-button.js';
 import {UiChoice, CHOICE} from './ui-choice.js';
 import {COLOR} from './ui-properties.js';
-import {TYPE, RESOURCE_LABELS, ENERGY} from './entity-properties.js';
+import {TYPE, RESOURCE_LABELS, ENERGY, NATURAL} from './entity-properties.js';
 import {S} from './sprite-pool.js';
+import {SETTINGS} from './storage.js';
 
 const OPEN_HEIGHT = 44 + 2 * 46;
 const ANIMATION_SPEED = OPEN_HEIGHT / 100;
@@ -18,8 +19,9 @@ const MIN_Y = 150;
   upgrade
   downgrade
   delete
-  info?
+  info
 */
+
 
 function UiWindow(ui, canvas) {
   this.ui = ui;
@@ -75,14 +77,23 @@ UiWindow.prototype.draw = function(ctx, time) {
   ctx.strokeRect(-2, y, width + 4, 32);
   window.numberOtherDraws++;
   
-  if (this.selectedEntity) {
+  const entity = this.selectedEntity;
+  if (entity) {
     ctx.font = "20px monospace";
     ctx.textBaseline = "middle";
     ctx.fillStyle = COLOR.primary;
-    const label = this.selectedEntity.label ||
-        RESOURCE_LABELS[this.selectedEntity.id];
+    const label = entity.label ||
+        RESOURCE_LABELS[entity.id] ||
+        "Tree";
     ctx.fillText(label, 8, y + 17);
     window.numberOtherDraws++;
+    
+    if (SETTINGS.debugInfo) {
+      const info = entity.type ?
+          entity.x + " " + entity.y :
+          entity.x.toFixed(1) + " " + entity.y.toFixed(1);
+      ctx.fillText(info, width / 2 + 10, y + 17);
+    }
   }
   
   ctx.beginPath();
@@ -210,8 +221,13 @@ UiWindow.prototype.initialize = function() {
   };
   this.defaultUi.all = Object.values(this.defaultUi);
   
-  this.entityUis.set(-1, { // Resource.
+  this.entityUis.set(NATURAL.resource, {
     resource: new UiResource(this, 10, 40),
+  });
+  
+  this.entityUis.set(NATURAL.tree, {
+    tree: new UiTree(this, this.canvasWidth / 2, 40)
+        .setMaxProgress(3),
   });
   
   this.entityUis.set(TYPE.mine, {
@@ -308,9 +324,14 @@ UiWindow.prototype.set = function(selectedEntity) {
   this.x = this.xTarget = 0;
   this.entityUi = this.entityUis.get(selectedEntity.type);
   
-  if (!selectedEntity.type) { // Resource.
-    this.entityUi = this.entityUis.get(-1);
-    this.entityUi.resource.set(selectedEntity);
+  if (!selectedEntity.type) {
+    if (selectedEntity.id) {
+      this.entityUi = this.entityUis.get(NATURAL.resource);
+      this.entityUi.resource.set(selectedEntity);
+    } else if (selectedEntity) {
+      this.entityUi = this.entityUis.get(NATURAL.tree);
+      this.entityUi.tree.set(selectedEntity);
+    }
   } else if (selectedEntity.type == TYPE.mine) {
     this.entityUi.progress.set(selectedEntity);
   } else if (selectedEntity.type == TYPE.chest) {

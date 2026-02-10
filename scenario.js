@@ -153,6 +153,13 @@ function productionTest(gameMap, time) {
   e(NAME.inserter, -10, 9, 1);
   e(NAME.inserter, -7, 11, 2);
   el(-10, 8);
+  
+  gameMap.getTreeAt(-77.5, -11.5, true);
+  gameMap.getTreeAt(33.5, 7.5, true);
+  gameMap.getTreeAt(33.5, -11.5, true);
+  for (let {x, y} of gameMap.getTreesIn(21, 15, 45, 32)) {
+    gameMap.getTreeAt(x, y, true);
+  }
 };
 
 function inserterTest(gameMap, time) {

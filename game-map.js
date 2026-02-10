@@ -374,10 +374,16 @@ GameMap.prototype.canPlace = function(x, y, width, height, ignoredEntity) {
           continue;
         return false;
       }
-      for (let entity of this.chunks.get(i).get(j).entities) {
+      const chunk = this.chunks.get(i).get(j);
+      for (let entity of chunk.entities) {
         if (entity == ignoredEntity) continue;
         if (x + width > entity.x && x < entity.x + entity.width &&
             y + height > entity.y && y < entity.y + entity.height)
+          return false;
+      }
+      for (let {x: tx, y: ty} of chunk.trees) {
+        if (x + width > tx && x < tx + 1 &&
+            y + height > ty && y < ty + 1)
           return false;
       }
     }
@@ -700,20 +706,70 @@ GameMap.prototype.getResourceAt = function(x, y, remove) {
   const cy = Math.floor(y / SIZE);
   if (!this.chunks.get(cx).has(cy)) return;
   const chunk = this.chunks.get(cx).get(cy);
-  if (!chunk.resources || !chunk.resources[x - cx * SIZE]) return;
+  const ex = Math.floor(x - cx * SIZE),
+      ey = Math.floor(y - cy * SIZE);
+  if (!chunk.resources?.[ex]?.[ey]) {
+    return undefined;
+  }
   if (remove) {
-    const res = chunk.resources[x - cx * SIZE][y - cy * SIZE];
-    delete chunk.resources[x - cx * SIZE][y - cy * SIZE];
+    const res = chunk.resources[ex][ey];
+    delete chunk.resources[ex][ey];
     return res;
   }
-  return chunk.resources[x - cx * SIZE][y - cy * SIZE];
+  return chunk.resources[ex][ey];
+};
+
+GameMap.prototype.getTreeAt = function(x, y, remove) {
+  const cx1 = Math.floor((x - 1) / SIZE);
+  const cx2 = Math.floor(x / SIZE);
+  const cy1 = Math.floor((y - 1) / SIZE);
+  const cy2 = Math.floor(y / SIZE);
+  for (let cx = cx1; cx <= cx2; cx++) {
+    if (!this.chunks.has(cx)) continue;
+    for (let cy = cy1; cy <= cy2; cy++) {
+      if (!this.chunks.get(cx).has(cy)) continue;
+      const chunk = this.chunks.get(cx).get(cy);
+      for (let tree of chunk.trees) {
+        if (x < tree.x || x >= tree.x + 1 ||
+            y < tree.y || y >= tree.y + 1) continue;
+        if (remove) {
+          const index = chunk.trees.indexOf(tree);
+          chunk.trees.splice(index, 1);
+        }
+        return tree;
+      }
+    }
+  }
+  return;
+};
+
+GameMap.prototype.getTreesIn = function(x, y, w, h) {
+  const cx1 = Math.floor((x - 1) / SIZE);
+  const cx2 = Math.floor((x + w) / SIZE);
+  const cy1 = Math.floor((y - 1) / SIZE);
+  const cy2 = Math.floor((y + h) / SIZE);
+  const result = [];
+  for (let cx = cx1; cx <= cx2; cx++) {
+    if (!this.chunks.has(cx)) continue;
+    for (let cy = cy1; cy <= cy2; cy++) {
+      if (!this.chunks.get(cx).has(cy)) continue;
+      const chunk = this.chunks.get(cx).get(cy);
+      for (let tree of chunk.trees) {
+        if (tree.x < x - 1 || tree.x >= x + w ||
+            tree.y < y || tree.y >= y + h) continue;
+        result.push(tree);
+      }
+    }
+  }
+  return result;
 };
 
 GameMap.prototype.getSelectedEntity = function(screenX, screenY) {
   const x = (this.view.x + screenX) / this.view.scale;
   const y = (this.view.y + screenY) / this.view.scale;
   return this.getEntityAt(x, y) ||
-      this.getResourceAt(Math.floor(x), Math.floor(y));
+      this.getResourceAt(x, y) ||
+      this.getTreeAt(x, y);
 };
 
 GameMap.prototype.tryCreateEntityFromScreen = function(screenX, screenY, direction, entityDef, data) {
