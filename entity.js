@@ -1,7 +1,7 @@
 import {Inventory} from './inventory.js';
 import {FluidTank} from './fluid-tank.js';
 import {ENTITIES} from './entity-definitions.js';
-import {TYPE, MAX_SIZE, NEVER, STATE, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ENERGY, MIN_SATISFACTION, DIRECTION} from './entity-properties.js';
+import {TYPE, NAME, MAX_SIZE, NEVER, STATE, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ENERGY, MIN_SATISFACTION, DIRECTION} from './entity-properties.js';
 import {ITEMS, I} from './item-definitions.js';
 import {RECIPES, FURNACE_FILTERS} from './recipe-definitions.js';
 import {S, SPRITES} from './sprite-pool.js';
@@ -117,14 +117,21 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.data.minePattern = 0;
     this.data.drillArea = def.drillArea;
     this.data.mineResources = [];
-    this.data.minedResource = 0;
-    this.data.mineOutputX = def.mineOutput[direction].x;
-    this.data.mineOutputY = def.mineOutput[direction].y;
+    this.data.minedResource = undefined;
     this.energySource = def.energySource;
     if (def.energySource == ENERGY.electric) {
       this.energyDrain = def.energyDrain;
     }
     this.energyConsumption = def.energyConsumption;
+    if (def.mineOutput) {
+      this.data.mineOutputX = def.mineOutput[direction].x;
+      this.data.mineOutputY = def.mineOutput[direction].y;
+    } else if (def.fluidOutputs) {
+      this.outputFluidTank = new FluidTank()
+          .setTanklets([I.crudeOil])
+          .setPipeConnections(def.fluidOutputs[direction]);
+      this.outputFluidTank.tanklets[0].capacity = 1000;
+    }
   } else if (this.type == TYPE.furnace) {
     this.state = STATE.missingItem;
     this.nextUpdate = NEVER;
@@ -445,31 +452,34 @@ Entity.prototype.update = function(gameMap, time) {
           break mine;
         }
         
-        // Modify resource.
-        resource.amount--;
-        if (resource.amount == 25 ||
-            resource.amount == 100 ||
-            resource.amount == 400 ||
-            resource.amount == 2000 ||
-            resource.amount == 8000 ||
-            resource.amount == 40000 ||
-            resource.amount == 200000) {
-          resource.sprite--;
-        } else if (!resource.amount) {
-          gameMap.getResourceAt(resource.x, resource.y,
-              /*remove*/ true);
+        if (this.name != NAME.pumpjack) {
+          // Modify resource.
+          resource.amount--;
+          if (resource.amount == 25 ||
+              resource.amount == 100 ||
+              resource.amount == 400 ||
+              resource.amount == 2000 ||
+              resource.amount == 8000 ||
+              resource.amount == 40000 ||
+              resource.amount == 200000) {
+            resource.sprite--;
+          } else if (!resource.amount) {
+            gameMap.getResourceAt(resource.x, resource.y,
+                /*remove*/ true);
+          }
         }
         
-        this.data.minedResource = resource.id;
+        this.data.minedResource = resource;
         state = STATE.itemReady;
       }
-      if (state == STATE.itemReady) {
+      if (state == STATE.itemReady &&
+          this.name != NAME.pumpjack) {
         const [outputEntity] = this.outputEntities;
         if (!outputEntity) {
           state = STATE.noOutput;
           break mine;
         }
-        const item = MINE_PRODUCTS[this.data.minedResource];
+        const item = MINE_PRODUCTS[this.data.minedResource.id];
         if (outputEntity.type == TYPE.belt ||
             outputEntity.type == TYPE.undergroundBelt ||
             outputEntity.type == TYPE.splitter) {
@@ -482,6 +492,16 @@ Entity.prototype.update = function(gameMap, time) {
         } else if (!outputEntity.insert(item, 1, this.nextUpdate)) {
           break mine;
         }
+        state = STATE.noEnergy;
+      }
+      if (state == STATE.itemReady &&
+          this.name == NAME.pumpjack) {
+        const amount = this.data.minedResource.amount;
+        const tanklet = this.outputFluidTank.tanklets[0];
+        if (tanklet.amount + amount > tanklet.capacity) {
+          break mine;
+        }
+        tanklet.amount += amount;
         state = STATE.noEnergy;
       }
       if (state == STATE.noEnergy) {

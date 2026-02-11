@@ -1,4 +1,4 @@
-import {TYPE, NEVER, STATE, ENERGY, FUEL_FILTERS, MINE_PATTERN} from './entity-properties.js';
+import {TYPE, NAME, NEVER, STATE, ENERGY, FUEL_FILTERS, MINE_PATTERN, RESOURCE_NAMES} from './entity-properties.js';
 
 
 export function insert(item, amount, time) {
@@ -352,6 +352,7 @@ export function connectInserter(other, time) {
 }
 
 export function connectMine(other, time) {
+  if (this.name == NAME.pumpjack) return;
   const x = this.x + this.data.mineOutputX,
         y = this.y + this.data.mineOutputY;
   if (other.x > x || other.x + other.width <= x ||
@@ -369,9 +370,13 @@ export function connectMine(other, time) {
 }
 
 export function connectResources(gameMap) {
-  this.data.mineResources.push(
-      ...MINE_PATTERN[this.data.drillArea].map(({x, y}) =>
-      gameMap.getResourceAt(this.x + x, this.y + y)));
+  for (let {x, y} of MINE_PATTERN[this.data.drillArea]) {
+    const res = gameMap.getResourceAt(this.x + x, this.y + y);
+    this.data.mineResources.push(!res ||
+        (this.name == NAME.pumpjack) !=
+        (res.id == RESOURCE_NAMES.crudeOil) ?
+        undefined : res);
+  }
 }
 
 export function setRecipe(recipe, time) {

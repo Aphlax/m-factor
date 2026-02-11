@@ -25,6 +25,17 @@ export const RECIPES = [
     duration: 3200,
   },
   {
+    prototypeName: "steel-plate",
+    inputs: [
+      {item: I.ironPlate, amount: 5},
+    ],
+    outputs: [
+      {item: I.steelPlate, amount: 1},
+    ],
+    entities: [NAME.stoneFurnace, NAME.electricFurnace],
+    duration: 16000,
+  },
+  {
     prototypeName: "iron-gear-wheel",
     inputs: [
       {item: I.ironPlate, amount: 2},
@@ -70,6 +81,8 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1],
     duration: 5000,
   },
+  
+  
   {
     prototypeName: "transport-belt",
     inputs: [
@@ -291,6 +304,20 @@ export const RECIPES = [
     ],
     entities: [NAME.assemblingMachine1],
     duration: 500,
+  },
+  {
+    prototypeName: "pumpjack",
+    inputs: [
+      {item: I.electronicCircuit, amount: 5},
+      {item: I.ironGear, amount: 10},
+      {item: I.pipe, amount: 10},
+      {item: I.steelPlate, amount: 5},
+    ],
+    outputs: [
+      {item: I.pumpjack, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 5000,
   },
   
   

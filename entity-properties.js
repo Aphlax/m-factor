@@ -39,6 +39,7 @@ export const NAME = {
   burnerInserter: 18,
   fastInserter: 19,
   longHandedInserter: 20,
+  pumpjack: 21,
 };
 
 /** Never value for next update. 285 years from now. */
@@ -148,6 +149,7 @@ export function resourceSprite(amount) {
 }
 
 export const MINE_PATTERN = {
+  [1]: [{x: 1, y: 1}], // Crude oil.
   [2]: [{x: 1, y: 0}, {x: 0, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}],
   [4]: [{x: 2, y: -1}, {x: 1, y: 2}, {x: 0, y: -1}, {x: -1, y: -1}, {x: 1, y: 1}, {x: 1, y: 0}, {x: -1, y: 2}, {x: 2, y: 1}, {x: -1, y: 0}, {x: 1, y: -1}, {x: 0, y: 2}, {x: -1, y: 1}, {x: 2, y: 2}, {x: 0, y: 0}, {x: 0, y: 1}, {x: 2, y: 0}],
   [5]: [{x: 1, y: 2}, {x: 0, y: 3}, {x: 1, y: -1}, {x: -1, y: 2}, {x: 2, y: 3}, {x: 0, y: 1}, {x: 3, y: 2}, {x: 2, y: 2}, {x: -1, y: 0}, {x: 2, y: 0}, {x: 3, y: 3}, {x: 0, y: -1}, {x: 0, y: 2}, {x: 3, y: -1}, {x: 2, y: 1}, {x: 3, y: 0}, {x: 1, y: 1}, {x: 2, y: -1}, {x: 3, y: 1}, {x: 0, y: 0}, {x: 1, y: 0}, {x: -1, y: -1}, {x: -1, y: 1}, {x: -1, y: 3}, {x: 1, y: 3}],

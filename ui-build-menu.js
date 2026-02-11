@@ -27,6 +27,7 @@ const BUILD_MENU = [
   NAME.assemblingMachine1,
   NAME.burnerDrill,
   NAME.electricMiningDrill,
+  NAME.pumpjack,
   NAME.stoneFurnace,
   NAME.electricFurnace,
   NAME.lab,

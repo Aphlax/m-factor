@@ -90,6 +90,11 @@ export const S = {
   splitterE: 142*16, // 32
   splitterS: 144*16, // 32
   splitterW: 146*16, // 32
+  pumpjackN: 148*16, // 40
+  pumpjackE: 150*16 + 8, // 40
+  pumpjackS: 153*16, // 40
+  pumpjackW: 155*16 + 8, // 40
+  pumpjackShadow: 158*16, // 40
   
   woodenChest: 15000,
   woodenChestShadow: 15001,
@@ -203,62 +208,65 @@ export const S = {
   tree04eShadow: 15374, // 4
   
   ironOreItem: 16000,
-  copperOreItem: 16000 + 1,
-  coalItem: 16000 + 2,
-  stoneItem: 16000 + 3,
-  ironPlateItem: 16000 + 4,
-  copperPlateItem: 16000 + 5,
-  ironGearItem: 16000 + 6,
-  copperCableItem: 16000 + 7,
-  electronicCircuitItem: 16000 + 8,
-  redScienceItem: 16000 + 9,
-  woodItem: 16000 + 10,
+  copperOreItem: 16001,
+  coalItem: 16002,
+  stoneItem: 16003,
+  ironPlateItem: 16004,
+  copperPlateItem: 16005,
+  ironGearItem: 16006,
+  copperCableItem: 16007,
+  electronicCircuitItem: 16008,
+  redScienceItem: 16009,
+  woodItem: 16010,
+  steelPlateItem: 16011,
   
-  waterFluid: 16050 + 0,
-  steamFluid: 16050 + 1,
+  waterFluid: 16050,
+  steamFluid: 16051,
+  crudeOilFluid: 16052,
   
-  burnerDrillItem: 16100 + 8,
-  woodenChestItem: 16100 + 9,
-  transportBeltItem: 16100 + 10,
-  inserterItem: 16100 + 11,
-  stoneFurnaceItem: 16100 + 12,
-  assemblingMachine1Item: 16100 + 13,
-  labItem: 16100 + 14,
-  offshorePumpItem: 16100 + 15,
-  pipeItem: 16100 + 16,
-  boilerItem: 16100 + 17,
-  steamEngineItem: 16100 + 18,
-  smallElectricPoleItem: 16100 + 19,
-  electricFurnaceItem: 16100 + 20,
-  undergroundBeltItem: 16100 + 21,
-  pipeToGroundItem: 16100 + 22,
-  electricMiningDrillItem: 16100 + 23,
-  splitterItem: 16100 + 24,
-  burnerInserterItem: 16100 + 25,
-  fastInserterItem: 16100 + 26,
-  longHandedInserterItem: 16100 + 27,
+  burnerDrillItem: 16100,
+  woodenChestItem: 16101,
+  transportBeltItem: 16102,
+  inserterItem: 16103,
+  stoneFurnaceItem: 16104,
+  assemblingMachine1Item: 16105,
+  labItem: 16106,
+  offshorePumpItem: 16107,
+  pipeItem: 16108,
+  boilerItem: 16109,
+  steamEngineItem: 16110,
+  smallElectricPoleItem: 16111,
+  electricFurnaceItem: 16112,
+  undergroundBeltItem: 16113,
+  pipeToGroundItem: 16114,
+  electricMiningDrillItem: 16115,
+  splitterItem: 16116,
+  burnerInserterItem: 16117,
+  fastInserterItem: 16118,
+  longHandedInserterItem: 16119,
+  pumpjackItem: 16120,
   
   gearIcon: 16500,
-  burnerDrillIcon: 16500 + 1,
-  woodenChestIcon: 16500 + 2,
-  transportBeltIcon: 16500 + 3,
-  inserterIcon: 16500 + 4,
-  stoneFurnaceIcon: 16500 + 5,
-  assemblingMachine1Icon: 16500 + 6,
-  labIcon: 16500 + 7,
-  crossIcon: 16500 + 8,
-  menuIcon: 16500 + 9,
-  windUpIcon: 16500 + 10,
-  offshorePumpIcon: 16500 + 11,
-  pipeIcon: 16500 + 12,
-  boilerIcon: 16500 + 13,
-  steamEngineIcon: 16500 + 14,
-  smallElectricPoleIcon: 16500 + 15,
-  electricFurnaceIcon: 16500 + 16,
-  undergroundBeltIcon: 16500 + 17,
-  pipeToGroundIcon: 16500 + 18,
-  electricMiningDrillIcon: 16500 + 19,
-  splitterIcon: 16500 + 20,
+  burnerDrillIcon: 16501,
+  woodenChestIcon: 16502,
+  transportBeltIcon: 16503,
+  inserterIcon: 16504,
+  stoneFurnaceIcon: 16505,
+  assemblingMachine1Icon: 16506,
+  labIcon: 16507,
+  crossIcon: 16508,
+  menuIcon: 16509,
+  windUpIcon: 16510,
+  offshorePumpIcon: 16511,
+  pipeIcon: 16512,
+  boilerIcon: 16513,
+  steamEngineIcon: 16514,
+  smallElectricPoleIcon: 16515,
+  electricFurnaceIcon: 16516,
+  undergroundBeltIcon: 16517,
+  pipeToGroundIcon: 16518,
+  electricMiningDrillIcon: 16519,
+  splitterIcon: 16520,
   copyIcon: 16521,
   snakeIcon: 16522,
   undergroundConnectIcon: 16523,
@@ -274,6 +282,7 @@ export const S = {
   bulldozeWhiteIcon: 16533,
   treeIcon: 16534,
   chopIcon: 16535,
+  pumpjackIcon: 16536,
   
   smoke: 17000,
   
@@ -969,6 +978,26 @@ export const SPRITES = [
     path: "graphics/entities/long-handed-inserter/long-handed-inserter-hand-closed.png",
     sprites: entitySprites(S.longHandedInserterHand + 2, 18, 44, 1, 1, -7, -7, 0, 12),
   },
+  {
+    path: "graphics/entities/pumpjack/pumpjack-north.png",
+    sprites: entitySprites(S.pumpjackN, 131, 139, 8, 5, 20, 15, 27, 16, true),
+  },
+  {
+    path: "graphics/entities/pumpjack/pumpjack-east.png",
+    sprites: entitySprites(S.pumpjackE, 131, 139, 8, 5, 20, 15, 27, 16, true),
+  },
+  {
+    path: "graphics/entities/pumpjack/pumpjack-south.png",
+    sprites: entitySprites(S.pumpjackS, 131, 139, 8, 5, 20, 15, 27, 16, true),
+  },
+  {
+    path: "graphics/entities/pumpjack/pumpjack-west.png",
+    sprites: entitySprites(S.pumpjackW, 131, 139, 8, 5, 20, 15, 27, 16, true),
+  },
+  {
+    path: "graphics/entities/pumpjack/pumpjack-horsehead-shadow.png",
+    sprites: entitySprites(S.pumpjackShadow, 155, 41, 8, 5, 11, 48, -40, -15, true),
+  },
   
   // Items.
   {
@@ -1016,12 +1045,20 @@ export const SPRITES = [
     sprites: itemSprites(S.redScienceItem),
   },
   {
+    path: "graphics/items/steel-plate.png",
+    sprites: itemSprites(S.steelPlateItem),
+  },
+  {
     path: "graphics/items/water.png",
     sprites: itemSprites(S.waterFluid),
   },
   {
     path: "graphics/items/steam.png",
     sprites: itemSprites(S.steamFluid),
+  },
+  {
+    path: "graphics/items/crude-oil.png",
+    sprites: itemSprites(S.crudeOilFluid),
   },
   
   
@@ -1106,9 +1143,10 @@ export const SPRITES = [
     sprites: itemSprites(S.longHandedInserterItem, S.longHandedInserterIcon),
   },
   {
-    path: "graphics/items/tree.png",
-    sprites: itemSprites(undefined, S.treeIcon),
+    path: "graphics/items/pumpjack.png",
+    sprites: itemSprites(S.pumpjackItem, S.pumpjackIcon),
   },
+  
   
   // Misc.
   {
@@ -1174,6 +1212,10 @@ export const SPRITES = [
   {
     path: "graphics/icons/chop.png",
     sprites: sprites(S.chopIcon, 80, 80, 1, 1),
+  },
+  {
+    path: "graphics/items/tree.png",
+    sprites: itemSprites(undefined, S.treeIcon),
   },
 ];
 

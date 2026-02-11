@@ -17,7 +17,7 @@ FluidTank.prototype.setInternalInlet = function(internalInlet) {
 };
 
 FluidTank.prototype.setTanklets = function(fluids) {
-  this.tanklets = [];
+  this.tanklets.length = 0;
   for (let fluid of fluids) {
     this.tanklets.push(new Tanklet(fluid));
   }

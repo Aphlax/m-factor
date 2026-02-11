@@ -595,6 +595,37 @@ export const ENTITIES = new Map([
     inserterHandSprites: S.longHandedInserterHand,
     taskDuration: 280,
   }],
+  [NAME.pumpjack,
+  {
+    label: 'Pumpjack',
+    prototypeName: "pumpjack",
+    type: TYPE.mine,
+    width: 3,
+    height: 3,
+    rotatable: true,
+    icon: S.pumpjackIcon,
+    sprites: {
+      [north]: [S.pumpjackN, S.pumpjackShadow],
+      [east]: [S.pumpjackE, S.pumpjackShadow],
+      [south]: [S.pumpjackS, S.pumpjackShadow],
+      [west]: [S.pumpjackW, S.pumpjackShadow],
+    },
+    animationLength: 40,
+    animationSpeed: 0.16,
+    mapColor: "#006094",
+    energySource: ENERGY.electric,
+    energyConsumption: 90, // kW
+    energyDrain: 0, // kW
+    
+    taskDuration: 1000,
+    fluidOutputs: {
+      [north]: [{x: 2, y: -1}],
+      [east]: [{x: 3, y: 0}],
+      [south]: [{x: 0, y: 3}],
+      [west]: [{x: -1, y: 2}],
+    },
+    drillArea: 1,
+  }],
 ]);
 
 ENTITIES.keys().forEach(name =>

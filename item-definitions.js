@@ -12,9 +12,11 @@ export const I = {
   electronicCircuit: 9,
   redScience: 10,
   wood: 11,
+  steelPlate: 12,
   
   water: 50, // Fluid.
   steam: 51, // Fluid.
+  crudeOil: 52, // Fluid.
   
   transportBelt: 100,
   inserter: 101,
@@ -34,6 +36,7 @@ export const I = {
   burnerInserter: 115,
   fastInserter: 116,
   longHandedInserter: 117,
+  pumpjack: 118,
 };
 
 export const ITEMS = new Map([
@@ -104,6 +107,12 @@ export const ITEMS = new Map([
     sprite: S.redScienceItem,
     stackSize: 200,
     prototypeName: "automation-science-pack",
+  }],
+  [I.steelPlate,
+  {
+    sprite: S.steelPlateItem,
+    stackSize: 100,
+    prototypeName: "steel-plate",
   }],
   
   // Placeable
@@ -222,6 +231,12 @@ export const ITEMS = new Map([
     stacksize: 50,
     prototypeName: "long-handed-inserter",
   }],
+  [I.pumpjack,
+  {
+    sprite: S.pumpjackItem,
+    stacksize: 10,
+    prototypeName: "pumpjack",
+  }],
 ]);
 
 ITEMS.entries()
@@ -241,6 +256,11 @@ export const FLUIDS = new Map([
   {
     sprite: S.steamFluid,
     prototypeName: "steam",
+  }],
+  [I.crudeOil,
+  {
+    sprite: S.crudeOilFluid,
+    prototypeName: "crude-oil",
   }],
 ]);
 
