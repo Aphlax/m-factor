@@ -149,7 +149,7 @@ Inventory.prototype.extract = function(item, amount, onlyFullAmount) {
  * the corresponding filter.
  */
 Inventory.prototype.setFilters = function(filters) {
-  if (filters.length < this.capacity)
+  if (filters && filters.length < this.capacity)
     throw new Error("Not implemented!");
   this.filters = filters;
   return this;
@@ -178,7 +178,7 @@ Inventory.prototype.insertFilters = function() {
   if (this.filters.length != this.capacity) return false;
   for (let i = 0; i < this.filters.length; i++) {
     const stackSize = ITEMS.get(this.filters[i].item).stackSize;
-    if ((this.amounts[i] ?? 0) >= Math.max(stackSize, Math.floor(this.filters[i].amount * 2.2))) {
+    if ((this.amounts[i] ?? 0) + this.filters[i].amount > stackSize) {
       return false;
     }
   }

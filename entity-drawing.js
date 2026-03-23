@@ -3,14 +3,15 @@ import {TYPE, STATE, DIRECTION, COLOR, MAX_HEIGHT, MAX_SHADOW} from './entity-pr
 import {ITEMS} from './item-definitions.js';
 
 /*
-  Optimizations
+  Global Rendering Optimizations
   
-  - Draw terrain on separate canvas, only refresh when changed
-  - resources too
-  - water terrain?
+  - use getContext("webgl2");
+  - draw terrain on separate canvas,
+      only refresh when changed
+    - resources too
+    - water terrain?
   - belt sprites chaining
-  - item sprites chaining
-  
+  - belt item sprites chaining
   
 */
 
@@ -316,7 +317,9 @@ export function drawIO(ctx, view) {
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
   for (let entity of this.inputEntities) {
-    const direction = this.type == TYPE.inserter ?
+    const direction = this.type == TYPE.inserter ||
+        (this.type == TYPE.assembler &&
+        entity.type == TYPE.pipe) ?
         this.direction : entity.direction;
     const dx = -s * ((direction - 2) % 2),
       dy = s * ((direction - 1) % 2),
@@ -353,6 +356,8 @@ export function drawIO(ctx, view) {
         this.type == TYPE.mine ||
         this.type == TYPE.offshorePump ||
         this.type == TYPE.boiler ||
+        (this.type == TYPE.assembler &&
+        entity.type == TYPE.pipe) ||
         ((this.type == TYPE.belt ||
         this.type == TYPE.undergroundBelt ||
         this.type == TYPE.splitter) && 
@@ -398,8 +403,9 @@ export function drawRecipe(ctx, view, recipe) {
     return;
   if (y + size <= 0 || y - size > view.height)
     return;
-  const itemDef = ITEMS.get(recipe.outputs[0].item);
-  const sprite = SPRITES.get(itemDef.sprite);
+  const spriteId = recipe.sprite ??
+      ITEMS.get(recipe.outputs[0].item).sprite;
+  const sprite = SPRITES.get(spriteId);
   ctx.shadowColor = "#000000";
   ctx.shadowBlur = 8;
   ctx.drawImage(sprite.image,

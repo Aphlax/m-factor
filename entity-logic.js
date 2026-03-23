@@ -1,5 +1,5 @@
 import {TYPE, NAME, NEVER, STATE, ENERGY, FUEL_FILTERS, MINE_PATTERN, RESOURCE_NAMES} from './entity-properties.js';
-
+import {ITEMS, FLUID_START, FLUID_END} from './item-definitions.js';
 
 export function insert(item, amount, time) {
   if (this.fuelInventory) {
@@ -379,24 +379,100 @@ export function connectResources(gameMap) {
   }
 }
 
+/** Returns true iff the recipe choice is invalid. */
 export function setRecipe(recipe, time) {
   if (this.type != TYPE.assembler ||
       this.data.recipe == recipe) return;
   
-  this.inputInventory.items.length = 0;
-  this.inputInventory.amounts.length = 0;
-  this.outputInventory.items.length = 0;
-  this.outputInventory.amounts.length = 0;
   if (!recipe) {
+    this.inputInventory.items.length = 0;
+    this.inputInventory.amounts.length = 0;
     this.inputInventory.capacity = 0;
     this.inputInventory.setFilters();
+    this.outputInventory.items.length = 0;
+    this.outputInventory.amounts.length = 0;
     this.outputInventory.capacity = 0;
     this.outputInventory.setFilters();
+    this.inputFluidTank?.setFilters();
+    this.outputFluidTank?.setFilters();
+    for (let entity of this.inputEntities) {
+      entity.data.channel?.outputTanklets.delete(this);
+    }
+    for (let entity of this.outputEntities) {
+      entity.data.channel?.inputTanklets.delete(this);
+    }
   } else {
-    this.inputInventory.capacity = recipe.inputs.length;
-    this.inputInventory.setFilters(recipe.inputs);
-    this.outputInventory.capacity = recipe.outputs.length;
-    this.outputInventory.setFilters(recipe.outputs);
+    const inputs = [], fluidInputs = [];
+    for (let input of recipe.inputs) {
+      if (input.item < FLUID_START ||
+          input.item >= FLUID_END) {
+        // Non-fluid item.
+        inputs.push(input);
+      } else { // Fluid.
+        fluidInputs.push(input);
+      }
+    }
+    for (let entity of this.inputEntities) {
+      if (!entity.data.pipeConnections) continue;
+      const connection =
+          this.getFluidTankConnection(this.inputFluidTank, entity);
+      if (!connection) continue;
+      const channel = entity.data.channel;
+      const fluid = fluidInputs[connection[0]] ?? fluidInputs[0];
+      if (channel.fluid && fluid &&
+          channel.fluid != fluid.item) {
+        return true;
+      }
+    }
+    
+    const outputs = [], fluidOutputs = [];
+    for (let output of recipe.outputs) {
+      if (output.item < FLUID_START ||
+          output.item >= FLUID_END) {
+        // Non-fluid item.
+        outputs.push(output);
+      } else { // Fluid.
+        fluidOutputs.push(output);
+      }
+    }
+    for (let entity of this.outputEntities) {
+      if (!entity.data.pipeConnections) continue;
+      const connection =
+          this.getFluidTankConnection(this.outputFluidTank, entity);
+      if (!connection) continue;
+      const channel = entity.data.channel;
+      const fluid = fluidOutputs[connection[0]] ?? fluidOutputs[0];
+      if (channel.fluid && fluid &&
+          channel.fluid != fluid.item) {
+        return true;
+      }
+    }
+    
+    this.inputInventory.items.length = 0;
+    this.inputInventory.amounts.length = 0;
+    this.inputInventory.capacity = inputs.length;
+    this.inputInventory.setFilters(inputs);
+    for (let entity of this.inputEntities) {
+      entity.data.channel?.outputTanklets.delete(this);
+    }
+    this.inputFluidTank?.setFilters(fluidInputs);
+    for (let entity of this.inputEntities) {
+      if (!entity.data.channel) continue;
+      this.connectFluidInput(entity, /*skipConnect*/ true);
+    }
+    
+    this.outputInventory.items.length = 0;
+    this.outputInventory.amounts.length = 0;
+    this.outputInventory.capacity = outputs.length;
+    this.outputInventory.setFilters(outputs);
+    for (let entity of this.outputEntities) {
+      entity.data.channel?.inputTanklets.delete(this);
+    }
+    this.outputFluidTank?.setFilters(fluidOutputs);
+    for (let entity of this.outputEntities) {
+      if (!entity.data.channel) continue;
+      this.connectFluidOutput(entity, /*skipConnect*/ true);
+    }
   }
   
   this.data.recipe = recipe;
@@ -558,40 +634,49 @@ export function updatePipeSprites() {
 }
 
 /** Returns true if this is an invalid connection and it should be removed. */
-export function connectFluidOutput(pipe) {
-  for (let i = 0; i < this.outputFluidTank.pipeConnections.length; i++) {
-    const p1 = this.outputFluidTank.pipeConnections[i];
-    if (this.x + p1.x < pipe.x ||
-        this.x + p1.x >= pipe.x + pipe.width ||
-        this.y + p1.y < pipe.y ||
-        this.y + p1.y >= pipe.y + pipe.height) continue;
-    for (let j = 0; j < pipe.data.pipeConnections.length; j++) {
-      const p2 = pipe.data.pipeConnections[j];
-      if (pipe.x + p2.x < this.x ||
-          pipe.x + p2.x >= this.x + this.width ||
-          pipe.y + p2.y < this.y ||
-          pipe.y + p2.y >= this.y + this.height ||
-          (this.x + p1.x != pipe.x + p2.x &&
-          this.y + p1.y != pipe.y + p2.y)) continue;
-      pipe.inputEntities.push(this);
-      this.outputEntities.push(pipe);
-      pipe.data.pipes[j] = this;
-      pipe.updatePipeSprites();
-      if (pipe.data.channel) {
-        // After a pipe is created, we first add
-        // input/output before it gets its channel.
-        return pipe.data.channel.addInputEntity(this, i);
-      }
-      return;
-    }
+export function connectFluidOutput(pipe, skipConnect) {
+  const connection =
+      this.getFluidTankConnection(this.outputFluidTank, pipe);
+  if (!connection) return;
+  const [i, j] = connection;
+  if (!skipConnect) {
+    pipe.inputEntities.push(this);
+    this.outputEntities.push(pipe);
+    pipe.data.pipes[j] = this;
+    pipe.updatePipeSprites();
   }
+  if (pipe.data.channel) {
+    // After a pipe is created, we first add
+    // input/output before it gets its channel.
+    return pipe.data.channel.addInputEntity(this, i);
+  }
+  return;
 }
 
 /** Returns true if this is an invalid connection and it should be removed. */
-export function connectFluidInput(pipe) {
+export function connectFluidInput(pipe, skipConnect) {
   if (this.inputFluidTank.internalInlet) return;
-  for (let i = 0; i < this.inputFluidTank.pipeConnections.length; i++) {
-    const p1 = this.inputFluidTank.pipeConnections[i];
+  const connection =
+      this.getFluidTankConnection(this.inputFluidTank, pipe);
+  if (!connection) return;
+  const [i, j] = connection;
+  if (!skipConnect) {
+    pipe.outputEntities.push(this);
+    this.inputEntities.push(pipe);
+    pipe.data.pipes[j] = this;
+    pipe.updatePipeSprites();
+  }
+  if (pipe.data.channel) {
+    // After a pipe is created, we first add
+    // input/output before it gets its channel.
+    return pipe.data.channel.addOutputEntity(this, i);
+  }
+  return;
+}
+
+export function getFluidTankConnection(tank, pipe) {
+  for (let i = 0; i < tank.pipeConnections.length; i++) {
+    const p1 = tank.pipeConnections[i];
     if (this.x + p1.x < pipe.x ||
         this.x + p1.x >= pipe.x + pipe.width ||
         this.y + p1.y < pipe.y ||
@@ -604,16 +689,49 @@ export function connectFluidInput(pipe) {
           pipe.y + p2.y >= this.y + this.height ||
           (this.x + p1.x != pipe.x + p2.x &&
           this.y + p1.y != pipe.y + p2.y)) continue;
-      pipe.outputEntities.push(this);
-      this.inputEntities.push(pipe);
-      pipe.data.pipes[j] = this;
-      pipe.updatePipeSprites();
-      if (pipe.data.channel) {
-        // After a pipe is created, we first add
-        // input/output before it gets its channel.
-        return pipe.data.channel.addOutputEntity(this, i);
-      }
-      return;
+      return [i, j];
     }
   }
+  return;
+}
+
+/** Extracts the filters from both the inventory and fluid tanks. */
+export function extractCombinedFilters() {
+  const inventoryFilters = this.inputInventory.filters;
+  for (let i = 0; i < inventoryFilters.length; i++) {
+    if ((this.inputInventory.amounts[i] ?? 0) < inventoryFilters[i].amount) {
+      return false;
+    }
+  }
+  for (let tanklet of this.inputFluidTank.tanklets) {
+    if (tanklet.amount < tanklet.capacity / 2) {
+      return false;
+    }
+  }
+  this.inputInventory.extractFilters();
+  for (let tanklet of this.inputFluidTank.tanklets) {
+    tanklet.amount -= tanklet.capacity / 2;
+  }
+  return true;
+}
+
+/** Inserts the filters to both the inventory and fluid tanks. */
+export function insertCombinedFilters() {
+  const inventoryFilters = this.outputInventory.filters;
+  for (let i = 0; i < inventoryFilters.length; i++) {
+    const stackSize = ITEMS.get(inventoryFilters[i].item).stackSize;
+    if ((this.outputInventory.amounts[i] ?? 0) + inventoryFilters[i].amount > stackSize) {
+      return false;
+    }
+  }
+  for (let tanklet of this.outputFluidTank.tanklets) {
+    if (tanklet.amount > tanklet.capacity / 2) {
+      return false;
+    }
+  }
+  this.outputInventory.insertFilters();
+  for (let tanklet of this.outputFluidTank.tanklets) {
+    tanklet.amount += tanklet.capacity / 2;
+  }
+  return true;
 }

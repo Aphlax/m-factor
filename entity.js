@@ -160,13 +160,29 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
   } else if (this.type == TYPE.assembler) {
     this.state = STATE.noRecipe;
     this.nextUpdate = NEVER;
+    if (def.idleAnimation) {
+      this.sprite = def.idleAnimation[direction][0];
+      this.data.idleAnimation = def.idleAnimation[direction][0];
+      this.data.workingAnimation = def.sprites[direction][0];
+    }
     this.data.processingSpeed = def.processingSpeed;
     this.data.recipe = undefined;
     this.inputInventory = new Inventory(0);
     this.outputInventory = new Inventory(0);
+    if (def.fluidInputs) {
+      this.inputFluidTank = new FluidTank()
+          .setPipeConnections(def.fluidInputs[direction]);
+    }
+    if (def.fluidOutputs) {
+      this.outputFluidTank = new FluidTank()
+          .setPipeConnections(def.fluidOutputs[direction]);
+    }
     this.energySource = def.energySource;
     this.energyDrain = def.energyDrain;
     this.energyConsumption = def.energyConsumption;
+    if (def.firePosition) {
+      this.data.firePosition = def.firePosition[direction];
+    }
     if (data?.recipe) {
       this.setRecipe(data.recipe, time);
     }
@@ -682,7 +698,9 @@ Entity.prototype.update = function(gameMap, time) {
             (time - this.taskStart) * this.animationSpeed / 60) %
             this.animationLength;
         }
-        if (!this.outputInventory.insertFilters()) {
+        if (this.outputFluidTank ?
+            !this.insertCombinedFilters() :
+            !this.outputInventory.insertFilters()) {
           state = STATE.itemReady;
           break assembler;
         }
@@ -694,7 +712,9 @@ Entity.prototype.update = function(gameMap, time) {
         state = STATE.missingItem;
       }
       if (state == STATE.missingItem) {
-        if (!this.inputInventory.extractFilters()) {
+        if (this.inputFluidTank ?
+            !this.extractCombinedFilters() :
+            !this.inputInventory.extractFilters()) {
           break assembler;
         }
         for (let inputEntity of this.inputEntities) {
@@ -712,6 +732,11 @@ Entity.prototype.update = function(gameMap, time) {
             this.taskStart + this.taskDuration / sat;
         this.animationSpeed = sat < MIN_SATISFACTION ?
             1 / NEVER : sat;
+        if (this.data.firePosition && nextUpdate != NEVER) {
+          const {x, y} = this.data.firePosition;
+          gameMap.createOilRefineryFire(this.x + x, this.y + y,
+              this.taskStart, this.taskEnd - this.taskStart);
+        }
         break assembler;
       }
     } // break assembler:
@@ -723,6 +748,14 @@ Entity.prototype.update = function(gameMap, time) {
       if (this.state == STATE.running && state != STATE.running) {
         this.data.grid.consumerss.get(this.energyConsumption).delete(this);
         this.data.grid.consumerss.get(this.energyDrain).add(this);
+      }
+    }
+    if (this.data.idleAnimation) {
+      if (this.state != STATE.running && state == STATE.running) {
+        this.sprite = this.data.workingAnimation;
+      }
+      if (this.state == STATE.running && state != STATE.running) {
+        this.sprite = this.data.idleAnimation;
       }
     }
     this.state = state;

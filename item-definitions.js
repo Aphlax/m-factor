@@ -17,6 +17,7 @@ export const I = {
   water: 50, // Fluid.
   steam: 51, // Fluid.
   crudeOil: 52, // Fluid.
+  petroleumGas: 53, // Fluid.
   
   transportBelt: 100,
   inserter: 101,
@@ -37,7 +38,11 @@ export const I = {
   fastInserter: 116,
   longHandedInserter: 117,
   pumpjack: 118,
+  oilRefinery: 119,
 };
+
+export const FLUID_START = 50;
+export const FLUID_END = 100;
 
 export const ITEMS = new Map([
   [I.ironOre,
@@ -234,8 +239,14 @@ export const ITEMS = new Map([
   [I.pumpjack,
   {
     sprite: S.pumpjackItem,
-    stacksize: 10,
+    stacksize: 20,
     prototypeName: "pumpjack",
+  }],
+  [I.oilRefinery,
+  {
+    sprite: S.oilRefineryItem,
+    stacksize: 10,
+    prototypeName: "oil-refinery",
   }],
 ]);
 
@@ -261,6 +272,11 @@ export const FLUIDS = new Map([
   {
     sprite: S.crudeOilFluid,
     prototypeName: "crude-oil",
+  }],
+  [I.petroleumGas,
+  {
+    sprite: S.petroleumGasFluid,
+    prototypeName: "petroleum-gas",
   }],
 ]);
 

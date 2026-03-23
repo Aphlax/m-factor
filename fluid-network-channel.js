@@ -23,6 +23,7 @@ Channel.fromPipe = function(pipe) {
 };
 
 Channel.prototype.update = function(time, dt) {
+  if (!this.fluid) return;
   // Output to tanklets.
   const maxOutputAmount = Math.min(this.amount, DEFAULT_TRANSFER *
       Math.max(this.amount / this.capacity, 0.05) * dt / 1000);
@@ -110,6 +111,8 @@ Channel.prototype.draw = function(ctx, view) {
 
 /** Returns true if this is an invalid connection and it should be removed. */
 Channel.prototype.addInputEntity = function(entity, index) {
+  if (!entity.outputFluidTank.tanklets.length)
+    return; // Assembler without recipe.
   const tanklet = entity.outputFluidTank.tanklets[index] ??
       entity.outputFluidTank.tanklets[0];
   if (this.fluid && tanklet.fluid != this.fluid) {
@@ -126,6 +129,8 @@ Channel.prototype.removeInputEntity = function(entity) {
 
 /** Returns true if this is an invalid connection and it should be removed. */
 Channel.prototype.addOutputEntity = function(entity, index) {
+  if (!entity.inputFluidTank.tanklets.length)
+    return; // Assembler without recipe.
   const tanklet = entity.inputFluidTank.tanklets[index] ??
       entity.inputFluidTank.tanklets[0];
   if (this.fluid && tanklet.fluid != this.fluid) {
@@ -148,14 +153,18 @@ Channel.prototype.add = function(pipe) {
   
   for (let entity of pipe.inputEntities) {
     if (!entity.outputFluidTank) continue;
-    this.addInputEntity(entity, 0);
+    const connection = entity.getFluidTankConnection(entity.outputFluidTank, pipe);
+    if (!connection) continue;
+    this.addInputEntity(entity, connection[0]);
   }
   for (let entity of pipe.outputEntities) {
     if (!entity.inputFluidTank) continue;
-    this.addOutputEntity(entity, 0);
+    const connection = entity.getFluidTankConnection(entity.inputFluidTank, pipe);
+    if (!connection) continue;
+    this.addOutputEntity(entity, connection[0]);
   }
   if (pipe.inputFluidTank?.internalInlet) {
-    this.addOutputEntity(pipe, -1);
+    this.addOutputEntity(pipe, 0);
   }
 };
 

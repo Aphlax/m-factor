@@ -1,6 +1,7 @@
 import {I} from './item-definitions.js';
 import {PROTO_TO_RECIPE} from './recipe-definitions.js';
-import {STATE, DIRECTION, NAME} from './entity-properties.js';
+import {STATE, DIRECTION, NAME, RESOURCE_NAMES} from './entity-properties.js';
+import {S} from './sprite-pool.js';
 
 const {north, east, south, west} = DIRECTION;
 
@@ -160,6 +161,20 @@ function productionTest(gameMap, time) {
   for (let {x, y} of gameMap.getTreesIn(21, 15, 45, 32)) {
     gameMap.getTreeAt(x, y, true);
   }
+  
+  gameMap.generateChunk(-1, 0);
+  const chunk = gameMap.chunks.get(-1).get(0);
+  chunk.resources = new Array(32);
+  chunk.resources[3] = new Array(32);
+  chunk.resources[3][31] =
+      {x: -29, y: 31, id: RESOURCE_NAMES.crudeOil,
+      amount: 34, sprite: S.crudeOil};
+  e(NAME.pumpjack, -30, 30, 2);
+  el(-28, 29);
+  p(-30, 33, 1, 7);
+  
+  el(-23, 33);
+  e(NAME.oilRefinery, -25, 34, 2);
 };
 
 function inserterTest(gameMap, time) {

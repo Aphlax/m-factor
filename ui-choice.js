@@ -31,8 +31,9 @@ UiChoice.prototype.openChoice = function(choice, entity, data) {
     if (choice == CHOICE.assemblerRecipe) {
       for (let r of RECIPES) {
         if (r.entities.includes(entity.name)) {
-          const itemDef = ITEMS.get(r.outputs[0].item);
-          const sprite = SPRITES.get(itemDef.sprite);
+          const spriteId = r.sprite ??
+              ITEMS.get(r.outputs[0].item).sprite;
+          const sprite = SPRITES.get(spriteId);
           if (!this.choices[i]) {
             this.choices.push({sprite, value: r});
           } else {

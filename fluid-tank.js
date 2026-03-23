@@ -24,6 +24,18 @@ FluidTank.prototype.setTanklets = function(fluids) {
   return this;
 };
 
+/** For use with recipes. */
+FluidTank.prototype.setFilters = function(filters) {
+  this.tanklets.length = 0;
+  if (!filters) return;
+  for (let filter of filters) {
+    const tanklet = new Tanklet(filter.item);
+    tanklet.capacity = filter.amount * 2;
+    this.tanklets.push(tanklet);
+  }
+  return this;
+};
+
 function Tanklet(fluid) {
   this.fluid = fluid;
   this.amount = 0;

@@ -626,6 +626,53 @@ export const ENTITIES = new Map([
     },
     drillArea: 1,
   }],
+  [NAME.oilRefinery,
+  {
+    label: 'Oil Refinery',
+    prototypeName: "oil-refinery",
+    type: TYPE.assembler,
+    width: 5,
+    height: 5,
+    rotatable: true,
+    icon: S.oilRefineryIcon,
+    sprites: {
+      [north]: [S.oilRefineryWorkingN],
+      [east]: [S.oilRefineryWorkingE],
+      [south]: [S.oilRefineryWorkingS],
+      [west]: [S.oilRefineryWorkingW],
+    },
+    animationLength: 1,
+    mapColor: "#006094",
+    energySource: ENERGY.electric,
+    energyConsumption: 434, // kW
+    energyDrain: 14, // kW
+    
+    idleAnimation: {
+      [north]: [S.oilRefineryN],
+      [east]: [S.oilRefineryE],
+      [south]: [S.oilRefineryS],
+      [west]: [S.oilRefineryW],
+    },
+    processingSpeed: 1,
+    fluidInputs: {
+      [north]: [{x: 1, y: 5}, {x: 3, y: 5}],
+      [east]: [{x: -1, y: 1}, {x: -1, y: 3}],
+      [south]: [{x: 1, y: -1}, {x: 3, y: -1}],
+      [west]: [{x: 5, y: 1}, {x: 5, y: 3}],
+    },
+    fluidOutputs: {
+      [north]: [{x: 0, y: -1}, {x: 2, y: -1}, {x: 4, y: -1}],
+      [east]: [{x: 5, y: 0}, {x: 5, y: 2}, {x: 5, y: 4}],
+      [south]: [{x: 0, y: 5}, {x: 2, y: 5}, {x: 4, y: 5}],
+      [west]: [{x: -1, y: 0}, {x: -1, y: 2}, {x: -1, y: 4}],
+    },
+    firePosition: {
+      [north]: {x: 3.95, y: 0.3},
+      [east]: {x: 1.3, y: 0.4},
+      [south]: {x: 1.09, y: -0.26},
+      [west]: {x: 4.74, y: 0.51},
+    }
+  }],
 ]);
 
 ENTITIES.keys().forEach(name =>

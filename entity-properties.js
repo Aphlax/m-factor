@@ -40,6 +40,7 @@ export const NAME = {
   fastInserter: 19,
   longHandedInserter: 20,
   pumpjack: 21,
+  oilRefinery: 22,
 };
 
 /** Never value for next update. 285 years from now. */

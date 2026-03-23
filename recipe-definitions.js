@@ -1,5 +1,6 @@
 import {I} from './item-definitions.js';
 import {NAME} from './entity-properties.js';
+import {S} from './sprite-pool.js';
 
 export const RECIPES = [
   {
@@ -81,6 +82,19 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1],
     duration: 5000,
   },
+  {
+    prototypeName: "basic-oil-processing",
+    inputs: [
+      {item: I.crudeOil, amount: 100},
+    ],
+    outputs: [
+      {item: I.petroleumGas, amount: 45},
+    ],
+    entities: [NAME.oilRefinery],
+    duration: 5000,
+    sprite: S.basicOilProcessingRecipe,
+  },
+  
   
   
   {
@@ -318,6 +332,20 @@ export const RECIPES = [
     ],
     entities: [NAME.assemblingMachine1],
     duration: 5000,
+  },
+  {
+    prototypeName: "oil-refinery",
+    inputs: [
+      {item: I.electronicCircuit, amount: 10},
+      {item: I.ironGear, amount: 10},
+      {item: I.pipe, amount: 10},
+      {item: I.steelPlate, amount: 15},
+    ],
+    outputs: [
+      {item: I.oilRefinery, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 8000,
   },
   
   

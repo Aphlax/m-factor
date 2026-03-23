@@ -206,6 +206,14 @@ export const S = {
   tree04cShadow: 15366, // 4
   tree04dShadow: 15370, // 4
   tree04eShadow: 15374, // 4
+  oilRefineryN: 15378,
+  oilRefineryE: 15379,
+  oilRefineryS: 15380,
+  oilRefineryW: 15381,
+  oilRefineryWorkingN: 15382,
+  oilRefineryWorkingE: 15383,
+  oilRefineryWorkingS: 15384,
+  oilRefineryWorkingW: 15385,
   
   ironOreItem: 16000,
   copperOreItem: 16001,
@@ -223,6 +231,8 @@ export const S = {
   waterFluid: 16050,
   steamFluid: 16051,
   crudeOilFluid: 16052,
+  petroleumGasFluid: 16053,
+  basicOilProcessingRecipe: 16054,
   
   burnerDrillItem: 16100,
   woodenChestItem: 16101,
@@ -245,6 +255,8 @@ export const S = {
   fastInserterItem: 16118,
   longHandedInserterItem: 16119,
   pumpjackItem: 16120,
+  oilRefineryItem: 16121,
+  chemicalPlantItem: 16122,
   
   gearIcon: 16500,
   burnerDrillIcon: 16501,
@@ -283,9 +295,11 @@ export const S = {
   treeIcon: 16534,
   chopIcon: 16535,
   pumpjackIcon: 16536,
+  oilRefineryIcon: 16537,
+  chemicalPlantIcon: 16538,
   
-  smoke: 17000,
-  
+  smoke: 17000, // 60
+  oilRefineryFire: 17060, // 60
 };
 
 export const SPRITES = [
@@ -988,7 +1002,7 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/pumpjack/pumpjack-south.png",
-    sprites: entitySprites(S.pumpjackS, 131, 139, 8, 5, 20, 15, 27, 16, true),
+    sprites: entitySprites(S.pumpjackS, 131, 140, 8, 5, 20, 15, 27, 17, true),
   },
   {
     path: "graphics/entities/pumpjack/pumpjack-west.png",
@@ -997,6 +1011,18 @@ export const SPRITES = [
   {
     path: "graphics/entities/pumpjack/pumpjack-horsehead-shadow.png",
     sprites: entitySprites(S.pumpjackShadow, 155, 41, 8, 5, 11, 48, -40, -15, true),
+  },
+  {
+    path: "graphics/entities/oil-refinery/oil-refinery.png",
+    sprites: entitySprites(S.oilRefineryN, 337, 255, 4, 1, 8, 169, 32, 63, true),
+  },
+  {
+    path: "graphics/entities/oil-refinery/oil-refinery-working.png",
+    sprites: entitySprites(S.oilRefineryWorkingN, 345, 255, 4, 1, 8, 177, 32, 63, true),
+  },
+  {
+    path: "graphics/entities/oil-refinery/oil-refinery-fire.png",
+    sprites: entitySprites(S.oilRefineryFire, 20, 40, 10, 6, -6, -6, 15, -7, true),
   },
   
   // Items.
@@ -1059,6 +1085,14 @@ export const SPRITES = [
   {
     path: "graphics/items/crude-oil.png",
     sprites: itemSprites(S.crudeOilFluid),
+  },
+  {
+    path: "graphics/items/petroleum-gas.png",
+    sprites: itemSprites(S.petroleumGasFluid),
+  },
+  {
+    path: "graphics/items/basic-oil-processing.png",
+    sprites: itemSprites(S.basicOilProcessingRecipe),
   },
   
   
@@ -1145,6 +1179,14 @@ export const SPRITES = [
   {
     path: "graphics/items/pumpjack.png",
     sprites: itemSprites(S.pumpjackItem, S.pumpjackIcon),
+  },
+  {
+    path: "graphics/items/oil-refinery.png",
+    sprites: itemSprites(S.oilRefineryItem, S.oilRefineryIcon),
+  },
+  {
+    path: "graphics/items/chemical-plant.png",
+    sprites: itemSprites(S.chemicalPlantItem, S.chemicalPlantIcon),
   },
   
   

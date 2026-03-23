@@ -283,6 +283,8 @@ UiWindow.prototype.initialize = function() {
     input: new UiInventory(this, 10, 40),
     output: new UiInventory(this, this.canvasWidth - 96, 40)
         .setIsOutput(true),
+    fluidInput: new UiFluidInventory(this, 10, 40),
+    fluidOutput: new UiFluidInventory(this, this.canvasWidth - 96, 40),
     progress: new UiProgress(this, 56, 40)
         .setWidth(this.canvasWidth - 158),
     recipe: new UiButton(this, this.canvasWidth - 50, 40)
@@ -342,15 +344,25 @@ UiWindow.prototype.set = function(selectedEntity) {
     this.entityUi.progress.set(selectedEntity);
   } else if (selectedEntity.type == TYPE.assembler) {
     this.entityUi.input.set(selectedEntity.inputInventory);
+    this.entityUi.fluidInput.set(selectedEntity.inputFluidTank);
+    this.entityUi.fluidInput.x = 10 +
+        selectedEntity.inputInventory.capacity * 46;
     this.entityUi.output.set(selectedEntity.outputInventory);
     this.entityUi.output.x = this.canvasWidth - 50 -
-        selectedEntity.outputInventory.capacity * 46;
+        (selectedEntity.outputInventory.capacity +
+        selectedEntity.outputFluidTank.tanklets.length) * 46;
+    this.entityUi.fluidOutput.set(selectedEntity.outputFluidTank);
+    this.entityUi.fluidOutput.x = this.canvasWidth - 50 -
+        selectedEntity.outputFluidTank.tanklets.length * 46;
     this.entityUi.progress.set(selectedEntity);
     this.entityUi.progress.x = 10 +
-        selectedEntity.inputInventory.capacity * 46;
+        (selectedEntity.inputInventory.capacity +
+        selectedEntity.inputFluidTank.tanklets.length) * 46;
     this.entityUi.progress.width = this.canvasWidth - 66 -
         46 * (selectedEntity.inputInventory.capacity +
-        selectedEntity.outputInventory.capacity);
+        selectedEntity.outputInventory.capacity +
+        selectedEntity.inputFluidTank.tanklets.length +
+        selectedEntity.outputFluidTank.tanklets.length);
     if (!selectedEntity.data.recipe) {
       this.entityUi.recipeChoice.openChoice(
           CHOICE.assemblerRecipe, selectedEntity);
