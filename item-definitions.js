@@ -13,6 +13,7 @@ export const I = {
   redScience: 10,
   wood: 11,
   steelPlate: 12,
+  plasticBar: 13,
   
   water: 50, // Fluid.
   steam: 51, // Fluid.
@@ -39,6 +40,7 @@ export const I = {
   longHandedInserter: 117,
   pumpjack: 118,
   oilRefinery: 119,
+  chemicalPlant: 120,
 };
 
 export const FLUID_START = 50;
@@ -118,6 +120,12 @@ export const ITEMS = new Map([
     sprite: S.steelPlateItem,
     stackSize: 100,
     prototypeName: "steel-plate",
+  }],
+  [I.plasticBar,
+  {
+    sprite: S.plasticBarItem,
+    stackSize: 100,
+    prototypeName: "plastic-bar",
   }],
   
   // Placeable
@@ -247,6 +255,12 @@ export const ITEMS = new Map([
     sprite: S.oilRefineryItem,
     stacksize: 10,
     prototypeName: "oil-refinery",
+  }],
+  [I.chemicalPlant,
+  {
+    sprite: S.chemicalPlantItem,
+    stacksize: 10,
+    prototypeName: "chemical-plant",
   }],
 ]);
 

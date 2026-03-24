@@ -61,7 +61,7 @@ export function inserterAllowsItems(a, b, c) {
     return a;
   } else if (outputEntity.type == TYPE.assembler) {
     const out = outputEntity.outputInventory;
-    if (!out.filters) return 0;
+    if (!out.filters) return -2;
     let full = true;
     for (let i = 0; i < out.filters.length; i++) {
       if (!out.items[i] ||
@@ -412,6 +412,7 @@ export function setRecipe(recipe, time) {
         fluidInputs.push(input);
       }
     }
+    const usedChannels = [], usedFluids = [];
     for (let entity of this.inputEntities) {
       if (!entity.data.pipeConnections) continue;
       const connection =
@@ -423,6 +424,14 @@ export function setRecipe(recipe, time) {
           channel.fluid != fluid.item) {
         return true;
       }
+      for (let i = 0; i < usedChannels.length; i++) {
+        if (channel == usedChannels[i] &&
+            fluid.item != usedFluids[i]) {
+          return true;
+        }
+      }
+      usedChannels.push(channel);
+      usedFluids.push(fluid.item);
     }
     
     const outputs = [], fluidOutputs = [];
@@ -446,6 +455,14 @@ export function setRecipe(recipe, time) {
           channel.fluid != fluid.item) {
         return true;
       }
+      for (let i = 0; i < usedChannels.length; i++) {
+        if (channel == usedChannels[i] &&
+            fluid.item != usedFluids[i]) {
+          return true;
+        }
+      }
+      usedChannels.push(channel);
+      usedFluids.push(fluid.item);
     }
     
     this.inputInventory.items.length = 0;
@@ -482,7 +499,8 @@ export function setRecipe(recipe, time) {
   if (recipe) {
     for (let inputEntity of this.inputEntities) {
       if (inputEntity.state == STATE.outputFull ||
-          inputEntity.state == STATE.itemReady) {
+          inputEntity.state == STATE.itemReady ||
+          inputEntity.state == STATE.missingItem) {
         inputEntity.nextUpdate = time;
       }
     }

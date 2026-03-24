@@ -94,6 +94,18 @@ export const RECIPES = [
     duration: 5000,
     sprite: S.basicOilProcessingRecipe,
   },
+  {
+    prototypeName: "plastic-bar",
+    inputs: [
+      {item: I.coal, amount: 1},
+      {item: I.petroleumGas, amount: 20},
+    ],
+    outputs: [
+      {item: I.plasticBar, amount: 2},
+    ],
+    entities: [NAME.chemicalPlant],
+    duration: 1000,
+  },
   
   
   

@@ -350,19 +350,19 @@ UiWindow.prototype.set = function(selectedEntity) {
     this.entityUi.output.set(selectedEntity.outputInventory);
     this.entityUi.output.x = this.canvasWidth - 50 -
         (selectedEntity.outputInventory.capacity +
-        selectedEntity.outputFluidTank.tanklets.length) * 46;
+        (selectedEntity.outputFluidTank?.tanklets.length ?? 0)) * 46;
     this.entityUi.fluidOutput.set(selectedEntity.outputFluidTank);
     this.entityUi.fluidOutput.x = this.canvasWidth - 50 -
-        selectedEntity.outputFluidTank.tanklets.length * 46;
+        (selectedEntity.outputFluidTank?.tanklets.length ?? 0) * 46;
     this.entityUi.progress.set(selectedEntity);
     this.entityUi.progress.x = 10 +
         (selectedEntity.inputInventory.capacity +
-        selectedEntity.inputFluidTank.tanklets.length) * 46;
+        (selectedEntity.inputFluidTank?.tanklets.length ?? 0)) * 46;
     this.entityUi.progress.width = this.canvasWidth - 66 -
         46 * (selectedEntity.inputInventory.capacity +
         selectedEntity.outputInventory.capacity +
-        selectedEntity.inputFluidTank.tanklets.length +
-        selectedEntity.outputFluidTank.tanklets.length);
+        (selectedEntity.inputFluidTank?.tanklets.length ?? 0) +
+        (selectedEntity.outputFluidTank?.tanklets.length ?? 0));
     if (!selectedEntity.data.recipe) {
       this.entityUi.recipeChoice.openChoice(
           CHOICE.assemblerRecipe, selectedEntity);

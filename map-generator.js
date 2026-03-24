@@ -255,8 +255,8 @@ MapGenerator.prototype.generateResources = function (cx, cy, tiles) {
           if (!hit) continue;
           const patchAmount = sqIp(sqPatchDist, RESOURCE_AMOUNT);
           const amount = Math.floor(
-              res.size * ((patchAmount + 2)**0.6) +
-              this.tileOffsets[j][i] * 0.2);
+              res.size * ((patchAmount + 2)**0.6) * 2 +
+              this.tileOffsets[j][i] * 0.4);
           if (!resources[i]) resources[i] = [];
           if (resources[i][j]?.amount >= amount) continue;
           resources[i][j] = {

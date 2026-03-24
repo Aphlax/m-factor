@@ -180,8 +180,10 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.energySource = def.energySource;
     this.energyDrain = def.energyDrain;
     this.energyConsumption = def.energyConsumption;
-    if (def.firePosition) {
-      this.data.firePosition = def.firePosition[direction];
+    if (def.particle) {
+      this.data.particle = def.particle;
+      this.data.particleAnimationLength = def.particleAnimationLength;
+      this.data.particlePosition = def.particlePosition[direction];
     }
     if (data?.recipe) {
       this.setRecipe(data.recipe, time);
@@ -732,10 +734,12 @@ Entity.prototype.update = function(gameMap, time) {
             this.taskStart + this.taskDuration / sat;
         this.animationSpeed = sat < MIN_SATISFACTION ?
             1 / NEVER : sat;
-        if (this.data.firePosition && nextUpdate != NEVER) {
-          const {x, y} = this.data.firePosition;
-          gameMap.createOilRefineryFire(this.x + x, this.y + y,
-              this.taskStart, this.taskEnd - this.taskStart);
+        if (this.data.particle && nextUpdate != NEVER) {
+          const {x, y} = this.data.particlePosition;
+          gameMap.createParticle(this.data.particle,
+              this.data.particleAnimationLength,
+              this.x + x, this.y + y,
+              this.taskStart, this.taskEnd - this.taskStart + 200);
         }
         break assembler;
       }

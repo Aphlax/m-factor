@@ -174,7 +174,18 @@ function productionTest(gameMap, time) {
   p(-30, 33, 1, 7);
   
   el(-23, 33);
-  e(NAME.oilRefinery, -25, 34, 2);
+  e(NAME.oilRefinery, -25, 34, 2)
+      .setRecipe(PROTO_TO_RECIPE.get("basic-oil-processing"), time);
+  p(-21, 39, 1, 11).amount = 1000;
+  
+  e(NAME.chemicalPlant, -19, 40, 2)
+      .setRecipe(PROTO_TO_RECIPE.get("plastic-bar"), time);
+  e(NAME.woodenChest, -15, 41, 0)
+      .inputInventory.insert(I.coal, 200);
+  e(NAME.inserter, -16, 41, 3);
+  e(NAME.woodenChest, -15, 42, 0);
+  e(NAME.inserter, -16, 42, 1);
+  el(-23, 40, 1, 2);
 };
 
 function inserterTest(gameMap, time) {

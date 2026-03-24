@@ -41,6 +41,7 @@ export const NAME = {
   longHandedInserter: 20,
   pumpjack: 21,
   oilRefinery: 22,
+  chemicalPlant: 23,
 };
 
 /** Never value for next update. 285 years from now. */

@@ -26,6 +26,7 @@ const BUILD_MENU = [
   NAME.pipeToGround,
   NAME.assemblingMachine1,
   NAME.oilRefinery,
+  NAME.chemicalPlant,
   NAME.burnerDrill,
   NAME.electricMiningDrill,
   NAME.pumpjack,

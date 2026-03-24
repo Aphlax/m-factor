@@ -879,7 +879,7 @@ GameMap.prototype.createSmoke = function(x, y, time, duration) {
   }
 };
 
-GameMap.prototype.createOilRefineryFire = function(x, y, time, duration) {
+GameMap.prototype.createParticle = function(sprite, length, x, y, time, duration) {
   const cx = Math.floor(x / SIZE);
   if (!this.chunks.has(cx)) return;
   const cy = Math.floor(y / SIZE);
@@ -891,16 +891,15 @@ GameMap.prototype.createOilRefineryFire = function(x, y, time, duration) {
   } else {
     p = {};
   }
-  p.sprite = S.oilRefineryFire;
-  p.xStart = p.xEnd = x - 0.59;
-  p.yStart = p.yEnd = y - 0.2;
+  p.sprite = sprite;
+  p.xStart = p.xEnd = x;
+  p.yStart = p.yEnd = y;
   p.sizeStart = p.sizeEnd = 1;
   p.startTime = time;
   p.duration = duration;
-  p.alphaStart = 1;
-  p.alphaEnd = 0.7;
-  p.animationLength = 60;
-  p.animation = Math.floor(60 * Math.random());
+  p.alphaStart = p.alphaEnd = 0.9;
+  p.animationLength = length;
+  p.animation = Math.floor(length * Math.random());
   p.animationSpeed = 1;
   
   this.chunks.get(cx).get(cy).particles.push(p);

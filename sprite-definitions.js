@@ -95,6 +95,10 @@ export const S = {
   pumpjackS: 153*16, // 40
   pumpjackW: 155*16 + 8, // 40
   pumpjackShadow: 158*16, // 40
+  chemicalPlantN: 161*16, // 24
+  chemicalPlantE: 162*16 + 8, // 24
+  chemicalPlantS: 164*16, // 24
+  chemicalPlantW: 165*16 + 8, // 24
   
   woodenChest: 15000,
   woodenChestShadow: 15001,
@@ -214,6 +218,10 @@ export const S = {
   oilRefineryWorkingE: 15383,
   oilRefineryWorkingS: 15384,
   oilRefineryWorkingW: 15385,
+  chemicalPlantShadowN: 15386,
+  chemicalPlantShadowE: 15387,
+  chemicalPlantShadowS: 15388,
+  chemicalPlantShadowW: 15389,
   
   ironOreItem: 16000,
   copperOreItem: 16001,
@@ -227,6 +235,7 @@ export const S = {
   redScienceItem: 16009,
   woodItem: 16010,
   steelPlateItem: 16011,
+  plasticBarItem: 16012,
   
   waterFluid: 16050,
   steamFluid: 16051,
@@ -300,6 +309,8 @@ export const S = {
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
+  chemicalPlantSmokeOuter: 17120, // 48
+  chemicalPlantSmokeInner: 17170, // 48
 };
 
 export const SPRITES = [
@@ -1024,6 +1035,22 @@ export const SPRITES = [
     path: "graphics/entities/oil-refinery/oil-refinery-fire.png",
     sprites: entitySprites(S.oilRefineryFire, 20, 40, 10, 6, -6, -6, 15, -7, true),
   },
+  {
+    path: "graphics/entities/chemical-plant/chemical-plant.png",
+    sprites: entitySprites(S.chemicalPlantN, 108, 148, 12, 8, 5, 7, 35, 17, true),
+  },
+  {
+    path: "graphics/entities/chemical-plant/chemical-plant-shadow.png",
+    sprites: entitySprites(S.chemicalPlantShadowN, 154, 112, 4, 1, -7, 65, 2, 14, true),
+  },
+  {
+    path: "graphics/entities/chemical-plant/chemical-plant-smoke-outer.png",
+    sprites: entitySprites(S.chemicalPlantSmokeOuter, 46, 94, 16, 3, 10, 4, 69, -7, true),
+  },
+  {
+    path: "graphics/entities/chemical-plant/chemical-plant-smoke-inner.png",
+    sprites: entitySprites(S.chemicalPlantSmokeInner, 20, 42, 16, 3, -5, -7, 17, -7, true),
+  },
   
   // Items.
   {
@@ -1074,6 +1101,11 @@ export const SPRITES = [
     path: "graphics/items/steel-plate.png",
     sprites: itemSprites(S.steelPlateItem),
   },
+  {
+    path: "graphics/items/plastic-bar.png",
+    sprites: itemSprites(S.plasticBarItem),
+  },
+  
   {
     path: "graphics/items/water.png",
     sprites: itemSprites(S.waterFluid),

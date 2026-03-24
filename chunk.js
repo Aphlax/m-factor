@@ -209,11 +209,11 @@ Chunk.prototype.drawMap = function(ctx, view) {
       const sxs = Math.floor(Math.floor((x0 * s) / szsz) * szsz - vx);
       const sys = Math.floor(Math.floor((y0 * s) / szsz) * szsz - vy);
       for(let x = sxs; x <= sxs + ss; x += szsz) {
-        ctx.rect(x, sy, sz, ss);
+        ctx.rect(x, sys, sz, ss + sz);
         window.numberOtherDraws++;
       }
       for(let y = sys; y <= sys + ss; y += szsz) {
-        ctx.rect(sx, y, ss, sz);
+        ctx.rect(sxs, y, ss + sz, sz);
         window.numberOtherDraws++;
       }
       ctx.clip("evenodd");
@@ -324,7 +324,8 @@ Chunk.prototype.drawParticles = function(ctx, view, time) {
     if (y * s > vy + vh) continue;
     
     ctx.globalAlpha = Math.min((time - p.startTime) / 200,
-        (1 - e) * p.alphaStart + e * p.alphaEnd);
+        (1 - e) * p.alphaStart + e * p.alphaEnd,
+        (p.startTime + p.duration - time) / 200);
     ctx.drawImage(
         sprite.image,
         sprite.x, sprite.y,

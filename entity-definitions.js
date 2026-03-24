@@ -666,11 +666,57 @@ export const ENTITIES = new Map([
       [south]: [{x: 0, y: 5}, {x: 2, y: 5}, {x: 4, y: 5}],
       [west]: [{x: -1, y: 0}, {x: -1, y: 2}, {x: -1, y: 4}],
     },
-    firePosition: {
-      [north]: {x: 3.95, y: 0.3},
-      [east]: {x: 1.3, y: 0.4},
-      [south]: {x: 1.09, y: -0.26},
-      [west]: {x: 4.74, y: 0.51},
+    particle: S.oilRefineryFire,
+    particleAnimationLength: 60,
+    particlePosition: {
+      [north]: {x: 3.36, y: 0.1},
+      [east]: {x: 0.71, y: 0.2},
+      [south]: {x: 0.48, y: -0.46},
+      [west]: {x: 4.15, y: 0.31},
+    }
+  }],
+  [NAME.chemicalPlant,
+  {
+    label: 'Chemical Plant',
+    prototypeName: "chemical-plant",
+    type: TYPE.assembler,
+    width: 3,
+    height: 3,
+    rotatable: true,
+    icon: S.chemicalPlantIcon,
+    sprites: {
+      [north]: [S.chemicalPlantN, S.chemicalPlantShadowN],
+      [east]: [S.chemicalPlantE, S.chemicalPlantShadowE],
+      [south]: [S.chemicalPlantS, S.chemicalPlantShadowS],
+      [west]: [S.chemicalPlantW, S.chemicalPlantShadowW],
+    },
+    animationLength: 24,
+    noShadowAnimation: true,
+    mapColor: "#006094",
+    energySource: ENERGY.electric,
+    energyConsumption: 217, // kW
+    energyDrain: 7, // kW
+    
+    processingSpeed: 1,
+    fluidInputs: {
+      [north]: [{x: 0, y: 3}, {x: 2, y: 3}],
+      [east]: [{x: -1, y: 0}, {x: -1, y: 2}],
+      [south]: [{x: 0, y: -1}, {x: 2, y: -1}],
+      [west]: [{x: 3, y: 0}, {x: 3, y: 2}],
+    },
+    fluidOutputs: {
+      [north]: [{x: 0, y: -1}, {x: 2, y: -1}],
+      [east]: [{x: 3, y: 0}, {x: 3, y: 2}],
+      [south]: [{x: 0, y: 3}, {x: 2, y: 3}],
+      [west]: [{x: -1, y: 0}, {x: -1, y: 2}],
+    },
+    particle: S.chemicalPlantSmokeOuter,
+    particleAnimationLength: 47,
+    particlePosition: {
+      [north]: {x: 0.64, y: -2.3},
+      [east]: {x: 1.54, y: -2.13},
+      [south]: {x: 1.28, y: -1.87},
+      [west]: {x: 0.61, y: -1.83},
     }
   }],
 ]);
