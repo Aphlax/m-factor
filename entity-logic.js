@@ -591,6 +591,19 @@ export function disconnectPipe() {
         other.updatePipeSprites();
       }
     }
+    if (other.outputFluidTank) {
+      for (let i = 0; i < other.outputFluidTank.pipes.length; i++) {
+        if (other.outputFluidTank.pipes[i] != this) continue;
+        delete other.outputFluidTank.pipes[i];
+      }
+    }
+    if (other.inputFluidTank &&
+        !other.inputFluidTank.internalInlet) {
+      for (let i = 0; i < other.inputFluidTank.pipes.length; i++) {
+        if (other.inputFluidTank.pipes[i] != this) continue;
+        delete other.inputFluidTank.pipes[i];
+      }
+    }
   }
 }
 
@@ -660,6 +673,7 @@ export function connectFluidOutput(pipe, skipConnect) {
   if (!skipConnect) {
     pipe.inputEntities.push(this);
     this.outputEntities.push(pipe);
+    this.outputFluidTank.pipes[i] = pipe;
     pipe.data.pipes[j] = this;
     pipe.updatePipeSprites();
   }
@@ -681,6 +695,7 @@ export function connectFluidInput(pipe, skipConnect) {
   if (!skipConnect) {
     pipe.outputEntities.push(this);
     this.inputEntities.push(pipe);
+    this.inputFluidTank.pipes[i] = pipe;
     pipe.data.pipes[j] = this;
     pipe.updatePipeSprites();
   }

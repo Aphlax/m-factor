@@ -218,7 +218,17 @@ GameMap.prototype.draw = function(ctx, time) {
       if (y * size > this.view.height + this.view.y + 1 * this.view.scale) continue;
       for (let entity of chunk.entities) {
         if (entity.type != TYPE.belt) {
+          const pipeCaps =
+              entity.type == TYPE.pipeToGround ||
+              entity.inputFluidTank ||
+              entity.outputFluidTank;
+          if (pipeCaps) {
+            entity.drawPipeCaps(ctx, this.view, /*below*/ true);
+          }
           entity.draw(ctx, this.view, time);
+          if (pipeCaps) {
+            entity.drawPipeCaps(ctx, this.view, /*below*/ false);
+          }
           if (!SETTINGS.altMode) continue;
           if ((entity.type == TYPE.furnace ||
               entity.type == TYPE.assembler) &&

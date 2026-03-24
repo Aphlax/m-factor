@@ -3,11 +3,13 @@
 function FluidTank() {
   this.tanklets = [];
   this.pipeConnections = undefined;
+  this.pipes = undefined;
   this.internalInlet = false;
 }
 
 FluidTank.prototype.setPipeConnections = function(points) {
   this.pipeConnections = points;
+  this.pipes = new Array(points.length);
   return this;
 };
 

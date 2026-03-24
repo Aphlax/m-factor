@@ -1,4 +1,4 @@
-import {SPRITES} from './sprite-pool.js';
+import {SPRITES, S} from './sprite-pool.js';
 import {TYPE, STATE, DIRECTION, COLOR, MAX_HEIGHT, MAX_SHADOW} from './entity-properties.js';
 import {ITEMS} from './item-definitions.js';
 
@@ -275,6 +275,55 @@ export function drawInserterHand(ctx, view, time) {
       base.height * scale * reach);
   window.numberImageDraws++;
   ctx.setTransform();
+}
+
+export function drawPipeCaps(ctx, view, below) {
+  const {x: vx, y: vy, width: vw, height: vh, scale: s} = view;
+  const {x, y, width, height} = this;
+  if ((x - 0.3) * s > vx + vw || (x + width + 0.3) * s <= vx)
+    return;
+  if ((y - MAX_HEIGHT - 0.3) * s > vy + vh || (y + height) * s <= vy)
+    return;
+  const ift = this.inputFluidTank;
+  const l = (ift?.internalInlet ? this.data.pipeConnections.length :
+      ift?.pipeConnections.length) ?? 0;
+  for (let i = 0; 1; i++) {
+    if (this.type != TYPE.pipeToGround) {
+      if (i == l + (this.outputFluidTank?.pipeConnections.length ?? 0))
+        break;
+      if (i < l ?
+          (ift.internalInlet ? this.data.pipes[i] : ift.pipes[i]) :
+          this.outputFluidTank.pipes[i - l])
+        continue;
+    } else {
+      if (i || this.data.pipes[0]) return;
+    }
+    const {x: dx, y: dy} = this.type == TYPE.pipeToGround ?
+        this.data.pipeConnections[0] :
+        i < l ?
+        (ift.internalInlet ? this.data.pipeConnections[i] :
+        ift.pipeConnections[i]) :
+        this.outputFluidTank.pipeConnections[i - l];
+    if ((dy == height) == below) continue;
+    const sprite = SPRITES.get(
+        dy == -1 ? S.pipeCapN :
+        dx == -1 ? S.pipeCapW :
+        dy == height ? S.pipeCapS :
+        S.pipeCapE);
+    const xScale = s /
+        (sprite.width - sprite.left - sprite.right);
+    const yScale = s /
+        (sprite.height - sprite.top - sprite.bottom);
+    ctx.drawImage(sprite.image,
+        sprite.x, sprite.y, sprite.width, sprite.height,
+        Math.floor((x + dx) * s - vx -
+            sprite.left * xScale),
+        Math.floor((y + dy) * s - vy -
+            sprite.top * yScale),
+        Math.ceil(sprite.width * xScale),
+        Math.ceil(sprite.height * yScale));
+    window.numberImageDraws++;
+  }
 }
 
 // This function is also called for resources and trees.

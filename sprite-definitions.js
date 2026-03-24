@@ -222,6 +222,10 @@ export const S = {
   chemicalPlantShadowE: 15387,
   chemicalPlantShadowS: 15388,
   chemicalPlantShadowW: 15389,
+  pipeCapN: 15390,
+  pipeCapE: 15391,
+  pipeCapS: 15392,
+  pipeCapW: 15393,
   
   ironOreItem: 16000,
   copperOreItem: 16001,
@@ -1050,6 +1054,22 @@ export const SPRITES = [
   {
     path: "graphics/entities/chemical-plant/chemical-plant-smoke-inner.png",
     sprites: entitySprites(S.chemicalPlantSmokeInner, 20, 42, 16, 3, -5, -7, 17, -7, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-cover-north.png",
+    sprites: entitySprites(S.pipeCapN, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-cover-east.png",
+    sprites: entitySprites(S.pipeCapE, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-cover-south.png",
+    sprites: entitySprites(S.pipeCapS, 64, 64, 1, 1, 16, 16, 16, 16, true),
+  },
+  {
+    path: "graphics/entities/pipe/pipe-cover-west.png",
+    sprites: entitySprites(S.pipeCapW, 64, 64, 1, 1, 16, 16, 16, 16, true),
   },
   
   // Items.

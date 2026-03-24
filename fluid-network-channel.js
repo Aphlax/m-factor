@@ -153,15 +153,20 @@ Channel.prototype.add = function(pipe) {
   
   for (let entity of pipe.inputEntities) {
     if (!entity.outputFluidTank) continue;
-    const connection = entity.getFluidTankConnection(entity.outputFluidTank, pipe);
-    if (!connection) continue;
-    this.addInputEntity(entity, connection[0]);
+    for (let i = 0; i < entity.outputFluidTank.pipes.length; i++) {
+      if (entity.outputFluidTank.pipes[i] == pipe) {
+        this.addInputEntity(entity, i);
+      }
+    }
   }
   for (let entity of pipe.outputEntities) {
-    if (!entity.inputFluidTank) continue;
-    const connection = entity.getFluidTankConnection(entity.inputFluidTank, pipe);
-    if (!connection) continue;
-    this.addOutputEntity(entity, connection[0]);
+    if (!entity.inputFluidTank ||
+        entity.inputFluidTank.internalInlet) continue;
+    for (let i = 0; i < entity.inputFluidTank.pipes.length; i++) {
+      if (entity.inputFluidTank.pipes[i] == pipe) {
+        this.addOutputEntity(entity, i);
+      }
+    }
   }
   if (pipe.inputFluidTank?.internalInlet) {
     this.addOutputEntity(pipe, 0);
