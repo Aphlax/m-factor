@@ -13,13 +13,15 @@ const MIN_Y = 150;
 
 /*
   default buttons:
-  move/rotate menu
-  pippette
-  inventory
-  upgrade
-  downgrade
-  delete
+  edit
+    move/rotate menu
+    pippette
+    inventory
+    upgrade
+    downgrade
+    delete
   info
+  module slots
 */
 
 

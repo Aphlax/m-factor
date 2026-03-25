@@ -1,7 +1,8 @@
 import {COLOR} from './ui-properties.js';
 import {RECIPES} from './recipe-definitions.js';
-import {ITEMS} from './item-definitions.js';
+import {ITEMS, FLUIDS, FLUID_START, FLUID_END} from './item-definitions.js';
 import {SPRITES, S} from './sprite-pool.js';
+import {STATE} from './entity-properties.js';
 
 const CHOICE = {
   assemblerRecipe: 1,
@@ -31,8 +32,11 @@ UiChoice.prototype.openChoice = function(choice, entity, data) {
     if (choice == CHOICE.assemblerRecipe) {
       for (let r of RECIPES) {
         if (r.entities.includes(entity.name)) {
+          const item = r.outputs[0].item;
           const spriteId = r.sprite ??
-              ITEMS.get(r.outputs[0].item).sprite;
+              (item >= FLUID_START && item < FLUID_END ?
+              FLUIDS.get(item).sprite :
+              ITEMS.get(item).sprite);
           const sprite = SPRITES.get(spriteId);
           if (!this.choices[i]) {
             this.choices.push({sprite, value: r});
@@ -172,6 +176,10 @@ UiChoice.prototype.touchEnd = function(e) {
         }
       }
       this.entity.data.itemFilters[this.data] = sel;
+      if (this.entity.state == STATE.missingItem) {
+        this.entity.nextUpdate =
+            this.parent.ui.game.playTime;
+      }
     }
   }
   

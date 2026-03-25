@@ -106,7 +106,174 @@ export const RECIPES = [
     entities: [NAME.chemicalPlant],
     duration: 1000,
   },
-  
+  {
+    prototypeName: "advanced-circuit",
+    inputs: [
+      {item: I.copperCable, amount: 4},
+      {item: I.electronicCircuit, amount: 2},
+      {item: I.plasticBar, amount: 2},
+    ],
+    outputs: [
+      {item: I.advancedCircuit, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 6000,
+  },
+  {
+    prototypeName: "advanced-oil-processing",
+    inputs: [
+      {item: I.crudeOil, amount: 100},
+      {item: I.water, amount: 50},
+    ],
+    outputs: [
+      {item: I.heavyOil, amount: 25},
+      {item: I.lightOil, amount: 45},
+      {item: I.petroleumGas, amount: 55},
+    ],
+    entities: [NAME.oilRefinery],
+    duration: 5000,
+    sprite: S.advancedOilProcessingRecipe,
+  },
+  {
+    prototypeName: "heavy-oil-cracking",
+    inputs: [
+      {item: I.heavyOil, amount: 40},
+      {item: I.water, amount: 30},
+    ],
+    outputs: [
+      {item: I.lightOil, amount: 30},
+    ],
+    entities: [NAME.chemicalPlant],
+    duration: 2000,
+    sprite: S.heavyOilCrackingRecipe,
+  },
+  {
+    prototypeName: "light-oil-cracking",
+    inputs: [
+      {item: I.lightOil, amount: 30},
+      {item: I.water, amount: 30},
+    ],
+    outputs: [
+      {item: I.petroleumGas, amount: 20},
+    ],
+    entities: [NAME.chemicalPlant],
+    duration: 2000,
+    sprite: S.lightOilCrackingRecipe,
+  },
+  {
+    prototypeName: "coal-liquefaction",
+    inputs: [
+      {item: I.coal, amount: 10},
+      {item: I.heavyOil, amount: 25},
+      {item: I.steam, amount: 50},
+    ],
+    outputs: [
+      {item: I.heavyOil, amount: 90},
+      {item: I.lightOil, amount: 20},
+      {item: I.petroleumGas, amount: 10},
+    ],
+    entities: [NAME.oilRefinery],
+    duration: 5000,
+    sprite: S.coalLiquefactionRecipe,
+  },
+  {
+    prototypeName: "sulfur",
+    inputs: [
+      {item: I.water, amount: 30},
+      {item: I.petroleumGas, amount: 30},
+    ],
+    outputs: [
+      {item: I.sulfur, amount: 2},
+    ],
+    entities: [NAME.chemicalPlant],
+    duration: 1000,
+  },
+  {
+    prototypeName: "solid-fuel-from-heavy-oil",
+    inputs: [
+      {item: I.heavyOil, amount: 20},
+    ],
+    outputs: [
+      {item: I.solidFuel, amount: 1},
+    ],
+    entities: [NAME.chemicalPlant],
+    duration: 1000,
+    sprite: S.solidFuelFromHeavyOilRecipe,
+  },
+  {
+    prototypeName: "solid-fuel-from-light-oil",
+    inputs: [
+      {item: I.lightOil, amount: 10},
+    ],
+    outputs: [
+      {item: I.solidFuel, amount: 1},
+    ],
+    entities: [NAME.chemicalPlant],
+    duration: 1000,
+    sprite: S.solidFuelFromLightOilRecipe,
+  },
+  {
+    prototypeName: "solid-fuel-from-petroleum-gas",
+    inputs: [
+      {item: I.petroleumGas, amount: 20},
+    ],
+    outputs: [
+      {item: I.solidFuel, amount: 1},
+    ],
+    entities: [NAME.chemicalPlant],
+    duration: 1000,
+    sprite: S.solidFuelFromPetroleumGasRecipe,
+  },
+  {
+    prototypeName: "battery",
+    inputs: [
+      {item: I.ironPlate, amount: 1},
+      {item: I.copperPlate, amount: 1},
+      {item: I.sulfuricAcid, amount: 20},
+    ],
+    outputs: [
+      {item: I.battery, amount: 1},
+    ],
+    entities: [NAME.chemicalPlant],
+    duration: 4000,
+  },
+  {
+    prototypeName: "explosives",
+    inputs: [
+      {item: I.coal, amount: 1},
+      {item: I.sulfur, amount: 1},
+      {item: I.water, amount: 10},
+    ],
+    outputs: [
+      {item: I.explosives, amount: 2},
+    ],
+    entities: [NAME.chemicalPlant],
+    duration: 4000,
+  },
+  {
+    prototypeName: "sulfuric-acid",
+    inputs: [
+      {item: I.ironPlate, amount: 1},
+      {item: I.sulfur, amount: 5},
+      {item: I.water, amount: 100},
+    ],
+    outputs: [
+      {item: I.sulfuricAcid, amount: 50},
+    ],
+    entities: [NAME.chemicalPlant],
+    duration: 1000,
+  },
+  {
+    prototypeName: "lubricant",
+    inputs: [
+      {item: I.heavyOil, amount: 10},
+    ],
+    outputs: [
+      {item: I.lubricant, amount: 10},
+    ],
+    entities: [NAME.chemicalPlant],
+    duration: 1000,
+  },
   
   
   {

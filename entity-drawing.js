@@ -1,6 +1,6 @@
 import {SPRITES, S} from './sprite-pool.js';
 import {TYPE, STATE, DIRECTION, COLOR, MAX_HEIGHT, MAX_SHADOW} from './entity-properties.js';
-import {ITEMS} from './item-definitions.js';
+import {ITEMS, FLUIDS, FLUID_START, FLUID_END} from './item-definitions.js';
 
 /*
   Global Rendering Optimizations
@@ -24,6 +24,7 @@ export function draw(ctx, view, time) {
     return;
   let animation = this.animation;
   if (this.animationLength && (this.state == STATE.running)) {
+    // This results in 18.33 fps...
     animation = Math.floor(animation +
         (time - this.taskStart) *
         this.animationSpeed / 60) % this.animationLength;
@@ -452,8 +453,11 @@ export function drawRecipe(ctx, view, recipe) {
     return;
   if (y + size <= 0 || y - size > view.height)
     return;
+  const item = recipe.outputs[0].item;
   const spriteId = recipe.sprite ??
-      ITEMS.get(recipe.outputs[0].item).sprite;
+      (item >= FLUID_START && item < FLUID_END ?
+      FLUIDS.get(item).sprite :
+      ITEMS.get(item).sprite);
   const sprite = SPRITES.get(spriteId);
   ctx.shadowColor = "#000000";
   ctx.shadowBlur = 8;

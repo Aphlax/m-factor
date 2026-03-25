@@ -413,6 +413,10 @@ UiInserterFilters.prototype.touchEnd = function(e) {
     }
     this.entity.data.filterMode = !(this.pressed - 1);
     this.pressed = 0;
+    if (this.entity.state == STATE.missingItem) {
+      this.entity.nextUpdate =
+          this.parent.ui.game.playTime;
+    }
     return;
   }
   if (this.entity.data.filterMode === undefined) {

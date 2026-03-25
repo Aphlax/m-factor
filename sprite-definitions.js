@@ -240,12 +240,28 @@ export const S = {
   woodItem: 16010,
   steelPlateItem: 16011,
   plasticBarItem: 16012,
+  advancedCircuitItem: 16013,
+  sulfurItem: 16014,
+  solidFuelItem: 16015,
+  batteryItem: 16016,
+  explosivesItem: 16017,
   
   waterFluid: 16050,
   steamFluid: 16051,
   crudeOilFluid: 16052,
   petroleumGasFluid: 16053,
   basicOilProcessingRecipe: 16054,
+  heavyOilFluid: 16055,
+  lightOilFluid: 16056,
+  advancedOilProcessingRecipe: 16057,
+  heavyOilCrackingRecipe: 16058,
+  lightOilCrackingRecipe: 16059,
+  coalLiquefactionRecipe: 16060,
+  sulfuricAcidFluid: 16061,
+  lubricantFluid: 16062,
+  solidFuelFromHeavyOilRecipe: 16063,
+  solidFuelFromLightOilRecipe: 16064,
+  solidFuelFromPetroleumGasRecipe: 16065,
   
   burnerDrillItem: 16100,
   woodenChestItem: 16101,
@@ -1125,6 +1141,27 @@ export const SPRITES = [
     path: "graphics/items/plastic-bar.png",
     sprites: itemSprites(S.plasticBarItem),
   },
+  {
+    path: "graphics/items/advanced-circuit.png",
+    sprites: itemSprites(S.advancedCircuitItem),
+  },
+  {
+    path: "graphics/items/sulfur.png",
+    sprites: itemSprites(S.sulfurItem),
+  },
+  {
+    path: "graphics/items/solid-fuel.png",
+    sprites: itemSprites(S.solidFuelItem),
+  },
+  {
+    path: "graphics/items/battery.png",
+    sprites: itemSprites(S.batteryItem),
+  },
+  {
+    path: "graphics/items/explosives.png",
+    sprites: itemSprites(S.explosivesItem),
+  },
+  
   
   {
     path: "graphics/items/water.png",
@@ -1145,6 +1182,50 @@ export const SPRITES = [
   {
     path: "graphics/items/basic-oil-processing.png",
     sprites: itemSprites(S.basicOilProcessingRecipe),
+  },
+  {
+    path: "graphics/items/heavy-oil.png",
+    sprites: itemSprites(S.heavyOilFluid),
+  },
+  {
+    path: "graphics/items/light-oil.png",
+    sprites: itemSprites(S.lightOilFluid),
+  },
+  {
+    path: "graphics/items/advanced-oil-processing.png",
+    sprites: itemSprites(S.advancedOilProcessingRecipe),
+  },
+  {
+    path: "graphics/items/heavy-oil-cracking.png",
+    sprites: itemSprites(S.heavyOilCrackingRecipe),
+  },
+  {
+    path: "graphics/items/light-oil-cracking.png",
+    sprites: itemSprites(S.lightOilCrackingRecipe),
+  },
+  {
+    path: "graphics/items/coal-liquefaction.png",
+    sprites: itemSprites(S.coalLiquefactionRecipe),
+  },
+  {
+    path: "graphics/items/sulfuric-acid.png",
+    sprites: itemSprites(S.sulfuricAcidFluid),
+  },
+  {
+    path: "graphics/items/lubricant.png",
+    sprites: itemSprites(S.lubricantFluid),
+  },
+  {
+    path: "graphics/items/solid-fuel-from-heavy-oil.png",
+    sprites: itemSprites(S.solidFuelFromHeavyOilRecipe),
+  },
+  {
+    path: "graphics/items/solid-fuel-from-light-oil.png",
+    sprites: itemSprites(S.solidFuelFromLightOilRecipe),
+  },
+  {
+    path: "graphics/items/solid-fuel-from-petroleum-gas.png",
+    sprites: itemSprites(S.solidFuelFromPetroleumGasRecipe),
   },
   
   
@@ -1362,6 +1443,7 @@ function halfBeltSprites(id, width, height,
 }
 
 function itemSprites(id, iconId) {
+  if (!id && !iconId) throw new Error("no id");
   return [
     ...(id ? [{id, ...rect(64)}] : []),
     ...(iconId ? [{id: iconId, ...rect(0, 0, 64, 64)}] : []),

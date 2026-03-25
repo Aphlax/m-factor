@@ -406,9 +406,8 @@ export function setRecipe(recipe, time) {
     for (let input of recipe.inputs) {
       if (input.item < FLUID_START ||
           input.item >= FLUID_END) {
-        // Non-fluid item.
         inputs.push(input);
-      } else { // Fluid.
+      } else {
         fluidInputs.push(input);
       }
     }
@@ -438,9 +437,8 @@ export function setRecipe(recipe, time) {
     for (let output of recipe.outputs) {
       if (output.item < FLUID_START ||
           output.item >= FLUID_END) {
-        // Non-fluid item.
         outputs.push(output);
-      } else { // Fluid.
+      } else {
         fluidOutputs.push(output);
       }
     }

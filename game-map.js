@@ -906,10 +906,10 @@ GameMap.prototype.createParticle = function(sprite, length, x, y, time, duration
   p.yStart = p.yEnd = y;
   p.sizeStart = p.sizeEnd = 1;
   p.startTime = time;
-  p.duration = duration;
+  p.duration = duration + 210;
   p.alphaStart = p.alphaEnd = 0.9;
   p.animationLength = length;
-  p.animation = Math.floor(length * Math.random());
+  p.animation = Math.floor(time / 60 + x + 2 * y) % length;
   p.animationSpeed = 1;
   
   this.chunks.get(cx).get(cy).particles.push(p);

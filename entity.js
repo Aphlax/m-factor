@@ -739,7 +739,7 @@ Entity.prototype.update = function(gameMap, time) {
           gameMap.createParticle(this.data.particle,
               this.data.particleAnimationLength,
               this.x + x, this.y + y,
-              this.taskStart, this.taskEnd - this.taskStart + 200);
+              this.taskStart, this.taskEnd - this.taskStart);
         }
         break assembler;
       }

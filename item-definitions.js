@@ -14,11 +14,20 @@ export const I = {
   wood: 11,
   steelPlate: 12,
   plasticBar: 13,
+  advancedCircuit: 14,
+  sulfur: 15,
+  solidFuel: 16,
+  battery: 17,
+  explosives: 18,
   
   water: 50, // Fluid.
   steam: 51, // Fluid.
   crudeOil: 52, // Fluid.
   petroleumGas: 53, // Fluid.
+  heavyOil: 54, // Fluid.
+  lightOil: 55, // Fluid.
+  sulfuricAcid: 56, // Fluid.
+  lubricant: 57, // Fluid.
   
   transportBelt: 100,
   inserter: 101,
@@ -32,15 +41,16 @@ export const I = {
   boiler: 109,
   steamEngine: 110,
   smallElectricPole: 111,
-  undergroundBelt: 112,
-  pipeToGround: 113,
-  splitter: 114,
-  burnerInserter: 115,
-  fastInserter: 116,
-  longHandedInserter: 117,
-  pumpjack: 118,
-  oilRefinery: 119,
-  chemicalPlant: 120,
+  electricFurnace: 112,
+  undergroundBelt: 113,
+  pipeToGround: 114,
+  splitter: 115,
+  burnerInserter: 116,
+  fastInserter: 117,
+  longHandedInserter: 118,
+  pumpjack: 119,
+  oilRefinery: 120,
+  chemicalPlant: 121,
 };
 
 export const FLUID_START = 50;
@@ -127,6 +137,37 @@ export const ITEMS = new Map([
     stackSize: 100,
     prototypeName: "plastic-bar",
   }],
+  [I.advancedCircuit,
+  {
+    sprite: S.advancedCircuitItem,
+    stackSize: 200,
+    prototypeName: "advanced-circuit",
+  }],
+  [I.sulfur,
+  {
+    sprite: S.sulfurItem,
+    stackSize: 50,
+    prototypeName: "sulfur",
+  }],
+  [I.solidFuel,
+  {
+    sprite: S.solidFuelItem,
+    stackSize: 50,
+    prototypeName: "solid-fuel",
+  }],
+  [I.battery,
+  {
+    sprite: S.batteryItem,
+    stackSize: 200,
+    prototypeName: "battery",
+  }],
+  [I.explosives,
+  {
+    sprite: S.explosivesItem,
+    stackSize: 50,
+    prototypeName: "explosives",
+  }],
+  
   
   // Placeable
   
@@ -291,6 +332,26 @@ export const FLUIDS = new Map([
   {
     sprite: S.petroleumGasFluid,
     prototypeName: "petroleum-gas",
+  }],
+  [I.heavyOil,
+  {
+    sprite: S.heavyOilFluid,
+    prototypeName: "heavy-oil",
+  }],
+  [I.lightOil,
+  {
+    sprite: S.lightOilFluid,
+    prototypeName: "light-oil",
+  }],
+  [I.sulfuricAcid,
+  {
+    sprite: S.sulfuricAcidFluid,
+    prototypeName: "sulfuric-acid",
+  }],
+  [I.lubricant,
+  {
+    sprite: S.lubricantFluid,
+    prototypeName: "lubricant",
   }],
 ]);
 

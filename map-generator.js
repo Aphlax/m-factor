@@ -368,6 +368,7 @@ TestGenerator.prototype.generateTiles = function() {
   return new Array(32).fill(0).map(_ => new Array(32).fill(DEFAULT_TERRAIN));
 };
 TestGenerator.prototype.generateResources = function() {};
+TestGenerator.prototype.generateTrees = function() {};
 
 
 export {MapGenerator, TestGenerator, MAP_COLOR, RESOURCE_COLORS};
