@@ -29,7 +29,7 @@ Grid.prototype.update = function(time, dt) {
   }
   if (!demand) {
     for (let generator of this.generators) {
-      if (generator.state == STATE.running) {
+      if (generator.state == STATE.working) {
         generator.state = STATE.idle;
         generator.animation = Math.floor(generator.animation +
             (time - generator.taskStart) * generator.animationSpeed / 60) %
@@ -53,7 +53,7 @@ Grid.prototype.update = function(time, dt) {
   for (let generator of this.generators) {
     const steam = generator.inputFluidTank.tanklets[0].amount;
     if (!steam) {
-      if (generator.state == STATE.running) {
+      if (generator.state == STATE.working) {
         generator.state = STATE.idle;
         generator.animation = Math.floor(generator.animation +
             (time - generator.taskStart) * generator.animationSpeed / 60) %
@@ -66,8 +66,8 @@ Grid.prototype.update = function(time, dt) {
     generator.inputFluidTank.tanklets[0].amount -=
         Math.min(needed * production,
         generator.inputFluidTank.tanklets[0].amount);
-    if (generator.state != STATE.running) {
-      generator.state = STATE.running;
+    if (generator.state != STATE.working) {
+      generator.state = STATE.working;
       generator.taskStart = time;
     }
   }

@@ -29,6 +29,31 @@ Channel.prototype.update = function(time, dt) {
       Math.max(this.amount / this.capacity, 0.05) * dt / 1000);
   let outputAmount = 0;
   for (let [entity, tanklet] of this.outputTanklets.entries()) {
+    if (entity.type == TYPE.pump) {
+      const [outTanklet] = entity.outputFluidTank.tanklets;
+      const sat = entity.data.grid?.satisfaction ?? 0;
+      const pump = Math.floor(Math.min(
+          outTanklet.capacity - outTanklet.amount,
+          tanklet.amount,
+          DEFAULT_TRANSFER * sat * dt / 1000));
+      tanklet.amount -= pump;
+      outTanklet.amount += pump;
+      if (!pump == (entity.state == STATE.working)) {
+        const state = pump ? STATE.working : STATE.idle;
+        if (entity.state != STATE.working && state == STATE.working) {
+          entity.data.grid.consumerss.get(entity.energyDrain).delete(entity);
+          entity.data.grid.consumerss.get(entity.energyConsumption).add(entity);
+          entity.taskStart = time;
+        } else if (entity.state == STATE.working && state != STATE.working) {
+          entity.data.grid?.consumerss.get(entity.energyConsumption).delete(entity);
+          entity.data.grid?.consumerss.get(entity.energyDrain).add(entity);
+          entity.animation = Math.floor(entity.animation +
+              (time - entity.taskStart) *
+              entity.animationSpeed / 60) % entity.animationLength;
+        }
+        entity.state = state;
+      }
+    }
     outputAmount += Math.min(tanklet.capacity -
         tanklet.amount, maxOutputAmount);
   }
@@ -36,8 +61,8 @@ Channel.prototype.update = function(time, dt) {
     const pOut = Math.min(this.amount / outputAmount, 1);
     if (pOut) {
       for (let [entity, tanklet] of this.outputTanklets.entries()) {
-        const transfer = Math.floor(
-            Math.min(tanklet.capacity - tanklet.amount,
+        const transfer = Math.floor(Math.min(
+            tanklet.capacity - tanklet.amount,
             this.amount,
             Math.ceil(pOut * maxOutputAmount)));
         
@@ -62,8 +87,8 @@ Channel.prototype.update = function(time, dt) {
   }
   const pIn = inputAmount ? Math.min((this.capacity - this.amount) / inputAmount, 1) : 0;
   for (let [entity, tanklet] of this.inputTanklets.entries()) {
-    const transfer = Math.floor(
-        Math.min(tanklet.amount,
+    const transfer = Math.floor(Math.min(
+        tanklet.amount,
         this.capacity - this.amount,
         Math.ceil(pIn * maxInputAmount)));
     this.amount += transfer;
@@ -115,10 +140,17 @@ Channel.prototype.addInputEntity = function(entity, index) {
     return; // Assembler without recipe.
   const tanklet = entity.outputFluidTank.tanklets[index] ??
       entity.outputFluidTank.tanklets[0];
-  if (this.fluid && tanklet.fluid != this.fluid) {
+  if (this.fluid && tanklet.fluid &&
+      tanklet.fluid != this.fluid) {
     return true;
-  } else if (!this.fluid) {
-    this.fluid = tanklet.fluid;
+  } else if (!this.fluid && tanklet.fluid) {
+    this.setFluid(tanklet.fluid);
+  } else if (this.fluid && !tanklet.fluid) {
+    // Pump.
+    tanklet.fluid = this.fluid;
+    entity.inputFluidTank.tanklets[0].fluid = this.fluid;
+    entity.inputFluidTank.pipes[0]
+        ?.data.channel.setFluid(this.fluid);
   }
   this.inputTanklets.set(entity, tanklet);
 };
@@ -133,10 +165,17 @@ Channel.prototype.addOutputEntity = function(entity, index) {
     return; // Assembler without recipe.
   const tanklet = entity.inputFluidTank.tanklets[index] ??
       entity.inputFluidTank.tanklets[0];
-  if (this.fluid && tanklet.fluid != this.fluid) {
+  if (this.fluid && tanklet.fluid &&
+      tanklet.fluid != this.fluid) {
     return true;
-  } else if (!this.fluid) {
-    this.fluid = tanklet.fluid;
+  } else if (!this.fluid && tanklet.fluid) {
+    this.setFluid(tanklet.fluid);
+  } else if (this.fluid && !tanklet.fluid) {
+    // Pump.
+    tanklet.fluid = this.fluid;
+    entity.outputFluidTank.tanklets[0].fluid = this.fluid;
+    entity.outputFluidTank.pipes[0]
+        ?.data.channel.setFluid(this.fluid);
   }
   this.outputTanklets.set(entity, tanklet);
 };
@@ -145,6 +184,35 @@ Channel.prototype.removeOutputEntity = function(entity) {
   this.outputTanklets.delete(entity);
 };
 
+Channel.prototype.setFluid = function(fluid) {
+  this.fluid = fluid;
+  for (let [entity, tanklet] of this.inputTanklets.entries()) {
+    if (!tanklet.fluid) { // Pump.
+      tanklet.fluid = fluid;
+      const otherTank = entity.inputFluidTank;
+      otherTank.tanklets[0].fluid = fluid;
+      const otherChannel =
+          otherTank.pipes[0]?.data.channel;
+      if (otherChannel) {
+        otherChannel.setFluid(fluid);
+      }
+    }
+  }
+  for (let [entity, tanklet] of this.outputTanklets.entries()) {
+    if (!tanklet.fluid) { // Pump.
+      tanklet.fluid = fluid;
+      const otherTank = entity.outputFluidTank;
+      otherTank.tanklets[0].fluid = fluid;
+      const otherChannel =
+          otherTank.pipes[0]?.data.channel;
+      if (otherChannel) {
+        otherChannel.setFluid(fluid);
+      }
+    }
+  }
+};
+
+/** Assumes the fluids are valid. */
 Channel.prototype.add = function(pipe) {
   this.pipes.add(pipe);
   pipe.data.channel = this;
@@ -212,6 +280,12 @@ Channel.prototype.remove = function(pipe) {
 Channel.prototype.join = function(other) {
   if (other == this) return;
   
+  if (this.fluid && !other.fluid) {
+    other.setFluid(this.fluid);
+  } else if (!this.fluid && other.fluid) {
+    this.setFluid(other.fluid);
+  }
+  
   for (let pipe of other.pipes) {
     this.pipes.add(pipe);
     pipe.data.channel = this;
@@ -220,7 +294,6 @@ Channel.prototype.join = function(other) {
   
   this.capacity += other.capacity;
   this.amount += other.amount;
-  this.fluid = this.fluid || other.fluid;
   
   for (let [entity, tanklet] of other.inputTanklets.entries()) {
     this.inputTanklets.set(entity, tanklet);

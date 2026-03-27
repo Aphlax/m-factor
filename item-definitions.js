@@ -19,6 +19,8 @@ export const I = {
   solidFuel: 16,
   battery: 17,
   explosives: 18,
+  engineUnit: 19,
+  stoneBrick: 20,
   
   water: 50, // Fluid.
   steam: 51, // Fluid.
@@ -51,6 +53,7 @@ export const I = {
   pumpjack: 119,
   oilRefinery: 120,
   chemicalPlant: 121,
+  pump: 122,
 };
 
 export const FLUID_START = 50;
@@ -166,6 +169,18 @@ export const ITEMS = new Map([
     sprite: S.explosivesItem,
     stackSize: 50,
     prototypeName: "explosives",
+  }],
+  [I.engineUnit,
+  {
+    sprite: S.engineUnitItem,
+    stackSize: 50,
+    prototypeName: "engine-unit",
+  }],
+  [I.stoneBrick,
+  {
+    sprite: S.stoneBrickItem,
+    stackSize: 100,
+    prototypeName: "stone-brick",
   }],
   
   
@@ -302,6 +317,12 @@ export const ITEMS = new Map([
     sprite: S.chemicalPlantItem,
     stacksize: 10,
     prototypeName: "chemical-plant",
+  }],
+  [I.pump,
+  {
+    sprite: S.pumpItem,
+    stacksize: 50,
+    prototypeName: "pump",
   }],
 ]);
 

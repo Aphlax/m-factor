@@ -16,6 +16,7 @@ export const TYPE = {
   undergroundBelt: 14,
   pipeToGround: 15,
   splitter: 16,
+  pump: 17,
 };
 
 export const NAME = {
@@ -42,6 +43,7 @@ export const NAME = {
   pumpjack: 21,
   oilRefinery: 22,
   chemicalPlant: 23,
+  pump: 24,
 };
 
 /** Never value for next update. 285 years from now. */
@@ -81,6 +83,7 @@ export const STATE = {
   itemReady: 3, // Inserter or mine ready to drop item (but output entity does not accept it). Assembler output yellow.
   outOfEnergy: 4, // Stopped mid task because there was no energy.
   noEnergy: 5, // Did not start a task because there was no energy.
+  working: 6, // Running but no definite task duration or end.
   
   noOutput: 11, // Inserter or mine has no output (after item is ready to drop).
   inserterCoolDown: 12, // Inserter moving back to initial position.

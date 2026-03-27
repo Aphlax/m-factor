@@ -181,7 +181,7 @@ UiChoice.prototype.touchEnd = function(e) {
             this.parent.ui.game.playTime;
       }
     }
-  }
+  } // break actions:
   
   // This extends the window to default height.
   this.parent.yTarget = this.parent.canvasHeight;

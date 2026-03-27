@@ -28,6 +28,37 @@ FluidNetwork.prototype.addPipe = function(pipe) {
     }
     fluid = other.data.channel.fluid;
   }
+  for (let entity of pipe.inputEntities) {
+    if (!entity.outputFluidTank) continue;
+    for (let i = 0; i < entity.outputFluidTank.pipes.length; i++) {
+      if (entity.outputFluidTank.pipes[i] == pipe) {
+        const tanklet = entity.outputFluidTank.tanklets[i] ??
+            entity.outputFluidTank.tanklets[0];
+        if (fluid && tanklet?.fluid &&
+            fluid != tanklet.fluid) {
+          return true;
+        } else if (!fluid) {
+          fluid = tanklet?.fluid;
+        }
+      }
+    }
+  }
+  for (let entity of pipe.outputEntities) {
+    if (!entity.inputFluidTank ||
+        entity.inputFluidTank.internalInlet) continue;
+    for (let i = 0; i < entity.inputFluidTank.pipes.length; i++) {
+      if (entity.inputFluidTank.pipes[i] == pipe) {
+        const tanklet = entity.inputFluidTank.tanklets[i] ??
+            entity.inputFluidTank.tanklets[0];
+        if (fluid && tanklet?.fluid &&
+            fluid != tanklet.fluid) {
+          return true;
+        } else if (!fluid) {
+          fluid = tanklet?.fluid;
+        }
+      }
+    }
+  }
   let connected = false;
   for (let i = 0; i < pipe.data.pipeConnections.length; i++) {
     const other = pipe.data.pipes[i];

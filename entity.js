@@ -318,6 +318,17 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     if (data?.itemFilter) {
       this.data.itemFilter = data.itemFilter;
     }
+  } else if (this.type == TYPE.pump) {
+    this.state = STATE.idle;
+    this.energySource = def.energySource;
+    this.energyDrain = def.energyDrain;
+    this.energyConsumption = def.energyConsumption;
+    this.inputFluidTank = new FluidTank()
+        .setTanklets([undefined])
+        .setPipeConnections(def.fluidInputs[direction]);
+    this.outputFluidTank = new FluidTank()
+        .setTanklets([undefined])
+        .setPipeConnections(def.fluidOutputs[direction]);
   }
   return this;
 };

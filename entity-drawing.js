@@ -23,7 +23,8 @@ export function draw(ctx, view, time) {
   if ((y - MAX_HEIGHT) * s > vy + vh || (y + height) * s <= vy)
     return;
   let animation = this.animation;
-  if (this.animationLength && (this.state == STATE.running)) {
+  if (this.animationLength &&
+      (this.state == STATE.running || this.state == STATE.working)) {
     // This results in 18.33 fps...
     animation = Math.floor(animation +
         (time - this.taskStart) *
@@ -62,7 +63,9 @@ export function drawShadow(ctx, view, time) {
   if (y * s > vy + vh || (y + height) * s <= vy)
     return;
   let animation = this.spriteShadowAnimation ? this.animation : 0;
-  if (this.animationLength && this.state == STATE.running && this.spriteShadowAnimation) {
+  if (this.animationLength &&
+      (this.state == STATE.running || this.state == STATE.working) &&
+      this.spriteShadowAnimation) {
     animation = Math.floor(animation +
         (time - this.taskStart) * this.animationSpeed / 60) %
         this.animationLength;
@@ -368,6 +371,7 @@ export function drawIO(ctx, view) {
   ctx.lineCap = "round";
   for (let entity of this.inputEntities) {
     const direction = this.type == TYPE.inserter ||
+        this.type == TYPE.pump ||
         (this.type == TYPE.assembler &&
         entity.type == TYPE.pipe) ?
         this.direction : entity.direction;
@@ -406,6 +410,7 @@ export function drawIO(ctx, view) {
         this.type == TYPE.mine ||
         this.type == TYPE.offshorePump ||
         this.type == TYPE.boiler ||
+        this.type == TYPE.pump ||
         (this.type == TYPE.assembler &&
         entity.type == TYPE.pipe) ||
         ((this.type == TYPE.belt ||

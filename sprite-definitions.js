@@ -99,6 +99,11 @@ export const S = {
   chemicalPlantE: 162*16 + 8, // 24
   chemicalPlantS: 164*16, // 24
   chemicalPlantW: 165*16 + 8, // 24
+  pumpN: 167*16, // 32
+  pumpE: 169*16, // 32
+  pumpS: 171*16, // 32
+  pumpW: 173*16, // 32
+  
   
   woodenChest: 15000,
   woodenChestShadow: 15001,
@@ -245,6 +250,8 @@ export const S = {
   solidFuelItem: 16015,
   batteryItem: 16016,
   explosivesItem: 16017,
+  engineUnitItem: 16018,
+  stoneBrickItem: 16019,
   
   waterFluid: 16050,
   steamFluid: 16051,
@@ -286,6 +293,7 @@ export const S = {
   pumpjackItem: 16120,
   oilRefineryItem: 16121,
   chemicalPlantItem: 16122,
+  pumpItem: 16123,
   
   gearIcon: 16500,
   burnerDrillIcon: 16501,
@@ -326,6 +334,7 @@ export const S = {
   pumpjackIcon: 16536,
   oilRefineryIcon: 16537,
   chemicalPlantIcon: 16538,
+  pumpIcon: 16539,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -1087,6 +1096,23 @@ export const SPRITES = [
     path: "graphics/entities/pipe/pipe-cover-west.png",
     sprites: entitySprites(S.pipeCapW, 64, 64, 1, 1, 16, 16, 16, 16, true),
   },
+  {
+    path: "graphics/entities/pump/pump-north.png",
+    sprites: entitySprites(S.pumpN, 53, 79, 8, 4, 2, 19, 0, 15, true),
+  },
+  {
+    path: "graphics/entities/pump/pump-east.png",
+    sprites: entitySprites(S.pumpE, 66, 60, 8, 4, 1, 1, 12, 16, true),
+  },
+  {
+    path: "graphics/entities/pump/pump-south.png",
+    sprites: entitySprites(S.pumpS, 62, 87, 8, 4, 2, 28, 11, 12, true),
+  },
+  {
+    path: "graphics/entities/pump/pump-west.png",
+    sprites: entitySprites(S.pumpW, 69, 51, 8, 4, 1, 4, 12, 7, true),
+  },
+  
   
   // Items.
   {
@@ -1160,6 +1186,14 @@ export const SPRITES = [
   {
     path: "graphics/items/explosives.png",
     sprites: itemSprites(S.explosivesItem),
+  },
+  {
+    path: "graphics/items/engine-unit.png",
+    sprites: itemSprites(S.engineUnitItem),
+  },
+  {
+    path: "graphics/items/stone-brick.png",
+    sprites: itemSprites(S.stoneBrickItem),
   },
   
   
@@ -1320,6 +1354,10 @@ export const SPRITES = [
   {
     path: "graphics/items/chemical-plant.png",
     sprites: itemSprites(S.chemicalPlantItem, S.chemicalPlantIcon),
+  },
+  {
+    path: "graphics/items/pump.png",
+    sprites: itemSprites(S.pumpItem, S.pumpIcon),
   },
   
   

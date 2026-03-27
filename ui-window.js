@@ -245,6 +245,7 @@ UiWindow.prototype.initialize = function() {
   this.entityUis.set(TYPE.boiler, {});
   this.entityUis.set(TYPE.electricPole, {});
   this.entityUis.set(TYPE.pipeToGround, {});
+  this.entityUis.set(TYPE.pump, {});
   
   this.entityUis.set(TYPE.belt, {
     snake: new UiButton(this, this.canvasWidth - 96, 86)

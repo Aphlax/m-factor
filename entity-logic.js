@@ -411,7 +411,7 @@ export function setRecipe(recipe, time) {
         fluidInputs.push(input);
       }
     }
-    const usedChannels = [], usedFluids = [];
+    const usedChannels = [];
     for (let entity of this.inputEntities) {
       if (!entity.data.pipeConnections) continue;
       const connection =
@@ -423,14 +423,13 @@ export function setRecipe(recipe, time) {
           channel.fluid != fluid.item) {
         return true;
       }
-      for (let i = 0; i < usedChannels.length; i++) {
+      for (let i = 0; i < usedChannels.length; i += 2) {
         if (channel == usedChannels[i] &&
-            fluid.item != usedFluids[i]) {
+            fluid.item != usedChannels[i + 1]) {
           return true;
         }
       }
-      usedChannels.push(channel);
-      usedFluids.push(fluid.item);
+      usedChannels.push(channel, fluid.item);
     }
     
     const outputs = [], fluidOutputs = [];
@@ -453,14 +452,13 @@ export function setRecipe(recipe, time) {
           channel.fluid != fluid.item) {
         return true;
       }
-      for (let i = 0; i < usedChannels.length; i++) {
+      for (let i = 0; i < usedChannels.length; i += 2) {
         if (channel == usedChannels[i] &&
-            fluid.item != usedFluids[i]) {
+            fluid.item != usedChannels[i + 1]) {
           return true;
         }
       }
-      usedChannels.push(channel);
-      usedFluids.push(fluid.item);
+      usedChannels.push(channel, fluid.item);
     }
     
     this.inputInventory.items.length = 0;

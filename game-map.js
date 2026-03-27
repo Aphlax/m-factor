@@ -345,7 +345,9 @@ GameMap.prototype.createEntity = function({name, x, y, direction, data}, time) {
   const i = entities.findIndex(e => e.y >= y && (e.y > y || e.x > x));
   entities.splice(i, 0, entity);
   
-  this.connectEntity(entity, time);
+  if (this.connectEntity(entity, time)) {
+    return undefined;
+  }
   
   return entity;
 };
@@ -542,25 +544,25 @@ GameMap.prototype.connectEntity = function(entity, time) {
         if (entity.data.pipeConnections && other.outputFluidTank) {
           if (other.connectFluidOutput(entity)) {
             this.deleteEntity(entity);
-            return;
+            return true;
           }
         }
         if (other.data.pipeConnections && entity.outputFluidTank) {
           if (entity.connectFluidOutput(other)) {
             this.deleteEntity(entity);
-            return;
+            return true;
           }
         }
         if (entity.data.pipeConnections && other.inputFluidTank) {
           if (other.connectFluidInput(entity)) {
             this.deleteEntity(entity);
-            return;
+            return true;
           }
         }
         if (other.data.pipeConnections && entity.inputFluidTank) {
           if (entity.connectFluidInput(other)) {
             this.deleteEntity(entity);
-            return;
+            return true;
           }
         }
       }
@@ -574,7 +576,7 @@ GameMap.prototype.connectEntity = function(entity, time) {
   if (entity.data.pipeConnections) {
     if (this.fluidNetwork.addPipe(entity)) {
       this.deleteEntity(entity);
-      return;
+      return true;
     }
   }
   if (isPole) {

@@ -26,6 +26,17 @@ export const RECIPES = [
     duration: 3200,
   },
   {
+    prototypeName: "stone-brick",
+    inputs: [
+      {item: I.stone, amount: 2},
+    ],
+    outputs: [
+      {item: I.stoneBrick, amount: 1},
+    ],
+    entities: [NAME.stoneFurnace, NAME.electricFurnace],
+    duration: 3200,
+  },
+  {
     prototypeName: "steel-plate",
     inputs: [
       {item: I.ironPlate, amount: 5},
@@ -525,6 +536,46 @@ export const RECIPES = [
     ],
     entities: [NAME.assemblingMachine1],
     duration: 8000,
+  },
+  {
+    prototypeName: "chemical-plant",
+    inputs: [
+      {item: I.electronicCircuit, amount: 5},
+      {item: I.ironGear, amount: 5},
+      {item: I.pipe, amount: 5},
+      {item: I.steelPlate, amount: 5},
+    ],
+    outputs: [
+      {item: I.chemicalPlant, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 5000,
+  },
+  {
+    prototypeName: "pump",
+    inputs: [
+      {item: I.engineUnit, amount: 1},
+      {item: I.pipe, amount: 1},
+      {item: I.steelPlate, amount: 1},
+    ],
+    outputs: [
+      {item: I.pump, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 2000,
+  },
+  {
+    prototypeName: "electric-furnace",
+    inputs: [
+      {item: I.advancedCircuit, amount: 5},
+      {item: I.steelPlate, amount: 10},
+      {item: I.stoneBrick, amount: 10},
+    ],
+    outputs: [
+      {item: I.electricFurnace, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 5000,
   },
   
   

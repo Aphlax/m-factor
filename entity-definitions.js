@@ -719,6 +719,44 @@ export const ENTITIES = new Map([
       [west]: {x: 0.61, y: -1.83},
     }
   }],
+  [NAME.pump,
+  {
+    label: 'Pump',
+    prototypeName: "pump",
+    type: TYPE.pump,
+    size: {
+      [north]: {width: 1, height: 2},
+      [east]: {width: 2, height: 1},
+      [south]: {width: 1, height: 2},
+      [west]: {width: 2, height: 1},
+    },
+    rotatable: true,
+    icon: S.pumpIcon,
+    sprites: {
+      [north]: [S.pumpN],
+      [east]: [S.pumpE],
+      [south]: [S.pumpS],
+      [west]: [S.pumpW],
+    },
+    animationLength: 32,
+    mapColor: "#689AB0",
+    energySource: ENERGY.electric,
+    energyConsumption: 30, // kW
+    energyDrain: 0, // kW
+    
+    fluidInputs: {
+      [north]: [{x: 0, y: 2}],
+      [east]: [{x: -1, y: 0}],
+      [south]: [{x: 0, y: -1}],
+      [west]: [{x: 2, y: 0}],
+    },
+    fluidOutputs: {
+      [north]: [{x: 0, y: -1}],
+      [east]: [{x: 2, y: 0}],
+      [south]: [{x: 0, y: 2}],
+      [west]: [{x: -1, y: 0}],
+    },
+  }],
 ]);
 
 ENTITIES.keys().forEach(name =>

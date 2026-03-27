@@ -24,6 +24,7 @@ const BUILD_MENU = [
   NAME.smallElectricPole,
   NAME.pipe,
   NAME.pipeToGround,
+  NAME.pump,
   NAME.assemblingMachine1,
   NAME.oilRefinery,
   NAME.chemicalPlant,
