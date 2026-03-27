@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" style="width: 100%; height: 100%; margin: 0; overflow: hidden;">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script type="importmap">{"imports": {
+    "react": "https://esm.sh/stable/react@19.2.0",
+    "react-dom/client": "https://esm.sh/stable/react-dom@19.2.0/client"}}
+    </script>
+    <title>Entity Test</title>
+  </head>
+  <body style="width: calc(100% - 20px); height: calc(100% - 20px); margin: 10px; overflow: hidden; touch-action: none;">
+    <h2>Entity Test</h2>
+    <div id="root" style="width: calc(100% - 20px); height: calc(100% - 20px); margin: 0; overflow: auto;"></div>
+<script type="module">
+import {it, sit, fit, test, assertEqual, assertNotEqual, assertExists, assertNotExists, assertMatch, power, elapse, blueprint, blueprintScrambled} from './test-framework.js';
+import {DIRECTION, NAME, STATE, NEVER, RESOURCE_NAMES} from '../entity-properties.js';
+import {I} from '../item-definitions.js';
+import {PROTO_TO_RECIPE} from '../recipe-definitions.js';
+const north = {direction: DIRECTION.north},
+    east = {direction: DIRECTION.east},
+    south = {direction: DIRECTION.south},
+    west = {direction: DIRECTION.west};
+
+it("creates drill", () => {
+  const drill = NAME.burnerDrill;
+  blueprint([
+    {name: drill, x: 0, y: 0, ...north},
+  ], ([d], map) => {
+    const chunk = map.chunks.get(0).get(0);
+    chunk.resources = new Array(32);
+    chunk.resources[0] = new Array(32);
+    chunk.resources[0][0] =
+        {x: 0, y: 0, id: RESOURCE_NAMES.ironOre,
+        amount: 34};
+    map.connectEntity(d, 0);
+    assertExists(d);
+    assertMatch(d.data.mineResources.find(Boolean),
+        {amount: 34});
+  });
+});
+it("creates furnace", () => {
+  const furn = NAME.stoneFurnace;
+  blueprint([
+    {name: furn, x: 0, y: 0, ...north},
+  ], ([f], map) => {
+    assertExists(f);
+    assertEqual(f.state, STATE.missingItem);
+    assertEqual(f.nextUpdate, NEVER);
+    f.insert(I.coal, 3, 0);
+    f.insert(I.ironOre, 10, 0);
+    assertEqual(f.nextUpdate, 0);
+    elapse(map, 3.2);
+    assertEqual(f.state, STATE.running);
+    const nrIronPlates = f.extract(I.ironPlate, 5);
+    assertEqual(nrIronPlates, 1);
+  });
+});
+it("creates assembler", () => {
+  const ass = NAME.assemblingMachine1;
+  blueprint([
+    {name: ass, x: 0, y: 0, ...north},
+  ], ([a], map) => {
+    assertExists(a);
+    power(a);
+    assertEqual(a.state, STATE.noRecipe);
+    assertEqual(a.nextUpdate, NEVER);
+    a.setRecipe(PROTO_TO_RECIPE
+        .get("iron-gear-wheel"), 0);
+    assertEqual(a.state, STATE.missingItem);
+    a.insert(I.ironPlate, 20, 0);
+    assertEqual(a.nextUpdate, 0);
+    // 2 gears/s, 0.5 processing speed
+    elapse(map, 3);
+    assertEqual(a.state, STATE.running);
+    const nrGears = a.extract(I.ironGear, 10);
+    assertEqual(nrGears, 3);
+  });
+});
+it("creates inserter", () => {
+  const chest = NAME.woodenChest;
+  const ins = NAME.inserter;
+  const ass = NAME.assemblingMachine1;
+  blueprintScrambled([
+    {name: chest, x: 0, y: 0, ...north},
+    {name: ins, x: 1, y: 0, ...east},
+    {name: ass, x: 2, y: 0, ...north},
+  ], ([c, i, a], map) => {
+    assertExists(i);
+    power(i);
+    elapse(map, 1);
+    assertEqual(i.state, STATE.missingItem);
+    assertEqual(i.nextUpdate, NEVER);
+    a.setRecipe(PROTO_TO_RECIPE
+        .get("automation-science-pack"), 0);
+    c.insert(I.ironGear, 20, 0);
+    c.insert(I.copperPlate, 20, 0);
+    assertEqual(i.nextUpdate, 0);
+    elapse(map, 3);
+    assertEqual(i.state, STATE.running);
+    assertMatch(a.inputInventory.amounts,
+        [2, 1]);
+  });
+});
+it("inserter to belt", () => {
+  const chest = NAME.woodenChest;
+  const ins = NAME.inserter;
+  const belt = NAME.transportBelt;
+  blueprintScrambled([
+    {name: chest, x: 0, y: 0, ...north},
+    {name: ins, x: 1, y: 0, ...east},
+    {name: belt, x: 2, y: 0, ...north},
+  ], ([c, i, b], map) => {
+    power(i);
+    c.insert(I.ironPlate, 1, 0);
+    c.insert(I.copperPlate, 1, 0);
+    elapse(map, 3);
+    assertMatch(b.data.lane.plusFlow,
+        [0, 0]);
+    assertMatch(b.data.lane.plusItems,
+        [I.ironPlate, I.copperPlate]);
+  });
+});
+it("filtered inserter", () => {
+  const chest = NAME.woodenChest;
+  const ins = NAME.inserter;
+  blueprintScrambled([
+    {name: chest, x: 0, y: 0, ...north},
+    {name: ins, x: 1, y: 0, ...east},
+    {name: chest, x: 2, y: 0, ...north},
+  ], ([c1, i, c2], map) => {
+    power(i);
+    c1.insert(I.ironPlate, 1, 0);
+    c1.insert(I.copperPlate, 1, 0);
+    c1.insert(I.ironGear, 1, 0);
+    i.data.filterMode = true;
+    i.data.itemFilters =
+        [I.copperPlate, I.ironGear];
+    elapse(map, 3);
+    assertMatch(c2.inputInventory.items,
+        [I.copperPlate, I.ironGear]);
+  });
+});
+it("filtered inserter blocklist", () => {
+  const chest = NAME.woodenChest;
+  const ins = NAME.inserter;
+  blueprintScrambled([
+    {name: chest, x: 0, y: 0, ...north},
+    {name: ins, x: 1, y: 0, ...east},
+    {name: chest, x: 2, y: 0, ...north},
+  ], ([c1, i, c2], map) => {
+    power(i);
+    c1.insert(I.ironPlate, 1, 0);
+    c1.insert(I.copperPlate, 1, 0);
+    c1.insert(I.ironGear, 1, 0);
+    i.data.filterMode = false;
+    i.data.itemFilters =
+        [I.copperPlate];
+    elapse(map, 3);
+    assertMatch(c2.inputInventory.items,
+        [I.ironPlate, I.ironGear]);
+  });
+});
+it("power generation", () => {
+  const pump = NAME.offshorePump;
+  const boiler = NAME.boiler;
+  const engine = NAME.steamEngine;
+  const pole = NAME.smallElectricPole;
+  blueprintScrambled([
+    {name: pump, x: 0, y: 0, ...east},
+    {name: boiler, x: 2, y: 0, ...south},
+    {name: engine, x: 2, y: 2, ...north},
+    {name: pole, x: 1, y: 2, ...north},
+  ], ([op, b, se, ep], map) => {
+    b.insert(I.coal, 50, 0);
+    const fakeEntity = () => ({
+      state: STATE.running,
+      taskStart: 100,
+      taskEnd: NEVER,
+      taskDuration: 10000,
+      nextUpdate: NEVER,
+    });
+    let entity;
+    for (let i = 0; i < 60; i++) {
+      ep.data.grid.consumerss.get(30)
+          .add(entity = fakeEntity());
+    }
+    // 900 kw output, 1800 kW demand
+    elapse(map, 2);
+    assertEqual(ep.data.grid.satisfaction, 0.5);
+    assertEqual(entity.taskEnd >= 20000, true);
+  });
+});
+
+test(document.getElementById("root"));
+</script>
+  </body>
+</html>

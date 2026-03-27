@@ -10,17 +10,22 @@
     <title>Pipe Test</title>
   </head>
   <body style="width: calc(100% - 20px); height: calc(100% - 20px); margin: 10px; overflow: hidden; touch-action: none;">
-    <h2 style="font-family: Calibri, sans-serif;">Pipe Test</h2>
+    <h2>Pipe Test</h2>
     <div id="root" style="width: calc(100% - 20px); height: calc(100% - 20px); margin: 0; overflow: auto;"></div>
 <script type="module">
-import {it, sit, fit, test, assertEqual, assertNotEqual, assertExists, assertNotExists, assertMatch, blueprint, blueprintScrambled} from './test-framework.js';
+import {it, sit, fit, test, assertEqual, assertNotEqual, assertExists, assertNotExists, assertMatch, blueprint, blueprintScrambled, elapse, power} from './test-framework.js';
 import {DIRECTION, NAME} from '../entity-properties.js';
-const {north, east, south, west} = DIRECTION;
+import {I} from '../item-definitions.js';
+import {PROTO_TO_RECIPE} from '../recipe-definitions.js';
+const north = {direction: DIRECTION.north},
+    east = {direction: DIRECTION.east},
+    south = {direction: DIRECTION.south},
+    west = {direction: DIRECTION.west};
 
 it("creates pipe", () => {
   const name = NAME.pipe;
   blueprint([
-    {name, x: 0, y: 0, direction: north},
+    {name, x: 0, y: 0, ...north},
   ], ([p1], map) => {
     assertExists(p1);
     assertExists(p1.data.channel);
@@ -34,9 +39,9 @@ it("creates pipe", () => {
 it("splits channel with chunk border", () => {
   const name = NAME.pipe;
   blueprintScrambled([
-    {name, x: 0, y: -1, direction: north},
-    {name, x: 0, y: 0, direction: north},
-    {name, x: 0, y: 1, direction: north},
+    {name, x: 0, y: -1, ...north},
+    {name, x: 0, y: 0, ...north},
+    {name, x: 0, y: 1, ...north},
   ], ([p1, p2, p3], map) => {
     assertExists(p1.data.channel);
     assertEqual(p1.data.channel, p3.data.channel);
@@ -48,11 +53,11 @@ it("splits channel with chunk border", () => {
 it("junction behaves correctly", () => {
   const name = NAME.pipe;
   blueprintScrambled([
-    {name, x: 0, y: 0, direction: north},
-    {name, x: 0, y: 1, direction: north},
-    {name, x: -1, y: 0, direction: north},
-    {name, x: 1, y: 0, direction: north},
-    {name, x: 0, y: -1, direction: north},
+    {name, x: 0, y: 0, ...north},
+    {name, x: 0, y: 1, ...north},
+    {name, x: -1, y: 0, ...north},
+    {name, x: 1, y: 0, ...north},
+    {name, x: 0, y: -1, ...north},
   ], ([p1, p2, p3, p4, p5], map) => {
     assertExists(p1.data.channel);
     assertEqual(p1.data.channel, p2.data.channel);
@@ -67,10 +72,10 @@ it("junction behaves correctly", () => {
 it("loop behaves correctly", () => {
   const name = NAME.pipe;
   blueprintScrambled([
-    {name, x: 0, y: 0, direction: north},
-    {name, x: 0, y: 1, direction: north},
-    {name, x: 1, y: 1, direction: north},
-    {name, x: 1, y: 0, direction: north},
+    {name, x: 0, y: 0, ...north},
+    {name, x: 0, y: 1, ...north},
+    {name, x: 1, y: 1, ...north},
+    {name, x: 1, y: 0, ...north},
   ], ([p1, p2, p3, p4], map) => {
     assertExists(p1.data.channel);
     assertEqual(p1.data.channel, p2.data.channel);
@@ -85,10 +90,10 @@ it("connects underground", () => {
   const pipe = NAME.pipe;
   const name = NAME.pipeToGround;
   blueprintScrambled([
-    {name: pipe, x: 0, y: -1, direction: north},
-    {name, x: 0, y: 0, direction: north},
-    {name, x: 0, y: 5, direction: south},
-    {name: pipe, x: 0, y: 6, direction: north},
+    {name: pipe, x: 0, y: -1, ...north},
+    {name, x: 0, y: 0, ...north},
+    {name, x: 0, y: 5, ...south},
+    {name: pipe, x: 0, y: 6, ...north},
   ], ([p1, u1, u2, p2], map) => {
     assertEqual(u1.data.pipes[1], u2);
     assertExists(u1.data.channel);
@@ -102,11 +107,11 @@ it("picks correct underground connection", () => {
   const pipe = NAME.pipe;
   const name = NAME.pipeToGround;
   blueprintScrambled([
-    {name, x: 0, y: 0, direction: north},
-    {name, x: 0, y: 1, direction: north},
-    {name: pipe, x: 0, y: 2, direction: north},
-    {name, x: 0, y: 3, direction: south},
-    {name, x: 0, y: 4, direction: south},
+    {name, x: 0, y: 0, ...north},
+    {name, x: 0, y: 1, ...north},
+    {name: pipe, x: 0, y: 2, ...north},
+    {name, x: 0, y: 3, ...south},
+    {name, x: 0, y: 4, ...south},
   ], ([u1, u2, p1, u3, u4], map) => {
     assertEqual(u2.data.pipes[1], u3);
     assertEqual(u2.data.channel, u3.data.channel);
@@ -126,17 +131,17 @@ it("picks correct underground connection", () => {
 it("considers underground chain", () => {
   const name = NAME.pipeToGround;
   blueprintScrambled([
-    {name, x: 0, y: -2, direction: north},
-    {name, x: 0, y: 2, direction: south},
-    {name, x: 0, y: 3, direction: north},
-    {name, x: 0, y: 5, direction: south},
+    {name, x: 0, y: -2, ...north},
+    {name, x: 0, y: 2, ...south},
+    {name, x: 0, y: 3, ...north},
+    {name, x: 0, y: 5, ...south},
   ], ([u1, u2, u3, u4], map, r) => {
     assertEqual(u1.data.channel, u2.data.channel);
     assertEqual(u1.data.channel, u4.data.channel);
     map.deleteEntity(u4, 0);
     assertNotEqual(u1.data.channel, u4.data.channel);
     u4 = map.createEntity(
-        r({name, x: 0, y: 6, direction: south}));
+        r({name, x: 0, y: 6, ...south}));
     assertEqual(u1.data.channel, u4.data.channel);
     map.deleteEntity(u3, 0);
     assertNotEqual(u1.data.channel, u4.data.channel);
@@ -146,20 +151,172 @@ it("splits connected underground pipes", () => {
   const pipe = NAME.pipe;
   const name = NAME.pipeToGround;
   blueprint([
-    {name: pipe, x: 0, y: 0, direction: north},
-    {name: pipe, x: 1, y: 0, direction: north},
-    {name, x: 0, y: 1, direction: north},
-    {name, x: 1, y: 1, direction: north},
-    {name, x: 0, y: 5, direction: south},
-    {name, x: 1, y: 5, direction: south},
-    {name: pipe, x: 0, y: 6, direction: north},
-    {name: pipe, x: 1, y: 6, direction: north},
+    {name: pipe, x: 0, y: 0, ...north},
+    {name: pipe, x: 1, y: 0, ...north},
+    {name, x: 0, y: 1, ...north},
+    {name, x: 1, y: 1, ...north},
+    {name, x: 0, y: 5, ...south},
+    {name, x: 1, y: 5, ...south},
+    {name: pipe, x: 0, y: 6, ...north},
+    {name: pipe, x: 1, y: 6, ...north},
   ], ([p1, p2, u1, u2, u3, u4], map, r) => {
     assertEqual(u1.data.channel, u4.data.channel);
     const u5 = map.createEntity(
-        r({name, x: 0, y: 3, direction: south}));
+        r({name, x: 0, y: 3, ...south}));
     assertEqual(u1.data.channel, u4.data.channel);
     assertEqual(u3.data.channel, u5.data.channel);
+  });
+});
+it("sets fluids", () => {
+  const pipe = NAME.pipe;
+  blueprintScrambled([
+    {name: pipe, x: 0, y: 0, ...north},
+    {name: pipe, x: 2, y: 0, ...north},
+  ], ([p1, p2], map, r) => {
+    p1.data.channel.fluid = I.water;
+    const res = map.createEntity(r({name: pipe, x: 1, y: 0, ...north}), 0);
+    assertExists(res);
+    assertEqual(p2.data.channel.fluid, I.water);
+  });
+});
+it("checks fluids", () => {
+  const pipe = NAME.pipe;
+  blueprint([
+    {name: pipe, x: 0, y: 0, ...north},
+    {name: pipe, x: 2, y: 0, ...north},
+  ], ([p1, p2], map, r) => {
+    p1.data.channel.fluid = I.water;
+    p2.data.channel.fluid = I.steam;
+    const res = map.createEntity(r({name: pipe, x: 1, y: 0, ...north}), 0);
+    assertNotExists(res);
+  });
+});
+it("connects fluid output", () => {
+  const pipe = NAME.pipe;
+  const name = NAME.offshorePump;
+  blueprintScrambled([
+    {name: pipe, x: 0, y: 0, ...north},
+    {name: pipe, x: 1, y: 0, ...north},
+    {name, x: 0, y: 1, ...north},
+  ], ([p1, p2, op], map) => {
+    assertEqual(p2.data.channel.fluid, I.water);
+    assertEqual(p2.data.channel.inputTanklets.size, 1);
+    map.deleteEntity(p1, 0);
+    assertEqual(p2.data.channel.fluid, I.water);
+    assertEqual(p2.data.channel.inputTanklets.size, 0);
+  });
+});
+it("connects fluid internal input", () => {
+  const pipe = NAME.pipe;
+  const name = NAME.steamEngine;
+  blueprintScrambled([
+    {name: pipe, x: 0, y: 0, ...north},
+    {name: pipe, x: 1, y: 0, ...north},
+    {name, x: 0, y: 1, ...north},
+  ], ([p1, p2, se], map) => {
+    assertEqual(p1.data.channel.fluid, I.steam);
+    assertEqual(p1.data.channel.outputTanklets.size, 1);
+    map.deleteEntity(p2, 0);
+    assertEqual(p1.data.channel.fluid, I.steam);
+    assertEqual(p1.data.channel.outputTanklets.size, 0);
+  });
+});
+it("invalid fluid connections", () => {
+  const pipe = NAME.pipe;
+  const pump = NAME.offshorePump;
+  const engine = NAME.steamEngine;
+  blueprintScrambled([
+    {name: pump, x: 1, y: 0, ...south},
+    {name: pipe, x: 1, y: 2, ...north},
+    {name: pipe, x: 1, y: 3, ...north},
+    {name: pipe, x: 1, y: 4, ...north},
+    {name: engine, x: 0, y: 5, ...north},
+  ], ([op, p1, p2, p3, se], map) => {
+    assertEqual(op && p1 && p2 && p3 && se, undefined);
+    if (op && p1 && p3 && se) {
+      assertNotEqual(p1.data.channel.fluid, p3.data.channel.fluid);
+    }
+  });
+});
+it("invalid fluid connections single pipe", () => {
+  const pipe = NAME.pipe;
+  const pump = NAME.offshorePump;
+  const engine = NAME.steamEngine;
+  blueprintScrambled([
+    {name: pump, x: 1, y: 0, ...south},
+    {name: pipe, x: 1, y: 2, ...north},
+    {name: engine, x: 0, y: 3, ...north},
+  ], ([op, p1, se], map) => {
+    assertEqual(op && p1 && se, undefined);
+  });
+});
+it("set fluid recipe", () => {
+  const pipe = NAME.pipe;
+  const chem = NAME.chemicalPlant;
+  blueprintScrambled([
+    {name: pipe, x: 0, y: 0, ...north},
+    {name: chem, x: 0, y: 1, ...south},
+  ], ([p1, cp], map) => {
+    const res = cp.setRecipe(
+        PROTO_TO_RECIPE.get("plastic-bar"), 0);
+    assertNotExists(res);
+    assertMatch(cp.data.recipe,
+        {prototypeName: "plastic-bar"});
+    assertEqual(p1.data.channel.fluid, I.petroleumGas);
+  });
+});
+it("set invalid fluid recipe", () => {
+  const pipe = NAME.pipe;
+  const pump = NAME.offshorePump;
+  const chem = NAME.chemicalPlant;
+  blueprintScrambled([
+    {name: pump, x: 0, y: 0, ...south},
+    {name: pipe, x: 0, y: 2, ...north},
+    {name: chem, x: 0, y: 3, ...south},
+  ], ([op, p1, cp], map) => {
+    const res = cp.setRecipe(
+        PROTO_TO_RECIPE.get("plastic-bar"), 0);
+    assertExists(res);
+    assertNotExists(cp.data.recipe);
+  });
+});
+it("set invalid fluid recipe connected inputs", () => {
+  const pipe = NAME.pipe;
+  const chem = NAME.chemicalPlant;
+  blueprintScrambled([
+    {name: pipe, x: 0, y: 0, ...north},
+    {name: pipe, x: 1, y: 0, ...north},
+    {name: pipe, x: 2, y: 0, ...north},
+    {name: chem, x: 0, y: 1, ...south},
+  ], ([p1, p2, p3, cp], map) => {
+    const res = cp.setRecipe(
+        PROTO_TO_RECIPE.get("heavy-oil-cracking"), 0);
+    assertExists(res);
+    assertNotExists(cp.data.recipe);
+    map.deleteEntity(p2, 0);
+    cp.setRecipe(
+        PROTO_TO_RECIPE.get("heavy-oil-cracking"), 0);
+    assertExists(cp.data.recipe);
+  });
+});
+it("pump works", () => {
+  const pipe = NAME.pipe;
+  const pump = NAME.pump;
+  const offs = NAME.offshorePump;
+  blueprintScrambled([
+    {name: offs, x: 0, y: 0, ...east},
+    {name: pipe, x: 2, y: 0, ...north},
+    {name: pump, x: 3, y: 0, ...east},
+    {name: pipe, x: 5, y: 0, ...north},
+    {name: pump, x: 6, y: 0, ...east},
+    {name: pipe, x: 8, y: 0, ...north},
+  ], ([op, p1, pu1, p2, pu2, p3], map) => {
+    assertEqual(p2.data.channel.fluid, I.water);
+    elapse(map, 1);
+    power(pu1);
+    power(pu2);
+    elapse(map, 1);
+    assertEqual(p3.data.channel.amount, 100);
   });
 });
 

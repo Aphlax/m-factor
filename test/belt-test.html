@@ -10,17 +10,20 @@
     <title>Belt Test</title>
   </head>
   <body style="width: calc(100% - 20px); height: calc(100% - 20px); margin: 10px; overflow: hidden; touch-action: none;">
-    <h2 style="font-family: Calibri, sans-serif;">Belt Test</h2>
+    <h2>Belt Test</h2>
     <div id="root" style="width: calc(100% - 20px); height: calc(100% - 20px); margin: 0; overflow: auto;"></div>
 <script type="module">
 import {it, sit, fit, test, assertEqual, assertNotEqual, assertExists, assertNotExists, assertMatch, blueprint, blueprintScrambled, elapse} from './test-framework.js';
 import {DIRECTION, NAME} from '../entity-properties.js';
-const {north, east, south, west} = DIRECTION;
+const north = {direction: DIRECTION.north},
+    east = {direction: DIRECTION.east},
+    south = {direction: DIRECTION.south},
+    west = {direction: DIRECTION.west};
 
 it("creates belt", () => {
   const name = NAME.transportBelt;
   blueprint([
-    {name, x: 0, y: 0, direction: north},
+    {name, x: 0, y: 0, ...north},
   ], ([b1], map) => {
     assertExists(b1);
     assertExists(b1.data.lane);
@@ -34,9 +37,9 @@ it("creates belt", () => {
 it("splits lane with chunk border", () => {
   const name = NAME.transportBelt;
   blueprintScrambled([
-    {name, x: 0, y: -1, direction: north},
-    {name, x: 0, y: 0, direction: north},
-    {name, x: 0, y: 1, direction: north},
+    {name, x: 0, y: -1, ...north},
+    {name, x: 0, y: 0, ...north},
+    {name, x: 0, y: 1, ...north},
   ], ([b1, b2, b3], map) => {
     assertExists(b1.data.lane);
     assertEqual(b1.data.lane, b3.data.lane);
@@ -48,9 +51,9 @@ it("splits lane with chunk border", () => {
 it("T junction behaves correctly", () => {
   const name = NAME.transportBelt;
   blueprintScrambled([
-    {name, x: 0, y: 0, direction: north},
-    {name, x: -1, y: 0, direction: east},
-    {name, x: 1, y: 0, direction: west},
+    {name, x: 0, y: 0, ...north},
+    {name, x: -1, y: 0, ...east},
+    {name, x: 1, y: 0, ...west},
   ], ([b1, b2, b3], map) => {
     assertNotEqual(b1.data.lane, b2.data.lane);
     assertNotEqual(b1.data.lane, b3.data.lane);
@@ -63,10 +66,10 @@ it("T junction behaves correctly", () => {
 it("X junction behaves correctly", () => {
   const name = NAME.transportBelt;
   blueprintScrambled([
-    {name, x: 0, y: 0, direction: north},
-    {name, x: 0, y: 1, direction: north},
-    {name, x: -1, y: 0, direction: east},
-    {name, x: 1, y: 0, direction: west},
+    {name, x: 0, y: 0, ...north},
+    {name, x: 0, y: 1, ...north},
+    {name, x: -1, y: 0, ...east},
+    {name, x: 1, y: 0, ...west},
   ], ([b1, b2, b3, b4], map) => {
     assertEqual(b1.data.lane, b2.data.lane);
     assertNotEqual(b1.data.lane, b3.data.lane);
@@ -80,10 +83,10 @@ it("X junction behaves correctly", () => {
 it("loop behaves correctly", () => {
   const name = NAME.transportBelt;
   blueprintScrambled([
-    {name, x: 0, y: 0, direction: east},
-    {name, x: 0, y: 1, direction: north},
-    {name, x: 1, y: 1, direction: west},
-    {name, x: 1, y: 0, direction: south},
+    {name, x: 0, y: 0, ...east},
+    {name, x: 0, y: 1, ...north},
+    {name, x: 1, y: 1, ...west},
+    {name, x: 1, y: 0, ...south},
   ], ([b1, b2, b3, b4], map, r) => {
     assertExists(b1.data.lane);
     assertEqual(b1.data.lane, b2.data.lane);
@@ -91,7 +94,7 @@ it("loop behaves correctly", () => {
     assertEqual(b1.data.lane, b4.data.lane);
     assertEqual(b1.data.lane.circular, true);
     const b5 = map.createEntity(
-        r({name, x: 1, y: -1, direction: south}));
+        r({name, x: 1, y: -1, ...south}));
     assertEqual(b1.data.lane.circular, false);
     map.deleteEntity(b5, 0);
     assertEqual(b1.data.lane.circular, true);
@@ -103,10 +106,10 @@ it("connects underground", () => {
   const belt = NAME.transportBelt;
   const name = NAME.undergroundBelt;
   blueprintScrambled([
-    {name: belt, x: 0, y: -1, direction: north},
-    {name, x: 0, y: 0, direction: north, data: {undergroundUp: true}},
-    {name, x: 0, y: 5, direction: north, data: {undergroundUp: false}},
-    {name: belt, x: 0, y: 6, direction: north},
+    {name: belt, x: 0, y: -1, ...north},
+    {name, x: 0, y: 0, ...north, data: {undergroundUp: true}},
+    {name, x: 0, y: 5, ...north, data: {undergroundUp: false}},
+    {name: belt, x: 0, y: 6, ...north},
   ], ([b1, u1, u2, b2]) => {
     assertEqual(u1.data.beltInput, u2);
     assertExists(u1.data.lane);
@@ -118,10 +121,10 @@ it("connects underground", () => {
 it("picks correct underground connection", () => {
   const name = NAME.undergroundBelt;
   blueprintScrambled([
-    {name, x: 0, y: 0, direction: north, data: {undergroundUp: true}},
-    {name, x: 0, y: 1, direction: north, data: {undergroundUp: true}},
-    {name, x: 0, y: 3, direction: north, data: {undergroundUp: false}},
-    {name, x: 0, y: 4, direction: north, data: {undergroundUp: false}},
+    {name, x: 0, y: 0, ...north, data: {undergroundUp: true}},
+    {name, x: 0, y: 1, ...north, data: {undergroundUp: true}},
+    {name, x: 0, y: 3, ...north, data: {undergroundUp: false}},
+    {name, x: 0, y: 4, ...north, data: {undergroundUp: false}},
   ], ([u1, u2, u3, u4], map) => {
     assertEqual(u2.data.beltInput, u3);
     assertEqual(u2.data.lane, u3.data.lane);
@@ -138,10 +141,10 @@ it("picks correct underground connection", () => {
 it("considers underground gaps", () => {
   const name = NAME.undergroundBelt;
   blueprintScrambled([
-    {name, x: 0, y: 0, direction: north, data: {undergroundUp: true}},
-    {name, x: 0, y: 2, direction: north, data: {undergroundUp: false}},
-    {name, x: 0, y: 3, direction: north, data: {undergroundUp: true}},
-    {name, x: 0, y: 5, direction: north, data: {undergroundUp: false}},
+    {name, x: 0, y: 0, ...north, data: {undergroundUp: true}},
+    {name, x: 0, y: 2, ...north, data: {undergroundUp: false}},
+    {name, x: 0, y: 3, ...north, data: {undergroundUp: true}},
+    {name, x: 0, y: 5, ...north, data: {undergroundUp: false}},
   ], ([u1, u2, u3, u4], map, r) => {
     assertEqual(u1.data.lane, u2.data.lane);
     assertEqual(u1.data.lane, u4.data.lane);
@@ -151,7 +154,7 @@ it("considers underground gaps", () => {
     assertMatch(u1.data.lane.nodes,
         [{length: 4, gaps: [1, 2]}]);
     u4 = map.createEntity(
-        r({name, x: 0, y: 5, direction: north, data: {undergroundUp: false}}));
+        r({name, x: 0, y: 5, ...north, data: {undergroundUp: false}}));
     assertMatch(u1.data.lane.nodes,
         [{length: 6, gaps: [0, 2, 3, 2]}]);
     map.deleteEntity(u3, 0);
@@ -163,11 +166,11 @@ it("considers underground items", () => {
   const belt = NAME.transportBelt;
   const name = NAME.undergroundBelt;
   blueprintScrambled([
-    {name, x: 0, y: 0, direction: north, data: {undergroundUp: true}},
-    {name: belt, x: 0, y: 1, direction: north},
-    {name, x: 0, y: 2, direction: north, data: {undergroundUp: false}},
-    {name: belt, x: 0, y: 3, direction: north},
-    {name: belt, x: 0, y: -1, direction: north},
+    {name, x: 0, y: 0, ...north, data: {undergroundUp: true}},
+    {name: belt, x: 0, y: 1, ...north},
+    {name, x: 0, y: 2, ...north, data: {undergroundUp: false}},
+    {name: belt, x: 0, y: 3, ...north},
+    {name: belt, x: 0, y: -1, ...north},
   ], ([u1, b1, u2, b2, b3], map, r) => {
     assertMatch(u1.data.lane.nodes,
         [{length: 5, gaps: [1, 2]}]);
@@ -179,7 +182,7 @@ it("considers underground items", () => {
     assertMatch(b3.data.lane.minusFlow,
         new Array(4).fill(0));
     u1 = map.createEntity(
-        r({name, x: 0, y: 0, direction: north, data: {undergroundUp: true}}));
+        r({name, x: 0, y: 0, ...north, data: {undergroundUp: true}}));
     assertMatch(u1.data.lane.minusFlow,
         [0,0,0,0,2,0,0,0,0,0,0,0]);
     u1.data.lane.minusFlow.length = 0;
@@ -188,7 +191,7 @@ it("considers underground items", () => {
     u1.data.lane.minusItems.push(...new Array(20).fill(1));
     map.deleteEntity(u2, 0);
     u2 = map.createEntity(
-        r({name, x: 0, y: 2, direction: north, data: {undergroundUp: false}}));
+        r({name, x: 0, y: 2, ...north, data: {undergroundUp: false}}));
     assertMatch(u1.data.lane.minusFlow,
         [0,0,0,0,0,0,0,0,2,0,0,0]);
   });
@@ -197,11 +200,11 @@ it("connects splitter", () => {
   const name = NAME.transportBelt;
   const splitter = NAME.splitter;
   blueprintScrambled([
-    {name: splitter, x: 0, y: 0, direction: north},
-    {name, x: 0, y: -1, direction: north},
-    {name, x: 1, y: -1, direction: north},
-    {name, x: 0, y: 1, direction: north},
-    {name, x: 1, y: 1, direction: north},
+    {name: splitter, x: 0, y: 0, ...north},
+    {name, x: 0, y: -1, ...north},
+    {name, x: 1, y: -1, ...north},
+    {name, x: 0, y: 1, ...north},
+    {name, x: 1, y: 1, ...north},
   ], ([s1, b1, b2, b3, b4], map, r) => {
     assertEqual(s1.outputEntities.includes(b1), true);
     assertEqual(s1.data.leftBeltOutput, b1);
@@ -216,12 +219,12 @@ it("connects circular splitter", () => {
   const name = NAME.transportBelt;
   const splitter = NAME.splitter;
   blueprintScrambled([
-    {name: splitter, x: 0, y: 0, direction: north},
-    {name, x: 0, y: -1, direction: west},
-    {name, x: -1, y: -1, direction: south},
-    {name, x: -1, y: 0, direction: south},
-    {name, x: -1, y: 1, direction: east},
-    {name, x: 0, y: 1, direction: north},
+    {name: splitter, x: 0, y: 0, ...north},
+    {name, x: 0, y: -1, ...west},
+    {name, x: -1, y: -1, ...south},
+    {name, x: -1, y: 0, ...south},
+    {name, x: -1, y: 1, ...east},
+    {name, x: 0, y: 1, ...north},
   ], ([s1, b1, b2, b3, b4, b5], map, r) => {
     assertEqual(b1.data.beltInput, s1);
     assertEqual(b5.data.beltOutput, s1);
@@ -237,7 +240,7 @@ it("connects circular splitter", () => {
         {belts: [s1], nodes:[{length: 1}]});
     assertEqual(s1.data.leftInLane.endSplitterData, s1.data);
     b5 = map.createEntity(
-        r({name, x: 0, y: 1, direction: north}));
+        r({name, x: 0, y: 1, ...north}));
     assertEqual(s1.data.leftBeltInput, b5);
     assertEqual(b1.data.lane, b5.data.lane);
     assertEqual(s1.data.leftOutLane, s1.data.leftInLane);
@@ -246,14 +249,14 @@ it("connects circular splitter", () => {
 it("connects two splitters", () => {
   const name = NAME.splitter;
   blueprintScrambled([
-    {name, x: 0, y: 0, direction: north},
-    {name, x: 0, y: -1, direction: north},
+    {name, x: 0, y: 0, ...north},
+    {name, x: 0, y: -1, ...north},
   ], ([s1, s2], map, r) => {
     assertEqual(s1.data.leftOutLane, s2.data.leftInLane);
     assertEqual(s1.data.rightOutLane, s2.data.rightInLane);
     map.deleteEntity(s2);
     s2 = map.createEntity(
-        r({name, x: 1, y: -1, direction: north}));
+        r({name, x: 1, y: -1, ...north}));
     assertEqual(s1.data.rightOutLane, s2.data.leftInLane);
   });
 });
@@ -261,9 +264,9 @@ it("insert to splitter", () => {
   const name = NAME.transportBelt;
   const splitter = NAME.splitter;
   blueprint([
-    {name: splitter, x: 0, y: 0, direction: north},
-    {name, x: 0, y: 1, direction: north},
-    {name, x: 0, y: 2, direction: north},
+    {name: splitter, x: 0, y: 0, ...north},
+    {name, x: 0, y: 1, ...north},
+    {name, x: 0, y: 2, ...north},
   ], ([s1, b1], map) => {
     const lane = b1.data.lane;
     lane.insertItem(1, b1, 0, 4);
@@ -275,33 +278,68 @@ it("insert to splitter", () => {
   });
 });
 it("extract from splitter", () => {
-  const name = NAME.transportBelt;
+  const belt = NAME.transportBelt;
   const splitter = NAME.splitter;
+  const inserter = NAME.inserter;
+  const chest = NAME.woodenChest;
   blueprint([
-    {name: splitter, x: 0, y: 0, direction: north},
-    {name, x: 0, y: 1, direction: north},
-    {name: splitter, x: 0, y: 2, direction: north},
-  ], ([s1, b1, s2], map) => {
+    {name: splitter, x: 0, y: 0, ...north},
+    {name: belt, x: 0, y: 1, ...north},
+    {name: inserter, x: 1, y: 1, ...east},
+    {name: chest, x: 2, y: 1, ...north},
+    {name: splitter, x: 0, y: 2, ...north},
+  ], ([s1, b1, i1, c1, s2], map) => {
     const lane = b1.data.lane;
     lane.minusFlow = [0.5, 0.5];
     lane.minusItems = [1, 1];
-    let item = lane.extractItem(-1, b1, 0, 4);
+    let item = lane.extractItem(i1, b1, 0, 4);
     assertEqual(item, -1); // Negative item id.
-    item = lane.extractItem(-1, b1, 0, 4);
+    item = lane.extractItem(i1, b1, 0, 4);
     assertEqual(item, -1); // Negative item id.
     lane.minusFlow = [1.5, 0];
     lane.minusItems = [1, 1];
-    item = lane.extractItem(-1, s2, 0, 4);
+    item = lane.extractItem(i1, s2, 0, 4);
     assertEqual(item, -1); // Negative item id.
-    item = lane.extractItem(-1, s2, 0, 4);
+    item = lane.extractItem(i1, s2, 0, 4);
     assertEqual(item, -1); // Negative item id.
+  });
+});
+it("extract from splitter long handed", () => {
+  const splitter = NAME.splitter;
+  const long = NAME.longHandedInserter;
+  const short = NAME.inserter;
+  const chest = NAME.woodenChest;
+  blueprint([
+    {name: splitter, x: 0, y: 0, ...north},
+    {name: long, x: 2, y: 0, ...east},
+    {name: chest, x: 4, y: 0, ...north},
+    {name: splitter, x: 0, y: 2, ...north},
+    {name: long, x: 2, y: 2, ...east},
+    {name: chest, x: 4, y: 2, ...north},
+    {name: splitter, x: 0, y: 4, ...north},
+    {name: short, x: 2, y: 4, ...east},
+    {name: chest, x: 3, y: 4, ...north},
+  ], ([s1, l1, c1, s2, l2, c2, s3, l3, c3], map) => {
+    const lane1 = s1.data.leftOutLane;
+    lane1.minusFlow = [0, 0];
+    lane1.minusItems = [1, 1];
+    const lane2 = s2.data.rightOutLane;
+    lane2.minusFlow = [0, 0];
+    lane2.minusItems = [1, 1];
+    const lane3 = s3.data.leftOutLane;
+    lane3.minusFlow = [0, 0];
+    lane3.minusItems = [1, 1];
+    elapse(map);
+    assertEqual(l1.data.inserterItem, 1);
+    assertEqual(l2.data.inserterItem, 0);
+    assertEqual(l3.data.inserterItem, 0);
   });
 });
 it("splits items in splitter", () => {
   const name = NAME.transportBelt;
   const splitter = NAME.splitter;
   blueprint([
-    {name: splitter, x: 0, y: 0, direction: north},
+    {name: splitter, x: 0, y: 0, ...north},
   ], ([s1], map) => {
     s1.data.leftInLane.minusFlow = [0, 0];
     s1.data.leftInLane.minusItems = [1, 1];
@@ -314,8 +352,8 @@ it("merges items in splitter", () => {
   const name = NAME.transportBelt;
   const splitter = NAME.splitter;
   blueprint([
-    {name: splitter, x: 0, y: 0, direction: north},
-    {name, x: 0, y: -1, direction: north},
+    {name: splitter, x: 0, y: 0, ...north},
+    {name, x: 0, y: -1, ...north},
   ], ([s1, b1], map) => {
     s1.data.leftInLane.minusFlow = [0, 0];
     s1.data.leftInLane.minusItems = [1, 1];
@@ -327,11 +365,11 @@ it("merges items in splitter", () => {
     assertMatch(s1.data.leftOutLane.minusItems, [1, 2, 1, 2]);
   });
 });
-it("moves items through constricted splitter", () => {
+it("moves items through congested splitter", () => {
   const name = NAME.transportBelt;
   const splitter = NAME.splitter;
   blueprint([
-    {name: splitter, x: 0, y: 0, direction: north},
+    {name: splitter, x: 0, y: 0, ...north},
   ], ([s1], map) => {
     s1.data.leftInLane.minusFlow = [0, 0, 0];
     s1.data.leftInLane.minusItems = [1, 1, 1];
@@ -346,14 +384,6 @@ it("moves items through constricted splitter", () => {
     assertMatch(s1.data.rightOutLane.minusItems, [3, 2, 2]);
     assertMatch(s1.data.leftInLane.minusItems, [1]);
     assertMatch(s1.data.rightInLane.minusItems, [2]);
-  });
-});
-it("works", () => {
-  const name = NAME.transportBelt;
-  blueprintScrambled([
-    {name, x: 0, y: 0, direction: north},
-  ], ([b1]) => {
-    assertEqual();
   });
 });
 

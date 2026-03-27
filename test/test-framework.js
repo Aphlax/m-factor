@@ -51,6 +51,7 @@ function TestSuite() {
         results.push(el('div',
             {className: "success"}, test.desc));
       } catch (error) {
+        console.log(error);
         results.push(el('details',
             {className: "failure"},
             el('summary', null, test.desc + " -" +
@@ -70,17 +71,13 @@ function TestSuite() {
 export function assertEqual(x, y) {
   assertNr++;
   if (x === y) return;
-  const error = new Error(`${pp(x)} != ${pp(y)}`);
-  console.log(error);
-  throw error;
+  throw new Error(`${pp(x)} != ${pp(y)}`);
 }
 
 export function assertNotEqual(x, y) {
   assertNr++;
   if (x !== y) return;
-  const error = new Error(`${pp(x)} == ${pp(y)} (they should be different)`);
-  console.log(error);
-  throw error;
+  throw new Error(`${pp(x)} == ${pp(y)} (they should be different)`);
 }
 
 export function assertMatch(x, template, qualifier = '') {
@@ -94,27 +91,21 @@ export function assertMatch(x, template, qualifier = '') {
     return;
   }
   if (x != template) {
-    const error = new Error(`${pp(x)} != ${pp(template)}` + (qualifier ? ` (in x${qualifier})` : ''));
-    console.log(error);
-    throw error;
+    throw new Error(`${pp(x)} != ${pp(template)}` + (qualifier ? ` (in x${qualifier})` : ''));
   }
 }
 
 export function assertExists(x) {
   assertNr++;
   if (x === undefined || x === null) {
-    const error = new Error("did not exist!");
-    console.log(error);
-    throw error;
+    throw new Error("did not exist!");
   }
 }
 
 export function assertNotExists(x) {
   assertNr++;
   if (x !== undefined && x !== null) {
-    const error = new Error(pp(x) + " did exist! (should not)");
-    console.log(error);
-    throw error;
+    throw new Error(pp(x) + " did exist! (should not)");
   }
 }
 
@@ -159,7 +150,18 @@ export function blueprintScrambled(blueprint, check, startPerm, rotations) {
   }
 }
 
-export function elapse(map, seconds) {
+const GOD_CONS = {add: () => {}, delete: () => {}},
+    GOD_GRID = {
+      satisfaction: 1,
+      consumerss: {
+        get: () => GOD_CONS,
+      }
+    };
+export function power(entity) {
+  entity.data.grid = GOD_GRID;
+}
+
+export function elapse(map, seconds = 0.1) {
   let startTime = map.playTime;
   while (map.playTime - startTime < seconds * 1000) {
     map.update(map.playTime + 100, 100);
