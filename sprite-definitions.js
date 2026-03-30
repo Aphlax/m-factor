@@ -231,6 +231,12 @@ export const S = {
   pipeCapE: 15391,
   pipeCapS: 15392,
   pipeCapW: 15393,
+  mediumElectricPole: 15394, // 4
+  mediumElectricPoleShadow: 15398, // 4
+  bigElectricPole: 15402, // 4
+  bigElectricPoleShadow: 15406, // 4
+  substation: 15410, // 4
+  substationShadow: 15414, // 4
   
   ironOreItem: 16000,
   copperOreItem: 16001,
@@ -252,6 +258,7 @@ export const S = {
   explosivesItem: 16017,
   engineUnitItem: 16018,
   stoneBrickItem: 16019,
+  ironStickItem: 16020,
   
   waterFluid: 16050,
   steamFluid: 16051,
@@ -294,6 +301,9 @@ export const S = {
   oilRefineryItem: 16121,
   chemicalPlantItem: 16122,
   pumpItem: 16123,
+  mediumElectricPoleItem: 16124,
+  bigElectricPoleItem: 16125,
+  substationItem: 16126,
   
   gearIcon: 16500,
   burnerDrillIcon: 16501,
@@ -335,6 +345,9 @@ export const S = {
   oilRefineryIcon: 16537,
   chemicalPlantIcon: 16538,
   pumpIcon: 16539,
+  mediumElectricPoleIcon: 16540,
+  bigElectricPoleIcon: 16541,
+  substationIcon: 16542,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -1112,6 +1125,31 @@ export const SPRITES = [
     path: "graphics/entities/pump/pump-west.png",
     sprites: entitySprites(S.pumpW, 69, 51, 8, 4, 1, 4, 12, 7, true),
   },
+  {
+    path: "graphics/entities/medium-electric-pole/medium-electric-pole.png",
+    sprites: entitySprites(S.mediumElectricPole, 40, 124, 4, 1, 0, 8, 92, 0, true),
+  },
+  {
+    path: "graphics/entities/medium-electric-pole/medium-electric-pole-shadow.png",
+    sprites: entitySprites(S.mediumElectricPoleShadow, 140, 32, 4, 1, -1, 109, 3, -3, true),
+  },
+  {
+    path: "graphics/entities/big-electric-pole/big-electric-pole.png",
+    sprites: entitySprites(S.bigElectricPole, 76, 156, 4, 1, 6, 6, 92, 0, true),
+  },
+  {
+    path: "graphics/entities/big-electric-pole/big-electric-pole-shadow.png",
+    sprites: entitySprites(S.bigElectricPoleShadow, 188, 48, 4, 1, 3, 121, -11, -5, true),
+  },
+  {
+    path: "graphics/entities/substation/substation.png",
+    sprites: entitySprites(S.substation, 70, 136, 4, 1, 3, 3, 70, 2, true),
+  },
+  {
+    path: "graphics/entities/substation/substation-shadow.png",
+    sprites: entitySprites(S.substationShadow, 186, 52, 4, 1, -2, 124, -14, 2, true),
+  },
+  
   
   
   // Items.
@@ -1194,6 +1232,10 @@ export const SPRITES = [
   {
     path: "graphics/items/stone-brick.png",
     sprites: itemSprites(S.stoneBrickItem),
+  },
+  {
+    path: "graphics/items/iron-stick.png",
+    sprites: itemSprites(S.ironStickItem),
   },
   
   
@@ -1358,6 +1400,18 @@ export const SPRITES = [
   {
     path: "graphics/items/pump.png",
     sprites: itemSprites(S.pumpItem, S.pumpIcon),
+  },
+  {
+    path: "graphics/items/medium-electric-pole.png",
+    sprites: itemSprites(S.mediumElectricPoleItem, S.mediumElectricPoleIcon),
+  },
+  {
+    path: "graphics/items/big-electric-pole.png",
+    sprites: itemSprites(S.bigElectricPoleItem, S.bigElectricPoleIcon),
+  },
+  {
+    path: "graphics/items/substation.png",
+    sprites: itemSprites(S.substationItem, S.substationIcon),
   },
   
   

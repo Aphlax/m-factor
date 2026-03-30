@@ -21,6 +21,7 @@ export const I = {
   explosives: 18,
   engineUnit: 19,
   stoneBrick: 20,
+  ironStick: 21,
   
   water: 50, // Fluid.
   steam: 51, // Fluid.
@@ -54,6 +55,9 @@ export const I = {
   oilRefinery: 120,
   chemicalPlant: 121,
   pump: 122,
+  mediumElectricPole: 123,
+  bigElectricPole: 124,
+  substation: 125,
 };
 
 export const FLUID_START = 50;
@@ -181,6 +185,12 @@ export const ITEMS = new Map([
     sprite: S.stoneBrickItem,
     stackSize: 100,
     prototypeName: "stone-brick",
+  }],
+  [I.ironStick,
+  {
+    sprite: S.ironStickItem,
+    stackSize: 100,
+    prototypeName: "iron-stick",
   }],
   
   
@@ -323,6 +333,24 @@ export const ITEMS = new Map([
     sprite: S.pumpItem,
     stacksize: 50,
     prototypeName: "pump",
+  }],
+  [I.mediumElectricPole,
+  {
+    sprite: S.mediumElectricPoleItem,
+    stacksize: 50,
+    prototypeName: "medium-electric-pole",
+  }],
+  [I.bigElectricPole,
+  {
+    sprite: S.bigElectricPoleItem,
+    stacksize: 50,
+    prototypeName: "big-electric-pole",
+  }],
+  [I.substation,
+  {
+    sprite: S.substationItem,
+    stacksize: 50,
+    prototypeName: "substation",
   }],
 ]);
 

@@ -285,6 +285,18 @@ export const RECIPES = [
     entities: [NAME.chemicalPlant],
     duration: 1000,
   },
+  {
+    prototypeName: "iron-stick",
+    inputs: [
+      {item: I.ironPlate, amount: 1},
+    ],
+    outputs: [
+      {item: I.ironStick, amount: 2},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 500,
+  },
+  
   
   
   {
@@ -598,6 +610,45 @@ export const RECIPES = [
     ],
     entities: [NAME.boiler],
     duration: 1000 / 6,
+  },
+  {
+    prototypeName: "medium-electric-pole",
+    inputs: [
+      {item: I.copperCable, amount: 2},
+      {item: I.ironStick, amount: 4},
+      {item: I.steelPlate, amount: 2},
+    ],
+    outputs: [
+      {item: I.mediumElectricPole, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 500,
+  },
+  {
+    prototypeName: "big-electric-pole",
+    inputs: [
+      {item: I.copperCable, amount: 4},
+      {item: I.ironStick, amount: 8},
+      {item: I.steelPlate, amount: 5},
+    ],
+    outputs: [
+      {item: I.bigElectricPole, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 500,
+  },
+  {
+    prototypeName: "substation",
+    inputs: [
+      {item: I.advancedCircuit, amount: 5},
+      {item: I.copperCable, amount: 6},
+      {item: I.steelPlate, amount: 10},
+    ],
+    outputs: [
+      {item: I.substation, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 500,
   },
 ];
 

@@ -44,6 +44,9 @@ export const NAME = {
   oilRefinery: 22,
   chemicalPlant: 23,
   pump: 24,
+  mediumElectricPole: 25,
+  bigElectricPole: 26,
+  substation: 27,
 };
 
 /** Never value for next update. 285 years from now. */

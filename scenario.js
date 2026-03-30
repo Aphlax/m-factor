@@ -19,8 +19,6 @@ function speedrun(map, time) {
 }
 
 function productionTest(gameMap, time) {
-  gameMap.centerView(-15, 34);
-  
   const e = (name, x, y, direction, data) => gameMap.createEntity({name, x, y, direction, data}, time);
   const l = (x, y, d, l) => createLane(gameMap, x, y, d, l, time);
   const p = (x, y, d, l) => createPipe(gameMap, x, y, d, l, time);
@@ -186,6 +184,18 @@ function productionTest(gameMap, time) {
   e(NAME.woodenChest, -15, 42, 0);
   e(NAME.inserter, -16, 42, 1);
   el(-23, 40, 1, 2);
+  
+  e(NAME.mediumElectricPole, -17, 36, 0);
+  e(NAME.mediumElectricPole, -10, 42, 0);
+  e(NAME.mediumElectricPole, -10, 49, 0);
+  
+  e(NAME.bigElectricPole, -10, 56, 0);
+  e(NAME.bigElectricPole, 21, 56, 0);
+  
+  e(NAME.substation, -10, 67, 0);
+  e(NAME.substation, 8, 67, 0);
+  
+  gameMap.centerView(-5, 67);
 };
 
 function inserterTest(gameMap, time) {
