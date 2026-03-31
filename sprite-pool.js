@@ -49,14 +49,15 @@ SpritePool.prototype.draw = function(ctx, time) {
       Math.floor((ctx.canvas.width * 0.6 - 30) * this.current / this.total + 10), 40);
   
   // For debugging the missing sprites on github.
-  if (this.current > this.total * 0.85) {
+  if (this.current > this.total * 0.95) {
     ctx.fillStyle = "black";
     ctx.fillText(this.total - this.current, ctx.canvas.width * 0.5 - 40,
         ctx.canvas.height - 125);
     for (let imageDef of SPRITES) {
       const id = imageDef.sprites[0].id;
       if (!this.sprites.has(id)) {
-        ctx.fillText("#" + id, ctx.canvas.width * 0.5 - 40,
+        ctx.fillText("#" + id,
+            ctx.canvas.width * 0.5 - 40,
             ctx.canvas.height - 100);
         break;
       }

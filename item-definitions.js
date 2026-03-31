@@ -58,6 +58,10 @@ export const I = {
   mediumElectricPole: 123,
   bigElectricPole: 124,
   substation: 125,
+  ironChest: 126,
+  steelChest: 127,
+  storageTank: 128,
+  steelFurnace: 129,
 };
 
 export const FLUID_START = 50;
@@ -351,6 +355,30 @@ export const ITEMS = new Map([
     sprite: S.substationItem,
     stacksize: 50,
     prototypeName: "substation",
+  }],
+  [I.ironChest,
+  {
+    sprite: S.ironChestItem,
+    stacksize: 50,
+    prototypeName: "iron-chest",
+  }],
+  [I.steelChest,
+  {
+    sprite: S.steelChestItem,
+    stacksize: 50,
+    prototypeName: "steel-chest",
+  }],
+  [I.storageTank,
+  {
+    sprite: S.storageTankItem,
+    stacksize: 50,
+    prototypeName: "storage-tank",
+  }],
+  [I.steelFurnace,
+  {
+    sprite: S.steelFurnaceItem,
+    stacksize: 50,
+    prototypeName: "steel-furnace",
   }],
 ]);
 

@@ -2,7 +2,7 @@ import {MapGenerator, TestGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {MINIMAP_SCALE_BOUNDRY} from './game-map-input.js';
 import {S} from './sprite-definitions.js';
-import {TYPE, STATE, MAX_SIZE, MAX_LOGISTIC_CONNECTION, MAX_UNDERGROUND_CONNECTION, ENERGY, DIRECTIONS, MAX_WIRE_REACH, MAX_SHADOW, MAX_ELECTRIC_SUPPLY, MAX_TREE_SIZE} from './entity-properties.js';
+import {NAME, TYPE, STATE, MAX_SIZE, MAX_LOGISTIC_CONNECTION, MAX_UNDERGROUND_CONNECTION, ENERGY, DIRECTIONS, MAX_WIRE_REACH, MAX_SHADOW, MAX_ELECTRIC_SUPPLY, MAX_TREE_SIZE} from './entity-properties.js';
 import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
 import {FluidNetwork} from './fluid-network.js';
@@ -219,7 +219,8 @@ GameMap.prototype.draw = function(ctx, time) {
       for (let entity of chunk.entities) {
         if (entity.type != TYPE.belt) {
           const pipeCaps =
-              entity.type == TYPE.pipeToGround ||
+              entity.name == NAME.pipeToGround ||
+              entity.name == NAME.storageTank ||
               entity.inputFluidTank ||
               entity.outputFluidTank;
           if (pipeCaps) {

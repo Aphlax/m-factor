@@ -628,7 +628,7 @@ export function disconnectPipeToGround() {
 }
 
 export function updatePipeSprites() {
-  if (this.type != TYPE.pipe) return;
+  if (this.name != NAME.pipe) return;
   let count = 0, direction, notdirection;
   for (let i = 0; i < 4; i++) {
     if (this.data.pipes[i]) {

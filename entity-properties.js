@@ -47,6 +47,10 @@ export const NAME = {
   mediumElectricPole: 25,
   bigElectricPole: 26,
   substation: 27,
+  ironChest: 28,
+  steelChest: 29,
+  storageTank: 30,
+  steelFurnace: 31,
 };
 
 /** Never value for next update. 285 years from now. */

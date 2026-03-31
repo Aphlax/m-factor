@@ -1,5 +1,5 @@
 import {SPRITES, S} from './sprite-pool.js';
-import {TYPE, STATE, DIRECTION, COLOR, MAX_HEIGHT, MAX_SHADOW} from './entity-properties.js';
+import {NAME, TYPE, STATE, DIRECTION, COLOR, MAX_HEIGHT, MAX_SHADOW} from './entity-properties.js';
 import {ITEMS, FLUIDS, FLUID_START, FLUID_END} from './item-definitions.js';
 
 /*
@@ -292,22 +292,24 @@ export function drawPipeCaps(ctx, view, below) {
   const l = (ift?.internalInlet ? this.data.pipeConnections.length :
       ift?.pipeConnections.length) ?? 0;
   for (let i = 0; 1; i++) {
-    if (this.type != TYPE.pipeToGround) {
+    if (ift || this.outputFluidTank) {
       if (i == l + (this.outputFluidTank?.pipeConnections.length ?? 0))
-        break;
+        return;
       if (i < l ?
           (ift.internalInlet ? this.data.pipes[i] : ift.pipes[i]) :
           this.outputFluidTank.pipes[i - l])
         continue;
     } else {
-      if (i || this.data.pipes[0]) return;
+      if (i >= this.data.pipeConnections.length ||
+          (this.name == NAME.pipeToGround && i)) return;
+      if (this.data.pipes[i]) continue;
     }
-    const {x: dx, y: dy} = this.type == TYPE.pipeToGround ?
-        this.data.pipeConnections[0] :
-        i < l ?
+    const {x: dx, y: dy} = ift || this.outputFluidTank ?
+        (i < l ?
         (ift.internalInlet ? this.data.pipeConnections[i] :
         ift.pipeConnections[i]) :
-        this.outputFluidTank.pipeConnections[i - l];
+        this.outputFluidTank.pipeConnections[i - l]) :
+        this.data.pipeConnections[i];
     if ((dy == height) == below) continue;
     const sprite = SPRITES.get(
         dy == -1 ? S.pipeCapN :

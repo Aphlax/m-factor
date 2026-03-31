@@ -237,7 +237,18 @@ export const S = {
   bigElectricPoleShadow: 15406, // 4
   substation: 15410, // 4
   substationShadow: 15414, // 4
+  ironChest: 15418,
+  ironChestShadow: 15419,
+  steelChest: 15420,
+  steelChestShadow: 15421,
+  storageTank: 15422, // 2
+  storageTankShadow: 15424, // 2
+  steelFurnace: 15426,
+  steelFurnaceShadow: 15427,
+  steelFurnaceWorking: 15428, // 48
   
+  
+  // Items
   ironOreItem: 16000,
   copperOreItem: 16001,
   coalItem: 16002,
@@ -304,6 +315,10 @@ export const S = {
   mediumElectricPoleItem: 16124,
   bigElectricPoleItem: 16125,
   substationItem: 16126,
+  ironChestItem: 16127,
+  steelChestItem: 16128,
+  storageTankItem: 16129,
+  steelFurnaceItem: 16130,
   
   gearIcon: 16500,
   burnerDrillIcon: 16501,
@@ -348,6 +363,10 @@ export const S = {
   mediumElectricPoleIcon: 16540,
   bigElectricPoleIcon: 16541,
   substationIcon: 16542,
+  ironChestIcon: 16543,
+  steelChestIcon: 16544,
+  storageTankIcon: 16545,
+  steelFurnaceIcon: 16546,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -1149,7 +1168,42 @@ export const SPRITES = [
     path: "graphics/entities/substation/substation-shadow.png",
     sprites: entitySprites(S.substationShadow, 186, 52, 4, 1, -2, 124, -14, 2, true),
   },
-  
+  {
+    path: "graphics/entities/iron-chest/iron-chest.png",
+    sprites: entitySprites(S.ironChest, 34, 38, 1, 1, 0, 2, 3, 3, true),
+  },
+  {
+    path: "graphics/entities/iron-chest/iron-chest-shadow.png",
+    sprites: entitySprites(S.ironChestShadow, 56, 26, 1, 1, 0, 24, -10, 4, true),
+  },
+  {
+    path: "graphics/entities/steel-chest/steel-chest.png",
+    sprites: entitySprites(S.steelChest, 32, 40, 1, 1, 0, 0, 5, 3, true),
+  },
+  {
+    path: "graphics/entities/steel-chest/steel-chest-shadow.png",
+    sprites: entitySprites(S.steelChestShadow, 56, 22, 1, 1, -1, 25, -11, 1, true),
+  },
+  {
+    path: "graphics/entities/storage-tank/storage-tank.png",
+    sprites: entitySprites(S.storageTank, 110, 108, 2, 1, 7, 7, 2, 10, true),
+  },
+  {
+    path: "graphics/entities/storage-tank/storage-tank-shadow.png",
+    sprites: entitySprites(S.storageTankShadow, 146, 77, 2, 1, 1, 49, -24, 5, true),
+  },
+  {
+    path: "graphics/entities/steel-furnace/steel-furnace.png",
+    sprites: entitySprites(S.steelFurnace, 85, 87, 1, 1, 11, 10, 12, 11, true),
+  },
+  {
+    path: "graphics/entities/steel-furnace/steel-furnace-shadow.png",
+    sprites: entitySprites(S.steelFurnaceShadow, 139, 43, 1, 1, -2, 77, -20, -1, true),
+  },
+  {
+    path: "graphics/entities/steel-furnace/steel-furnace-working.png",
+    sprites: entitySprites(S.steelFurnaceWorking, 85, 87, 8, 6, 11, 10, 12, 11, true),
+  },
   
   
   // Items.
@@ -1412,6 +1466,22 @@ export const SPRITES = [
   {
     path: "graphics/items/substation.png",
     sprites: itemSprites(S.substationItem, S.substationIcon),
+  },
+  {
+    path: "graphics/items/iron-chest.png",
+    sprites: itemSprites(S.ironChestItem, S.ironChestIcon),
+  },
+  {
+    path: "graphics/items/steel-chest.png",
+    sprites: itemSprites(S.steelChestItem, S.steelChestIcon),
+  },
+  {
+    path: "graphics/items/storage-tank.png",
+    sprites: itemSprites(S.storageTankItem, S.storageTankIcon),
+  },
+  {
+    path: "graphics/items/steel-furnace.png",
+    sprites: itemSprites(S.steelFurnaceItem, S.steelFurnaceIcon),
   },
   
   

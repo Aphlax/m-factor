@@ -11,7 +11,7 @@ export const RECIPES = [
     outputs: [
       {item: I.ironPlate, amount: 1},
     ],
-    entities: [NAME.stoneFurnace, NAME.electricFurnace],
+    entities: [NAME.stoneFurnace, NAME.steelFurnace, NAME.electricFurnace],
     duration: 3200,
   },
   {
@@ -22,7 +22,7 @@ export const RECIPES = [
     outputs: [
       {item: I.copperPlate, amount: 1},
     ],
-    entities: [NAME.stoneFurnace, NAME.electricFurnace],
+    entities: [NAME.stoneFurnace, NAME.steelFurnace, NAME.electricFurnace],
     duration: 3200,
   },
   {
@@ -33,7 +33,7 @@ export const RECIPES = [
     outputs: [
       {item: I.stoneBrick, amount: 1},
     ],
-    entities: [NAME.stoneFurnace, NAME.electricFurnace],
+    entities: [NAME.stoneFurnace, NAME.steelFurnace, NAME.electricFurnace],
     duration: 3200,
   },
   {
@@ -44,7 +44,7 @@ export const RECIPES = [
     outputs: [
       {item: I.steelPlate, amount: 1},
     ],
-    entities: [NAME.stoneFurnace, NAME.electricFurnace],
+    entities: [NAME.stoneFurnace, NAME.steelFurnace, NAME.electricFurnace],
     duration: 16000,
   },
   {
@@ -649,6 +649,52 @@ export const RECIPES = [
     ],
     entities: [NAME.assemblingMachine1],
     duration: 500,
+  },
+  {
+    prototypeName: "iron-chest",
+    inputs: [
+      {item: I.ironPlate, amount: 8},
+    ],
+    outputs: [
+      {item: I.ironChest, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 500,
+  },
+  {
+    prototypeName: "steel-chest",
+    inputs: [
+      {item: I.steelPlate, amount: 8},
+    ],
+    outputs: [
+      {item: I.steelChest, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 500,
+  },
+  {
+    prototypeName: "storage-tank",
+    inputs: [
+      {item: I.ironPlate, amount: 20},
+      {item: I.steelPlate, amount: 5},
+    ],
+    outputs: [
+      {item: I.storageTank, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 3000,
+  },
+  {
+    prototypeName: "steel-furnace",
+    inputs: [
+      {item: I.steelPlate, amount: 6},
+      {item: I.stoneBrick, amount: 10},
+    ],
+    outputs: [
+      {item: I.steelFurnace, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 3000,
   },
 ];
 
