@@ -182,7 +182,7 @@ export const INSERTER_PICKUP_BEND = {
 };
 
 export const LAB_FILTERS = [
-  {item: I.redScience, amount: 1},
+  {item: I.automationScience, amount: 1},
 ];
 
 

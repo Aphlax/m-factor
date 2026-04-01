@@ -375,7 +375,8 @@ export function drawIO(ctx, view) {
     const direction = this.type == TYPE.inserter ||
         this.type == TYPE.pump ||
         (this.type == TYPE.assembler &&
-        entity.type == TYPE.pipe) ?
+        (entity.type == TYPE.pipe ||
+        entity.type == TYPE.pipeToGround)) ?
         this.direction : entity.direction;
     const dx = -s * ((direction - 2) % 2),
       dy = s * ((direction - 1) % 2),
@@ -414,7 +415,8 @@ export function drawIO(ctx, view) {
         this.type == TYPE.boiler ||
         this.type == TYPE.pump ||
         (this.type == TYPE.assembler &&
-        entity.type == TYPE.pipe) ||
+        (entity.type == TYPE.pipe ||
+        entity.type == TYPE.pipeToGround)) ||
         ((this.type == TYPE.belt ||
         this.type == TYPE.undergroundBelt ||
         this.type == TYPE.splitter) && 

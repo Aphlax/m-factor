@@ -244,7 +244,6 @@ UiWindow.prototype.initialize = function() {
   this.entityUis.set(TYPE.offshorePump, {});
   this.entityUis.set(TYPE.boiler, {});
   this.entityUis.set(TYPE.electricPole, {});
-  this.entityUis.set(TYPE.pipeToGround, {});
   this.entityUis.set(TYPE.pump, {});
   
   this.entityUis.set(TYPE.belt, {
@@ -272,6 +271,7 @@ UiWindow.prototype.initialize = function() {
   this.entityUis.set(TYPE.pipeToGround, {
     connectUnderground: new UiButton(this, this.canvasWidth - 96, 86)
         .setButton(BUTTON.connectUnderground, S.undergroundConnectIcon),
+    fluidIndicator: new UiFluidIndicator(this, 10, 40),
   });
   
   this.entityUis.set(TYPE.furnace, {
@@ -374,7 +374,8 @@ UiWindow.prototype.set = function(selectedEntity) {
   } else if (selectedEntity.type == TYPE.lab) {
     this.entityUi.inventory.set(selectedEntity.inputInventory);
     this.entityUi.progress.set(selectedEntity);
-  } else if (selectedEntity.type == TYPE.pipe) {
+  } else if (selectedEntity.type == TYPE.pipe ||
+      selectedEntity.type == TYPE.pipeToGround) {
     this.entityUi.fluidIndicator.set(selectedEntity);
   } else if (selectedEntity.type == TYPE.generator) {
     this.entityUi.input.set(this.ui.game.settings.debugPipes ?

@@ -88,7 +88,7 @@ export const RECIPES = [
       {item: I.copperPlate, amount: 1},
     ],
     outputs: [
-      {item: I.redScience, amount: 1},
+      {item: I.automationScience, amount: 1},
     ],
     entities: [NAME.assemblingMachine1],
     duration: 5000,
@@ -296,6 +296,136 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1],
     duration: 500,
   },
+  {
+    prototypeName: "processing-unit",
+    inputs: [
+      {item: I.advancedCircuit, amount: 2},
+      {item: I.electronicCircuit, amount: 20},
+      {item: I.sulfur, amount: 5},
+    ],
+    outputs: [
+      {item: I.processingUnit, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine2],
+    duration: 10000,
+  },
+  {
+    prototypeName: "electric-engine-unit",
+    inputs: [
+      {item: I.electronicCircuit, amount: 2},
+      {item: I.engineUnit, amount: 1},
+      {item: I.lubricant, amount: 15},
+    ],
+    outputs: [
+      {item: I.electricEngineUnit, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine2],
+    duration: 10000,
+  },
+  {
+    prototypeName: "flying-robot-frame",
+    inputs: [
+      {item: I.battery, amount: 2},
+      {item: I.electricEngineUnit, amount: 1},
+      {item: I.electronicCircuit, amount: 3},
+      {item: I.steelPlate, amount: 1},
+    ],
+    outputs: [
+      {item: I.flyingRobotFrame, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 20000,
+  },
+  {
+    prototypeName: "low-density-structure",
+    inputs: [
+      {item: I.copperPlate, amount: 20},
+      {item: I.plasticBar, amount: 5},
+      {item: I.steelPlate, amount: 2},
+    ],
+    outputs: [
+      {item: I.lowDensityStructure, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 15000,
+  },
+  {
+    prototypeName: "rocket-fuel",
+    inputs: [
+      {item: I.lightOil, amount: 10},
+      {item: I.solidFuel, amount: 10},
+    ],
+    outputs: [
+      {item: I.rocketFuel, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine2],
+    duration: 15000,
+  },
+  {
+    prototypeName: "logistic-science-pack",
+    inputs: [
+      {item: I.inserter, amount: 1},
+      {item: I.transportBelt, amount: 1},
+    ],
+    outputs: [
+      {item: I.logisticScience, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 6000,
+  },
+  {
+    prototypeName: "military-science-pack",
+    inputs: [
+      {item: I.grenade, amount: 1},
+      {item: I.piercingRoundsMagazine, amount: 1},
+      {item: I.wall, amount: 2},
+    ],
+    outputs: [
+      {item: I.militaryScience, amount: 2},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 10000,
+  },
+  {
+    prototypeName: "chemical-science-pack",
+    inputs: [
+      {item: I.advancedCircuit, amount: 3},
+      {item: I.engineUnit, amount: 2},
+      {item: I.sulfur, amount: 1},
+    ],
+    outputs: [
+      {item: I.chemicalScience, amount: 2},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 24000,
+  },
+  {
+    prototypeName: "production-science-pack",
+    inputs: [
+      {item: I.electricFurnace, amount: 1},
+      {item: I.productivityModule, amount: 1},
+      {item: I.rail, amount: 30},
+    ],
+    outputs: [
+      {item: I.productionScience, amount: 3},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 21000,
+  },
+  {
+    prototypeName: "utility-science-pack",
+    inputs: [
+      {item: I.flyingRobotFrame, amount: 1},
+      {item: I.lowDensityStructure, amount: 3},
+      {item: I.processingUnit, amount: 2},
+    ],
+    outputs: [
+      {item: I.utilityScience, amount: 3},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 21000,
+  },
+  
   
   
   
@@ -695,6 +825,197 @@ export const RECIPES = [
     ],
     entities: [NAME.assemblingMachine1],
     duration: 3000,
+  },
+  {
+    prototypeName: "wall",
+    inputs: [
+      {item: I.stoneBrick, amount: 5},
+    ],
+    outputs: [
+      {item: I.wall, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 500,
+  },
+  {
+    prototypeName: "beacon",
+    inputs: [
+      {item: I.advancedCircuit, amount: 20},
+      {item: I.copperCable, amount: 10},
+      {item: I.electronicCircuit, amount: 20},
+      {item: I.steelPlate, amount: 10},
+    ],
+    outputs: [
+      {item: I.beacon, amount: 2},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 15000,
+  },
+  {
+    prototypeName: "rail",
+    inputs: [
+      {item: I.ironStick, amount: 1},
+      {item: I.steelPlate, amount: 1},
+      {item: I.stone, amount: 1},
+    ],
+    outputs: [
+      {item: I.rail, amount: 2},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 500,
+  },
+  
+  
+  
+  {
+    prototypeName: "speed-module",
+    inputs: [
+      {item: I.advancedCircuit, amount: 5},
+      {item: I.electronicCircuit, amount: 5},
+    ],
+    outputs: [
+      {item: I.speedModule, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 15000,
+  },
+  {
+    prototypeName: "speed-module-2",
+    inputs: [
+      {item: I.advancedCircuit, amount: 5},
+      {item: I.speedModule, amount: 4},
+      {item: I.processingUnit, amount: 5},
+    ],
+    outputs: [
+      {item: I.speedModule2, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 30000,
+  },
+  {
+    prototypeName: "speed-module-3",
+    inputs: [
+      {item: I.advancedCircuit, amount: 5},
+      {item: I.speedModule2, amount: 4},
+      {item: I.processingUnit, amount: 5},
+    ],
+    outputs: [
+      {item: I.speedModule3, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 60000,
+  },
+  {
+    prototypeName: "efficiency-module",
+    inputs: [
+      {item: I.advancedCircuit, amount: 5},
+      {item: I.electronicCircuit, amount: 5},
+    ],
+    outputs: [
+      {item: I.efficiencyModule, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 15000,
+  },
+  {
+    prototypeName: "efficiency-module-2",
+    inputs: [
+      {item: I.advancedCircuit, amount: 5},
+      {item: I.efficiencyModule, amount: 4},
+      {item: I.processingUnit, amount: 5},
+    ],
+    outputs: [
+      {item: I.efficiencyModule2, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 30000,
+  },
+  {
+    prototypeName: "efficiency-module-3",
+    inputs: [
+      {item: I.advancedCircuit, amount: 5},
+      {item: I.efficiencyModule2, amount: 4},
+      {item: I.processingUnit, amount: 5},
+    ],
+    outputs: [
+      {item: I.efficiencyModule3, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 60000,
+  },
+  {
+    prototypeName: "productivity-module",
+    inputs: [
+      {item: I.advancedCircuit, amount: 5},
+      {item: I.electronicCircuit, amount: 5},
+    ],
+    outputs: [
+      {item: I.productivityModule, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 15000,
+  },
+  {
+    prototypeName: "productivity-module-2",
+    inputs: [
+      {item: I.advancedCircuit, amount: 5},
+      {item: I.productivityModule, amount: 4},
+      {item: I.processingUnit, amount: 5},
+    ],
+    outputs: [
+      {item: I.productivityModule2, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 30000,
+  },
+  {
+    prototypeName: "productivity-module-3",
+    inputs: [
+      {item: I.advancedCircuit, amount: 5},
+      {item: I.productivityModule2, amount: 4},
+      {item: I.processingUnit, amount: 5},
+    ],
+    outputs: [
+      {item: I.productivityModule3, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 60000,
+  },
+  {
+    prototypeName: "firearm-magazine",
+    inputs: [
+      {item: I.ironPlate, amount: 4},
+    ],
+    outputs: [
+      {item: I.firearmMagazine, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 1000,
+  },
+  {
+    prototypeName: "piercing-rounds-magazine",
+    inputs: [
+      {item: I.copperPlate, amount: 2},
+      {item: I.firearmMagazine, amount: 2},
+      {item: I.steelPlate, amount: 1},
+    ],
+    outputs: [
+      {item: I.piercingRoundsMagazine, amount: 2},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 6000,
+  },
+  {
+    prototypeName: "grenade",
+    inputs: [
+      {item: I.coal, amount: 10},
+      {item: I.ironPlate, amount: 5},
+    ],
+    outputs: [
+      {item: I.grenade, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1],
+    duration: 8000,
   },
 ];
 

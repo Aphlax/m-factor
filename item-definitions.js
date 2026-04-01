@@ -10,7 +10,6 @@ export const I = {
   ironGear: 7,
   copperCable: 8,
   electronicCircuit: 9,
-  redScience: 10,
   wood: 11,
   steelPlate: 12,
   plasticBar: 13,
@@ -22,6 +21,19 @@ export const I = {
   engineUnit: 19,
   stoneBrick: 20,
   ironStick: 21,
+  processingUnit: 22,
+  electricEngineUnit: 23,
+  flyingRobotFrame: 24,
+  lowDensityStructure: 25,
+  rocketFuel: 26,
+  
+  automationScience: 27,
+  logisticScience: 28,
+  militaryScience: 29,
+  chemicalScience: 30,
+  productionScience: 31,
+  utilityScience: 32,
+  spaceScience: 33,
   
   water: 50, // Fluid.
   steam: 51, // Fluid.
@@ -62,6 +74,22 @@ export const I = {
   steelChest: 127,
   storageTank: 128,
   steelFurnace: 129,
+  wall: 130,
+  beacon: 131,
+  rail: 132,
+  
+  speedModule: 200,
+  speedModule2: 201,
+  speedModule3: 202,
+  efficiencyModule: 203,
+  efficiencyModule2: 204,
+  efficiencyModule3: 205,
+  productivityModule: 206,
+  productivityModule2: 207,
+  productivityModule3: 208,
+  firearmMagazine: 209,
+  piercingRoundsMagazine: 210,
+  grenade: 211,
 };
 
 export const FLUID_START = 50;
@@ -130,9 +158,9 @@ export const ITEMS = new Map([
     stackSize: 200,
     prototypeName: "electronic-circuit",
   }],
-  [I.redScience,
+  [I.automationScience,
   {
-    sprite: S.redScienceItem,
+    sprite: S.automationScienceItem,
     stackSize: 200,
     prototypeName: "automation-science-pack",
   }],
@@ -196,6 +224,73 @@ export const ITEMS = new Map([
     stackSize: 100,
     prototypeName: "iron-stick",
   }],
+  [I.processingUnit,
+  {
+    sprite: S.processingUnitItem,
+    stackSize: 100,
+    prototypeName: "processing-unit",
+  }],
+  [I.electricEngineUnit,
+  {
+    sprite: S.electricEngineUnitItem,
+    stackSize: 50,
+    prototypeName: "electric-engine-unit",
+  }],
+  [I.flyingRobotFrame,
+  {
+    sprite: S.flyingRobotFrameItem,
+    stackSize: 50,
+    prototypeName: "flying-robot-frame",
+  }],
+  [I.lowDensityStructure,
+  {
+    sprite: S.lowDensityStructureItem,
+    stackSize: 50,
+    prototypeName: "low-density-structure",
+  }],
+  [I.rocketFuel,
+  {
+    sprite: S.rocketFuelItem,
+    stackSize: 20,
+    prototypeName: "rocket-fuel",
+  }],
+  [I.logisticScience,
+  {
+    sprite: S.logisticScienceItem,
+    stackSize: 200,
+    prototypeName: "logistic-science-pack",
+  }],
+  [I.militaryScience,
+  {
+    sprite: S.militaryScienceItem,
+    stackSize: 200,
+    prototypeName: "military-science-pack",
+  }],
+  [I.chemicalScience,
+  {
+    sprite: S.chemicalScienceItem,
+    stackSize: 200,
+    prototypeName: "chemical-science-pack",
+  }],
+  [I.productionScience,
+  {
+    sprite: S.productionScienceItem,
+    stackSize: 200,
+    prototypeName: "production-science-pack",
+  }],
+  [I.utilityScience,
+  {
+    sprite: S.utilityScienceItem,
+    stackSize: 200,
+    prototypeName: "utility-science-pack",
+  }],
+  [I.spaceScience,
+  {
+    sprite: S.spaceScienceItem,
+    stackSize: 200,
+    prototypeName: "space-science-pack",
+  }],
+  
   
   
   // Placeable
@@ -379,6 +474,105 @@ export const ITEMS = new Map([
     sprite: S.steelFurnaceItem,
     stacksize: 50,
     prototypeName: "steel-furnace",
+  }],
+  [I.wall,
+  {
+    sprite: S.wallItem,
+    stacksize: 100,
+    prototypeName: "wall",
+  }],
+  [I.beacon,
+  {
+    sprite: S.beaconItem,
+    stacksize: 20,
+    prototypeName: "beacon",
+  }],
+  [I.rail,
+  {
+    sprite: S.railItem,
+    stacksize: 100,
+    prototypeName: "rail",
+  }],
+  
+  
+  
+  [I.speedModule,
+  {
+    sprite: S.speedModuleItem,
+    stacksize: 50,
+    prototypeName: "speed-module",
+  }],
+  [I.speedModule2,
+  {
+    sprite: S.speedModule2Item,
+    stacksize: 50,
+    prototypeName: "speed-module-2",
+  }],
+  [I.speedModule3,
+  {
+    sprite: S.speedModule3Item,
+    stacksize: 50,
+    prototypeName: "speed-module-3",
+  }],
+  [I.efficiencyModule,
+  {
+    sprite: S.efficiencyModuleItem,
+    stacksize: 50,
+    prototypeName: "efficiency-module",
+  }],
+  [I.efficiencyModule2,
+  {
+    sprite: S.efficiencyModule2Item,
+    stacksize: 50,
+    prototypeName: "efficiency-module-2",
+  }],
+  [I.efficiencyModule3,
+  {
+    sprite: S.efficiencyModule3Item,
+    stacksize: 50,
+    prototypeName: "efficiency-module-3",
+  }],
+  [I.productivityModule,
+  {
+    sprite: S.productivityModuleItem,
+    stacksize: 50,
+    prototypeName: "productivity-module",
+  }],
+  [I.productivityModule2,
+  {
+    sprite: S.productivityModule2Item,
+    stacksize: 50,
+    prototypeName: "productivity-module-2",
+  }],
+  [I.productivityModule3,
+  {
+    sprite: S.productivityModule3Item,
+    stacksize: 50,
+    prototypeName: "productivity-module-3",
+  }],
+  [I.productivityModule3,
+  {
+    sprite: S.productivityModule3Item,
+    stacksize: 50,
+    prototypeName: "productivity-module-3",
+  }],
+  [I.firearmMagazine,
+  {
+    sprite: S.firearmMagazineItem,
+    stacksize: 100,
+    prototypeName: "firearm-magazine",
+  }],
+  [I.piercingRoundsMagazine,
+  {
+    sprite: S.piercingRoundsMagazineItem,
+    stacksize: 100,
+    prototypeName: "piercing-rounds-magazine",
+  }],
+  [I.grenade,
+  {
+    sprite: S.grenadeItem,
+    stacksize: 100,
+    prototypeName: "grenade",
   }],
 ]);
 

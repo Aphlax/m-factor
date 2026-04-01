@@ -886,9 +886,11 @@ GridDrag.prototype.isClickMode = function() {
 }
 
 GridDrag.prototype.touchStart = function(sx, sy, firstTouch) {
+  const ox = -this.view.x, oy = -this.view.y, s = this.view.scale;
+  const {width, height} = this.entity;
   const {x, y} = this.points[0];
-  const cx = (x + 1) * this.view.scale - this.view.x + GRID_START.x,
-      cy = (y + 1) * this.view.scale - this.view.y + GRID_START.y;
+  const cx = (x + width) * s + ox + GRID_START.x,
+      cy = (y + height) * s + oy + GRID_START.y;
   if (firstTouch && !this.active &&
       Math.sqrt((sx - cx) ** 2 + (sy - cy) ** 2) < 22) {
     this.active = true;
@@ -983,14 +985,16 @@ GridDrag.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
 GridDrag.prototype.draw = function(ctx) {
   const ox = -this.view.x, oy = -this.view.y;
   const s = this.view.scale, half = s / 2, eps = 0.08 * s;
+  const {width, height} = this.entity;
   ctx.strokeStyle = COLOR.buildPlanner;
   ctx.lineWidth = 1;
   if (!this.active) {
     const {x, y} = this.points[0];
     ctx.beginPath();
-    ctx.roundRect(x * s + ox + eps, y * s + oy + eps, s - 2 * eps, s - 2 * eps, 2 * eps);
-    const cx = x * s + s + ox + GRID_START.x,
-        cy = y * s + s + oy + GRID_START.y, pi = Math.PI;
+    ctx.roundRect(x * s + ox + eps, y * s + oy + eps,
+        width * s - 2 * eps, height * s - 2 * eps, 2 * eps);
+    const cx = (x + width) * s + ox + GRID_START.x,
+        cy = (y + height) * s + oy + GRID_START.y, pi = Math.PI;
     ctx.moveTo(cx + 20, cy);
     ctx.arc(cx, cy, 20, 0, 2 * pi);
     ctx.stroke(); ctx.beginPath();
@@ -1001,7 +1005,8 @@ GridDrag.prototype.draw = function(ctx) {
     ctx.arc(cx, cy, 23, 0.9 * pi, 1.1 * pi);
     ctx.stroke(); ctx.beginPath();
     ctx.arc(cx, cy, 23, 1.4 * pi, 1.6 * pi);
-    ctx.moveTo(x * s + s * 4 / 5 + ox, y * s + s + oy - eps);
+    ctx.moveTo((x + width - 0.2) * s + ox,
+        (y + height) * s - eps + oy);
     ctx.lineTo(cx - 8.5, cy - 18.5);
     ctx.stroke();
     const icon = this.icon;
@@ -1027,7 +1032,7 @@ GridDrag.prototype.draw = function(ctx) {
       ctx.beginPath();
     }
     ctx.roundRect(x * s + ox + eps, y * s + oy + eps,
-        this.entity.width * s - 2 * eps, this.entity.height * s - 2 * eps, 2 * eps);
+        width * s - 2 * eps, height * s - 2 * eps, 2 * eps);
   }
   ctx.stroke();
 };

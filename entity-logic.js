@@ -404,6 +404,7 @@ export function setRecipe(recipe, time) {
   } else {
     const inputs = [], fluidInputs = [];
     for (let input of recipe.inputs) {
+      if (!input.item) throw new Error("Invalid input, " + recipe.prototypeName);
       if (input.item < FLUID_START ||
           input.item >= FLUID_END) {
         inputs.push(input);
@@ -412,28 +413,29 @@ export function setRecipe(recipe, time) {
       }
     }
     const usedChannels = [];
-    for (let entity of this.inputEntities) {
-      if (!entity.data.pipeConnections) continue;
-      const connection =
-          this.getFluidTankConnection(this.inputFluidTank, entity);
-      if (!connection) continue;
-      const channel = entity.data.channel;
-      const fluid = fluidInputs[connection[0]] ?? fluidInputs[0];
-      if (channel.fluid && fluid &&
-          channel.fluid != fluid.item) {
-        return true;
-      }
-      for (let i = 0; i < usedChannels.length; i += 2) {
-        if (channel == usedChannels[i] &&
-            fluid.item != usedChannels[i + 1]) {
+    if (fluidInputs.length) {
+      for (let i = 0; i < this.inputFluidTank.pipeConnections.length; i++) {
+        const entity = this.inputFluidTank.pipes[i];
+        if (!entity) continue;
+        const channel = entity.data.channel;
+        const fluid = fluidInputs[i] ?? fluidInputs[0];
+        if (channel.fluid && fluid &&
+            channel.fluid != fluid.item) {
           return true;
         }
+        for (let j = 0; j < usedChannels.length; j += 2) {
+          if (channel == usedChannels[j] &&
+              fluid.item != usedChannels[j + 1]) {
+            return true;
+          }
+        }
+        usedChannels.push(channel, fluid.item);
       }
-      usedChannels.push(channel, fluid.item);
     }
     
     const outputs = [], fluidOutputs = [];
     for (let output of recipe.outputs) {
+      if (!output.item) throw new Error("Invalid output, " + recipe.prototypeName);
       if (output.item < FLUID_START ||
           output.item >= FLUID_END) {
         outputs.push(output);
@@ -441,24 +443,24 @@ export function setRecipe(recipe, time) {
         fluidOutputs.push(output);
       }
     }
-    for (let entity of this.outputEntities) {
-      if (!entity.data.pipeConnections) continue;
-      const connection =
-          this.getFluidTankConnection(this.outputFluidTank, entity);
-      if (!connection) continue;
-      const channel = entity.data.channel;
-      const fluid = fluidOutputs[connection[0]] ?? fluidOutputs[0];
-      if (channel.fluid && fluid &&
-          channel.fluid != fluid.item) {
-        return true;
-      }
-      for (let i = 0; i < usedChannels.length; i += 2) {
-        if (channel == usedChannels[i] &&
-            fluid.item != usedChannels[i + 1]) {
+    if (fluidOutputs.length) {
+      for (let i = 0; i < this.outputFluidTank.pipeConnections.length; i++) {
+        const entity = this.outputFluidTank.pipes[i];
+        if (!entity) continue;
+        const channel = entity.data.channel;
+        const fluid = fluidOutputs[i] ?? fluidOutputs[0];
+        if (channel.fluid && fluid &&
+            channel.fluid != fluid.item) {
           return true;
         }
+        for (let j = 0; j < usedChannels.length; j += 2) {
+          if (channel == usedChannels[j] &&
+              fluid.item != usedChannels[j + 1]) {
+            return true;
+          }
+        }
+        usedChannels.push(channel, fluid.item);
       }
-      usedChannels.push(channel, fluid.item);
     }
     
     this.inputInventory.items.length = 0;

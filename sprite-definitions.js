@@ -258,7 +258,7 @@ export const S = {
   ironGearItem: 16006,
   copperCableItem: 16007,
   electronicCircuitItem: 16008,
-  redScienceItem: 16009,
+  automationScienceItem: 16009,
   woodItem: 16010,
   steelPlateItem: 16011,
   plasticBarItem: 16012,
@@ -270,6 +270,29 @@ export const S = {
   engineUnitItem: 16018,
   stoneBrickItem: 16019,
   ironStickItem: 16020,
+  processingUnitItem: 16021,
+  electricEngineUnitItem: 16022,
+  flyingRobotFrameItem: 16023,
+  lowDensityStructureItem: 16024,
+  rocketFuelItem: 16025,
+  logisticScienceItem: 16026,
+  militaryScienceItem: 16027,
+  chemicalScienceItem: 16028,
+  productionScienceItem: 16029,
+  utilityScienceItem: 16030,
+  spaceScienceItem: 16031,
+  speedModuleItem: 16032,
+  speedModule2Item: 16033,
+  speedModule3Item: 16034,
+  efficiencyModuleItem: 16035,
+  efficiencyModule2Item: 16036,
+  efficiencyModule3Item: 16037,
+  productivityModuleItem: 16038,
+  productivityModule2Item: 16039,
+  productivityModule3Item: 16040,
+  firearmMagazineItem: 16041,
+  piercingRoundsMagazineItem: 16042,
+  grenadeItem: 16043,
   
   waterFluid: 16050,
   steamFluid: 16051,
@@ -319,6 +342,9 @@ export const S = {
   steelChestItem: 16128,
   storageTankItem: 16129,
   steelFurnaceItem: 16130,
+  wallItem: 16131,
+  beaconItem: 16132,
+  railItem: 16133,
   
   gearIcon: 16500,
   burnerDrillIcon: 16501,
@@ -367,6 +393,9 @@ export const S = {
   steelChestIcon: 16544,
   storageTankIcon: 16545,
   steelFurnaceIcon: 16546,
+  wallIcon: 16547,
+  beaconIcon: 16548,
+  railIcon: 16549,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -1249,7 +1278,7 @@ export const SPRITES = [
   },
   {
     path: "graphics/items/automation-science-pack.png",
-    sprites: itemSprites(S.redScienceItem),
+    sprites: itemSprites(S.automationScienceItem),
   },
   {
     path: "graphics/items/steel-plate.png",
@@ -1290,6 +1319,98 @@ export const SPRITES = [
   {
     path: "graphics/items/iron-stick.png",
     sprites: itemSprites(S.ironStickItem),
+  },
+  {
+    path: "graphics/items/processing-unit.png",
+    sprites: itemSprites(S.processingUnitItem),
+  },
+  {
+    path: "graphics/items/electric-engine-unit.png",
+    sprites: itemSprites(S.electricEngineUnitItem),
+  },
+  {
+    path: "graphics/items/flying-robot-frame.png",
+    sprites: itemSprites(S.flyingRobotFrameItem),
+  },
+  {
+    path: "graphics/items/low-density-structure.png",
+    sprites: itemSprites(S.lowDensityStructureItem),
+  },
+  {
+    path: "graphics/items/rocket-fuel.png",
+    sprites: itemSprites(S.rocketFuelItem),
+  },
+  {
+    path: "graphics/items/logistic-science-pack.png",
+    sprites: itemSprites(S.logisticScienceItem),
+  },
+  {
+    path: "graphics/items/military-science-pack.png",
+    sprites: itemSprites(S.militaryScienceItem),
+  },
+  {
+    path: "graphics/items/chemical-science-pack.png",
+    sprites: itemSprites(S.chemicalScienceItem),
+  },
+  {
+    path: "graphics/items/production-science-pack.png",
+    sprites: itemSprites(S.productionScienceItem),
+  },
+  {
+    path: "graphics/items/utility-science-pack.png",
+    sprites: itemSprites(S.utilityScienceItem),
+  },
+  {
+    path: "graphics/items/space-science-pack.png",
+    sprites: itemSprites(S.spaceScienceItem),
+  },
+  {
+    path: "graphics/items/speed-module.png",
+    sprites: itemSprites(S.speedModuleItem),
+  },
+  {
+    path: "graphics/items/speed-module-2.png",
+    sprites: itemSprites(S.speedModule2Item),
+  },
+  {
+    path: "graphics/items/speed-module-3.png",
+    sprites: itemSprites(S.speedModule3Item),
+  },
+  {
+    path: "graphics/items/effectivity-module.png",
+    sprites: itemSprites(S.efficiencyModuleItem),
+  },
+  {
+    path: "graphics/items/effectivity-module-2.png",
+    sprites: itemSprites(S.efficiencyModule2Item),
+  },
+  {
+    path: "graphics/items/effectivity-module-3.png",
+    sprites: itemSprites(S.efficiencyModule3Item),
+  },
+  {
+    path: "graphics/items/productivity-module.png",
+    sprites: itemSprites(S.productivityModuleItem),
+  },
+  {
+    path: "graphics/items/productivity-module-2.png",
+    sprites: itemSprites(S.productivityModule2Item),
+  },
+  {
+    path: "graphics/items/productivity-module-3.png",
+    sprites: itemSprites(S.productivityModule3Item),
+  },
+  {
+    path: "graphics/items/firearm-magazine.png",
+    sprites: itemSprites(S.firearmMagazineItem),
+  },
+  {
+    path: "graphics/items/piercing-rounds-magazine.png",
+    sprites: itemSprites(S.piercingRoundsMagazineItem),
+  },
+  {
+    path: "graphics/items/grenade.png",
+    sprites: itemSprites(S.grenadeItem),
   },
   
   
@@ -1482,6 +1603,18 @@ export const SPRITES = [
   {
     path: "graphics/items/steel-furnace.png",
     sprites: itemSprites(S.steelFurnaceItem, S.steelFurnaceIcon),
+  },
+  {
+    path: "graphics/items/wall.png",
+    sprites: itemSprites(S.wallItem, S.wallIcon),
+  },
+  {
+    path: "graphics/items/beacon.png",
+    sprites: itemSprites(S.beaconItem, S.beaconIcon),
+  },
+  {
+    path: "graphics/items/rail.png",
+    sprites: itemSprites(S.railItem, S.railIcon),
   },
   
   
