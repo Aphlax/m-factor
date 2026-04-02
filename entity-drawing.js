@@ -22,6 +22,18 @@ export function draw(ctx, view, time) {
     return;
   if ((y - MAX_HEIGHT) * s > vy + vh || (y + height) * s <= vy)
     return;
+  if (this.extraSpriteUnder) {
+    const {x: sx, y: sy, width: sw, height: sh, left, right, top, bottom, image} =
+        SPRITES.get(this.extraSpriteUnder);
+    const xScale = width * s / (sw - left - right);
+    const yScale = height * s / (sh - top - bottom);
+    ctx.drawImage(image, sx, sy, sw, sh,
+        Math.floor(x * s - vx - left * xScale),
+        Math.floor(y * s - vy - top * yScale),
+        Math.ceil(sw * xScale),
+        Math.ceil(sh * yScale));
+    window.numberImageDraws++;
+  }
   let animation = this.animation;
   if (this.animationLength &&
       (this.state == STATE.running || this.state == STATE.working)) {
@@ -40,19 +52,27 @@ export function draw(ctx, view, time) {
         x * s - vx + 10, y * s - vy + 10);
     return;
   }
-  const xScale = width * s /
-      (sprite.width - sprite.left - sprite.right);
-  const yScale = height * s /
-      (sprite.height - sprite.top - sprite.bottom);
-  ctx.drawImage(sprite.image,
-      sprite.x, sprite.y, sprite.width, sprite.height,
-      Math.floor(x * s - vx -
-          sprite.left * xScale),
-      Math.floor(y * s - vy -
-          sprite.top * yScale),
-      Math.ceil(sprite.width * xScale),
-      Math.ceil(sprite.height * yScale));
+  const {x: sx, y: sy, width: sw, height: sh, left, right, top, bottom, image} = sprite;
+  const xScale = width * s / (sw - left - right);
+  const yScale = height * s / (sh - top - bottom);
+  ctx.drawImage(image, sx, sy, sw, sh,
+      Math.floor(x * s - vx - left * xScale),
+      Math.floor(y * s - vy - top * yScale),
+      Math.ceil(sw * xScale),
+      Math.ceil(sh * yScale));
   window.numberImageDraws++;
+  if (this.extraSpriteOver) {
+    const {x: sx, y: sy, width: sw, height: sh, left, right, top, bottom, image} =
+        SPRITES.get(this.extraSpriteOver);
+    const xScale = width * s / (sw - left - right);
+    const yScale = height * s / (sh - top - bottom);
+    ctx.drawImage(image, sx, sy, sw, sh,
+        Math.floor(x * s - vx - left * xScale),
+        Math.floor(y * s - vy - top * yScale),
+        Math.ceil(sw * xScale),
+        Math.ceil(sh * yScale));
+    window.numberImageDraws++;
+  }
 };
 
 export function drawShadow(ctx, view, time) {

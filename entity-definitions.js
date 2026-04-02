@@ -923,6 +923,76 @@ export const ENTITIES = new Map([
     },
     smokePosition: {x: 1.6, y: -0.55},
   }],
+  [NAME.assemblingMachine2,
+  {
+    label: "Assembler 2",
+    prototypeName: "assembling-machine-2",
+    type: TYPE.assembler,
+    width: 3,
+    height: 3,
+    rotatable: true,
+    icon: S.assemblingMachine2Icon,
+    sprites: {
+      [north]: [S.assemblingMachine2, S.assemblingMachine2Shadow],
+      [east]: [S.assemblingMachine2, S.assemblingMachine2Shadow],
+      [south]: [S.assemblingMachine2, S.assemblingMachine2Shadow],
+      [west]: [S.assemblingMachine2, S.assemblingMachine2Shadow],
+    },
+    animationLength: 32,
+    mapColor: "#006094",
+    energySource: ENERGY.electric,
+    energyDrain: 5, // kW
+    energyConsumption: 155, // kW
+    
+    processingSpeed: 0.75,
+    extraSprites: [
+      S.assemblingMachine2PipeN,
+      S.assemblingMachine2PipeE,
+      S.assemblingMachine2PipeS,
+      S.assemblingMachine2PipeW,
+    ],
+    fluidInputs: {
+      [north]: [{x: 1, y: -1}],
+      [east]: [{x: 3, y: 1}],
+      [south]: [{x: 1, y: 3}],
+      [west]: [{x: -1, y: 1}],
+    },
+  }],
+  [NAME.assemblingMachine3,
+  {
+    label: "Assembler 3",
+    prototypeName: "assembling-machine-3",
+    type: TYPE.assembler,
+    width: 3,
+    height: 3,
+    rotatable: true,
+    icon: S.assemblingMachine3Icon,
+    sprites: {
+      [north]: [S.assemblingMachine3, S.assemblingMachine3Shadow],
+      [east]: [S.assemblingMachine3, S.assemblingMachine3Shadow],
+      [south]: [S.assemblingMachine3, S.assemblingMachine3Shadow],
+      [west]: [S.assemblingMachine3, S.assemblingMachine3Shadow],
+    },
+    animationLength: 32,
+    mapColor: "#006094",
+    energySource: ENERGY.electric,
+    energyDrain: 12.5, // kW
+    energyConsumption: 387.5, // kW
+    
+    processingSpeed: 1.25,
+    extraSprites: [
+      S.assemblingMachine3PipeN,
+      S.assemblingMachine3PipeE,
+      S.assemblingMachine3PipeS,
+      S.assemblingMachine3PipeW,
+    ],
+    fluidInputs: {
+      [north]: [{x: 1, y: -1}],
+      [east]: [{x: 3, y: 1}],
+      [south]: [{x: 1, y: 3}],
+      [west]: [{x: -1, y: 1}],
+    },
+  }],
 ]);
 
 ENTITIES.keys().forEach(name =>

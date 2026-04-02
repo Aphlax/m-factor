@@ -77,6 +77,8 @@ export const I = {
   wall: 130,
   beacon: 131,
   rail: 132,
+  assemblingMachine2: 133,
+  assemblingMachine3: 134,
   
   speedModule: 200,
   speedModule2: 201,
@@ -493,6 +495,21 @@ export const ITEMS = new Map([
     stacksize: 100,
     prototypeName: "rail",
   }],
+  [I.assemblingMachine2,
+  {
+    sprite: S.assemblingMachine2Item,
+    stacksize: 50,
+    prototypeName: "assembling-machine-2",
+  }],
+  [I.assemblingMachine3,
+  {
+    sprite: S.assemblingMachine3Item,
+    stacksize: 50,
+    prototypeName: "assembling-machine-3",
+  }],
+  
+  
+  
   
   
   

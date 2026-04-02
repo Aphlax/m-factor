@@ -103,6 +103,10 @@ export const S = {
   pumpE: 169*16, // 32
   pumpS: 171*16, // 32
   pumpW: 173*16, // 32
+  assemblingMachine2: 175*16, // 32
+  assemblingMachine2Shadow: 177*16, // 32
+  assemblingMachine3: 179*16, // 32
+  assemblingMachine3Shadow: 181*16, // 32
   
   
   woodenChest: 15000,
@@ -246,6 +250,14 @@ export const S = {
   steelFurnace: 15426,
   steelFurnaceShadow: 15427,
   steelFurnaceWorking: 15428, // 48
+  assemblingMachine2PipeN: 15476,
+  assemblingMachine2PipeE: 15477,
+  assemblingMachine2PipeS: 15478,
+  assemblingMachine2PipeW: 15479,
+  assemblingMachine3PipeN: 15480,
+  assemblingMachine3PipeE: 15481,
+  assemblingMachine3PipeS: 15482,
+  assemblingMachine3PipeW: 15483,
   
   
   // Items
@@ -345,6 +357,8 @@ export const S = {
   wallItem: 16131,
   beaconItem: 16132,
   railItem: 16133,
+  assemblingMachine2Item: 16134,
+  assemblingMachine3Item: 16135,
   
   gearIcon: 16500,
   burnerDrillIcon: 16501,
@@ -396,6 +410,8 @@ export const S = {
   wallIcon: 16547,
   beaconIcon: 16548,
   railIcon: 16549,
+  assemblingMachine2Icon: 16550,
+  assemblingMachine3Icon: 16551,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -1233,6 +1249,56 @@ export const SPRITES = [
     path: "graphics/entities/steel-furnace/steel-furnace-working.png",
     sprites: entitySprites(S.steelFurnaceWorking, 85, 87, 8, 6, 11, 10, 12, 11, true),
   },
+  {
+    path: "graphics/entities/assembling-machine-2/assembling-machine-2.png",
+    sprites: entitySprites(S.assemblingMachine2, 108, 110, 8, 4, 5, 7, 5, 9, true),
+  },
+  {
+    path: "graphics/entities/assembling-machine-2/assembling-machine-2-shadow.png",
+    sprites: entitySprites(S.assemblingMachine2Shadow, 98, 82, 8, 4, -12, 14, -11, -3, true),
+  },
+  {
+    path: "graphics/entities/assembling-machine-2/assembling-machine-2-pipe-N.png",
+    sprites: entitySprites(S.assemblingMachine2PipeN, 35, 18, 1, 1, -33, -28, 10, -88, true),
+  },
+  {
+    path: "graphics/entities/assembling-machine-2/assembling-machine-2-pipe-E.png",
+    sprites: entitySprites(S.assemblingMachine2PipeE, 20, 38, 1, 1, -77, 1, -29, -29, true),
+  },
+  {
+    path: "graphics/entities/assembling-machine-2/assembling-machine-2-pipe-S.png",
+    sprites: entitySprites(S.assemblingMachine2PipeS, 44, 31, 1, 1, -26, -26, -65, 0, true),
+  },
+  {
+    path: "graphics/entities/assembling-machine-2/assembling-machine-2-pipe-W.png",
+    sprites: entitySprites(S.assemblingMachine2PipeW, 19, 37, 1, 1, 0, -77, -29, -30, true),
+  },
+  {
+    path: "graphics/entities/assembling-machine-3/assembling-machine-3.png",
+    sprites: entitySprites(S.assemblingMachine3, 108, 119, 8, 4, 6, 6, 15, 8, true),
+  },
+  {
+    path: "graphics/entities/assembling-machine-3/assembling-machine-3-shadow.png",
+    sprites: entitySprites(S.assemblingMachine3Shadow, 130, 82, 8, 4, -13, 47, -9, -5, true),
+  },
+  {
+    path: "graphics/entities/assembling-machine-3/assembling-machine-3-pipe-N.png",
+    sprites: entitySprites(S.assemblingMachine3PipeN, 35, 18, 1, 1, -33, -28, 10, -88, true),
+  },
+  {
+    path: "graphics/entities/assembling-machine-3/assembling-machine-3-pipe-E.png",
+    sprites: entitySprites(S.assemblingMachine3PipeE, 20, 38, 1, 1, -77, 1, -29, -29, true),
+  },
+  {
+    path: "graphics/entities/assembling-machine-3/assembling-machine-3-pipe-S.png",
+    sprites: entitySprites(S.assemblingMachine3PipeS, 44, 31, 1, 1, -26, -26, -65, 0, true),
+  },
+  {
+    path: "graphics/entities/assembling-machine-3/assembling-machine-3-pipe-W.png",
+    sprites: entitySprites(S.assemblingMachine3PipeW, 19, 37, 1, 1, 0, -77, -29, -30, true),
+  },
+  
+  
   
   
   // Items.
@@ -1616,6 +1682,17 @@ export const SPRITES = [
     path: "graphics/items/rail.png",
     sprites: itemSprites(S.railItem, S.railIcon),
   },
+  {
+    path: "graphics/items/assembling-machine-2.png",
+    sprites: itemSprites(S.assemblingMachine2Item, S.assemblingMachine2Icon),
+  },
+  {
+    path: "graphics/items/assembling-machine-3.png",
+    sprites: itemSprites(S.assemblingMachine3Item, S.assemblingMachine3Icon),
+  },
+  
+  
+  
   
   
   // Misc.

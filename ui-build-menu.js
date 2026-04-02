@@ -32,6 +32,8 @@ const BUILD_MENU = [
   NAME.storageTank,
   NAME.pump,
   NAME.assemblingMachine1,
+  NAME.assemblingMachine2,
+  NAME.assemblingMachine3,
   NAME.oilRefinery,
   NAME.chemicalPlant,
   NAME.burnerDrill,

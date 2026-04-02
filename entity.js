@@ -25,6 +25,8 @@ function Entity() {
   this.animationLength = 0;
   this.animationSpeed = 0;
   this.spriteShadowAnimation = true;
+  this.extraSpriteUnder = 0;
+  this.extraSpriteOver = 0;
   
   this.taskStart = 0;
   this.taskDuration = 0;
@@ -172,6 +174,13 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     if (def.fluidInputs) {
       this.inputFluidTank = new FluidTank()
           .setPipeConnections(def.fluidInputs[direction]);
+      if (def.extraSprites) {
+        if (direction == DIRECTION.north) {
+          this.extraSpriteUnder = def.extraSprites[direction];
+        } else {
+          this.extraSpriteOver = def.extraSprites[direction];
+        }
+      }
     }
     if (def.fluidOutputs) {
       this.outputFluidTank = new FluidTank()

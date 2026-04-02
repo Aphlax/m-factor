@@ -55,7 +55,7 @@ export const RECIPES = [
     outputs: [
       {item: I.ironGear, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -67,7 +67,7 @@ export const RECIPES = [
     outputs: [
       {item: I.electronicCircuit, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -78,7 +78,7 @@ export const RECIPES = [
     outputs: [
       {item: I.copperCable, amount: 2},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -90,7 +90,7 @@ export const RECIPES = [
     outputs: [
       {item: I.automationScience, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 5000,
   },
   {
@@ -127,7 +127,7 @@ export const RECIPES = [
     outputs: [
       {item: I.advancedCircuit, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 6000,
   },
   {
@@ -293,7 +293,7 @@ export const RECIPES = [
     outputs: [
       {item: I.ironStick, amount: 2},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -306,7 +306,7 @@ export const RECIPES = [
     outputs: [
       {item: I.processingUnit, amount: 1},
     ],
-    entities: [NAME.assemblingMachine2],
+    entities: [NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 10000,
   },
   {
@@ -319,7 +319,7 @@ export const RECIPES = [
     outputs: [
       {item: I.electricEngineUnit, amount: 1},
     ],
-    entities: [NAME.assemblingMachine2],
+    entities: [NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 10000,
   },
   {
@@ -333,7 +333,7 @@ export const RECIPES = [
     outputs: [
       {item: I.flyingRobotFrame, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 20000,
   },
   {
@@ -346,7 +346,7 @@ export const RECIPES = [
     outputs: [
       {item: I.lowDensityStructure, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 15000,
   },
   {
@@ -358,7 +358,7 @@ export const RECIPES = [
     outputs: [
       {item: I.rocketFuel, amount: 1},
     ],
-    entities: [NAME.assemblingMachine2],
+    entities: [NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 15000,
   },
   {
@@ -370,7 +370,7 @@ export const RECIPES = [
     outputs: [
       {item: I.logisticScience, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 6000,
   },
   {
@@ -383,7 +383,7 @@ export const RECIPES = [
     outputs: [
       {item: I.militaryScience, amount: 2},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 10000,
   },
   {
@@ -396,7 +396,7 @@ export const RECIPES = [
     outputs: [
       {item: I.chemicalScience, amount: 2},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 24000,
   },
   {
@@ -409,7 +409,7 @@ export const RECIPES = [
     outputs: [
       {item: I.productionScience, amount: 3},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 21000,
   },
   {
@@ -422,7 +422,7 @@ export const RECIPES = [
     outputs: [
       {item: I.utilityScience, amount: 3},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 21000,
   },
   
@@ -438,7 +438,7 @@ export const RECIPES = [
     outputs: [
       {item: I.transportBelt, amount: 2},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -451,7 +451,7 @@ export const RECIPES = [
     outputs: [
       {item: I.inserter, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -462,7 +462,7 @@ export const RECIPES = [
     outputs: [
       {item: I.woodenChest, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -475,7 +475,7 @@ export const RECIPES = [
     outputs: [
       {item: I.burnerDrill, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 2000,
   },
   {
@@ -486,7 +486,7 @@ export const RECIPES = [
     outputs: [
       {item: I.stoneFurnace, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -499,7 +499,7 @@ export const RECIPES = [
     outputs: [
       {item: I.assemblingMachine1, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -512,7 +512,7 @@ export const RECIPES = [
     outputs: [
       {item: I.lab, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 2000,
   },
   {
@@ -525,7 +525,7 @@ export const RECIPES = [
     outputs: [
       {item: I.offshorePump, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -536,7 +536,7 @@ export const RECIPES = [
     outputs: [
       {item: I.pipe, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -548,7 +548,7 @@ export const RECIPES = [
     outputs: [
       {item: I.boiler, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -561,7 +561,7 @@ export const RECIPES = [
     outputs: [
       {item: I.steamEngine, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -573,7 +573,7 @@ export const RECIPES = [
     outputs: [
       {item: I.smallElectricPole, amount: 2},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -585,7 +585,7 @@ export const RECIPES = [
     outputs: [
       {item: I.undergroundBelt, amount: 2},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 1000,
   },
   {
@@ -597,7 +597,7 @@ export const RECIPES = [
     outputs: [
       {item: I.pipeToGround, amount: 2},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -610,7 +610,7 @@ export const RECIPES = [
     outputs: [
       {item: I.splitter, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 1000,
   },
   {
@@ -622,7 +622,7 @@ export const RECIPES = [
     outputs: [
       {item: I.burnerInserter, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -635,7 +635,7 @@ export const RECIPES = [
     outputs: [
       {item: I.fastInserter, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -648,7 +648,7 @@ export const RECIPES = [
     outputs: [
       {item: I.longHandedInserter, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -662,7 +662,7 @@ export const RECIPES = [
     outputs: [
       {item: I.pumpjack, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 5000,
   },
   {
@@ -676,7 +676,7 @@ export const RECIPES = [
     outputs: [
       {item: I.oilRefinery, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 8000,
   },
   {
@@ -690,7 +690,7 @@ export const RECIPES = [
     outputs: [
       {item: I.chemicalPlant, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 5000,
   },
   {
@@ -703,7 +703,7 @@ export const RECIPES = [
     outputs: [
       {item: I.pump, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 2000,
   },
   {
@@ -716,7 +716,7 @@ export const RECIPES = [
     outputs: [
       {item: I.electricFurnace, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 5000,
   },
   
@@ -751,7 +751,7 @@ export const RECIPES = [
     outputs: [
       {item: I.mediumElectricPole, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -764,7 +764,7 @@ export const RECIPES = [
     outputs: [
       {item: I.bigElectricPole, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -777,7 +777,7 @@ export const RECIPES = [
     outputs: [
       {item: I.substation, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -788,7 +788,7 @@ export const RECIPES = [
     outputs: [
       {item: I.ironChest, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -799,7 +799,7 @@ export const RECIPES = [
     outputs: [
       {item: I.steelChest, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -811,7 +811,7 @@ export const RECIPES = [
     outputs: [
       {item: I.storageTank, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 3000,
   },
   {
@@ -823,7 +823,7 @@ export const RECIPES = [
     outputs: [
       {item: I.steelFurnace, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 3000,
   },
   {
@@ -834,7 +834,7 @@ export const RECIPES = [
     outputs: [
       {item: I.wall, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
   {
@@ -848,7 +848,7 @@ export const RECIPES = [
     outputs: [
       {item: I.beacon, amount: 2},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 15000,
   },
   {
@@ -861,9 +861,39 @@ export const RECIPES = [
     outputs: [
       {item: I.rail, amount: 2},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
+  {
+    prototypeName: "assembling-machine-2",
+    inputs: [
+      {item: I.assemblingMachine1, amount: 1},
+      {item: I.electronicCircuit, amount: 3},
+      {item: I.ironGear, amount: 5},
+      {item: I.steelPlate, amount: 2},
+    ],
+    outputs: [
+      {item: I.assemblingMachine2, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  {
+    prototypeName: "assembling-machine-3",
+    inputs: [
+      {item: I.assemblingMachine2, amount: 2},
+      {item: I.speedModule, amount: 4},
+    ],
+    outputs: [
+      {item: I.assemblingMachine3, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  
+  
+  
+  
   
   
   
@@ -876,7 +906,7 @@ export const RECIPES = [
     outputs: [
       {item: I.speedModule, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 15000,
   },
   {
@@ -889,7 +919,7 @@ export const RECIPES = [
     outputs: [
       {item: I.speedModule2, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 30000,
   },
   {
@@ -902,7 +932,7 @@ export const RECIPES = [
     outputs: [
       {item: I.speedModule3, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 60000,
   },
   {
@@ -914,7 +944,7 @@ export const RECIPES = [
     outputs: [
       {item: I.efficiencyModule, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 15000,
   },
   {
@@ -927,7 +957,7 @@ export const RECIPES = [
     outputs: [
       {item: I.efficiencyModule2, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 30000,
   },
   {
@@ -940,7 +970,7 @@ export const RECIPES = [
     outputs: [
       {item: I.efficiencyModule3, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 60000,
   },
   {
@@ -952,7 +982,7 @@ export const RECIPES = [
     outputs: [
       {item: I.productivityModule, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 15000,
   },
   {
@@ -965,7 +995,7 @@ export const RECIPES = [
     outputs: [
       {item: I.productivityModule2, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 30000,
   },
   {
@@ -978,7 +1008,7 @@ export const RECIPES = [
     outputs: [
       {item: I.productivityModule3, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 60000,
   },
   {
@@ -989,7 +1019,7 @@ export const RECIPES = [
     outputs: [
       {item: I.firearmMagazine, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 1000,
   },
   {
@@ -1002,7 +1032,7 @@ export const RECIPES = [
     outputs: [
       {item: I.piercingRoundsMagazine, amount: 2},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 6000,
   },
   {
@@ -1014,7 +1044,7 @@ export const RECIPES = [
     outputs: [
       {item: I.grenade, amount: 1},
     ],
-    entities: [NAME.assemblingMachine1],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 8000,
   },
 ];

@@ -1,9 +1,10 @@
 import {I} from './item-definitions.js';
 import {PROTO_TO_RECIPE} from './recipe-definitions.js';
 import {STATE, DIRECTION, NAME, RESOURCE_NAMES} from './entity-properties.js';
-import {S} from './sprite-pool.js';
+import {S as SNAME} from './sprite-pool.js';
 
 const {north, east, south, west} = DIRECTION;
+const {north: N, east: E, south: S, west: W} = DIRECTION;
 
 export function scenario(gameMap, time) {
   //return speedrun(gameMap, time);
@@ -72,28 +73,39 @@ function productionTest(gameMap, time) {
     e(NAME.inserter, -11, 12 + 2 * i, 1);
     e(NAME.inserter, -8, 12 + 2 * i, 1);
   }
-  l(-7, 12, 2, 30);
-  l(-25, 12, 2, 18);
-  l(-25, 30, 1, 16);
-  l(-9, 30, 2, 15);
   
-  l(-7, 42, 1, 2);l(-5, 42, 2, 2);
-  l(-1, 39, 1, 24);
-  l(-9, 45, 1, 26);
-  l(-3, 39, 1, 1);l(-2, 39, 2, 1);
-  l(-2, 40, 1, 2);l(0, 40, 0, 1);
+  // iron.
+  l(-7, 12, S, 29);
+  e(NAME.splitter, -7, 41, S);
+  l(-6, 42, E, 1);
+  l(-5, 42, S, 2);
   e(NAME.inserter, -4, 42, 1);
   e(NAME.inserter, -4, 43, 1);
-  e(NAME.inserter, -3, 40, 0);
+  e(NAME.undergroundBelt, -7, 42, S, {});
+  e(NAME.undergroundBelt, -7, 47, S, {undergroundUp: true});
+  
+  // science.
+  l(2, 39, E, 21);
+  
+  // copper.
+  l(-25, 12, S, 18);
+  l(-25, 30, E, 16);
+  l(-9, 30, S, 14);
+  e(NAME.splitter, -9, 44, S);
+  l(-8, 45, E, 26);
+  l(-8, 46, N, 1);
+  l(-9, 45, S, 5);
+  
+  // gears.
+  e(NAME.inserter, -2, 44, S);
   e(NAME.assemblingMachine1, -3, 41, 0)
       .setRecipe(PROTO_TO_RECIPE.get("iron-gear-wheel"), time);
   let assembler;
   for (let i = 0; i < 6; i++) {
     assembler = e(NAME.assemblingMachine1, 3 * i, 41, 0);
     assembler.setRecipe(PROTO_TO_RECIPE.get("automation-science-pack"), time);
-    e(NAME.inserter, 1 + 3 * i, 40, 2);
-    e(NAME.inserter, 1 + 3 * i, 44, 0);
-    e(NAME.inserter, 2 + 3 * i, 40, 0);
+    e(NAME.inserter, 1 + 3 * i, 44, N);
+    e(NAME.inserter, 2 + 3 * i, 40, N);
   }
   assembler.nextUpdate = time;
   assembler.inputInventory.insert(I.ironGear, 5);
@@ -166,7 +178,7 @@ function productionTest(gameMap, time) {
   chunk.resources[3] = new Array(32);
   chunk.resources[3][31] =
       {x: -29, y: 31, id: RESOURCE_NAMES.crudeOil,
-      amount: 34, sprite: S.crudeOil};
+      amount: 34, sprite: SNAME.crudeOil};
   e(NAME.pumpjack, -30, 30, 2);
   el(-28, 29);
   p(-30, 33, 1, 7);
@@ -195,7 +207,7 @@ function productionTest(gameMap, time) {
   e(NAME.substation, -10, 67, 0);
   e(NAME.substation, 8, 67, 0);
   
-  gameMap.centerView(-5, 67);
+  gameMap.centerView(-5, 47);
 };
 
 function inserterTest(gameMap, time) {

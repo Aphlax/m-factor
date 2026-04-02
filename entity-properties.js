@@ -51,6 +51,8 @@ export const NAME = {
   steelChest: 29,
   storageTank: 30,
   steelFurnace: 31,
+  assemblingMachine2: 32,
+  assemblingMachine3: 33,
 };
 
 /** Never value for next update. 285 years from now. */
