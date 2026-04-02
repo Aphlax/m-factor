@@ -719,6 +719,84 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 5000,
   },
+  {
+    prototypeName: "fast-transport-belt",
+    inputs: [
+      {item: I.ironGear, amount: 5},
+      {item: I.transportBelt, amount: 1},
+    ],
+    outputs: [
+      {item: I.fastTransportBelt, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  {
+    prototypeName: "fast-underground-belt",
+    inputs: [
+      {item: I.ironGear, amount: 40},
+      {item: I.undergroundBelt, amount: 2},
+    ],
+    outputs: [
+      {item: I.fastUndergroundBelt, amount: 2},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 2000,
+  },
+  {
+    prototypeName: "fast-splitter",
+    inputs: [
+      {item: I.electronicCircuit, amount: 10},
+      {item: I.ironGear, amount: 10},
+      {item: I.splitter, amount: 1},
+    ],
+    outputs: [
+      {item: I.fastSplitter, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 2000,
+  },
+  {
+    prototypeName: "express-transport-belt",
+    inputs: [
+      {item: I.transportBelt, amount: 1},
+      {item: I.ironGear, amount: 10},
+      {item: I.lubricant, amount: 20},
+    ],
+    outputs: [
+      {item: I.expressTransportBelt, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  {
+    prototypeName: "express-underground-belt",
+    inputs: [
+      {item: I.fastUndergroundBelt, amount: 2},
+      {item: I.ironGear, amount: 80},
+      {item: I.lubricant, amount: 40},
+    ],
+    outputs: [
+      {item: I.expressUndergroundBelt, amount: 2},
+    ],
+    entities: [NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 2000,
+  },
+  {
+    prototypeName: "express-splitter",
+    inputs: [
+      {item: I.advancedCircuit, amount: 10},
+      {item: I.fastSplitter, amount: 1},
+      {item: I.ironGear, amount: 10},
+      {item: I.lubricant, amount: 80},
+    ],
+    outputs: [
+      {item: I.expressSplitter, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 2000,
+  },
+  
   
   
   {

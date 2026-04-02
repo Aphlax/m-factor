@@ -359,6 +359,12 @@ export const S = {
   railItem: 16133,
   assemblingMachine2Item: 16134,
   assemblingMachine3Item: 16135,
+  fastTransportBeltItem: 16136,
+  fastUndergroundBeltItem: 16137,
+  fastSplitterItem: 16138,
+  expressTransportBeltItem: 16139,
+  expressUndergroundBeltItem: 16140,
+  expressSplitterItem: 16141,
   
   gearIcon: 16500,
   burnerDrillIcon: 16501,
@@ -412,6 +418,12 @@ export const S = {
   railIcon: 16549,
   assemblingMachine2Icon: 16550,
   assemblingMachine3Icon: 16551,
+  fastTransportBeltIcon: 16552,
+  fastUndergroundBeltIcon: 16553,
+  fastSplitterIcon: 16554,
+  expressTransportBeltIcon: 16555,
+  expressUndergroundBeltIcon: 16556,
+  expressSplitterIcon: 16557,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -1690,6 +1702,31 @@ export const SPRITES = [
     path: "graphics/items/assembling-machine-3.png",
     sprites: itemSprites(S.assemblingMachine3Item, S.assemblingMachine3Icon),
   },
+  {
+    path: "graphics/items/fast-transport-belt.png",
+    sprites: itemSprites(S.fastTransportBeltItem, S.fastTransportBeltIcon),
+  },
+  {
+    path: "graphics/items/fast-underground-belt.png",
+    sprites: itemSprites(S.fastUndergroundBeltItem, S.fastUndergroundBeltIcon),
+  },
+  {
+    path: "graphics/items/fast-splitter.png",
+    sprites: itemSprites(S.fastSplitterItem, S.fastSplitterIcon),
+  },
+  {
+    path: "graphics/items/express-transport-belt.png",
+    sprites: itemSprites(S.expressTransportBeltItem, S.expressTransportBeltIcon),
+  },
+  {
+    path: "graphics/items/express-underground-belt.png",
+    sprites: itemSprites(S.expressUndergroundBeltItem, S.expressUndergroundBeltIcon),
+  },
+  {
+    path: "graphics/items/express-splitter.png",
+    sprites: itemSprites(S.expressSplitterItem, S.expressSplitterIcon),
+  },
+  
   
   
   

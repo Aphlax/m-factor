@@ -79,6 +79,12 @@ export const I = {
   rail: 132,
   assemblingMachine2: 133,
   assemblingMachine3: 134,
+  fastTransportBelt: 135,
+  fastUndergroundBelt: 136,
+  fastSplitter: 137,
+  expressTransportBelt: 138,
+  expressUndergroundBelt: 139,
+  expressSplitter: 140,
   
   speedModule: 200,
   speedModule2: 201,
@@ -507,7 +513,42 @@ export const ITEMS = new Map([
     stacksize: 50,
     prototypeName: "assembling-machine-3",
   }],
-  
+  [I.fastTransportBelt,
+  {
+    sprite: S.fastTransportBeltItem,
+    stacksize: 100,
+    prototypeName: "fast-transport-belt",
+  }],
+  [I.fastUndergroundBelt,
+  {
+    sprite: S.fastUndergroundBeltItem,
+    stacksize: 50,
+    prototypeName: "fast-undetground-belt",
+  }],
+  [I.fastSplitter,
+  {
+    sprite: S.fastSplitterItem,
+    stacksize: 50,
+    prototypeName: "fast-splitter",
+  }],
+  [I.expressTransportBelt,
+  {
+    sprite: S.expressTransportBeltItem,
+    stacksize: 100,
+    prototypeName: "express-transport-belt",
+  }],
+  [I.expressUndergroundBelt,
+  {
+    sprite: S.expressUndergroundBeltItem,
+    stacksize: 50,
+    prototypeName: "express-undetground-belt",
+  }],
+  [I.expressSplitter,
+  {
+    sprite: S.expressSplitterItem,
+    stacksize: 50,
+    prototypeName: "express-splitter",
+  }],
   
   
   
