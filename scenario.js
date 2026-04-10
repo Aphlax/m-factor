@@ -207,6 +207,8 @@ function productionTest(gameMap, time) {
   e(NAME.substation, -10, 67, 0);
   e(NAME.substation, 8, 67, 0);
   
+  e(NAME.fastTransportBelt, 10, 70, 0);
+  
   gameMap.centerView(-5, 47);
 };
 

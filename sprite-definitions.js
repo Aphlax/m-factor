@@ -107,6 +107,70 @@ export const S = {
   assemblingMachine2Shadow: 177*16, // 32
   assemblingMachine3: 179*16, // 32
   assemblingMachine3Shadow: 181*16, // 32
+  fastTransportBeltE: 183*16,
+  fastTransportBeltW: 185*16,
+  fastTransportBeltN: 187*16,
+  fastTransportBeltS: 189*16,
+  fastTransportBeltEN: 191*16,
+  fastTransportBeltNE: 193*16,
+  fastTransportBeltWN: 195*16,
+  fastTransportBeltNW: 197*16,
+  fastTransportBeltSE: 199*16,
+  fastTransportBeltES: 201*16,
+  fastTransportBeltSW: 203*16,
+  fastTransportBeltWS: 205*16,
+  fastTransportBeltBeginN: 207*16,
+  fastTransportBeltEndS: 209*16,
+  fastTransportBeltBeginE: 211*16,
+  fastTransportBeltEndW: 213*16,
+  fastTransportBeltBeginS: 215*16,
+  fastTransportBeltEndN: 217*16,
+  fastTransportBeltBeginW: 219*16,
+  fastTransportBeltEndE: 221*16,
+  expressTransportBeltE: 223*16,
+  expressTransportBeltW: 225*16,
+  expressTransportBeltN: 227*16,
+  expressTransportBeltS: 229*16,
+  expressTransportBeltEN: 231*16,
+  expressTransportBeltNE: 233*16,
+  expressTransportBeltWN: 235*16,
+  expressTransportBeltNW: 237*16,
+  expressTransportBeltSE: 239*16,
+  expressTransportBeltES: 241*16,
+  expressTransportBeltSW: 243*16,
+  expressTransportBeltWS: 245*16,
+  expressTransportBeltBeginN: 247*16,
+  expressTransportBeltEndS: 249*16,
+  expressTransportBeltBeginE: 251*16,
+  expressTransportBeltEndW: 253*16,
+  expressTransportBeltBeginS: 255*16,
+  expressTransportBeltEndN: 257*16,
+  expressTransportBeltBeginW: 259*16,
+  expressTransportBeltEndE: 261*16,
+  fastUndergroundExitBeltS: 263*16,
+  fastUndergroundExitBeltW: 265*16,
+  fastUndergroundExitBeltN: 267*16,
+  fastUndergroundExitBeltE: 269*16,
+  fastUndergroundEnterBeltN: 271*16,
+  fastUndergroundEnterBeltE: 273*16,
+  fastUndergroundEnterBeltS: 275*16,
+  fastUndergroundEnterBeltW: 277*16,
+  expressUndergroundExitBeltS: 279*16,
+  expressUndergroundExitBeltW: 281*16,
+  expressUndergroundExitBeltN: 283*16,
+  expressUndergroundExitBeltE: 285*16,
+  expressUndergroundEnterBeltN: 287*16,
+  expressUndergroundEnterBeltE: 289*16,
+  expressUndergroundEnterBeltS: 291*16,
+  expressUndergroundEnterBeltW: 293*16,
+  fastSplitterN: 295*16, // 32
+  fastSplitterE: 297*16, // 32
+  fastSplitterS: 299*16, // 32
+  fastSplitterW: 301*16, // 32
+  expressSplitterN: 303*16, // 32
+  expressSplitterE: 305*16, // 32
+  expressSplitterS: 307*16, // 32
+  expressSplitterW: 309*16, // 32
   
   
   woodenChest: 15000,
@@ -258,6 +322,30 @@ export const S = {
   assemblingMachine3PipeE: 15481,
   assemblingMachine3PipeS: 15482,
   assemblingMachine3PipeW: 15483,
+  fastUndergroundBeltSO: 15484,
+  fastUndergroundBeltWO: 15485,
+  fastUndergroundBeltNO: 15486,
+  fastUndergroundBeltEO: 15487,
+  fastUndergroundBeltNI: 15488,
+  fastUndergroundBeltEI: 15489,
+  fastUndergroundBeltSI: 15490,
+  fastUndergroundBeltWI: 15491,
+  fastUndergroundBeltWOSideLoaded: 15493,
+  fastUndergroundBeltEOSideLoaded: 15495,
+  fastUndergroundBeltEISideLoaded: 15497,
+  fastUndergroundBeltWISideLoaded: 15499,
+  expressUndergroundBeltSO: 15500,
+  expressUndergroundBeltWO: 15501,
+  expressUndergroundBeltNO: 15502,
+  expressUndergroundBeltEO: 15503,
+  expressUndergroundBeltNI: 15504,
+  expressUndergroundBeltEI: 15505,
+  expressUndergroundBeltSI: 15506,
+  expressUndergroundBeltWI: 15507,
+  expressUndergroundBeltWOSideLoaded: 15509,
+  expressUndergroundBeltEOSideLoaded: 15511,
+  expressUndergroundBeltEISideLoaded: 15513,
+  expressUndergroundBeltWISideLoaded: 15515,
   
   
   // Items
@@ -1309,7 +1397,74 @@ export const SPRITES = [
     path: "graphics/entities/assembling-machine-3/assembling-machine-3-pipe-W.png",
     sprites: entitySprites(S.assemblingMachine3PipeW, 19, 37, 1, 1, 0, -77, -29, -30, true),
   },
-  
+  {
+    path: "graphics/entities/fast-transport-belt/fast-transport-belt.png",
+    sprites: [
+        ...entitySprites(S.fastTransportBeltE, 64, 64, 32, 20, 16, 16, 16, 16, true),
+        ...halfBeltSprites(S.fastUndergroundEnterBeltE, 64, 64, 64*0, 32, 32, 0, 16, 16, 16, 16),
+        ...halfBeltSprites(S.fastUndergroundEnterBeltW, 64, 64, 64*1, 32, -32, 0, 16, 16, 16, 16),
+        ...halfBeltSprites(S.fastUndergroundEnterBeltN, 64, 64, 64*2, 32, 0, -32, 16, 16, 16, 16),
+        ...halfBeltSprites(S.fastUndergroundEnterBeltS, 64, 64, 64*3, 32, 0, 37, 16, 16, 16, 16),
+        ...halfBeltSprites(S.fastUndergroundExitBeltE, 64, 64, 64*0, 32, -32, 0, 16, 16, 16, 16),
+        ...halfBeltSprites(S.fastUndergroundExitBeltW, 64, 64, 64*1, 32, 32, 0, 16, 16, 16, 16),
+        ...halfBeltSprites(S.fastUndergroundExitBeltN, 64, 64, 64*2, 32, 0, 37, 16, 16, 16, 16),
+        ...halfBeltSprites(S.fastUndergroundExitBeltS, 64, 64, 64*3, 32, 0, -32, 16, 16, 16, 16),
+    ],
+  },
+  {
+    path: "graphics/entities/express-transport-belt/express-transport-belt.png",
+    sprites: [
+        ...entitySprites(S.expressTransportBeltE, 64, 64, 32, 20, 16, 16, 16, 16, true),
+        ...halfBeltSprites(S.expressUndergroundEnterBeltE, 64, 64, 64*0, 32, 32, 0, 16, 16, 16, 16),
+        ...halfBeltSprites(S.expressUndergroundEnterBeltW, 64, 64, 64*1, 32, -32, 0, 16, 16, 16, 16),
+        ...halfBeltSprites(S.expressUndergroundEnterBeltN, 64, 64, 64*2, 32, 0, -32, 16, 16, 16, 16),
+        ...halfBeltSprites(S.expressUndergroundEnterBeltS, 64, 64, 64*3, 32, 0, 37, 16, 16, 16, 16),
+        ...halfBeltSprites(S.expressUndergroundExitBeltE, 64, 64, 64*0, 32, -32, 0, 16, 16, 16, 16),
+        ...halfBeltSprites(S.expressUndergroundExitBeltW, 64, 64, 64*1, 32, 32, 0, 16, 16, 16, 16),
+        ...halfBeltSprites(S.expressUndergroundExitBeltN, 64, 64, 64*2, 32, 0, 37, 16, 16, 16, 16),
+        ...halfBeltSprites(S.expressUndergroundExitBeltS, 64, 64, 64*3, 32, 0, -32, 16, 16, 16, 16),
+    ],
+  },
+  {
+    path: "graphics/entities/fast-underground-belt/fast-underground-belt-structure.png",
+    sprites: entitySprites(S.fastUndergroundBeltSO, 96, 96, 4, 4, 32, 32, 32, 32, true),
+  },
+  {
+    path: "graphics/entities/express-underground-belt/express-underground-belt-structure.png",
+    sprites: entitySprites(S.expressUndergroundBeltSO, 96, 96, 4, 4, 32, 32, 32, 32, true),
+  },
+  {
+    path: "graphics/entities/fast-splitter/fast-splitter-north.png",
+    sprites: entitySprites(S.fastSplitterN, 82, 36, 8, 4, 4, 14, 2, 2, true),
+  },
+  {
+    path: "graphics/entities/fast-splitter/fast-splitter-east.png",
+    sprites: entitySprites(S.fastSplitterE, 46, 80, 8, 4, 3, 11, 14, 2, true),
+  },
+  {
+    path: "graphics/entities/fast-splitter/fast-splitter-south.png",
+    sprites: entitySprites(S.fastSplitterS, 82, 32, 8, 4, 4, 14, 1, -1, true),
+  },
+  {
+    path: "graphics/entities/fast-splitter/fast-splitter-west.png",
+    sprites: entitySprites(S.fastSplitterW, 46, 76, 8, 4, 3, 11, 10, 2, true),
+  },
+  {
+    path: "graphics/entities/express-splitter/express-splitter-north.png",
+    sprites: entitySprites(S.expressSplitterN, 82, 36, 8, 4, 4, 14, 2, 2, true),
+  },
+  {
+    path: "graphics/entities/express-splitter/express-splitter-east.png",
+    sprites: entitySprites(S.expressSplitterE, 46, 80, 8, 4, 3, 11, 14, 2, true),
+  },
+  {
+    path: "graphics/entities/express-splitter/express-splitter-south.png",
+    sprites: entitySprites(S.expressSplitterS, 82, 32, 8, 4, 4, 14, 1, -1, true),
+  },
+  {
+    path: "graphics/entities/express-splitter/express-splitter-west.png",
+    sprites: entitySprites(S.expressSplitterW, 46, 76, 8, 4, 3, 11, 10, 2, true),
+  },
   
   
   

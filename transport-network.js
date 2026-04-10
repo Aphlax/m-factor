@@ -157,10 +157,11 @@ TransportNetwork.prototype.computeBeltConnections = function(belt) {
 };
 
 TransportNetwork.prototype.addBelt = function(belt) {
+  const speed = belt.data.beltSpeed;
   if (belt.type != TYPE.splitter) {
     const before = belt.data.beltInput;
     const after = belt.data.beltOutput;
-    if (before) {
+    if (before && before.data.beltSpeed == speed) {
       if (before.type != TYPE.splitter) {
         belt.data.lane = before.data.lane.extendEnd(belt);
       } else if (before.data.leftBeltOutput == belt) {
@@ -168,7 +169,7 @@ TransportNetwork.prototype.addBelt = function(belt) {
       } else {
         belt.data.lane = before.data.rightOutLane.extendEnd(belt);
       }
-      if (after) {
+      if (after && after.data.beltSpeed == speed) {
         if (after.type != TYPE.splitter) {
           belt.data.lane.appendLaneEnd(after.data.lane);
         } else if (after.data.leftBeltInput == belt) {
@@ -178,7 +179,7 @@ TransportNetwork.prototype.addBelt = function(belt) {
         }
       }
       return;
-    } else if (after) {
+    } else if (after && after.data.beltSpeed == speed) {
       if (after.type != TYPE.splitter) {
         belt.data.lane =
           after.data.lane.extendBegin(belt);
@@ -193,62 +194,62 @@ TransportNetwork.prototype.addBelt = function(belt) {
     }
     this.lanes.push(Lane.fromBelt(belt, this.laneId++));
   } else {
-    if (belt.data.leftBeltInput) {
-      const other = belt.data.leftBeltInput;
-      if (other.type != TYPE.splitter) {
+    const leftIn = belt.data.leftBeltInput;
+    if (leftIn && leftIn.data.beltSpeed == speed) {
+      if (leftIn.type != TYPE.splitter) {
         belt.data.leftInLane =
-            other.data.lane.extendEnd(belt);
-      } else if (belt.direction&1 ? belt.y == other.y : belt.x == other.x) {
+            leftIn.data.lane.extendEnd(belt);
+      } else if (belt.direction&1 ? belt.y == leftIn.y : belt.x == leftIn.x) {
         belt.data.leftInLane =
-            other.data.leftOutLane.extendEnd(belt);
+            leftIn.data.leftOutLane.extendEnd(belt);
       } else {
         belt.data.leftInLane =
-            other.data.rightOutLane.extendEnd(belt);
+            leftIn.data.rightOutLane.extendEnd(belt);
       }
     } else {
       this.lanes.push(Lane.fromSplitter(belt, 1, 1, this.laneId++));
     }
-    if (belt.data.rightBeltInput) {
-      const other = belt.data.rightBeltInput;
-      if (other.type != TYPE.splitter) {
+    const rightIn = belt.data.rightBeltInput;
+    if (rightIn && rightIn.data.beltSpeed == speed) {
+      if (rightIn.type != TYPE.splitter) {
         belt.data.rightInLane =
-            other.data.lane.extendEnd(belt);
-      } else if (belt.direction&1 ? belt.y == other.y : belt.x == other.x) {
+            rightIn.data.lane.extendEnd(belt);
+      } else if (belt.direction&1 ? belt.y == rightIn.y : belt.x == rightIn.x) {
         belt.data.rightInLane =
-            other.data.rightOutLane.extendEnd(belt);
+            rightIn.data.rightOutLane.extendEnd(belt);
       } else {
         belt.data.rightInLane =
-            other.data.leftOutLane.extendEnd(belt);
+            rightIn.data.leftOutLane.extendEnd(belt);
       }
     } else {
       this.lanes.push(Lane.fromSplitter(belt, 1, 0, this.laneId++));
     }
-    if (belt.data.leftBeltOutput) {
-      const other = belt.data.leftBeltOutput;
-      if (other.type != TYPE.splitter) {
+    const leftOut = belt.data.leftBeltOutput;
+    if (leftOut && leftOut.data.beltSpeed == speed) {
+      if (leftOut.type != TYPE.splitter) {
         belt.data.leftOutLane =
-            other.data.lane.extendBegin(belt);
-      } else if (belt.direction&1 ? belt.y == other.y : belt.x == other.x) {
+            leftOut.data.lane.extendBegin(belt);
+      } else if (belt.direction&1 ? belt.y == leftOut.y : belt.x == leftOut.x) {
         belt.data.leftOutLane =
-            other.data.leftInLane.extendBegin(belt);
+            leftOut.data.leftInLane.extendBegin(belt);
       } else {
         belt.data.leftOutLane =
-            other.data.rightInLane.extendBegin(belt);
+            leftOut.data.rightInLane.extendBegin(belt);
       }
     } else {
       this.lanes.push(Lane.fromSplitter(belt, 0, 1, this.laneId++));
     }
-    if (belt.data.rightBeltOutput) {
-      const other = belt.data.rightBeltOutput;
-      if (other.type != TYPE.splitter) {
+    const rightOut = belt.data.rightBeltOutput;
+    if (rightOut && rightOut.data.beltSpeed == speed) {
+      if (rightOut.type != TYPE.splitter) {
         belt.data.rightOutLane =
-            other.data.lane.extendBegin(belt);
-      } else if (belt.direction&1 ? belt.y == other.y : belt.x == other.x) {
+            rightOut.data.lane.extendBegin(belt);
+      } else if (belt.direction&1 ? belt.y == rightOut.y : belt.x == rightOut.x) {
         belt.data.rightOutLane =
-            other.data.rightInLane.extendBegin(belt);
+            rightOut.data.rightInLane.extendBegin(belt);
       } else {
         belt.data.rightOutLane =
-            other.data.leftInLane.extendBegin(belt);
+            rightOut.data.leftInLane.extendBegin(belt);
       }
     } else {
       this.lanes.push(Lane.fromSplitter(belt, 0, 0, this.laneId++));
@@ -304,7 +305,7 @@ TransportNetwork.prototype.beltInputChanged = function(belt, lane) {
     this.lanes.push(lane.split(belt, this.laneId++));
   }
   const input = belt.data.beltInput;
-  if (input) {
+  if (input && input.data.beltSpeed == belt.data.beltSpeed) {
     if (input.type != TYPE.splitter) {
       if (input.data.lane) {
         input.data.lane.appendLaneEnd(lane);

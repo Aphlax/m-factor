@@ -200,6 +200,10 @@ export function drawBelt(ctx, view, time) {
     }
   }
   if (this.data.beltExtraRightSprite) {
+    const speed = this.data.beltExtraRightAnimation % 100,
+        length = Math.floor(this.data.beltExtraRightAnimation / 100);
+    let animation = Math.floor(
+        time * speed / 60) % length;
     const spr = SPRITES.get(this.data.beltExtraRightSprite + animation);
     ctx.drawImage(spr.image,
         spr.x, spr.y, spr.width, spr.height,
@@ -210,13 +214,17 @@ export function drawBelt(ctx, view, time) {
     window.numberImageDraws++;
   }
   if (this.data.beltExtraLeftSprite) {
-    const s = SPRITES.get(this.data.beltExtraLeftSprite + animation);
-    ctx.drawImage(s.image,
-        s.x, s.y, s.width, s.height,
-        Math.floor(x * s - vx - s.left * xScale),
-        Math.floor(y * s - vy - s.top * yScale),
-        Math.ceil(s.width * xScale),
-        Math.ceil(s.height * yScale));
+    const speed = this.data.beltExtraLeftAnimation % 100,
+        length = Math.floor(this.data.beltExtraLeftAnimation / 100);
+    let animation = Math.floor(
+        time * speed / 60) % length;
+    const spr = SPRITES.get(this.data.beltExtraLeftSprite + animation);
+    ctx.drawImage(spr.image,
+        spr.x, spr.y, spr.width, spr.height,
+        Math.floor(x * s - vx - spr.left * xScale),
+        Math.floor(y * s - vy - spr.top * yScale),
+        Math.ceil(spr.width * xScale),
+        Math.ceil(spr.height * yScale));
     window.numberImageDraws++;
   }
 }

@@ -53,6 +53,12 @@ export const NAME = {
   steelFurnace: 31,
   assemblingMachine2: 32,
   assemblingMachine3: 33,
+  fastTransportBelt: 34,
+  fastUndergroundBelt: 35,
+  fastSplitter: 36,
+  expressTransportBelt: 37,
+  expressUndergroundBelt: 38,
+  expressSplitter: 39,
 };
 
 /** Never value for next update. 285 years from now. */
@@ -95,7 +101,6 @@ export const STATE = {
   working: 6, // Running but no definite task duration or end.
   
   noOutput: 11, // Inserter or mine has no output (after item is ready to drop).
-  inserterCoolDown: 12, // Inserter moving back to initial position.
   mineEmpty: 13,
   noRecipe: 14,
   idle: 15, // No work todo for other reason

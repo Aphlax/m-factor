@@ -318,7 +318,7 @@ GameMap.prototype.drawMap = function(ctx) {
             (s < MINIMAP_SCALE_BOUNDRY &&
             (type == TYPE.chest ||
             type == TYPE.inserter ||
-            type == TYPE.electricPole ||
+            (type == TYPE.electricPole && width == 1) ||
             type == TYPE.undergroundBelt ||
             type == TYPE.splitter ||
             type == TYPE.pipe ||
@@ -694,11 +694,26 @@ GameMap.prototype.disconnectEntity = function(entity, time) {
 GameMap.prototype.generateChunk = function(cx, cy) {
   if (!this.chunks.has(cx)) {
     this.chunks.set(cx, new Map());
+    // Iteration order in ascending x.
+    const sorted = [...this.chunks.entries()]
+        .sort(([a], [b]) => a - b);
+    this.chunks.clear();
+    for (const [x, cs] of sorted) {
+      this.chunks.set(x, cs);
+    }
   }
-  if (!this.chunks.get(cx).has(cy)) {
-    this.chunks.get(cx).set(cy,
+  const yChunks = this.chunks.get(cx);
+  if (!yChunks.has(cy)) {
+    yChunks.set(cy,
         new Chunk(cx, cy)
             .generate(this.mapGenerator));
+    // Iteration order in ascending y.
+    const sorted = [...yChunks.entries()]
+        .sort(([a], [b]) => a - b);
+    yChunks.clear();
+    for (const [x, cs] of sorted) {
+      yChunks.set(x, cs);
+    }
   }
 };
 

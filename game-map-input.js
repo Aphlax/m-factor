@@ -3,6 +3,8 @@ import {COLOR, TOOL} from './ui-properties.js';
 import {S} from './sprite-pool.js';
 import {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, InserterDrag, PowerPoleDrag, GridDrag, OffshorePump} from './game-map-input-modes.js';
 import {SelectionTool, SELECTION_TYPE, PasteTool} from './game-map-input-tools.js';
+import {SETTINGS} from './storage.js';
+
 
 const MIN_SCALE = 1;
 const MINIMAP_SCALE_BOUNDRY = 4;
@@ -130,6 +132,9 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
           sx, sy, SELECTION_TYPE.bulldoze, false);
     } else if (entity?.type || (entity && !entry)) {
       this.ui.window.set(entity);
+      if (SETTINGS.debugInfo) {
+        console.log(entity);
+      }
       if (entry) {
         this.ui.buildMenu.reset();
       }

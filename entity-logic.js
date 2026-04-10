@@ -264,7 +264,7 @@ export function updateBeltSprites() {
         this.data.beltEndSprites[1];
     return;
   }
-  let right = false, left = false;
+  let right = undefined, left = undefined;
   for (let other of this.inputEntities) {
     if (other == this.data.beltInput) continue;
     if (other.type != TYPE.belt &&
@@ -272,14 +272,18 @@ export function updateBeltSprites() {
         other.type != TYPE.splitter) continue;
     if (!right &&
         (this.direction - other.direction + 4) % 4 == 1) {
-      right = true;
+      right = other;
     } else if (!left &&
         (this.direction - other.direction + 4) % 4 == 3) {
-      left = true;
+      left = other;
     }
   }
-  this.data.beltExtraRightSprite = right ? this.data.beltEndSprites[2] : 0;
-  this.data.beltExtraLeftSprite = left ? this.data.beltEndSprites[3] : 0;
+  this.data.beltExtraRightSprite = right?.data.beltEndSprites[1] ?? 0;
+  this.data.beltExtraRightAnimation = right ?
+      right.data.beltAnimation * 100 + right.data.beltAnimationSpeed : 0;
+  this.data.beltExtraLeftSprite = left?.data.beltEndSprites[1] ?? 0;
+  this.data.beltExtraLeftAnimation = left ?
+      left.data.beltAnimation * 100 + left.data.beltAnimationSpeed : 0;
   if (this.type == TYPE.belt) {
     if (!this.data.beltInput) {
       this.data.beltSprite = this.data.beltSprites[0];
@@ -292,10 +296,9 @@ export function updateBeltSprites() {
         this.data.beltSprites[0] :
         this.data.beltSprites[1];
   }
-  if (!this.data.beltInput) {
-    this.data.beltBeginSprite =
-      this.type == TYPE.undergroundBelt && this.data.undergroundUp ?
-      0 : this.data.beltEndSprites[0];
+  if (!this.data.beltInput &&
+      !(this.type == TYPE.undergroundBelt && this.data.undergroundUp)) {
+    this.data.beltBeginSprite = this.data.beltEndSprites[0];
   } else {
     this.data.beltBeginSprite = 0;
   }

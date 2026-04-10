@@ -43,7 +43,7 @@ function Lane(belts, nodes) {
   this.plusFlow = [];
   
   this.endSplitterData = undefined;
-  this.id = 0;
+  this.id = 0; // For splitters, only lower id does the splitting logic.
   
   const c = Math.ceil(Math.random() * 255 * 2);
   this.color = `rgb(${Math.abs(c-255)}, ${Math.abs((c+170)%510-255)}, ${Math.abs((c+340)%510-255)})`;
@@ -358,34 +358,57 @@ Lane.prototype.update = function(time, dt) {
       }
       continue;
     }
-    // Belt side loading.
+    // Belt side loading and loop/speed change.
     if (!flow.length || flow[0]) {
       continue;
     }
+    // Why is this not on the lane?
     if ((flowSign == FLOW.minus ?
         belt.data.beltSideLoadMinusWait :
         belt.data.beltSideLoadPlusWait) > time) {
       continue;
     }
     const items = flowSign == FLOW.minus ? this.minusItems : this.plusItems;
+    const positionForBelt = ((belt.direction + 2) % 4) * 3 + 1 - flowSign;
     for (let entity of belt.outputEntities) {
       if (entity.type != TYPE.belt &&
-          entity.type != TYPE.undergroundBelt)
+          entity.type != TYPE.undergroundBelt &&
+          entity.type != TYPE.splitter)
         continue;
-      if (entity.type == TYPE.undergroundBelt &&
-          ((((belt.direction - entity.direction + 4) % 4) == 1) ==
-          (entity.data.undergroundUp != (flowSign == FLOW.minus))))
-        continue;
-      if (belt.type == TYPE.splitter &&
-          (entity == belt.data.leftBeltOutput ||
-          entity == belt.data.rightBeltOutput ||
-          ((this == belt.data.leftOutLane) ==
-          (belt.direction&0x1 ?
+      let wait;
+      if (entity.type == TYPE.splitter) {
+        let lane;
+        if (belt.type == TYPE.splitter) {
+          const isLeftLane = this == belt.data.leftOutLane;
+          if (entity != (isLeftLane ? belt.data.leftBeltOutput :
+              belt.data.rightBeltOutput)) continue;
+          const same = belt.direction&0x1 ?
+              (entity.y == belt.y) : (entity.x == belt.x);
+          lane = same == isLeftLane ?
+              entity.data.leftInLane : entity.data.rightInLane;
+        } else {
+          const left = entity.direction&0x1 ?
               (entity.y == belt.y) == (belt.direction == 1) :
-              (entity.x == belt.x) == (belt.direction == 0)))))
-        continue;
-      const positionForBelt = ((belt.direction + 2) % 4) * 3 + 1 - flowSign;
-      const wait = entity.beltInsert(items[0], time, belt, positionForBelt);
+              (entity.x == belt.x) == (belt.direction == 0);
+          lane = left ? entity.data.leftInLane : entity.data.rightInLane;
+        }
+        wait = lane.insertItem(items[0], entity, time, positionForBelt);
+      } else {
+        if (entity.type == TYPE.undergroundBelt &&
+            ((((belt.direction - entity.direction + 4) % 4) == 1) ==
+            (entity.data.undergroundUp != (flowSign == FLOW.minus))))
+          continue;
+        // Check if the entity is on the currently considered side of the splitter.
+        if (belt.type == TYPE.splitter &&
+            (entity == belt.data.leftBeltOutput ||
+            entity == belt.data.rightBeltOutput ||
+            ((this == belt.data.leftOutLane) !=
+            (belt.direction&0x1 ?
+                (entity.y == belt.y) == (belt.direction == 1) :
+                (entity.x == belt.x) == (belt.direction == 0)))))
+          continue;
+        wait = entity.beltInsert(items[0], time, belt, positionForBelt);
+      }
       if (!wait) {
         flow.shift();
         items.shift();
@@ -406,6 +429,7 @@ Lane.prototype.update = function(time, dt) {
 
 Lane.prototype.draw = function(ctx, view) {
   const sprites = new Map();
+  const firstBeltInput = this.belts[0].data.beltInput;
   for (let flowSign of FLOWS) {
     const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
     const items = flowSign == FLOW.minus ? this.minusItems : this.plusItems;
@@ -440,10 +464,10 @@ Lane.prototype.draw = function(ctx, view) {
         continue;
       }
       let x, y;
-      if ((n || (this.circular &&
-          this.belts[this.belts.length - 1].direction != this.belts[0].direction)) &&
-          dte > this.nodes[n].length - 1) {
-        const prevDir = this.nodes[n ? n - 1 : this.nodes.length - 1].direction;
+      if (dte > this.nodes[n].length - 1 &&
+          (n || (firstBeltInput &&
+          this.nodes[0].direction != firstBeltInput.direction))) {
+        const prevDir = (n ? this.nodes[n - 1] : firstBeltInput).direction;
         const largeTurn = ((this.nodes[n].direction -
             prevDir + 4) % 4) == 2 + flowSign;
         const angle =
