@@ -97,16 +97,14 @@ export function assertMatch(x, template, qualifier = '') {
 
 export function assertExists(x) {
   assertNr++;
-  if (x === undefined || x === null) {
-    throw new Error("did not exist!");
-  }
+  if (x !== undefined && x !== null) return;
+  throw new Error("did not exist!");
 }
 
 export function assertNotExists(x) {
   assertNr++;
-  if (x !== undefined && x !== null) {
-    throw new Error(pp(x) + " did exist! (should not)");
-  }
+  if (x === undefined || x === null) return;
+  throw new Error(pp(x) + " did exist! (should not)");
 }
 
 function pp(x) {
@@ -126,7 +124,7 @@ export function blueprint(blueprint, check) {
   check(entities, gameMap, x => x);
 }
 
-/** Tests a blueprint with all possible creation orders. */
+/** Tests a blueprint with all possible creation orders and rotations. */
 export function blueprintScrambled(blueprint, check, startPerm, rotations) {
   const permutations = createPermutations(blueprint.length);
   if (startPerm) permutations.unshift(startPerm);
@@ -157,10 +155,12 @@ const GOD_CONS = {add: () => {}, delete: () => {}},
         get: () => GOD_CONS,
       }
     };
+/** Powers an entity. */
 export function power(entity) {
   entity.data.grid = GOD_GRID;
 }
 
+/** Runs time. */
 export function elapse(map, seconds = 0.1) {
   let startTime = map.playTime;
   while (map.playTime - startTime < seconds * 1000) {
