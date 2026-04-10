@@ -51,11 +51,9 @@ function productionTest(gameMap, time) {
   l(-78, 49, 0, 66);
   l(-78, -17, 1, 63);
   const lane = l(-15, -17, 2, 27);
-  lane.minusItems = new Array(140).fill(I.coal);
-  lane.minusFlow = new Array(140).fill(0);
+  lane.minusFlow = new Array(140).fill([0, I.coal]).flat();
   lane.minusFlow[0] = 7;
-  lane.plusItems = new Array(135).fill(I.coal);
-  lane.plusFlow = new Array(135).fill(0);
+  lane.plusFlow = new Array(135).fill([0, I.coal]).flat();
   lane.plusFlow[0] = 7;
   
   e(NAME.splitter, -16, 10, 2);
@@ -91,7 +89,7 @@ function productionTest(gameMap, time) {
   l(-25, 12, S, 18);
   l(-25, 30, E, 16);
   l(-9, 30, S, 14);
-  e(NAME.splitter, -9, 44, S);
+  e(NAME.fastSplitter, -9, 44, S);
   l(-8, 45, E, 26);
   l(-8, 46, N, 1);
   l(-9, 45, S, 5);
@@ -122,8 +120,7 @@ function productionTest(gameMap, time) {
   e(NAME.inserter, -14, -14, 1);
   l(-13, -14, 1, 46);
   const lane2 = l(33, -14, 2, 39);
-  lane2.plusItems = new Array(4 * 85 - 55).fill(I.coal);
-  lane2.plusFlow = new Array(4 * 85 - 55).fill(0);
+  lane2.plusFlow = new Array(4 * 85 - 55).fill([0, I.coal]).flat();
   lane2.plusFlow[0] = 10;
   e(NAME.inserter, 34, 21, 1);
   e(NAME.inserter, 34, 24, 1);

@@ -3,10 +3,20 @@ import {SPRITES} from './sprite-pool.js';
 import {ITEMS} from './item-definitions.js';
 import {SETTINGS} from './storage.js';
 
+/** For belts going north, minus side is left. */
 const FLOW = {
   minus: -1, plus: 1
 };
 const FLOWS = [FLOW.minus, FLOW.plus];
+
+/**
+ *  The size of one entry in the flow.
+ *  1. Distance
+ *  2. Item
+ *  (3. Repeat, 4. Stacksize, 5. Freshness)
+ */
+const FLOW_SIZE = 2;
+
 /**
  *  The 12 insertion positions from inserters
  *  and side loading for a belt facing north.
@@ -36,11 +46,11 @@ function Lane(belts, nodes) {
   this.nodes = nodes;
   this.circular = false;
   
-  // For belts going north, minus side is left.
-  this.minusItems = [];
   this.minusFlow = [];
-  this.plusItems = [];
   this.plusFlow = [];
+  
+  this.minusWait = 0;
+  this.plusWait = 0;
   
   this.endSplitterData = undefined;
   this.id = 0; // For splitters, only lower id does the splitting logic.
@@ -79,8 +89,6 @@ Lane.fromSplitter = function(belt, input, left, id) {
  * If 0, the item was put on the belt.
  */
 Lane.prototype.insertItem = function(item, belt, time, positionForBelt) {
-  let flow, flowSign, items;
-  
   const turnBelt = (belt.direction -
       (belt.data.beltInput?.direction ??
       belt.direction) + 4) % 4;
@@ -103,14 +111,13 @@ Lane.prototype.insertItem = function(item, belt, time, positionForBelt) {
       exactPosition < 0.5) {
     exactPosition = 0.5;
   }
+  let flow, flowSign;
   if (minusSide) {
     flowSign = FLOW.minus;
     flow = this.minusFlow;
-    items = this.minusItems;
   } else {
     flowSign = FLOW.plus;
     flow = this.plusFlow;
-    items = this.plusItems;
   }
   
   let dte = this.endSplitterData ? -0.5 : 0;
@@ -137,26 +144,24 @@ Lane.prototype.insertItem = function(item, belt, time, positionForBelt) {
     }
   }
   
-  for (let i = 0; i < flow.length; i++) {
+  for (let i = 0; i < flow.length; i += FLOW_SIZE) {
     if (dte < flow[i]) {
       flow[i] -= dte + 0.25;
-      flow.splice(i, 0, dte);
-      items.splice(i, 0, item);
+      flow.splice(i, 0, dte, item);
       return 0; // Item inserted, 0 wait.
     }
     if (dte < flow[i] + 0.25) {
       // Item can't be inserted here,
       // calculate how much wait until potential gap.
       let wait = flow[i] + 0.25 - dte;
-      while (++i < flow.length && !flow[i] && wait < 1) {
+      while ((i += FLOW_SIZE) < flow.length && !flow[i] && wait < 1) {
         wait += 0.25;
       }
       return Math.ceil(wait / belt.data.beltSpeed * 1000);
     }
     dte -= flow[i] + 0.25;
   }
-  flow.push(dte);
-  items.push(item);
+  flow.push(dte, item);
   return 0; // Item inserted, 0 wait.
 };
 
@@ -190,8 +195,6 @@ Lane.prototype.extractItem = function(inserter, belt, time, positionForBelt) {
     flowSign *= -startFlowSign;
     const flow = flowSign == FLOW.minus ?
         this.minusFlow : this.plusFlow;
-    const flowItems = flowSign == FLOW.minus ?
-        this.minusItems : this.plusItems;
     
     if (!flow.length) continue;
     let dte = this.endSplitterData ? -0.5 : 0;
@@ -219,11 +222,11 @@ Lane.prototype.extractItem = function(inserter, belt, time, positionForBelt) {
         b = 0, bDist, bIndex,
         c = 0, cDist, cIndex,
         pos = -0.125, i = 0;
-    for (; i < flow.length; i++) {
+    for (; i < flow.length; i += FLOW_SIZE) {
       pos += flow[i] + 0.25;
-      const item = flowItems[i];
       if (pos > dte + dteLength) break;
       
+      const item = flow[i + 1];
       if (pos > dte) {
         const dist = Math.abs(pos - dte - dteLength / 2);
         if (!a || (a == item && dist < aDist)) {
@@ -256,10 +259,9 @@ Lane.prototype.extractItem = function(inserter, belt, time, positionForBelt) {
     if (!res) continue;
     const index = res == a ? aIndex : (res == b ? bIndex : cIndex);
     // Extract this item.
-    const [len] = flow.splice(index, 1),
-        [item] = flowItems.splice(index, 1);
+    const [dist, item] = flow.splice(index, FLOW_SIZE);
     if (index < flow.length) {
-      flow[index] += len + 0.25;
+      flow[index] += dist + 0.25;
     }
     return -item;
   }
@@ -271,7 +273,7 @@ Lane.prototype.update = function(time, dt) {
   for (let flowSign of FLOWS) {
     const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
     let movement = total;
-    for (let i = 0; i < flow.length; i++) {
+    for (let i = 0; i < flow.length; i += FLOW_SIZE) {
       if (flow[i] > movement) {
         flow[i] -= movement;
         movement = 0;
@@ -309,21 +311,18 @@ Lane.prototype.update = function(time, dt) {
             this.endSplitterData.rightInLane;
         const inFlow = flowSign == FLOW.minus ?
             inLane.minusFlow : inLane.plusFlow;
-        const inItems = flowSign == FLOW.minus ?
-            inLane.minusItems : inLane.plusItems;
         if (!inFlow.length || inFlow[0]) continue;
         
         const hasFilter = !!this.endSplitterData.itemFilter,
-            matchesFilter = hasFilter && this.endSplitterData.itemFilter == inItems[0];
+            matchesFilter = hasFilter && this.endSplitterData.itemFilter == inFlow[1];
         const lane = toLeft ?
             this.endSplitterData.leftOutLane :
             this.endSplitterData.rightOutLane;
         if (!first && (!hasFilter || matchesFilter)) {
           first = true;
-          const wait = lane.insertItem(inItems[0], belt, time, positionForBelt);
+          const wait = lane.insertItem(inFlow[1], belt, time, positionForBelt);
           if (!wait) {
-            inFlow.shift();
-            inItems.shift();
+            inFlow.splice(0, FLOW_SIZE);
             if (inFlow.length) {
               inFlow[0] += 0.25;
             }
@@ -338,10 +337,9 @@ Lane.prototype.update = function(time, dt) {
         const other = !toLeft ?
             this.endSplitterData.leftOutLane :
             this.endSplitterData.rightOutLane;
-        const otherWait = other.insertItem(inItems[0], belt, time, positionForBelt);
+        const otherWait = other.insertItem(inFlow[1], belt, time, positionForBelt);
         if (!otherWait) {
-          inFlow.shift();
-          inItems.shift();
+          inFlow.splice(0, FLOW_SIZE);
           if (inFlow.length) {
             inFlow[0] += 0.25;
           }
@@ -362,13 +360,10 @@ Lane.prototype.update = function(time, dt) {
     if (!flow.length || flow[0]) {
       continue;
     }
-    // Why is this not on the lane?
     if ((flowSign == FLOW.minus ?
-        belt.data.beltSideLoadMinusWait :
-        belt.data.beltSideLoadPlusWait) > time) {
+        this.minusWait : this.plusWait) > time) {
       continue;
     }
-    const items = flowSign == FLOW.minus ? this.minusItems : this.plusItems;
     const positionForBelt = ((belt.direction + 2) % 4) * 3 + 1 - flowSign;
     for (let entity of belt.outputEntities) {
       if (entity.type != TYPE.belt &&
@@ -387,39 +382,38 @@ Lane.prototype.update = function(time, dt) {
           lane = same == isLeftLane ?
               entity.data.leftInLane : entity.data.rightInLane;
         } else {
-          const left = entity.direction&0x1 ?
+          const left = belt.direction&0x1 ?
               (entity.y == belt.y) == (belt.direction == 1) :
               (entity.x == belt.x) == (belt.direction == 0);
           lane = left ? entity.data.leftInLane : entity.data.rightInLane;
         }
-        wait = lane.insertItem(items[0], entity, time, positionForBelt);
+        wait = lane.insertItem(flow[1], entity, time, positionForBelt);
       } else {
         if (entity.type == TYPE.undergroundBelt &&
             ((((belt.direction - entity.direction + 4) % 4) == 1) ==
             (entity.data.undergroundUp != (flowSign == FLOW.minus))))
           continue;
         // Check if the entity is on the currently considered side of the splitter.
-        if (belt.type == TYPE.splitter &&
-            (entity == belt.data.leftBeltOutput ||
-            entity == belt.data.rightBeltOutput ||
-            ((this == belt.data.leftOutLane) !=
-            (belt.direction&0x1 ?
-                (entity.y == belt.y) == (belt.direction == 1) :
-                (entity.x == belt.x) == (belt.direction == 0)))))
-          continue;
-        wait = entity.beltInsert(items[0], time, belt, positionForBelt);
+        if (belt.type == TYPE.splitter) {
+          const isLeftLane = this == belt.data.leftOutLane;
+          const left = belt.direction&0x1 ?
+              (entity.y == belt.y) == (belt.direction == 1) :
+              (entity.x == belt.x) == (belt.direction == 0);
+          if (isLeftLane != left)
+            continue;
+        }
+        wait = entity.beltInsert(flow[1], time, belt, positionForBelt);
       }
       if (!wait) {
-        flow.shift();
-        items.shift();
+        flow.splice(0, FLOW_SIZE);
         if (flow.length) {
           flow[0] += 0.25;
         }
       } else {
         if (flowSign == FLOW.minus) {
-          belt.data.beltSideLoadMinusWait = time + wait;
+          this.minusWait = time + wait;
         } else {
-          belt.data.beltSideLoadPlusWait = time + wait;
+          this.plusWait = time + wait;
         }
       }
       break;
@@ -432,12 +426,11 @@ Lane.prototype.draw = function(ctx, view) {
   const firstBeltInput = this.belts[0].data.beltInput;
   for (let flowSign of FLOWS) {
     const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
-    const items = flowSign == FLOW.minus ? this.minusItems : this.plusItems;
     if (!flow.length) continue;
     let dte = this.endSplitterData ? 0.5 : 0,
         n = this.nodes.length - 1,
         gapIndex = this.nodes[n].gaps.length - 2;
-    for (let i = 0; i < flow.length; i++) {
+    for (let i = 0; i < flow.length; i += FLOW_SIZE) {
       dte += flow[i] + 0.125;
       let len;
       while (n && dte > (len = (this.nodes[n].length +
@@ -498,11 +491,11 @@ Lane.prototype.draw = function(ctx, view) {
           (y + 0.234375) * view.scale >= view.y &&
           (x - 0.234375) * view.scale < view.x + view.width &&
           (y - 0.234375) * view.scale < view.y + view.height) {
-        let sprite = sprites.get(items[i]);
+        let sprite = sprites.get(flow[i + 1]);
         if (!sprite) {
-          const itemDef = ITEMS.get(items[i]);
+          const itemDef = ITEMS.get(flow[i + 1]);
           sprite = SPRITES.get(itemDef.sprite);
-          sprites.set(items[i], sprite);
+          sprites.set(flow[i + 1], sprite);
         }
         ctx.drawImage(sprite.image,
             sprite.x, sprite.y,
@@ -591,6 +584,7 @@ Lane.prototype.extendEnd = function(belt) {
   }
   const last = this.belts[this.belts.length - 1];
   this.belts.push(belt);
+  this.minusWait = this.plusWait = 0;
   if (last.direction == belt.direction) {
     let diff = belt.type != TYPE.undergroundBelt ||
         last.type != TYPE.undergroundBelt ? 1 :
@@ -645,6 +639,7 @@ Lane.prototype.extendBegin = function(belt) {
 
 Lane.prototype.removeEnd = function() {
   const belt = this.belts.pop();
+  this.minusWait = this.plusWait = 0;
   if (this.endSplitterData) {
     this.endSplitterData = undefined;
   }
@@ -656,7 +651,6 @@ Lane.prototype.removeEnd = function() {
       (belt.direction - last.direction + 4) % 4;
   for (let flowSign of FLOWS) {
     const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
-    const items = flowSign == FLOW.minus ? this.minusItems : this.plusItems;
     let removal = diff, i = 0;
     if (belt.type == TYPE.splitter) {
       removal -= 0.5;
@@ -665,14 +659,14 @@ Lane.prototype.removeEnd = function() {
       removal += (turnBelt == 1 ? -0.5 : 0.5) * flowSign;
     }
     while (i < flow.length && removal > flow[i]) {
-      removal -= flow[i++] + 0.25;
+      removal -= flow[i] + 0.25;
+      i += FLOW_SIZE;
     }
     if (i < flow.length && removal > 0) {
       flow[i] -= removal;
     }
     if (i) {
       flow.splice(0, i);
-      items.splice(0, i);
     }
   }
   if (this.circular) {
@@ -693,7 +687,6 @@ Lane.prototype.removeBegin = function() {
       Math.abs(first.x - belt.x + first.y - belt.y);
   for (let flowSign of FLOWS) {
     const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
-    const items = flowSign == FLOW.minus ? this.minusItems : this.plusItems;
     let laneLength = -diff;
     for (let n = 0; n < this.nodes.length; n++) {
       laneLength += this.nodes[n].length;
@@ -705,11 +698,11 @@ Lane.prototype.removeBegin = function() {
     }
     let i = 0;
     while (i < flow.length && laneLength >= flow[i] + 0.25) {
-      laneLength -= flow[i++] + 0.25;
+      laneLength -= flow[i] + 0.25;
+      i += FLOW_SIZE;
     }
     if (i < flow.length && laneLength < flow[i] + 0.25) {
       flow.length = i;
-      items.length = i;
     }
   }
   if (this.circular) {
@@ -728,6 +721,7 @@ Lane.prototype.removeBegin = function() {
 };
 
 Lane.prototype.appendLaneEnd = function(other) {
+  this.minusWait = this.plusWait = 0;
   if (other == this) {
     this.circular = true;
     return;
@@ -742,13 +736,9 @@ Lane.prototype.appendLaneEnd = function(other) {
   for (let flowSign of FLOWS) {
     const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
     const otherFlow = flowSign == FLOW.minus ? other.minusFlow : other.plusFlow;
-    const items = flowSign == FLOW.minus ? this.minusItems : this.plusItems;
-    const otherItems = flowSign == FLOW.minus ? other.minusItems : other.plusItems;
     if (!flow.length) {
       flow.push(...otherFlow);
       otherFlow.length = 0;
-      items.push(...otherItems);
-      otherItems.length = 0;
       continue;
     }
     let laneLength = diff;
@@ -760,14 +750,12 @@ Lane.prototype.appendLaneEnd = function(other) {
         laneLength += flowSign * turn * 0.5;
       }
     }
-    for (let i = 0; i < otherFlow.length; i++) {
+    for (let i = 0; i < otherFlow.length; i += FLOW_SIZE) {
       laneLength -= otherFlow[i] + 0.25;
     }
     flow[0] += laneLength;
     flow.unshift(...otherFlow);
     otherFlow.length = 0;
-    items.unshift(...otherItems);
-    otherItems.length = 0;
   }
   const node = this.nodes[this.nodes.length - 1];
   if (node.direction == other.nodes[0].direction) {
@@ -834,6 +822,9 @@ Lane.prototype.split = function(belt, id) {
   const belts = this.belts.splice(b);
   // lane is the end half of the original.
   const lane = new Lane(belts, nodes);
+  lane.minusWait = this.minusWait;
+  lane.plusWait = this.plusWait;
+  this.minusWait = this.plusWait = 0;
   for (let b of lane.belts) {
     if (b.type != TYPE.splitter) {
       b.data.lane = lane;
@@ -852,8 +843,6 @@ Lane.prototype.split = function(belt, id) {
   for (let flowSign of FLOWS) {
     const flow = flowSign == FLOW.minus ? this.minusFlow : this.plusFlow;
     const laneFlow = flowSign == FLOW.minus ? lane.minusFlow : lane.plusFlow;
-    const items = flowSign == FLOW.minus ? this.minusItems : this.plusItems;
-    const laneItems = flowSign == FLOW.minus ? lane.minusItems : lane.plusItems;
     let laneLength = 0;
     for (let n = 0; n < lane.nodes.length; n++) {
       laneLength += lane.nodes[n].length;
@@ -866,25 +855,23 @@ Lane.prototype.split = function(belt, id) {
     }
     let i = 0;
     while (i < flow.length && laneLength > flow[i]) {
-      laneLength -= flow[i++] + 0.25;
+      laneLength -= flow[i] + 0.25;
+      i += FLOW_SIZE;
     }
     if (i < flow.length && laneLength < flow[i] + 0.25) {
       laneFlow.push(...flow.splice(0, i));
-      laneItems.push(...items.splice(0, i));
       if (diff) {
         i = 0; laneLength += diff; 
         while (i < flow.length && laneLength > flow[i]) {
-          laneLength -= flow[i++] + 0.25;
+          laneLength -= flow[i] + 0.25;
+          i += FLOW_SIZE;
         }
         flow.splice(0, i);
-        items.splice(0, i);
       }
       flow[0] -= laneLength;
     } else {
       laneFlow.push(...flow);
       flow.length = 0;
-      laneItems.push(...items);
-      items.length = 0;
     }
   }
   
