@@ -796,29 +796,6 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 2000,
   },
-  
-  
-  
-  {
-    prototypeName: "water-pumping",
-    inputs: [],
-    outputs: [
-      {item: I.water, amount: 1200 / 6},
-    ],
-    entities: [NAME.offshorePump],
-    duration: 1000 / 6,
-  },
-  {
-    prototypeName: "steam",
-    inputs: [
-      {item: I.water, amount: 6 / 6},
-    ],
-    outputs: [
-      {item: I.steam, amount: 60 / 6},
-    ],
-    entities: [NAME.boiler],
-    duration: 1000 / 6,
-  },
   {
     prototypeName: "medium-electric-pole",
     inputs: [
@@ -968,13 +945,6 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
-  
-  
-  
-  
-  
-  
-  
   {
     prototypeName: "speed-module",
     inputs: [
@@ -1125,6 +1095,120 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 8000,
   },
+  {
+    prototypeName: "locomotive",
+    inputs: [
+      {item: I.electronicCircuit, amount: 10},
+      {item: I.engineUnit, amount: 20},
+      {item: I.steelPlate, amount: 30},
+    ],
+    outputs: [
+      {item: I.locomotive, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 4000,
+  },
+  {
+    prototypeName: "cargo-wagon",
+    inputs: [
+      {item: I.ironGear, amount: 10},
+      {item: I.ironPlate, amount: 20},
+      {item: I.steelPlate, amount: 20},
+    ],
+    outputs: [
+      {item: I.cargoWagon, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 1000,
+  },
+  {
+    prototypeName: "fluid-wagon",
+    inputs: [
+      {item: I.ironGear, amount: 10},
+      {item: I.pipe, amount: 8},
+      {item: I.steelPlate, amount: 16},
+      {item: I.storageTank, amount: 1},
+    ],
+    outputs: [
+      {item: I.fluidWagon, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 1500,
+  },
+  {
+    prototypeName: "train-stop",
+    inputs: [
+      {item: I.electronicCircuit, amount: 5},
+      {item: I.ironPlate, amount: 6},
+      {item: I.ironStick, amount: 6},
+      {item: I.steelPlate, amount: 3},
+    ],
+    outputs: [
+      {item: I.trainStop, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  {
+    prototypeName: "rail-signal",
+    inputs: [
+      {item: I.electronicCircuit, amount: 1},
+      {item: I.ironPlate, amount: 5},
+    ],
+    outputs: [
+      {item: I.railSignal, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  {
+    prototypeName: "rail-chain-signal",
+    inputs: [
+      {item: I.electronicCircuit, amount: 1},
+      {item: I.ironPlate, amount: 5},
+    ],
+    outputs: [
+      {item: I.railChainSignal, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  
+  
+  
+  
+  
+  
+  
+  {
+    prototypeName: "water-pumping",
+    inputs: [],
+    outputs: [
+      {item: I.water, amount: 1200 / 6},
+    ],
+    entities: [NAME.offshorePump],
+    duration: 1000 / 6,
+  },
+  {
+    prototypeName: "steam",
+    inputs: [
+      {item: I.water, amount: 6 / 6},
+    ],
+    outputs: [
+      {item: I.steam, amount: 60 / 6},
+    ],
+    entities: [NAME.boiler],
+    duration: 1000 / 6,
+  },
+  
+  
+  
+  
+  
+  
+  
+  
+  
 ];
 
 export const FURNACE_FILTERS = RECIPES

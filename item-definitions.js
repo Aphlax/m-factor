@@ -85,6 +85,9 @@ export const I = {
   expressTransportBelt: 138,
   expressUndergroundBelt: 139,
   expressSplitter: 140,
+  trainStop: 141,
+  railSignal: 142,
+  railChainSignal: 143,
   
   speedModule: 200,
   speedModule2: 201,
@@ -98,6 +101,9 @@ export const I = {
   firearmMagazine: 209,
   piercingRoundsMagazine: 210,
   grenade: 211,
+  locomotive: 212,
+  cargoWagon: 213,
+  fluidWagon: 214,
 };
 
 export const FLUID_START = 50;
@@ -549,8 +555,24 @@ export const ITEMS = new Map([
     stacksize: 50,
     prototypeName: "express-splitter",
   }],
-  
-  
+  [I.trainStop,
+  {
+    sprite: S.trainStopItem,
+    stacksize: 10,
+    prototypeName: "train-stop",
+  }],
+  [I.railSignal,
+  {
+    sprite: S.railSignalItem,
+    stacksize: 20,
+    prototypeName: "rail-signal",
+  }],
+  [I.railChainSignal,
+  {
+    sprite: S.railChainSignalItem,
+    stacksize: 20,
+    prototypeName: "rail-chain-signal",
+  }],
   
   
   
@@ -631,6 +653,24 @@ export const ITEMS = new Map([
     sprite: S.grenadeItem,
     stacksize: 100,
     prototypeName: "grenade",
+  }],
+  [I.locomotive,
+  {
+    sprite: S.locomotiveItem,
+    stacksize: 5,
+    prototypeName: "locomotive",
+  }],
+  [I.cargoWagon,
+  {
+    sprite: S.cargoWagonItem,
+    stacksize: 5,
+    prototypeName: "cargo-wagon",
+  }],
+  [I.fluidWagon,
+  {
+    sprite: S.fluidWagonItem,
+    stacksize: 5,
+    prototypeName: "fluid-wagon",
   }],
 ]);
 

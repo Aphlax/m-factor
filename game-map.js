@@ -192,7 +192,13 @@ GameMap.prototype.draw = function(ctx, time) {
       if (y * size > this.view.height + this.view.y + 1 * this.view.scale) continue;
       for (let entity of chunk.entities) {
         if (!entity.spriteShadow) continue;
+        if (entity.type == TYPE.rail) {
+          ctx.globalAlpha = 1;
+        }
         entity.drawShadow(ctx, this.view, time);
+        if (entity.type == TYPE.rail) {
+          ctx.globalAlpha = 0.5;
+        }
       }
     }
   }
@@ -217,29 +223,28 @@ GameMap.prototype.draw = function(ctx, time) {
   	if ((y + 1) * size <= this.view.y - this.view.scale * MAX_SIZE) continue;
       if (y * size > this.view.height + this.view.y + 1 * this.view.scale) continue;
       for (let entity of chunk.entities) {
-        if (entity.type != TYPE.belt) {
-          const pipeCaps =
-              entity.name == NAME.pipeToGround ||
-              entity.name == NAME.storageTank ||
-              entity.inputFluidTank ||
-              entity.outputFluidTank;
-          if (pipeCaps) {
-            entity.drawPipeCaps(ctx, this.view, /*below*/ true);
-          }
-          entity.draw(ctx, this.view, time);
-          if (pipeCaps) {
-            entity.drawPipeCaps(ctx, this.view, /*below*/ false);
-          }
-          if (!SETTINGS.altMode) continue;
-          if ((entity.type == TYPE.furnace ||
-              entity.type == TYPE.assembler) &&
-              entity.data.recipe) {
-            entity.drawRecipe(ctx, this.view, entity.data.recipe);
-          }
-          if (entity.type == TYPE.splitter &&
-              entity.data.itemFilter) {
-            entity.drawSplitterFilter(ctx, this.view);
-          }
+        if (entity.type == TYPE.belt) continue;
+        const pipeCaps =
+            entity.name == NAME.pipeToGround ||
+            entity.name == NAME.storageTank ||
+            entity.inputFluidTank ||
+            entity.outputFluidTank;
+        if (pipeCaps) {
+          entity.drawPipeCaps(ctx, this.view, /*below*/ true);
+        }
+        entity.draw(ctx, this.view, time);
+        if (pipeCaps) {
+          entity.drawPipeCaps(ctx, this.view, /*below*/ false);
+        }
+        if (!SETTINGS.altMode) continue;
+        if ((entity.type == TYPE.furnace ||
+            entity.type == TYPE.assembler) &&
+            entity.data.recipe) {
+          entity.drawRecipe(ctx, this.view, entity.data.recipe);
+        }
+        if (entity.type == TYPE.splitter &&
+            entity.data.itemFilter) {
+          entity.drawSplitterFilter(ctx, this.view);
         }
       }
     }

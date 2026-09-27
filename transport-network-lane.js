@@ -12,7 +12,7 @@ const FLOWS = [FLOW.minus, FLOW.plus];
 /**
  *  The size of one entry in the flow.
  *  1. Distance
- *  2. Item
+ *  2. Item (+ variant)
  *  (3. Repeat, 4. Stacksize, 5. Freshness)
  */
 const FLOW_SIZE = 2;

@@ -57,7 +57,9 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
   this.label = def.label;
   this.x = x;
   this.y = y;
-  direction = def.rotatable || def.type == TYPE.offshorePump ?
+  direction = def.rotatable ||
+      def.type == TYPE.offshorePump ||
+      def.type == TYPE.rail ?
       direction : DIRECTION.north;
   if (!def.size) {
     this.width = def.width;
@@ -68,8 +70,8 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
   }
   this.direction = direction;
   this.energySource = ENERGY.none;
-  this.sprite = def.sprites[direction][0];
-  this.spriteShadow = def.sprites[direction][1];
+  this.sprite = def.sprites?.[direction][0];
+  this.spriteShadow = def.sprites?.[direction][1];
   this.animation = 0;
   this.animationLength = def.animationLength ?? 0;
   this.animationSpeed = def.animationSpeed ?? 1;
@@ -338,6 +340,23 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.outputFluidTank = new FluidTank()
         .setTanklets([undefined])
         .setPipeConnections(def.fluidOutputs[direction]);
+  } else if (this.type == TYPE.rail) {
+    const dir = this.direction;
+    const tmp = Math.sin(72.556 * this.x + 38.912 * this.y + 26.721 * dir) * 31484.7936;
+    const hash = Math.floor((tmp - Math.floor(tmp)) * 24);
+    this.width = this.height =
+        dir < 2 ? 2 : dir < 8 ? 4 : 6;
+    const sprites =
+        dir < 2 ?
+            def.railStraightSprites
+            .map(s => s + 8 * dir + hash % 8) :
+        dir < 8 ?
+            def.railDiagonalSprites
+            .map(s => s + 3 * (dir - 2) + hash % 3) :
+        def.railCurveSprites
+            .map(s => s + 4 * (dir - 8) + hash % 4);
+    this.sprite = sprites[2];
+    this.spriteShadow = sprites[0];
   }
   return this;
 };

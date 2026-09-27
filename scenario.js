@@ -206,7 +206,20 @@ function productionTest(gameMap, time) {
   
   e(NAME.fastTransportBelt, 10, 70, 0);
   
-  gameMap.centerView(-5, 47);
+  const rail = e.bind(null, NAME.rail);
+  rail(0, 70, 6);
+  
+  rail(0, 70, 3);
+  rail(2, 72, 3);
+  rail(4, 74, 17);
+  rail(9, 76, 16);
+  for (let i = 0; i < 8; i++) {
+    rail(14 + i * 2, 78, 0);
+  }
+  
+  rail(0, 75, 2);
+  
+  gameMap.centerView(0, 50);
 };
 
 function inserterTest(gameMap, time) {
@@ -395,8 +408,7 @@ function inserterTest(gameMap, time) {
   const lane = createLane(gameMap, -11, -5, 3, 1, time);
   e(NAME.burnerDrill, -12, -8, 2)
       .energyStored = 150;
-  lane.minusItems = new Array(4 * 6).fill(I.ironOre);
-  lane.minusFlow = new Array(4 * 6).fill(0);
+  lane.minusFlow = new Array(4 * 6).fill([0, I.ironOre]).flat();
   return s;
 }
 

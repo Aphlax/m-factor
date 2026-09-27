@@ -17,6 +17,9 @@ export const TYPE = {
   pipeToGround: 15,
   splitter: 16,
   pump: 17,
+  rail: 18,
+  trainStop: 19,
+  railSignal: 20,
 };
 
 export const NAME = {
@@ -59,6 +62,10 @@ export const NAME = {
   expressTransportBelt: 37,
   expressUndergroundBelt: 38,
   expressSplitter: 39,
+  rail: 40,
+  trainStop: 41,
+  railSignal: 42,
+  railChainSignal: 43,
 };
 
 /** Never value for next update. 285 years from now. */

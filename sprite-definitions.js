@@ -346,6 +346,25 @@ export const S = {
   expressUndergroundBeltEOSideLoaded: 15511,
   expressUndergroundBeltEISideLoaded: 15513,
   expressUndergroundBeltWISideLoaded: 15515,
+  railStoneStraight: 15520, // 16
+  railStoneDiagonal: 15536, // 18
+  railStoneCurve: 15554, // 64
+  railWoodStraight: 15620, // 16
+  railWoodDiagonal: 15636, // 18
+  railWoodCurve: 15654, // 64
+  railMetalStraight: 15720, // 16
+  railMetalDiagonal: 15736, // 18
+  railMetalCurve: 15754, // 64
+  railTopStraight: 15820, // 16
+  railTopDiagonal: 15836, // 18
+  railTopCurve: 15854, // 64
+  railSignal: 15920, // 24
+  railSignalMetal: 15944, // 10
+  railChainSignal: 15954, // 40
+  railChainSignalMetal: 18000, // 10
+  trainStop: 18010, // 4
+  trainStopBottom: 18014, // 4
+  
   
   
   // Items
@@ -453,6 +472,12 @@ export const S = {
   expressTransportBeltItem: 16139,
   expressUndergroundBeltItem: 16140,
   expressSplitterItem: 16141,
+  locomotiveItem: 16142,
+  cargoWagonItem: 16143,
+  fluidWagonItem: 16144,
+  trainStopItem: 16145,
+  railSignalItem: 16146,
+  railChainSignalItem: 16147,
   
   gearIcon: 16500,
   burnerDrillIcon: 16501,
@@ -512,6 +537,12 @@ export const S = {
   expressTransportBeltIcon: 16555,
   expressUndergroundBeltIcon: 16556,
   expressSplitterIcon: 16557,
+  locomotiveIcon: 16558,
+  cargoWagonIcon: 16559,
+  fluidWagonIcon: 16560,
+  trainStopIcon: 16561,
+  railSignalIcon: 16562,
+  railChainSignalIcon: 16563,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -1465,7 +1496,70 @@ export const SPRITES = [
     path: "graphics/entities/express-splitter/express-splitter-west.png",
     sprites: entitySprites(S.expressSplitterW, 46, 76, 8, 4, 3, 11, 10, 2, true),
   },
-  
+  {
+    path: "graphics/entities/rail/rail-stone-path.png",
+    sprites: [
+        ...entitySprites(S.railStoneStraight, 128, 128, 8, 2, 32, 32, 32, 32, true),
+        ...offset(0, 256,
+            entitySprites(S.railStoneDiagonal, 192, 192, 3, 6, 32, 32, 32, 32, true)),
+        ...offset(1024, 0,
+            entitySprites(S.railStoneCurve, 256, 256, 4, 16, 32, 32, 32, 32, true)),
+    ],
+  },
+  {
+    path: "graphics/entities/rail/rail-ties.png",
+    sprites: [
+        ...entitySprites(S.railWoodStraight, 128, 128, 8, 2, 32, 32, 32, 32, true),
+        ...offset(0, 256,
+            entitySprites(S.railWoodDiagonal, 192, 192, 3, 6, 32, 32, 32, 32, true)),
+        ...offset(1024, 0,
+            entitySprites(S.railWoodCurve, 256, 256, 4, 16, 32, 32, 32, 32, true)),
+    ],
+  },
+  {
+    path: "graphics/entities/rail/rail-backplates.png",
+    sprites: [
+        ...entitySprites(S.railMetalStraight, 128, 128, 8, 2, 32, 32, 32, 32, true),
+        ...offset(0, 256,
+            entitySprites(S.railMetalDiagonal, 192, 192, 3, 6, 32, 32, 32, 32, true)),
+        ...offset(1024, 0,
+            entitySprites(S.railMetalCurve, 256, 256, 4, 16, 32, 32, 32, 32, true)),
+    ],
+  },
+  {
+    path: "graphics/entities/rail/rail-metals.png",
+    sprites: [
+        ...entitySprites(S.railTopStraight, 128, 128, 8, 2, 32, 32, 32, 32, true),
+        ...offset(0, 256,
+            entitySprites(S.railTopDiagonal, 192, 192, 3, 6, 32, 32, 32, 32, true)),
+        ...offset(1024, 0,
+            entitySprites(S.railTopCurve, 256, 256, 4, 16, 32, 32, 32, 32, true)),
+    ],
+  },
+  {
+    path: "graphics/entities/rail-signal/rail-signal.png",
+    sprites: entitySprites(S.railSignal, 96, 96, 3, 8, 32, 32, 32, 32, true),
+  },
+  {
+    path: "graphics/entities/rail-signal/rail-signal-metal.png",
+    sprites: entitySprites(S.railSignalMetal, 96, 96, 10, 1, 32, 32, 32, 32, true),
+  },
+  {
+    path: "graphics/entities/rail-chain-signal/rail-chain-signal.png",
+    sprites: entitySprites(S.railChainSignal, 160, 160, 5, 8, 32, 96, 32, 96, true),
+  },
+  {
+    path: "graphics/entities/rail-chain-signal/rail-chain-signal-metal.png",
+    sprites: entitySprites(S.railChainSignalMetal, 96, 96, 10, 1, 32, 32, 32, 32, true),
+  },
+  {
+    path: "graphics/entities/train-stop/train-stop-structure.png",
+    sprites: entitySprites(S.trainStop, 156, 175, 4, 1, -23, 83, 97, 14, true),
+  },
+  {
+    path: "graphics/entities/train-stop/train-stop-ground.png",
+    sprites: entitySprites(S.trainStopBottom, 194, 189, 4, 1, 1, 97, 66, 59, true),
+  },
   
   
   // Items.
@@ -1881,6 +1975,30 @@ export const SPRITES = [
     path: "graphics/items/express-splitter.png",
     sprites: itemSprites(S.expressSplitterItem, S.expressSplitterIcon),
   },
+  {
+    path: "graphics/items/locomotive.png",
+    sprites: itemSprites(S.locomotiveItem, S.locomotiveIcon),
+  },
+  {
+    path: "graphics/items/cargo-wagon.png",
+    sprites: itemSprites(S.cargoWagonItem, S.cargoWagonIcon),
+  },
+  {
+    path: "graphics/items/fluid-wagon.png",
+    sprites: itemSprites(S.fluidWagonItem, S.fluidWagonIcon),
+  },
+  {
+    path: "graphics/items/train-stop.png",
+    sprites: itemSprites(S.trainStopItem, S.trainStopIcon),
+  },
+  {
+    path: "graphics/items/rail-signal.png",
+    sprites: itemSprites(S.railSignalItem, S.railSignalIcon),
+  },
+  {
+    path: "graphics/items/rail-chain-signal.png",
+    sprites: itemSprites(S.railChainSignalItem, S.railChainSignalIcon),
+  },
   
   
   
@@ -2050,6 +2168,11 @@ function resourceSprites(id, variations, count) {
     }
   }
   return res;
+}
+
+function offset(dx, dy, sprites) {
+  return sprites.map(s =>
+      ({...s, x: s.x + dx, y: s.y + dy}));
 }
 
 function rect(x, y, width, height) {

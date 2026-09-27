@@ -52,6 +52,10 @@ const BUILD_MENU = [
   NAME.offshorePump,
   NAME.boiler,
   NAME.steamEngine,
+  NAME.rail,
+  NAME.trainStop,
+  NAME.railSignal,
+  NAME.railChainSignal,
 ];
 const DEACC = 50;
 
