@@ -1,6 +1,6 @@
 import {S} from './sprite-pool.js';
 import {DIRECTION, TYPE, ENERGY, NAME} from './entity-properties.js';
-import {WATER_PUMPING_RECIPE, BOILER_RECIPE} from './recipe-definitions.js';
+import {WATER_PUMPING_RECIPE, BOILER_RECIPE, ROCKET_SILO_RECIPE, ROCKET_SCIENCE_RECIPE} from './recipe-definitions.js';
 
 const {north, east, south, west} = DIRECTION;
 
@@ -1216,6 +1216,9 @@ export const ENTITIES = new Map([
     height: 2,
     rotatable: false,
     icon: S.railIcon,
+    sprites: {
+      [north]: [S.railStoneStraight, S.railMetalStraight],
+    },
     animationLength: 0,
     mapColor: "#8F8F8D",
     
@@ -1270,7 +1273,35 @@ export const ENTITIES = new Map([
     },
     animationLength: 0,
     mapColor: "#8F8F8D",
-  }]
+  }],
+  [NAME.rocketSilo,
+  {
+    label: "Rocket Silo",
+    prototypeName: "rocket-silo",
+    type: TYPE.rocketSilo,
+    width: 9,
+    height: 9,
+    rotatable: false,
+    icon: S.rocketSiloIcon,
+    sprites: {
+      [north]: [S.rocketSilo, S.rocketSiloShadow],
+    },
+    animationLength: 0,
+    mapColor: "#006094",
+    energySource: ENERGY.electric,
+    energyDrain: 12.5, // kW
+    energyConsumption: 387.5, // kW
+    
+    recipe: ROCKET_SILO_RECIPE,
+    science: ROCKET_SCIENCE_RECIPE,
+    siloSprites: [S.rocketSiloHole, S.rocketSiloHoleLight, S.rocketSilo, S.rocketSiloFront],
+    doorSprites: [S.rocketSiloDoorBack, S.rocketSiloDoorBackHalf, S.rocketSiloDoorBackOpen, S.rocketSiloDoorFront, S.rocketSiloDoorFrontHalf, S.rocketSiloDoorFrontOpen],
+    doorMovement: [60, -25, -60, 25],
+    armSprites: [S.rocketSiloArmBack, S.rocketSiloArmRight, S.rocketSiloArmFront],
+    armAnimation: 32,
+    extraSprites: [S.rocketSiloTurbine],
+    extraAnimation: 32,
+  }],
 ]);
 
 ENTITIES.keys().forEach(name =>

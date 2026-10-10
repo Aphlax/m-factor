@@ -425,6 +425,22 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 21000,
   },
+  {
+    prototypeName: "satellite",
+    inputs: [
+      {item: I.accumulator, amount: 100},
+      {item: I.lowDensityStructure, amount: 100},
+      {item: I.processingUnit, amount: 100},
+      {item: I.radar, amount: 5},
+      {item: I.rocketFuel, amount: 50},
+      {item: I.solarPanel, amount: 100},
+    ],
+    outputs: [
+      {item: I.satellite, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 5000,
+  },
   
   
   
@@ -1173,6 +1189,83 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
+  {
+    prototypeName: "radar",
+    inputs: [
+      {item: I.electronicCircuit, amount: 5},
+      {item: I.ironGear, amount: 5},
+      {item: I.ironPlate, amount: 10},
+    ],
+    outputs: [
+      {item: I.radar, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  {
+    prototypeName: "accumulator",
+    inputs: [
+      {item: I.battery, amount: 5},
+      {item: I.ironPlate, amount: 2},
+    ],
+    outputs: [
+      {item: I.accumulator, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 10000,
+  },
+  {
+    prototypeName: "solar-panel",
+    inputs: [
+      {item: I.copperPlate, amount: 5},
+      {item: I.electronicCircuit, amount: 15},
+      {item: I.steelPlate, amount: 5},
+    ],
+    outputs: [
+      {item: I.solarPanel, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 10000,
+  },
+  {
+    prototypeName: "rocket-silo",
+    inputs: [
+      {item: I.concrete, amount: 1000},
+      {item: I.electricEngineUnit, amount: 200},
+      {item: I.pipe, amount: 100},
+      {item: I.processingUnit, amount: 200},
+      {item: I.steelPlate, amount: 1000},
+    ],
+    outputs: [
+      {item: I.rocketSilo, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 30000,
+  },
+  {
+    prototypeName: "concrete",
+    inputs: [
+      {item: I.ironOre, amount: 1},
+      {item: I.stoneBrick, amount: 5},
+      {item: I.water, amount: 100},
+    ],
+    outputs: [
+      {item: I.concrete, amount: 10},
+    ],
+    entities: [NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 10000,
+  },
+  {
+    prototypeName: "refined-hazard-concrete",
+    inputs: [
+      {item: I.refinedConcrete, amount: 10},
+    ],
+    outputs: [
+      {item: I.refinedHazardConcrete, amount: 10},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 250,
+  },
   
   
   
@@ -1200,13 +1293,28 @@ export const RECIPES = [
     entities: [NAME.boiler],
     duration: 1000 / 6,
   },
-  
-  
-  
-  
-  
-  
-  
+  {
+    prototypeName: "rocket-part",
+    inputs: [
+      {item: I.processingUnit, amount: 1},
+      {item: I.lowDensityStructure, amount: 1},
+      {item: I.rocketFuel, amount: 1},
+    ],
+    outputs: [],
+    entities: [NAME.rocketSilo],
+    duration: 1500,
+  },
+  {
+    prototypeName: "rocket-science",
+    inputs: [
+      {item: I.satellite, amount: 1},
+    ],
+    outputs: [
+      {item: I.spaceScience, amount: 1000},
+    ],
+    entities: [NAME.rocketSilo],
+    duration: 0,
+  },
   
   
 ];
@@ -1220,6 +1328,10 @@ export const WATER_PUMPING_RECIPE = RECIPES
     .find(r => r.entities.includes(NAME.offshorePump));
 export const BOILER_RECIPE = RECIPES
     .find(r => r.entities.includes(NAME.boiler));
+export const ROCKET_SILO_RECIPE = RECIPES
+    .find(r => r.prototypeName == "rocket-part");
+export const ROCKET_SCIENCE_RECIPE = RECIPES
+    .find(r => r.prototypeName == "rocket-science");
 
 export const PROTO_TO_RECIPE = new Map(
     RECIPES.map(r => [r.prototypeName, r]));

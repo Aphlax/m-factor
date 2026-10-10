@@ -31,7 +31,7 @@ it("creates drill", () => {
         {x: 0, y: 0, id: RESOURCE_NAMES.ironOre,
         amount: 34};
     map.connectEntity(d, 0);
-    assertExists(d);
+    assertNotExists(d);
     assertMatch(d.data.mineResources.find(Boolean),
         {amount: 34});
   });

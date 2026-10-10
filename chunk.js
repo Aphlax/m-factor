@@ -288,12 +288,12 @@ Chunk.prototype.drawTrees = function(ctx, view, index) {
         (sprite.width - sprite.left - sprite.right);
     const yScale = s /
         (sprite.height - sprite.top - sprite.bottom);
-    const sx = Math.floor(tree.x * s - vx -
+    const sx = (tree.x * s - vx -
             sprite.left * xScale),
-        sy = Math.floor(tree.y * s - vy -
+        sy = (tree.y * s - vy -
             sprite.top * yScale),
-        sw = Math.ceil(sprite.width * xScale),
-        sh = Math.ceil(sprite.height * yScale);
+        sw = (sprite.width * xScale),
+        sh = (sprite.height * yScale);
     if (sx > vw || sx < -sw || sy > vh || sy < -sh) continue;
     ctx.drawImage(
         sprite.image,

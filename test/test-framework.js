@@ -51,7 +51,10 @@ function TestSuite() {
         results.push(el('div',
             {className: "success"}, test.desc));
       } catch (error) {
-        console.log(error);
+        console.error(error);
+        if (window.MDev) {
+          MDev.reportError(error.message, ...getSource(error))
+        }
         results.push(el('details',
             {className: "failure"},
             el('summary', null, test.desc + " -" +
@@ -68,16 +71,31 @@ function TestSuite() {
   return results;
 }
 
+function getSource(error) {
+  const lines = error.stack.split("\n");
+  for (const line of lines) {
+    const match = line.match(/^\s*at\s+(?:.*\s+\()?(?:file:\/\/)?(.*?):(\d+):(\d+)\)?$/);
+    if (match) {
+      return [match[1], parseInt(match[2]), parseInt(match[3])];
+    }
+  }
+  return ["", 0, 0];
+}
+
 export function assertEqual(x, y) {
   assertNr++;
   if (x === y) return;
-  throw new Error(`${pp(x)} != ${pp(y)}`);
+  const err = new Error(`${pp(x)} != ${pp(y)}`);
+  Error.captureStackTrace(err, assertEqual);
+  throw err;
 }
 
 export function assertNotEqual(x, y) {
   assertNr++;
   if (x !== y) return;
-  throw new Error(`${pp(x)} == ${pp(y)} (they should be different)`);
+  const err = new Error(`${pp(x)} == ${pp(y)} (they should be different)`);
+  Error.captureStackTrace(err, assertNotEqual);
+  throw err;
 }
 
 export function assertMatch(x, template, qualifier = '') {
@@ -91,20 +109,26 @@ export function assertMatch(x, template, qualifier = '') {
     return;
   }
   if (x != template) {
-    throw new Error(`${pp(x)} != ${pp(template)}` + (qualifier ? ` (in x${qualifier})` : ''));
+    const err = new Error(`${pp(x)} != ${pp(template)}` + (qualifier ? ` (in x${qualifier})` : ''));
+    Error.captureStackTrace(err, assertMatch);
+    throw err;
   }
 }
 
 export function assertExists(x) {
   assertNr++;
   if (x !== undefined && x !== null) return;
-  throw new Error("did not exist!");
+  const err = new Error("did not exist!");
+  Error.captureStackTrace(err, assertExists);
+  throw err;
 }
 
 export function assertNotExists(x) {
   assertNr++;
   if (x === undefined || x === null) return;
-  throw new Error(pp(x) + " did exist! (should not)");
+  const err = new Error(pp(x) + " did exist! (should not)");
+  Error.captureStackTrace(err, assertNotExists);
+  throw err;
 }
 
 function pp(x) {

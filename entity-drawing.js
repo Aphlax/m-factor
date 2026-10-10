@@ -28,10 +28,10 @@ export function draw(ctx, view, time) {
     const xScale = width * s / (sw - left - right);
     const yScale = height * s / (sh - top - bottom);
     ctx.drawImage(image, sx, sy, sw, sh,
-        Math.floor(x * s - vx - left * xScale),
-        Math.floor(y * s - vy - top * yScale),
-        Math.ceil(sw * xScale),
-        Math.ceil(sh * yScale));
+        (x * s - vx - left * xScale),
+        (y * s - vy - top * yScale),
+        (sw * xScale),
+        (sh * yScale));
     window.numberImageDraws++;
   }
   let animation = this.animation;
@@ -56,10 +56,10 @@ export function draw(ctx, view, time) {
   const xScale = width * s / (sw - left - right);
   const yScale = height * s / (sh - top - bottom);
   ctx.drawImage(image, sx, sy, sw, sh,
-      Math.floor(x * s - vx - left * xScale),
-      Math.floor(y * s - vy - top * yScale),
-      Math.ceil(sw * xScale),
-      Math.ceil(sh * yScale));
+      (x * s - vx - left * xScale),
+      (y * s - vy - top * yScale),
+      (sw * xScale),
+      (sh * yScale));
   window.numberImageDraws++;
   if (this.extraSpriteOver) {
     const {x: sx, y: sy, width: sw, height: sh, left, right, top, bottom, image} =
@@ -67,10 +67,10 @@ export function draw(ctx, view, time) {
     const xScale = width * s / (sw - left - right);
     const yScale = height * s / (sh - top - bottom);
     ctx.drawImage(image, sx, sy, sw, sh,
-        Math.floor(x * s - vx - left * xScale),
-        Math.floor(y * s - vy - top * yScale),
-        Math.ceil(sw * xScale),
-        Math.ceil(sh * yScale));
+        (x * s - vx - left * xScale),
+        (y * s - vy - top * yScale),
+        (sw * xScale),
+        (sh * yScale));
     window.numberImageDraws++;
   }
 };
@@ -106,12 +106,12 @@ export function drawShadow(ctx, view, time) {
       (sprite.height - sprite.top - sprite.bottom);
   ctx.drawImage(sprite.image,
       sprite.x, sprite.y, sprite.width, sprite.height,
-      Math.floor(x * s - vx -
+      (x * s - vx -
           sprite.left * xScale),
-      Math.floor(y * s - vy -
+      (y * s - vy -
           sprite.top * yScale),
-      Math.ceil(sprite.width * xScale),
-      Math.ceil(sprite.height * yScale));
+      (sprite.width * xScale),
+      (sprite.height * yScale));
   window.numberImageDraws++;
 };
 
@@ -350,12 +350,56 @@ export function drawPipeCaps(ctx, view, below) {
         (sprite.height - sprite.top - sprite.bottom);
     ctx.drawImage(sprite.image,
         sprite.x, sprite.y, sprite.width, sprite.height,
-        Math.floor((x + dx) * s - vx -
+        ((x + dx) * s - vx -
             sprite.left * xScale),
-        Math.floor((y + dy) * s - vy -
+        ((y + dy) * s - vy -
             sprite.top * yScale),
-        Math.ceil(sprite.width * xScale),
-        Math.ceil(sprite.height * yScale));
+        (sprite.width * xScale),
+        (sprite.height * yScale));
+    window.numberImageDraws++;
+  }
+}
+
+export function drawRocketSilo(ctx, view, time) {
+  const {x: vx, y: vy, width: vw, height: vh, scale: s} = view;
+  const {x, y, width, height} = this;
+  const {siloSprites, doorSprites, doorMovement, armSprites, armAnimation, extraSprites, extraAnimation} = this.data;
+  
+  const t = (time / 60) % 128;
+  const door = (t >= 64 ? 128 - t : t) / 64;
+  const arms = 1;
+  const rocket = 0;
+  
+  for (let i = 0; 1; i++) {
+    let id = 0, dx = 0, dy = 0;
+    if (i < 2) { // Doors.
+      const state = door < 0.35 ? 0 : (door < 0.65 ? 1 : 2);
+      id = doorSprites[i * 3 + state];
+      dx = doorMovement[i * 2] * door;
+      dy = doorMovement[i * 2 + 1] * door;
+    } else if (i == 2) { // Silo.
+      id = siloSprites[2];
+    } else if (i < 5) { // Arms 1 + 2.
+      const anim = Math.floor(arms * (armAnimation - 1));
+      id = armSprites[i - 3] + anim;
+    } else if (i == 5) { // Front.
+      id = siloSprites[3];
+    } else if (i == 6) { // Arm 3.
+      const anim = Math.floor(arms * (armAnimation - 1));
+      id = armSprites[2] + anim;
+    } else if (i <= 6 + extraSprites.length) {
+      const anim = Math.floor(time / 60) % extraAnimation;
+      id = extraSprites[i - 7] + anim;
+    } else break;
+    
+    const sprite = SPRITES.get(id);
+    const {x: sx, y: sy, width: sw, height: sh,
+      left, right, top, bottom, image} = sprite;
+    ctx.drawImage(image, sx, sy, sw, sh,
+        (x * s - vx - (left - dx) * s / 32),
+        (y * s - vy - (top - dy) * s / 32),
+        (sw * s / 32),
+        (sh * s / 32));
     window.numberImageDraws++;
   }
 }
@@ -501,8 +545,8 @@ export function drawRecipe(ctx, view, recipe) {
   ctx.drawImage(sprite.image,
       sprite.x, sprite.y,
       sprite.width, sprite.height,
-      Math.floor(x - size), Math.floor(y - size),
-      Math.ceil(size * 2), Math.ceil(size * 2));
+      (x - size), (y - size),
+      (size * 2), (size * 2));
   window.numberImageDraws++;
   ctx.shadowColor = undefined;
   ctx.shadowBlur = 0;

@@ -10,6 +10,7 @@
     <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
     <title>Sprite compose</title>
     <style>
+body { background-color: white; }
 .col {
   display: flex;
   flex-direction: column;
@@ -294,7 +295,7 @@ function App() {
 
   return (
 <>
-  <h5>Sprite Compose</h5>
+  <p>Sprite Compose</p>
   <input type="text" value={basePath} onInput={e => setBasePath(e.target.value)}/>
   <div className="row">
     Tiles:
@@ -341,7 +342,7 @@ function App() {
         onDelete={i == sprites.length - 1 ? () => setSprites(sprites.slice(0, sprites.length - 1)) : undefined}/>)}
   </div>
   <button onClick={addSprite}>Add sprite</button>
-  <span className="flex"></span>
+  <span className=""></span>
   <canvas ref={canvas} className="flex"></canvas>
 </>);
 }

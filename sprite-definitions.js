@@ -171,6 +171,10 @@ export const S = {
   expressSplitterE: 305*16, // 32
   expressSplitterS: 307*16, // 32
   expressSplitterW: 309*16, // 32
+  rocketSiloArmBack: 311*16, // 32
+  rocketSiloArmRight: 313*16, // 32
+  rocketSiloArmFront: 315*16, // 32
+  rocketSiloTurbine: 317*16, // 32
   
   
   woodenChest: 15000,
@@ -364,6 +368,21 @@ export const S = {
   railChainSignalMetal: 18000, // 10
   trainStop: 18010, // 4
   trainStopBottom: 18014, // 4
+  rocketSiloShadow: 18018,
+  rocketSiloHole: 18019,
+  rocketSiloHoleLight: 18020,
+  rocketSiloDoorBack: 18021,
+  rocketSiloDoorFront: 18022,
+  rocketSilo: 18023,
+  rocketSiloFront: 18024,
+  rocket: 18025,
+  rocketShadow: 18026,
+  rocketFlame: 18027,
+  rocketSmoke: 18028, // 24
+  rocketSiloDoorBackHalf: 18052,
+  rocketSiloDoorFrontHalf: 18053,
+  rocketSiloDoorBackOpen: 18054,
+  rocketSiloDoorFrontOpen: 18055,
   
   
   
@@ -412,6 +431,7 @@ export const S = {
   firearmMagazineItem: 16041,
   piercingRoundsMagazineItem: 16042,
   grenadeItem: 16043,
+  satelliteItem: 16044,
   
   waterFluid: 16050,
   steamFluid: 16051,
@@ -478,6 +498,13 @@ export const S = {
   trainStopItem: 16145,
   railSignalItem: 16146,
   railChainSignalItem: 16147,
+  rocketSiloItem: 16148,
+  radarItem: 16149,
+  accumulatorItem: 16150,
+  solarPanelItem: 16151,
+  concreteItem: 16152,
+  refinedConcreteItem: 16153,
+  refinedHazardConcreteItem: 16154,
   
   gearIcon: 16500,
   burnerDrillIcon: 16501,
@@ -543,6 +570,13 @@ export const S = {
   trainStopIcon: 16561,
   railSignalIcon: 16562,
   railChainSignalIcon: 16563,
+  rocketSiloIcon: 16564,
+  radarIcon: 16565,
+  accumulatorIcon: 16566,
+  solarPanelIcon: 16567,
+  concreteIcon: 16568,
+  refinedConcreteIcon: 16569,
+  refinedHazardConcreteIcon: 16570,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -1560,6 +1594,64 @@ export const SPRITES = [
     path: "graphics/entities/train-stop/train-stop-ground.png",
     sprites: entitySprites(S.trainStopBottom, 194, 189, 4, 1, 1, 97, 66, 59, true),
   },
+  {
+    path: "graphics/entities/rocket-silo/00-rocket-silo-shadow.png",
+    sprites: entitySprites(S.rocketSiloShadow, 304, 290, 1, 1, 1, 15, 0, 2, true),
+  },
+  {
+    path: "graphics/entities/rocket-silo/06-rocket-silo.png",
+    sprites: entitySprites(S.rocketSilo, 300, 300, 1, 1, 5, 7, 8, 4, true),
+  },
+  {
+    path: "graphics/entities/rocket-silo/01-rocket-silo-hole.png",
+    sprites: entitySprites(S.rocketSiloHole, 202, 136, 1, 1, -36, -50, -106, -46, true),
+  },
+  {
+    path: "graphics/entities/rocket-silo/01-rocket-silo-hole-light.png",
+    sprites: entitySprites(S.rocketSiloHoleLight, 202, 136, 1, 1, -36, -50, -106, -46, true),
+  },
+  {
+    path: "graphics/entities/rocket-silo/04-door-back.png",
+    sprites: [
+      ...entitySprites(S.rocketSiloDoorBack, 138, 144, 1, 1, -102, -28-20, -83, -61, true),
+      ...entitySprites(S.rocketSiloDoorBackHalf, 120, 144, 1, 1, -102, -28-38, -83, -61, true),
+      ...offset(0, 40,
+        entitySprites(S.rocketSiloDoorBackOpen, 100, 104, 1, 1, -102, -28-58, -83-40, -61, true)),
+    ],
+  },
+  {
+    path: "graphics/entities/rocket-silo/05-door-front.png",
+    sprites: [
+      ...offset(20, 0,
+        entitySprites(S.rocketSiloDoorFront, 146, 152, 1, 1, -35-20, -87, -98, -38, true)),
+      ...offset(42, 0,
+        entitySprites(S.rocketSiloDoorFrontHalf, 124, 152, 1, 1, -35-42, -87, -98, -38, true)),
+      ...offset(66, 0,
+        entitySprites(S.rocketSiloDoorFrontOpen, 100, 152, 1, 1, -35-66, -87, -98, -38, true)),
+    ],
+  },
+  {
+    path: "graphics/entities/rocket-silo/14-rocket-silo-front.png",
+    sprites: entitySprites(S.rocketSiloFront, 292, 132, 1, 1, 5, -1, -156, 0, true),
+  },
+  {
+    path: "graphics/entities/rocket-silo/08-rocket-silo-arms-back.png",
+    sprites: entitySprites(S.rocketSiloArmBack, 66, 76, 32, 1, -56, -166, -21, -191, true),
+  },
+  {
+    path: "graphics/entities/rocket-silo/08-rocket-silo-arms-right.png",
+    sprites: entitySprites(S.rocketSiloArmRight, 94, 94, 32, 1, -196, 2, -59, -135, true),
+  },
+  {
+    path: "graphics/entities/rocket-silo/13-rocket-silo-arms-front.png",
+    sprites: entitySprites(S.rocketSiloArmFront, 66, 114, 32, 1, -58, -164, -103, -71, true),
+  },
+  {
+    path: "graphics/entities/rocket-silo/15-rocket-silo-turbine.png",
+    sprites: entitySprites(S.rocketSiloTurbine, 28, 46, 8, 4, -25, -235, -230, -12, true),
+  },
+  
+  
   
   
   // Items.
@@ -1738,6 +1830,10 @@ export const SPRITES = [
   {
     path: "graphics/items/grenade.png",
     sprites: itemSprites(S.grenadeItem),
+  },
+  {
+    path: "graphics/items/satellite.png",
+    sprites: itemSprites(S.satelliteItem),
   },
   
   
@@ -1998,6 +2094,34 @@ export const SPRITES = [
   {
     path: "graphics/items/rail-chain-signal.png",
     sprites: itemSprites(S.railChainSignalItem, S.railChainSignalIcon),
+  },
+  {
+    path: "graphics/items/rocket-silo.png",
+    sprites: itemSprites(S.rocketSiloItem, S.rocketSiloIcon),
+  },
+  {
+    path: "graphics/items/radar.png",
+    sprites: itemSprites(S.radarItem, S.radarIcon),
+  },
+  {
+    path: "graphics/items/accumulator.png",
+    sprites: itemSprites(S.accumulatorItem, S.accumulatorIcon),
+  },
+  {
+    path: "graphics/items/solar-panel.png",
+    sprites: itemSprites(S.solarPanelItem, S.solarPanelIcon),
+  },
+  {
+    path: "graphics/items/concrete.png",
+    sprites: itemSprites(S.concreteItem, S.concreteIcon),
+  },
+  {
+    path: "graphics/items/refined-concrete.png",
+    sprites: itemSprites(S.refinedConcreteItem, S.refinedConcreteIcon),
+  },
+  {
+    path: "graphics/items/refined-hazard-concrete.png",
+    sprites: itemSprites(S.refinedHazardConcreteItem, S.refinedHazardConcreteIcon),
   },
   
   

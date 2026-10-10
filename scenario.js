@@ -219,6 +219,8 @@ function productionTest(gameMap, time) {
   
   rail(0, 75, 2);
   
+  e(NAME.rocketSilo, -5, 50, 0);
+  
   gameMap.centerView(0, 50);
 };
 

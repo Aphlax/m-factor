@@ -26,14 +26,15 @@ export const I = {
   flyingRobotFrame: 24,
   lowDensityStructure: 25,
   rocketFuel: 26,
+  satellite: 27,
   
-  automationScience: 27,
-  logisticScience: 28,
-  militaryScience: 29,
-  chemicalScience: 30,
-  productionScience: 31,
-  utilityScience: 32,
-  spaceScience: 33,
+  automationScience: 40,
+  logisticScience: 41,
+  militaryScience: 42,
+  chemicalScience: 43,
+  productionScience: 44,
+  utilityScience: 45,
+  spaceScience: 46,
   
   water: 50, // Fluid.
   steam: 51, // Fluid.
@@ -88,6 +89,10 @@ export const I = {
   trainStop: 141,
   railSignal: 142,
   railChainSignal: 143,
+  rocketSilo: 144,
+  radar: 145,
+  accumulator: 146,
+  solarPanel: 147,
   
   speedModule: 200,
   speedModule2: 201,
@@ -104,6 +109,9 @@ export const I = {
   locomotive: 212,
   cargoWagon: 213,
   fluidWagon: 214,
+  concrete: 215,
+  refinedConcrete: 216,
+  refinedHazardConcrete: 217,
 };
 
 export const FLUID_START = 50;
@@ -267,6 +275,12 @@ export const ITEMS = new Map([
     sprite: S.rocketFuelItem,
     stackSize: 20,
     prototypeName: "rocket-fuel",
+  }],
+  [I.satellite,
+  {
+    sprite: S.satelliteItem,
+    stacksize: 5,
+    prototypeName: "satellite",
   }],
   [I.logisticScience,
   {
@@ -572,6 +586,48 @@ export const ITEMS = new Map([
     sprite: S.railChainSignalItem,
     stacksize: 20,
     prototypeName: "rail-chain-signal",
+  }],
+  [I.radar,
+  {
+    sprite: S.radarItem,
+    stacksize: 10,
+    prototypeName: "radar",
+  }],
+  [I.accumulator,
+  {
+    sprite: S.accumulatorItem,
+    stacksize: 100,
+    prototypeName: "accumulator",
+  }],
+  [I.solarPanel,
+  {
+    sprite: S.solarPanelItem,
+    stacksize: 100,
+    prototypeName: "solar-panel",
+  }],
+  [I.rocketSilo,
+  {
+    sprite: S.rocketSiloItem,
+    stacksize: 1,
+    prototypeName: "rocket-silo",
+  }],
+  [I.concrete,
+  {
+    sprite: S.concreteItem,
+    stacksize: 100,
+    prototypeName: "concrete",
+  }],
+  [I.refinedConcrete,
+  {
+    sprite: S.refinedConcreteItem,
+    stacksize: 100,
+    prototypeName: "refined-concrete",
+  }],
+  [I.refinedHazardConcrete,
+  {
+    sprite: S.refinedHazardConcreteItem,
+    stacksize: 100,
+    prototypeName: "refined-hazard-concrete",
   }],
   
   

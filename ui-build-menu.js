@@ -56,6 +56,7 @@ const BUILD_MENU = [
   NAME.trainStop,
   NAME.railSignal,
   NAME.railChainSignal,
+  NAME.rocketSilo,
 ];
 const DEACC = 50;
 

@@ -66,7 +66,10 @@ GameMap.prototype.update = function(time, dt) {
             entity.type == TYPE.generator ||
             entity.type == TYPE.electricPole ||
             entity.type == TYPE.undergroundBelt ||
-            entity.type == TYPE.pipeToGround) continue;
+            entity.type == TYPE.pipeToGround ||
+            entity.type == TYPE.rail ||
+            entity.type == TYPE.trainStop ||
+            entity.type == TYPE.railSignal) continue;
         if (time < entity.nextUpdate) continue;
         entity.update(this, time);
       }
@@ -235,6 +238,9 @@ GameMap.prototype.draw = function(ctx, time) {
         entity.draw(ctx, this.view, time);
         if (pipeCaps) {
           entity.drawPipeCaps(ctx, this.view, /*below*/ false);
+        }
+        if (entity.type == TYPE.rocketSilo) {
+          entity.drawRocketSilo(ctx, this.view, time)
         }
         if (!SETTINGS.altMode) continue;
         if ((entity.type == TYPE.furnace ||

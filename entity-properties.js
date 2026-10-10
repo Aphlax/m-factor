@@ -20,6 +20,7 @@ export const TYPE = {
   rail: 18,
   trainStop: 19,
   railSignal: 20,
+  rocketSilo: 21,
 };
 
 export const NAME = {
@@ -66,13 +67,14 @@ export const NAME = {
   trainStop: 41,
   railSignal: 42,
   railChainSignal: 43,
+  rocketSilo: 44,
 };
 
 /** Never value for next update. 285 years from now. */
 export const NEVER = Math.floor(Number.MAX_SAFE_INTEGER / 1000);
 
 /** Maximal width/length of any entity. */
-export const MAX_SIZE = 5;
+export const MAX_SIZE = 9;
 
 /** Maximal length of inserter arm. */
 export const MAX_LOGISTIC_CONNECTION = 2;
