@@ -363,33 +363,66 @@ export function drawPipeCaps(ctx, view, below) {
 export function drawRocketSilo(ctx, view, time) {
   const {x: vx, y: vy, width: vw, height: vh, scale: s} = view;
   const {x, y, width, height} = this;
-  const {siloSprites, doorSprites, doorMovement, armSprites, armAnimation, extraSprites, extraAnimation} = this.data;
+  const {siloSprites, rocketSprites, rocketPosition, doorSprites, doorPosition, armSprites, armAnimation, extraSprites, extraAnimation} = this.data;
   
-  const t = (time / 60) % 128;
-  const door = (t >= 64 ? 128 - t : t) / 64;
-  const arms = 1;
-  const rocket = 0;
+  const t = time % 20000;
+  const p = 1 + t / 6666; // From 0 to 4.
+  const rocket = p < 1.5 ? 0 : p < 2.5 ? p - 1.5 : p < 3 ? 1 : 1 + Math.pow((p - 3) * 2, 2);
+  const door = p < 1 ? 0 : p < 1.5 ? (p - 1) / 0.5 : p < 3.5 ? 1 : 1 - (p - 3.5) / 0.5;
+  const arms = rocket < 0.715 ? 0 : rocket < 1 ? (rocket - 0.715) / 0.285 : rocket < 1.25 ? 1 - (rocket - 1) * 4 : 0;
+  
+  const pos = rocket > 1 ? rocket - 1 : rocket,
+      o = rocket > 1 ? 2 : 0,
+      rdx = (1 - pos) * rocketPosition[0 + o] + pos * rocketPosition[2 + o],
+      rdy = (1 - pos) * rocketPosition[1 + o] + pos * rocketPosition[3 + o];
   
   for (let i = 0; 1; i++) {
     let id = 0, dx = 0, dy = 0;
-    if (i < 2) { // Doors.
-      const state = door < 0.35 ? 0 : (door < 0.65 ? 1 : 2);
-      id = doorSprites[i * 3 + state];
-      dx = doorMovement[i * 2] * door;
-      dy = doorMovement[i * 2 + 1] * door;
-    } else if (i == 2) { // Silo.
+    if (i == 0) { // Hole.
+      if (p < 2.5 || p > 3.8) continue;
+      id = siloSprites[1];
+      ctx.globalAlpha = p < 3 ? (p - 2.5) * 2 : 1 - (p - 3.3) * 2;
+    } else if (i == 2 || i == 3) { // Doors.
+      const j = i == 2 ? 0 : 1;
+      const state = door < 0.3 ? 0 : (door < 0.65 ? 1 : 2);
+      id = doorSprites[j * 3 + state];
+      dx = doorPosition[j * 2] * door;
+      dy = doorPosition[j * 2 + 1] * door;
+    } else if (i == 4) { // Silo.
       id = siloSprites[2];
-    } else if (i < 5) { // Arms 1 + 2.
+    } else if (i == 5 || i == 6 || i == 11) { // Arms.
       const anim = Math.floor(arms * (armAnimation - 1));
-      id = armSprites[i - 3] + anim;
-    } else if (i == 5) { // Front.
+      id = armSprites[i == 11 ? 2 : i - 5] + anim;
+    } else if (i == 7) { // Flame.
+      if (rocket < 1.2 || rocket > 2) continue;
+      const anim = Math.floor(time / 60) % 8;
+      id = rocketSprites[2] + (rocket < 1.4 ? 8 : 0) + anim;
+      dx = rocketPosition[6] + rdx;
+      dy = rocketPosition[7] + rdy;
+    } else if (i == 1 || i == 8) { // Rocket.
+      if (i == 1 && ctx.globalAlpha != 1) {
+        ctx.globalAlpha = 1;
+      }
+      if ((i == 1) != (rocket == 0)) continue;
+      if (p <= 1 || rocket > 2) continue;
+      const part = rocket < 1.2 ? 5 - Math.floor(rocket * 4.2) : 0;
+      id = rocketSprites[0] + part;
+      dx = rdx; dy = rdy;
+    } else if (i == 9) { // Smoke.
+      if (p < 2.5 || rocket > 2) continue;
+      const anim = Math.floor(time / 60) % 24;
+      id = rocketSprites[3] + anim;
+      dx = rocketPosition[8] + rdx;
+      dy = rocketPosition[9] + rdy;
+      ctx.globalAlpha = p < 2.8 ? (p - 2.5) / 0.3 : 1;
+    } else if (i == 10) { // Front.
+      if (ctx.globalAlpha != 1) {
+        ctx.globalAlpha = 1;
+      }
       id = siloSprites[3];
-    } else if (i == 6) { // Arm 3.
-      const anim = Math.floor(arms * (armAnimation - 1));
-      id = armSprites[2] + anim;
-    } else if (i <= 6 + extraSprites.length) {
+    } else if (i <= 11 + extraSprites.length) {
       const anim = Math.floor(time / 60) % extraAnimation;
-      id = extraSprites[i - 7] + anim;
+      id = extraSprites[i - 12] + anim;
     } else break;
     
     const sprite = SPRITES.get(id);

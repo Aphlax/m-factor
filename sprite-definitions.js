@@ -375,15 +375,14 @@ export const S = {
   rocketSiloDoorFront: 18022,
   rocketSilo: 18023,
   rocketSiloFront: 18024,
-  rocket: 18025,
-  rocketShadow: 18026,
-  rocketFlame: 18027,
+  rocketShadow: 18025,
   rocketSmoke: 18028, // 24
   rocketSiloDoorBackHalf: 18052,
   rocketSiloDoorFrontHalf: 18053,
   rocketSiloDoorBackOpen: 18054,
   rocketSiloDoorFrontOpen: 18055,
-  
+  rocketFlame: 18056, // 16
+  rocket: 18072, // 6
   
   
   // Items
@@ -1649,6 +1648,32 @@ export const SPRITES = [
   {
     path: "graphics/entities/rocket-silo/15-rocket-silo-turbine.png",
     sprites: entitySprites(S.rocketSiloTurbine, 28, 46, 8, 4, -25, -235, -230, -12, true),
+  },
+  {
+    path: "graphics/entities/rocket-silo/02-rocket.png",
+    sprites: [
+      ...entitySprites(S.rocket, 154, 300, 1, 1, 0, 0, 0, 0),
+      ...entitySprites(S.rocket + 1, 154, 280, 1, 1, 0, 0, 0, 0),
+      ...entitySprites(S.rocket + 2, 154, 235, 1, 1, 0, 0, 0, 0),
+      ...entitySprites(S.rocket + 3, 154, 190, 1, 1, 0, 0, 0, 0),
+      ...entitySprites(S.rocket + 4, 154, 140, 1, 1, 0, 0, 0, 0),
+      ...entitySprites(S.rocket + 5, 154, 100, 1, 1, 0, 0, 0, 0),
+    ],
+  },
+  {
+    path: "graphics/entities/rocket-silo/09-rocket-shadow.png",
+    sprites: entitySprites(S.rocketShadow, 336, 110, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/rocket-silo/10-jet-flame.png",
+    sprites: [
+      ...entitySprites(S.rocketFlame, 87, 128, 8, 1, 0, 0, 0, 0),
+      ...entitySprites(S.rocketFlame + 8, 87, 64, 8, 1, 0, 0, 0, 0),
+    ],
+  },
+  {
+    path: "graphics/entities/rocket-silo/12-rocket-smoke.png",
+    sprites: entitySprites(S.rocketSmoke, 41, 145, 8, 3, 0, 0, 0, 0),
   },
   
   

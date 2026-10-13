@@ -43,14 +43,16 @@ UiProgress.prototype.draw = function(ctx, time) {
   ctx.strokeStyle = COLOR.border2;
   ctx.strokeRect(x, y, this.width, 40);
   
-  ctx.font = "16px monospace";
-  ctx.textBaseline = "middle";
-  ctx.textAlign = "end";
-  ctx.fillStyle = this.entity.state == STATE.running ||
-      this.entity.state == STATE.itemReady ?
-      COLOR.primary : COLOR.secondary;
-  ctx.fillText(Math.floor(progress * 100) + "%", x + this.width - 5, y + 21);
-  ctx.textAlign = "start";
+  if (this.width >= 30) {
+    ctx.font = "16px monospace";
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "end";
+    ctx.fillStyle = this.entity.state == STATE.running ||
+        this.entity.state == STATE.itemReady ?
+        COLOR.primary : COLOR.secondary;
+    ctx.fillText(Math.floor(progress * 100) + "%", x + this.width - 5, y + 21);
+    ctx.textAlign = "start";
+  }
   window.numberOtherDraws += 3;
 };
 

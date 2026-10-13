@@ -22,7 +22,7 @@ SpritePool.prototype.loadImage = function(imageDef) {
   image.onload = () => {
     for (let s of imageDef.sprites) {
       if (this.sprites.has(s.id)) {
-        throw new Error("Sprite id conflict. " + s.id + " already exists.");
+        throw new Error("Sprite id conflict. " + s.id + " already exists: " + imageDef.path);
       }
       this.sprites.set(s.id, {...s, image});
     }
