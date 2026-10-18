@@ -114,6 +114,7 @@ export const STATE = {
   noRecipe: 14,
   idle: 15, // No work todo for other reason
   multipleGrids: 16,
+  rocket: 17,
 };
 
 export const DIRECTION = {

@@ -1324,14 +1324,15 @@ export const FURNACE_FILTERS = RECIPES
     .map(r => r.inputs[0])
     .sort((a, b) => b - a);
 
-export const WATER_PUMPING_RECIPE = RECIPES
-    .find(r => r.entities.includes(NAME.offshorePump));
-export const BOILER_RECIPE = RECIPES
-    .find(r => r.entities.includes(NAME.boiler));
-export const ROCKET_SILO_RECIPE = RECIPES
-    .find(r => r.prototypeName == "rocket-part");
-export const ROCKET_SCIENCE_RECIPE = RECIPES
-    .find(r => r.prototypeName == "rocket-science");
-
 export const PROTO_TO_RECIPE = new Map(
     RECIPES.map(r => [r.prototypeName, r]));
+
+export const WATER_PUMPING_RECIPE =
+    PROTO_TO_RECIPE.get("water-pumping");
+export const BOILER_RECIPE =
+    PROTO_TO_RECIPE.get("steam");
+export const ROCKET_SILO_RECIPE =
+    PROTO_TO_RECIPE.get("rocket-part");
+export const ROCKET_SCIENCE_RECIPE =
+    PROTO_TO_RECIPE.get("rocket-science");
+

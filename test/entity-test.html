@@ -31,7 +31,7 @@ it("creates drill", () => {
         {x: 0, y: 0, id: RESOURCE_NAMES.ironOre,
         amount: 34};
     map.connectEntity(d, 0);
-    assertNotExists(d);
+    assertExists(d);
     assertMatch(d.data.mineResources.find(Boolean),
         {amount: 34});
   });
@@ -93,7 +93,7 @@ it("creates inserter", () => {
     c.insert(I.ironGear, 20, 0);
     c.insert(I.copperPlate, 20, 0);
     assertEqual(i.nextUpdate, 0);
-    elapse(map, 3);
+    elapse(map, 5);
     assertEqual(i.state, STATE.running);
     assertMatch(a.inputInventory.amounts,
         [2, 1]);

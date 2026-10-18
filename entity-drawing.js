@@ -363,18 +363,31 @@ export function drawPipeCaps(ctx, view, below) {
 export function drawRocketSilo(ctx, view, time) {
   const {x: vx, y: vy, width: vw, height: vh, scale: s} = view;
   const {x, y, width, height} = this;
-  const {siloSprites, rocketSprites, rocketPosition, doorSprites, doorPosition, armSprites, armAnimation, extraSprites, extraAnimation} = this.data;
+  const {rocketParts} = this.data;
+  const {siloSprites, rocketSprites, rocketPosition, doorSprites, doorPosition, armSprites, armAnimation, extraSprites, extraAnimation} = this.data.drawing;
   
-  const t = time % 20000;
-  const p = 1 + t / 6666; // From 0 to 4.
+  let p = 0; // From 0 to 4;
+  const pct = (time - this.taskStart) /
+      (this.taskEnd - this.taskStart);
+  if (this.data.progress == rocketParts) {
+    if (this.state == STATE.rocket) {
+      p = 1 + pct * 1.5;
+    } else {
+      p = 2.5;
+    }
+  } else if (this.data.progress == rocketParts + 1) {
+    p = 2.5 + pct * 1;
+  } else if (this.data.progress == rocketParts + 2) {
+    p = 3.5 + pct * 0.5;
+  }
   const rocket = p < 1.5 ? 0 : p < 2.5 ? p - 1.5 : p < 3 ? 1 : 1 + Math.pow((p - 3) * 2, 2);
   const door = p < 1 ? 0 : p < 1.5 ? (p - 1) / 0.5 : p < 3.5 ? 1 : 1 - (p - 3.5) / 0.5;
   const arms = rocket < 0.715 ? 0 : rocket < 1 ? (rocket - 0.715) / 0.285 : rocket < 1.25 ? 1 - (rocket - 1) * 4 : 0;
   
   const pos = rocket > 1 ? rocket - 1 : rocket,
-      o = rocket > 1 ? 2 : 0,
-      rdx = (1 - pos) * rocketPosition[0 + o] + pos * rocketPosition[2 + o],
-      rdy = (1 - pos) * rocketPosition[1 + o] + pos * rocketPosition[3 + o];
+      off = rocket > 1 ? 2 : 0,
+      rdx = (1 - pos) * rocketPosition[0 + off] + pos * rocketPosition[2 + off],
+      rdy = (1 - pos) * rocketPosition[1 + off] + pos * rocketPosition[3 + off];
   
   for (let i = 0; 1; i++) {
     let id = 0, dx = 0, dy = 0;

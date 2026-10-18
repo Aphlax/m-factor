@@ -16,15 +16,20 @@ function Inventory(capacity) {
 Inventory.prototype.allowsItems = function(a, b, c) {
   if (this.filters && this.filters.length == this.capacity) {
     // Filtered slots
-    let full = true;
+    let full = false;
     for (let i = 0; i < this.filters.length; i++) {
       const filter = this.filters[i].item;
+      if (!filter) continue;
+      if (a != filter && b != filter &&
+          c != filter)
+        continue;
       if (!this.items[i] ||
           this.amounts[i] < this.filters[i].amount * 2) {
         if (filter == a) return a;
         if (filter == b) return b;
         if (filter == c) return c;
-        full = false;
+      } else {
+        full = true;
       }
     }
     return full ? -1 : 0;
@@ -32,6 +37,7 @@ Inventory.prototype.allowsItems = function(a, b, c) {
   if (this.filters) {
     if (this.items.length < this.capacity) {
       for (let filter of this.filters) {
+        if (!filter.item) continue;
         if (a == filter.item) return a;
         if (b == filter.item) return b;
         if (c == filter.item) return c;
@@ -43,6 +49,7 @@ Inventory.prototype.allowsItems = function(a, b, c) {
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i];
       for (let filter of this.filters) {
+        if (!filter.item) continue;
         if (item == filter.item) {
           if (this.amounts[i] < filter.amount * 2) {
             if (item == a || item == b || item == c) {
@@ -129,10 +136,15 @@ Inventory.prototype.extract = function(item, amount, onlyFullAmount) {
       return 0;
     }
     const transfer = Math.min(amount - count, this.amounts[i]);
-    if (transfer == this.amounts[i] && (!this.filter ||
-        this.filter.length > this.capacity)) {
-      this.items.splice(i, 1);
-      this.amounts.splice(i, 1);
+    if (transfer == this.amounts[i]) {
+      if (!this.filters ||
+        this.filters.length != this.capacity) {
+        this.items.splice(i, 1);
+        this.amounts.splice(i, 1);
+      } else {
+        this.items[i] = undefined;
+        this.amounts[i] = 0;
+      }
     } else {
       this.amounts[i] -= transfer;
     }
@@ -153,6 +165,27 @@ Inventory.prototype.setFilters = function(filters) {
     throw new Error("Not implemented!");
   this.filters = filters;
   return this;
+};
+
+/** Extracts exactly the items from this inventory. Slow. */
+Inventory.prototype.extractItems = function(items) {
+  item: for (let i = 0; i < items.length; i++) {
+    for (let j = 0; j < this.capacity; j++) {
+      if (items[i].item == this.items[j]) {
+        if (items[i].amount > this.amounts[j]) {
+          return false;
+        } else {
+          continue item;
+        }
+      }
+    }
+    return false;
+  }
+  for (let i = 0; i < items.length; i++) {
+    const {item, amount} = items[i];
+    this.extract(item, amount);
+  }
+  return true;
 };
 
 /** Extracts exactly the filters from this inventory. */
@@ -190,5 +223,13 @@ Inventory.prototype.insertFilters = function() {
   }
   return true;
 };
+
+Inventory.prototype.setItems = function(items) {
+  for (let i = 0; i < items.length; i++) {
+    this.items[i] = items[i].item;
+    this.amounts[i] = items[i].amount;
+  }
+}
+
 
 export {Inventory};

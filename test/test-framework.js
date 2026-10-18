@@ -111,6 +111,11 @@ export function assertMatch(x, template, qualifier = '') {
   if (x != template) {
     const err = new Error(`${pp(x)} != ${pp(template)}` + (qualifier ? ` (in x${qualifier})` : ''));
     Error.captureStackTrace(err, assertMatch);
+    if (err.stack) {
+      err.stack = err.stack.split('\n')
+        .filter(line => !line.includes("assertMatch"))
+        .join('\n');
+    }
     throw err;
   }
 }

@@ -7,16 +7,8 @@ const {north, east, south, west} = DIRECTION;
 const {north: N, east: E, south: S, west: W} = DIRECTION;
 
 export function scenario(gameMap, time) {
-  //return speedrun(gameMap, time);
   return productionTest(gameMap, time);
   return inserterTest(gameMap, time);
-}
-
-function speedrun(map, time) {
-  map.centerView(0, 0);
-  map.createEntities([
-    
-  ]);
 }
 
 function productionTest(gameMap, time) {
@@ -219,7 +211,44 @@ function productionTest(gameMap, time) {
   
   rail(0, 75, 2);
   
+  // Rocket.
   e(NAME.rocketSilo, -5, 50, 0);
+  e(NAME.ironChest, -7, 54, 0).inputInventory
+    .insert(I.lowDensityStructure, 300);
+  e(NAME.ironChest, -12, 55, 0).inputInventory
+    .insert(I.processingUnit, 300);
+  e(NAME.ironChest, -7, 56, 0).inputInventory
+    .insert(I.rocketFuel, 300);
+  e(NAME.fastInserter, -6, 54, 1);
+  e(NAME.fastInserter, -6, 55, 1);
+  e(NAME.fastInserter, -6, 56, 1);
+  e(NAME.fastInserter, -11, 55, 1);
+  l(-10, 55, E, 4);
+  el(-8, 56);
+  el(-6, 52);
+  
+  assembler = e(NAME.assemblingMachine1, -13, 60, 1);
+  assembler.setRecipe(PROTO_TO_RECIPE.get("satellite"));
+  assembler.outputInventory.insertFilters();
+  const chest = e(NAME.ironChest, -15, 60, 0).inputInventory;
+  chest.insert(I.accumulator, 250);
+  chest.insert(I.lowDensityStructure, 100);
+  chest.insert(I.processingUnit, 100);
+  chest.insert(I.rocketFuel, 50);
+  chest.insert(I.radar, 5);
+  chest.insert(I.solarPanel, 100);
+  e(NAME.ironChest, -15, 62, 0)
+  e(NAME.fastInserter, -14, 60, 1);
+  e(NAME.fastInserter, -15, 61, 2);
+  e(NAME.fastInserter, -14, 62, 1);
+  el(-14, 59);
+  l(-9, 60, E, 6);
+  e(NAME.fastInserter, -10, 60, E);
+  e(NAME.fastInserter, -4, 59, N);
+  el(-5, 59, W, 2);
+  e(NAME.fastInserter, -2, 59, S);
+  l(-2, 60, S, 5);
+  el(-1, 59);
   
   gameMap.centerView(0, 50);
 };

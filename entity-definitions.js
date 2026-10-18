@@ -111,7 +111,7 @@ export const ENTITIES = new Map([
     
     inserterReach: 1,
     inserterHandSprites: S.inserterHand,
-    taskDuration: 400,
+    taskDuration: 600,
   }],
   [NAME.stoneFurnace,
   {
@@ -543,7 +543,7 @@ export const ENTITIES = new Map([
     
     inserterReach: 1,
     inserterHandSprites: S.burnerInserterHand,
-    taskDuration: 372,
+    taskDuration: 840,
   }],
   [NAME.fastInserter,
   {
@@ -568,7 +568,7 @@ export const ENTITIES = new Map([
     
     inserterReach: 1,
     inserterHandSprites: S.fastInserterHand,
-    taskDuration: 140,
+    taskDuration: 200,
   }],
   [NAME.longHandedInserter,
   {
@@ -593,7 +593,7 @@ export const ENTITIES = new Map([
     
     inserterReach: 2,
     inserterHandSprites: S.longHandedInserterHand,
-    taskDuration: 280,
+    taskDuration: 400,
   }],
   [NAME.pumpjack,
   {
@@ -669,10 +669,10 @@ export const ENTITIES = new Map([
     particle: S.oilRefineryFire,
     particleAnimationLength: 60,
     particlePosition: {
-      [north]: {x: 3.36, y: 0.1},
-      [east]: {x: 0.71, y: 0.2},
-      [south]: {x: 0.48, y: -0.46},
-      [west]: {x: 4.15, y: 0.31},
+      [north]: {x: 3.2, y: -0.48},
+      [east]: {x: 0.55 , y: -0.38},
+      [south]: {x: 0.32, y: -1.04},
+      [west]: {x: 4, y: -0.27},
     }
   }],
   [NAME.chemicalPlant,
@@ -713,10 +713,10 @@ export const ENTITIES = new Map([
     particle: S.chemicalPlantSmokeOuter,
     particleAnimationLength: 47,
     particlePosition: {
-      [north]: {x: 0.64, y: -2.3},
-      [east]: {x: 1.54, y: -2.13},
-      [south]: {x: 1.28, y: -1.87},
-      [west]: {x: 0.61, y: -1.83},
+      [north]: {x: 0.28, y: -3.71},
+      [east]: {x: 1.18, y: -3.54},
+      [south]: {x: 0.92, y: -3.28},
+      [west]: {x: 0.25, y: -3.24},
     }
   }],
   [NAME.pump,
@@ -1294,15 +1294,21 @@ export const ENTITIES = new Map([
     
     recipe: ROCKET_SILO_RECIPE,
     science: ROCKET_SCIENCE_RECIPE,
-    siloSprites: [S.rocketSiloHole, S.rocketSiloHoleLight, S.rocketSilo, S.rocketSiloFront],
-    rocketSprites: [S.rocket, S.rocketShadow, S.rocketFlame, S.rocketSmoke],
-    rocketPosition: [62, 165, 62, -30, 62, -240, 36, 270, 75, 137],
-    doorSprites: [S.rocketSiloDoorBack, S.rocketSiloDoorBackHalf, S.rocketSiloDoorBackOpen, S.rocketSiloDoorFront, S.rocketSiloDoorFrontHalf, S.rocketSiloDoorFrontOpen],
-    doorPosition: [65, -26, -65, 26],
-    armSprites: [S.rocketSiloArmBack, S.rocketSiloArmRight, S.rocketSiloArmFront],
-    armAnimation: 32,
-    extraSprites: [S.rocketSiloTurbine],
-    extraAnimation: 32,
+    rocketParts: 100,
+    deployDuration: 8000,
+    launchDuration: 5000,
+    closeDuration: 2666,
+    drawing: {
+      siloSprites: [S.rocketSiloHole, S.rocketSiloHoleLight, S.rocketSilo, S.rocketSiloFront],
+      rocketSprites: [S.rocket, S.rocketShadow, S.rocketFlame, S.rocketSmoke],
+      rocketPosition: [62, 165, 62, -30, 62, -240, 36, 270, 75, 137],
+      doorSprites: [S.rocketSiloDoorBack, S.rocketSiloDoorBackHalf, S.rocketSiloDoorBackOpen, S.rocketSiloDoorFront, S.rocketSiloDoorFrontHalf, S.rocketSiloDoorFrontOpen],
+      doorPosition: [65, -26, -65, 26],
+      armSprites: [S.rocketSiloArmBack, S.rocketSiloArmRight, S.rocketSiloArmFront],
+      armAnimation: 32,
+      extraSprites: [S.rocketSiloTurbine],
+      extraAnimation: 32,
+    },
   }],
 ]);
 

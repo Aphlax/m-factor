@@ -4,12 +4,15 @@ import {SPRITES, S} from './sprite-pool.js';
 import {CHOICE} from './ui-choice.js';
 import {ITEMS, FLUIDS, I} from './item-definitions.js';
 
+const PROGRESS = { task: 1, rocket: 2 };
+
 function UiProgress(parent, x, y) {
   this.parent = parent;
   this.x = x;
   this.y = y;
   this.entity = undefined;
   this.width = 0;
+  this.mode = PROGRESS.task;
 }
 
 UiProgress.prototype.set = function(entity) {
@@ -21,18 +24,29 @@ UiProgress.prototype.setWidth = function(width) {
   return this;
 };
 
+UiProgress.prototype.setMode = function(mode) {
+  this.mode = mode;
+  return this;
+};
+
 UiProgress.prototype.draw = function(ctx, time) {
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
   
   let progress = 0;
-  if (this.entity.state == STATE.running ||
-      this.entity.state == STATE.outOfEnergy) {
-    progress = (time - this.entity.taskStart) /
-        (this.entity.taskEnd - this.entity.taskStart)
-  } else if (this.entity.state == STATE.outputFull ||
-      this.entity.state == STATE.itemReady) {
-    progress = 1;
+  if (this.mode == PROGRESS.task) {
+    if (this.entity.state == STATE.running ||
+        this.entity.state == STATE.outOfEnergy) {
+      progress = (time - this.entity.taskStart) /
+          (this.entity.taskEnd - this.entity.taskStart)
+    } else if (this.entity.state == STATE.outputFull ||
+        this.entity.state == STATE.itemReady) {
+      progress = 1;
+    }
+  } else {
+    progress = this.entity.data.progress /
+      this.entity.data.rocketParts;
+    if (progress > 1) progress = 1;
   }
   
   ctx.fillStyle = COLOR.background3;
@@ -509,4 +523,4 @@ UiTree.prototype.touchEnd = function(e) {
 }
 
 
-export {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTree};
+export {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTree};

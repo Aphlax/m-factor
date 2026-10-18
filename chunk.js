@@ -310,20 +310,22 @@ Chunk.prototype.drawParticles = function(ctx, view, time) {
     if (time > p.startTime + p.duration) continue;
     const t = (time - p.startTime) / p.duration;
     const e = t * t;
-    const x = (1 - e) * p.xStart + e * p.xEnd;
-    const y = (1 - t) * p.yStart + t * p.yEnd;
+    const xt = p.move == 1 ? e : t;
+    const x = (1 - xt) * p.xStart + xt * p.xEnd;
+    const yt = p.move == 2 ? e + 0.3 * t : t;
+    const y = (1 - yt) * p.yStart + yt * p.yEnd;
     const size = (1 - e) * p.sizeStart + e * p.sizeEnd;
     
     const animation = Math.floor(p.animation +
         (time - p.startTime) * p.animationSpeed / 60) %
         p.animationLength;
     const sprite = SPRITES.get(p.sprite + animation);
-    if ((x + sprite.width * size) * s <= vx) continue;
+    if ((x + sprite.width * size / 32) * s <= vx) continue;
     if (x * s > vx + vw) continue;
-    if ((y + sprite.height * size) * s <= vy) continue;
+    if ((y + sprite.height * size / 32) * s <= vy) continue;
     if (y * s > vy + vh) continue;
     
-    ctx.globalAlpha = Math.min((time - p.startTime) / 200,
+    ctx.globalAlpha = Math.min(p.move == 2 ? 1 : (time - p.startTime) / 200,
         (1 - e) * p.alphaStart + e * p.alphaEnd,
         (p.startTime + p.duration - time) / 200);
     ctx.drawImage(
@@ -332,8 +334,8 @@ Chunk.prototype.drawParticles = function(ctx, view, time) {
         sprite.width, sprite.height,
         (x * s - vx),
         (y * s - vy),
-        (sprite.width * size * s / 64),
-        (sprite.height * size * s / 64));
+        (sprite.width * size * s / 32),
+        (sprite.height * size * s / 32));
     window.numberImageDraws++;
   }
   ctx.globalAlpha = 1;

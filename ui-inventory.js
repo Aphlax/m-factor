@@ -8,15 +8,23 @@ function UiInventory(parent, x, y) {
   this.y = y;
   this.inventory = undefined;
   this.isOutput = false;
+  this.start = 0;
+  this.end = 100;
 }
 
 UiInventory.prototype.set = function(inventory) {
   this.inventory = inventory;
+  return this;
 };
 
 UiInventory.prototype.setIsOutput = function(isOutput) {
   this.isOutput = isOutput;
   return this;
+};
+
+UiInventory.prototype.setPart = function(start, end) {
+  this.start = start;
+  this.end = end ?? 100;
 };
 
 UiInventory.prototype.draw = function(ctx) {
@@ -28,30 +36,34 @@ UiInventory.prototype.draw = function(ctx) {
   ctx.font = "16px monospace";
   ctx.textAlign = "end";
   ctx.textBaseline = "middle";
-  for (let i = 0; i < this.inventory.capacity; i++) {
-    const isFull = this.inventory.amounts[i] >= this.inventory.filters?.[i]?.amount * 2;
+  const amount = (this.end < this.inventory.capacity ? this.end : this.inventory.capacity) - this.start;
+  for (let i = 0; i < amount; i++) {
+    const j = this.start + i;
+    const isFull = this.inventory.amounts[j] >= this.inventory.filters?.[j]?.amount * 2;
     ctx.fillStyle = isFull && this.isOutput ?
         "#686028" : COLOR.background3;
     ctx.fillRect(x + i * 46, y, 40, 40);
     ctx.strokeRect(x + i * 46, y, 40, 40);
-    if (this.inventory.items[i] || this.inventory.filters?.length == this.inventory.capacity) {
-      const item = this.inventory.items[i] ?? this.inventory.filters[i].item;
-      const itemDef = ITEMS.get(item);
-      const sprite = SPRITES.get(itemDef.sprite);
-      if (!this.inventory.items[i]) {
-        ctx.globalAlpha = 0.4;
-      }
-      ctx.drawImage(sprite.image,
-          sprite.x, sprite.y,
-          sprite.width, sprite.height,
-          x + i * 46 + 5, y + 5, 32, 32);
-      if (!this.inventory.items[i]) {
-        ctx.globalAlpha = 1;
-      } else {
-        ctx.fillStyle = COLOR.primary;
-        ctx.fillText(this.inventory.amounts[i],
-            x + i * 46 + 37, y + 32);
-      }
+    if (!this.inventory.items[j] && 
+        this.inventory.filters?.length != this.inventory.capacity)
+      continue;
+    const item = this.inventory.items[j] ?? this.inventory.filters[j].item;
+    if (item <= 0) continue;
+    const itemDef = ITEMS.get(item);
+    const sprite = SPRITES.get(itemDef.sprite);
+    if (!this.inventory.items[j]) {
+      ctx.globalAlpha = 0.4;
+    }
+    ctx.drawImage(sprite.image,
+        sprite.x, sprite.y,
+        sprite.width, sprite.height,
+        x + i * 46 + 5, y + 5, 32, 32);
+    if (!this.inventory.items[j]) {
+      ctx.globalAlpha = 1;
+    } else {
+      ctx.fillStyle = COLOR.primary;
+      ctx.fillText(this.inventory.amounts[j],
+          x + i * 46 + 37, y + 32);
     }
   }
   ctx.textAlign = "start";

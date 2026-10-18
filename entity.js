@@ -360,24 +360,22 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
   } else if (this.type == TYPE.rocketSilo) {
     this.state = STATE.missingItem;
     this.nextUpdate = NEVER;
-    this.extraSpriteUnder = def.siloSprites[0];
-    this.data.processingSpeed = def.processingSpeed;
+    this.taskDuration = def.recipe.duration;
+    this.extraSpriteUnder = def.drawing.siloSprites[0];
     this.data.recipe = def.recipe;
     this.data.science = def.science;
     this.data.progress = 0;
-    this.data.siloSprites = def.siloSprites;
-    this.data.rocketSprites = def.rocketSprites;
-    this.data.rocketPosition = def.rocketPosition;
-    this.data.doorSprites = def.doorSprites;
-    this.data.doorPosition = def.doorPosition;
-    this.data.armSprites = def.armSprites;
-    this.data.armAnimation = def.armAnimation;
-    this.data.extraSprites = def.extraSprites;
-    this.data.extraAnimation = def.extraAnimation;
-    const allInputs = [...def.recipe.inputs, ...def.science.inputs]
+    this.data.rocketParts = def.rocketParts;
+    this.data.deployDuration = def.deployDuration;
+    this.data.launchDuration = def.launchDuration;
+    this.data.closeDuration = def.closeDuration;
+    this.data.drawing = def.drawing;
+    const allInputs = [...def.recipe.inputs,
+      ...def.science.inputs.map(item => ({...item, item: 0}))];
     this.inputInventory = new Inventory(allInputs.length)
         .setFilters(allInputs);
-    this.outputInventory = new Inventory(1);
+    this.outputInventory = new Inventory(def.science.outputs.length)
+        .setFilters(def.science.outputs);
     this.energySource = def.energySource;
     this.energyDrain = def.energyDrain;
     this.energyConsumption = def.energyConsumption;
@@ -936,20 +934,77 @@ Entity.prototype.update = function(gameMap, time) {
     }
   } else if (this.type == TYPE.rocketSilo) {
     let state = this.state, nextUpdate = NEVER;
+    const {recipe, science, rocketParts, deployDuration, launchDuration, closeDuration} = this.data;
     silo: {
-      if (state == STATE.running ||
-          state == STATE.itemReady) {
-        if (state == STATE.running && this.animationLength) {
-          this.animation = Math.floor(this.animation +
-            (time - this.taskStart) * this.animationSpeed / 60) %
-            this.animationLength;
+      if (state == STATE.rocket) {
+        if (this.data.progress == rocketParts + 1) {
+          this.data.progress++;
+          const [rocket, _, flame, smoke] = this.data.drawing.rocketSprites;
+          const rocketPosition = this.data.drawing.rocketPosition;
+          const x = this.x + rocketPosition[4] / 32;
+          const y = this.y + rocketPosition[5] / 32;
+          const fx = x + rocketPosition[6] / 32;
+          const fy = y + rocketPosition[7] / 32;
+          gameMap.createRocket(flame, 8, fx, fy, 64, this.nextUpdate, 4000);
+          gameMap.createRocket(rocket, 1, x, y, 64, this.nextUpdate, 4000);
+          const sx = x + rocketPosition[8] / 32;
+          const sy = y + rocketPosition[9] / 32;
+          gameMap.createRocket(smoke, 24, sx, sy, 64, this.nextUpdate, 4000);
+          this.taskStart = this.nextUpdate;
+          this.taskEnd = nextUpdate =
+            this.taskStart + closeDuration;
+          break silo;
+        } else if (this.data.progress == rocketParts + 2) {
+          this.outputInventory.setItems(science.outputs);
+          for (let outputEntity of this.outputEntities) {
+            if (outputEntity.state == STATE.missingItem) {
+              outputEntity.nextUpdate = this.nextUpdate;
+            }
+          }
+          this.data.progress = 0;
+        } else {
+          for (let i = 0; i < science.inputs.length; i++) {
+            this.inputInventory.filters
+              [recipe.inputs.length + i].item = science.inputs[i].item;
+          }
+          for (let inputEntity of this.inputEntities) {
+            if (inputEntity.state == STATE.missingInput ||
+                inputEntity.state == STATE.outputFull ||
+                inputEntity.state == STATE.itemReady) {
+              inputEntity.nextUpdate = this.nextUpdate;
+            }
+          }
         }
-        // progress
-        this.data.progress++;
         state = STATE.missingItem;
+      } else if (state == STATE.running) {
+        this.data.progress++;
+        if (this.data.progress >= rocketParts) {
+          state = STATE.rocket;
+          this.taskStart = this.nextUpdate;
+          this.taskEnd = nextUpdate =
+            this.taskStart + deployDuration;
+          break silo;
+        } else {
+          state = STATE.missingItem;
+        }
       }
       if (state == STATE.missingItem) {
-        if (!this.inputInventory.extractFilters()) {
+        const needs = this.data.progress < rocketParts ?
+            recipe.inputs : science.inputs;
+        if (!this.inputInventory.extractItems(needs)) {
+          break silo;
+        }
+        
+        if (this.data.progress == rocketParts) {
+          state = STATE.rocket;
+          this.data.progress++;
+          for (let i = 0; i < science.inputs.length; i++) {
+            this.inputInventory.filters
+              [recipe.inputs.length + i].item = 0;
+          }
+          this.taskStart = this.nextUpdate;
+          this.taskEnd = nextUpdate =
+            this.taskStart + launchDuration;
           break silo;
         }
         for (let inputEntity of this.inputEntities) {
@@ -978,14 +1033,6 @@ Entity.prototype.update = function(gameMap, time) {
       if (this.state == STATE.running && state != STATE.running) {
         this.data.grid.consumerss.get(this.energyConsumption).delete(this);
         this.data.grid.consumerss.get(this.energyDrain).add(this);
-      }
-    }
-    if (this.data.idleAnimation) {
-      if (this.state != STATE.running && state == STATE.running) {
-        this.sprite = this.data.workingAnimation;
-      }
-      if (this.state == STATE.running && state != STATE.running) {
-        this.sprite = this.data.idleAnimation;
       }
     }
     this.state = state;

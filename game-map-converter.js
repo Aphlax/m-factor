@@ -189,6 +189,8 @@ GMC.serializeEntity = function(index, entity, blueprintOnly) {
       ...(entity.type == TYPE.mine ? {
           minePattern: entity.data.minePattern,
           minedResource: entity.data.minedResource} : {}),
+      ...(entity.type == TYPE.rocketSilo ?
+          {progress: entity.data.progress} : {}),
     }),
   };
 };
@@ -297,6 +299,7 @@ GMC.deserializeEntityCustomFields = function(e, entity) {
       entity.type == TYPE.mine ||
       entity.type == TYPE.furnace ||
       entity.type == TYPE.assembler ||
+      entity.type == TYPE.rocketSilo ||
       entity.type == TYPE.lab ||
       entity.type == TYPE.boiler ||
       entity.type == TYPE.generator) {
@@ -356,6 +359,17 @@ GMC.deserializeEntityCustomFields = function(e, entity) {
   if (entity.type == TYPE.mine) {
     entity.data.minePattern = e.minePattern;
     entity.data.minedResource = e.minedResource;
+  }
+  if (entity.type == TYPE.rocketSilo) {
+    entity.data.progress = e.progress;
+    const {recipe, science, rocketParts} = entity.data;
+    if (entity.state == STATE.missingItem &&
+        e.progress == rocketParts) {
+      for (let i = 0; i < science.inputs.length; i++) {
+        entity.inputInventory.filters
+          [recipe.inputs.length + i].item = science.inputs[i].item;
+      }
+    }
   }
 };
 

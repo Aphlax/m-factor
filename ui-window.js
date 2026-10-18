@@ -1,5 +1,5 @@
 import {UiInventory, UiFluidInventory} from './ui-inventory.js';
-import {UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTree} from './ui-components.js';
+import {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTree} from './ui-components.js';
 import {UiButton, BUTTON} from './ui-button.js';
 import {UiChoice, CHOICE} from './ui-choice.js';
 import {COLOR} from './ui-properties.js';
@@ -248,7 +248,6 @@ UiWindow.prototype.initialize = function() {
   this.entityUis.set(TYPE.rail, {});
   this.entityUis.set(TYPE.trainStop, {});
   this.entityUis.set(TYPE.railSignal, {});
-  this.entityUis.set(TYPE.rocketSilo, {});
   
   this.entityUis.set(TYPE.belt, {
     snake: new UiButton(this, this.canvasWidth - 96, 86)
@@ -314,6 +313,18 @@ UiWindow.prototype.initialize = function() {
     input: new UiFluidInventory(this, 10, 40),
   });
   
+  this.entityUis.set(TYPE.rocketSilo, {
+    input: new UiInventory(this, 10, 40),
+    progress: new UiProgress(this, 56, 40)
+        .setWidth(this.canvasWidth - 112),
+    scienceInput: new UiInventory(this, 10, 86),
+    rocketProgress: new UiProgress(this, 56, 86)
+        .setWidth(this.canvasWidth - 88)
+        .setMode(PROGRESS.rocket),
+    output: new UiInventory(this, this.canvasWidth - 50, 86)
+        .setIsOutput(true),
+  });
+  
   for (let ui of this.entityUis.values()) {
     ui.all = Object.values(ui);
   }
@@ -331,7 +342,7 @@ UiWindow.prototype.set = function(selectedEntity) {
     this.animationSpeed = (this.yTarget - this.y) / 100;
   }
   this.x = this.xTarget = 0;
-  this.entityUi = this.entityUis.get(selectedEntity.type);
+  const ui = this.entityUi = this.entityUis.get(selectedEntity.type);
   
   if (!selectedEntity.type) {
     if (selectedEntity.id) {
@@ -342,62 +353,82 @@ UiWindow.prototype.set = function(selectedEntity) {
       this.entityUi.tree.set(selectedEntity);
     }
   } else if (selectedEntity.type == TYPE.mine) {
-    this.entityUi.progress.set(selectedEntity);
+    ui.progress.set(selectedEntity);
   } else if (selectedEntity.type == TYPE.chest) {
-    this.entityUi.inventory.set(selectedEntity.inputInventory);
+    ui.inventory.set(selectedEntity.inputInventory);
   } else if (selectedEntity.type == TYPE.furnace) {
-    this.entityUi.input.set(selectedEntity.inputInventory);
-    this.entityUi.output.set(selectedEntity.outputInventory);
-    this.entityUi.progress.set(selectedEntity);
+    ui.input.set(selectedEntity.inputInventory);
+    ui.output.set(selectedEntity.outputInventory);
+    ui.progress.set(selectedEntity);
   } else if (selectedEntity.type == TYPE.assembler) {
-    this.entityUi.input.set(selectedEntity.inputInventory);
-    this.entityUi.fluidInput.set(selectedEntity.inputFluidTank);
-    this.entityUi.fluidInput.x = 10 +
+    ui.input.set(selectedEntity.inputInventory);
+    ui.fluidInput.set(selectedEntity.inputFluidTank);
+    ui.fluidInput.x = 10 +
         selectedEntity.inputInventory.capacity * 46;
-    this.entityUi.output.set(selectedEntity.outputInventory);
-    this.entityUi.output.x = this.canvasWidth - 50 -
+    ui.output.set(selectedEntity.outputInventory);
+    ui.output.x = this.canvasWidth - 50 -
         (selectedEntity.outputInventory.capacity +
         (selectedEntity.outputFluidTank?.tanklets.length ?? 0)) * 46;
-    this.entityUi.fluidOutput.set(selectedEntity.outputFluidTank);
-    this.entityUi.fluidOutput.x = this.canvasWidth - 50 -
+    ui.fluidOutput.set(selectedEntity.outputFluidTank);
+    ui.fluidOutput.x = this.canvasWidth - 50 -
         (selectedEntity.outputFluidTank?.tanklets.length ?? 0) * 46;
-    this.entityUi.progress.set(selectedEntity);
-    this.entityUi.progress.x = 10 +
+    ui.progress.set(selectedEntity);
+    ui.progress.x = 10 +
         (selectedEntity.inputInventory.capacity +
         (selectedEntity.inputFluidTank?.tanklets.length ?? 0)) * 46;
-    this.entityUi.progress.width = this.canvasWidth - 66 -
+    ui.progress.width = this.canvasWidth - 66 -
         46 * (selectedEntity.inputInventory.capacity +
         selectedEntity.outputInventory.capacity +
         (selectedEntity.inputFluidTank?.tanklets.length ?? 0) +
         (selectedEntity.outputFluidTank?.tanklets.length ?? 0));
     if (!selectedEntity.data.recipe) {
-      this.entityUi.recipeChoice.openChoice(
+      ui.recipeChoice.openChoice(
           CHOICE.assemblerRecipe, selectedEntity);
       this.x = this.xTarget = -this.canvasWidth;
     }
   } else if (selectedEntity.type == TYPE.lab) {
-    this.entityUi.inventory.set(selectedEntity.inputInventory);
-    this.entityUi.progress.set(selectedEntity);
+    ui.inventory.set(selectedEntity.inputInventory);
+    ui.progress.set(selectedEntity);
   } else if (selectedEntity.type == TYPE.pipe ||
       selectedEntity.type == TYPE.pipeToGround) {
-    this.entityUi.fluidIndicator.set(selectedEntity);
+    ui.fluidIndicator.set(selectedEntity);
   } else if (selectedEntity.type == TYPE.generator) {
-    this.entityUi.input.set(this.ui.game.settings.debugPipes ?
+    ui.input.set(this.ui.game.settings.debugPipes ?
         selectedEntity.inputFluidTank : undefined);
   } else if (selectedEntity.type == TYPE.undergroundBelt) {
-    this.entityUi.connectUnderground.setButton(
+    ui.connectUnderground.setButton(
         (selectedEntity.data.undergroundUp ?
         !selectedEntity.data.beltInput :
         !selectedEntity.data.beltOutput) ?
         BUTTON.connectUnderground : BUTTON.none);
   } else if (selectedEntity.type == TYPE.pipeToGround) {
-    this.entityUi.connectUnderground.setButton(
+    ui.connectUnderground.setButton(
         !selectedEntity.data.pipes[1] ?
         BUTTON.connectUnderground : BUTTON.none);
   } else if (selectedEntity.type == TYPE.splitter) {
-    this.entityUi.priority.set(selectedEntity);
+    ui.priority.set(selectedEntity);
   } else if (selectedEntity.type == TYPE.inserter) {
-    this.entityUi.filters.set(selectedEntity);
+    ui.filters.set(selectedEntity);
+  } else if (selectedEntity.type == TYPE.rocketSilo) {
+    const {recipe, science} = selectedEntity.data;
+    ui.input.set(selectedEntity.inputInventory)
+      .setPart(0, recipe.inputs.length);
+    ui.progress.set(selectedEntity);
+    ui.progress.x = 10 +
+        (recipe.inputs.length) * 46;
+    ui.progress.width = this.canvasWidth - 20 -
+        46 * (recipe.inputs.length);
+    ui.scienceInput.set(selectedEntity.inputInventory)
+      .setPart(recipe.inputs.length, 100);
+    ui.rocketProgress.set(selectedEntity);
+    ui.rocketProgress.x = 10 +
+        (science.inputs.length) * 46;
+    ui.rocketProgress.width = this.canvasWidth - 66 -
+        46 * (science.inputs.length +
+        selectedEntity.outputInventory.capacity);
+    ui.output.set(selectedEntity.outputInventory);
+    ui.output.x = this.canvasWidth - 50 -
+        (selectedEntity.outputInventory.capacity) * 46;
   }
   
   this.showDefaultUi = !!selectedEntity.type;

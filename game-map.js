@@ -25,7 +25,8 @@ function GameMap(seed, type) {
   this.transportNetwork = new TransportNetwork();
   this.fluidNetwork = new FluidNetwork();
   this.electricNetwork = new ElectricNetwork(this);
-  this.particles = []; // Expired particles.
+  this.particlePool = [];
+  this.particles = [];
 }
 
 GameMap.prototype.initialize = function() {
@@ -77,7 +78,7 @@ GameMap.prototype.update = function(time, dt) {
       for (let i = 0; i < chunk.particles.length; i++) {
         const p = chunk.particles[i];
         if (p.startTime + p.duration < time) {
-          this.particles.push(p);
+          this.particlePool.push(p);
           expired++;
         } else if (expired) {
           chunk.particles[i - expired] = p;
@@ -87,6 +88,19 @@ GameMap.prototype.update = function(time, dt) {
         chunk.particles.length -= expired;
       }
     }
+  }
+  let expired = 0;
+  for (let i = 0; i < this.particles.length; i++) {
+    const p = this.particles[i];
+    if (p.startTime + p.duration < time) {
+      this.particlePool.push(p);
+      expired++;
+    } else if (expired) {
+      this.particles[i - expired] = p;
+    }
+  }
+  if (expired) {
+    this.particles.length -= expired;
   }
   const timestampEntities = performance.now();
   window.timeEntities = timestampEntities - timestampElectric;
@@ -304,6 +318,7 @@ GameMap.prototype.draw = function(ctx, time) {
       chunk.drawParticles(ctx, this.view, time);
     }
   }
+  Chunk.prototype.drawParticles.call(this, ctx, this.view, time);
   window.numberParticleDraws = window.numberImageDraws - countBeforeParticles;
 };
 
@@ -892,9 +907,9 @@ GameMap.prototype.createSmoke = function(x, y, time, duration) {
   if (!count && time % 200 < duration) count++;
   for (let i = 0; i < count; i++) {
     let p;
-    if (this.particles.length) {
-      p = this.particles[this.particles.length - 1];
-      this.particles.length--;
+    if (this.particlePool.length) {
+      p = this.particlePool[this.particlePool.length - 1];
+      this.particlePool.length--;
     } else {
       p = {};
     }
@@ -903,8 +918,9 @@ GameMap.prototype.createSmoke = function(x, y, time, duration) {
     p.yStart = y - 0.2;
     p.xEnd = x + 1.5 + Math.random();
     p.yEnd = y - 4 - 1.5 * Math.random();
-    p.sizeStart = 0.4 + 0.15 * Math.random();
-    p.sizeEnd = 2 + Math.random();
+    p.move = 1;
+    p.sizeStart = 0.2 + 0.075 * Math.random();
+    p.sizeEnd = 1 + 0.5 * Math.random();
     p.startTime = time + i * duration / count;
     const d = (p.xEnd - p.xStart) ** 2 + (p.yEnd - p.yStart) ** 2;
     p.duration = (d + 25) / 55 * 4000;
@@ -924,15 +940,16 @@ GameMap.prototype.createParticle = function(sprite, length, x, y, time, duration
   const cy = Math.floor(y / SIZE);
   if (!this.chunks.get(cx).has(cy)) return;
   let p;
-  if (this.particles.length) {
-    p = this.particles[this.particles.length - 1];
-    this.particles.length--;
+  if (this.particlePool.length) {
+    p = this.particlePool[this.particlePool.length - 1];
+    this.particlePool.length--;
   } else {
     p = {};
   }
   p.sprite = sprite;
   p.xStart = p.xEnd = x;
   p.yStart = p.yEnd = y;
+  p.move = 0;
   p.sizeStart = p.sizeEnd = 1;
   p.startTime = time;
   p.duration = duration + 210;
@@ -942,6 +959,29 @@ GameMap.prototype.createParticle = function(sprite, length, x, y, time, duration
   p.animationSpeed = 1;
   
   this.chunks.get(cx).get(cy).particles.push(p);
+};
+
+GameMap.prototype.createRocket = function(sprite, length, x, y, distance, time, duration) {
+  let p;
+  if (this.particlePool.length) {
+    p = this.particlePool[this.particlePool.length - 1];
+    this.particlePool.length--;
+  } else {
+    p = {};
+  }
+  p.sprite = sprite;
+  p.xStart = p.xEnd = x;
+  p.yStart = y;
+  p.yEnd = y - distance;
+  p.move = 2;
+  p.sizeStart = p.sizeEnd = 1;
+  p.startTime = time;
+  p.duration = duration + 210;
+  p.alphaStart = p.alphaEnd = 1;
+  p.animationLength = length;
+  p.animation = length ? Math.floor(time / 60) % length : 0;
+  p.animationSpeed = 1;
+  this.particles.push(p);
 };
 
 export {GameMap};

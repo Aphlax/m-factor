@@ -20,7 +20,8 @@ export function insert(item, amount, time) {
       if (this.type == TYPE.chest ||
           this.type == TYPE.lab) {
         for (let outputEntity of this.outputEntities) {
-          if (outputEntity.state == STATE.missingItem) {
+          if (outputEntity.state == STATE.missingItem ||
+              outputEntity.state == STATE.outputFull) {
             outputEntity.nextUpdate = time;
           }
         }
