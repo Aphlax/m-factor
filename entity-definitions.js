@@ -1289,8 +1289,8 @@ export const ENTITIES = new Map([
     animationLength: 0,
     mapColor: "#006094",
     energySource: ENERGY.electric,
-    energyDrain: 12.5, // kW
-    energyConsumption: 387.5, // kW
+    energyDrain: 400, // kW
+    energyConsumption: 3600, // kW
     
     recipe: ROCKET_SILO_RECIPE,
     science: ROCKET_SCIENCE_RECIPE,

@@ -2,7 +2,7 @@
 
 import {GameMap, MAP} from './game-map.js';
 import {GameUi} from './game-ui.js';
-import {UiPauseMenu, UiSettingsMenu} from './game-menu.js';
+import {UiPauseMenu, UiSettingsMenu, UiVictoryScreen} from './game-menu.js';
 import {Storage, STORAGE} from './storage.js';
 import {SPRITES} from './sprite-pool.js';
 import {scenario} from './scenario.js';
@@ -16,6 +16,7 @@ const MODE = {
   playing: 2,
   pauseMenu: 3,
   settingsMenu: 4,
+  victoryScreen: 5,
 };
 
 function Game(canvas) {
@@ -30,11 +31,13 @@ function Game(canvas) {
   this.ui = new GameUi(this, canvas);
   this.pauseMenu = new UiPauseMenu(this, canvas);
   this.settingsMenu = new UiSettingsMenu(this, canvas);
+  this.victoryScreen = new UiVictoryScreen(this, canvas);
   this.gameMap = undefined;
   
   this.setupScenario = true;
   this.lastUpdate = 0;
   this.playTime = 0;
+  this.achievedVictory = false;
   
   this.loadMap(new GameMap(this.seed, MAP.nauvis)
       .setViewFromCanvas(canvas));
@@ -44,7 +47,7 @@ function Game(canvas) {
 Game.prototype.loadMap = function(gameMap) {
   this.playTime = gameMap.playTime;
   this.gameMap = gameMap;
-  this.gameMap.initialize();
+  this.gameMap.initialize(this);
   this.ui.setMap(gameMap);
   this.mode = MODE.playing;
 };
@@ -108,6 +111,15 @@ Game.prototype.draw = function(ctx, time) {
   } else if (this.mode == MODE.settingsMenu) {
     this.settingsMenu.draw(ctx);
     this.storage.draw(ctx, time);
+  } else if (this.mode == MODE.victoryScreen) {
+    if (this.gameMap.view.scale >= MAP_SCALE_BOUNDRY) {
+      this.gameMap.drawGround(ctx, this.playTime);
+      this.gameMap.draw(ctx, this.playTime);
+    } else {
+      this.gameMap.drawMap(ctx);
+    }
+    this.ui.window.draw(ctx, this.playTime);
+    this.victoryScreen.draw(ctx);
   }
 };
 
@@ -122,6 +134,12 @@ Game.prototype.continuePlay = function() {
 Game.prototype.openSettings = function() {
   this.mode = MODE.settingsMenu;
   this.settingsMenu.initialize();
+};
+
+Game.prototype.openVicoryScreen = function() {
+  if (this.achievedVictory) return;
+  this.achievedVictory = true;
+  this.mode = MODE.victoryScreen;
 };
 
 Game.prototype.saveGame = function() {
@@ -146,6 +164,8 @@ Game.prototype.touchStart = function(e) {
     this.pauseMenu.touchStart(e);
   } else if (this.mode == MODE.settingsMenu) {
     this.settingsMenu.touchStart(e);
+  } else if (this.mode == MODE.victoryScreen) {
+    this.victoryScreen.touchStart(e);
   }
 };
 
@@ -156,6 +176,8 @@ Game.prototype.touchMove = function(e) {
     this.pauseMenu.touchMove(e);
   } else if (this.mode == MODE.settingsMenu) {
     this.settingsMenu.touchMove(e);
+  } else if (this.mode == MODE.victoryScreen) {
+    this.victoryScreen.touchMove(e);
   }
 };
 
@@ -166,6 +188,8 @@ Game.prototype.touchEnd = function(e) {
     this.pauseMenu.touchEnd(e);
   } else if (this.mode == MODE.settingsMenu) {
     this.settingsMenu.touchEnd(e);
+  } else if (this.mode == MODE.victoryScreen) {
+    this.victoryScreen.touchEnd(e);
   }
 };
 

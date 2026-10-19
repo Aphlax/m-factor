@@ -29,7 +29,8 @@ function GameMap(seed, type) {
   this.particles = [];
 }
 
-GameMap.prototype.initialize = function() {
+GameMap.prototype.initialize = function(game) {
+  this.game = game; // Only used for victory screen.
   this.mapGenerator.initialize();
 };
 

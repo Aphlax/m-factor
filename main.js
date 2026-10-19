@@ -34,7 +34,7 @@ import {Game} from "./game.js";
     lastFrame = time;
     frameCount++;
     if (time >= nextFps) {
-  	frameRate = Math.round(frameCount / (time - nextFps + 500) * 1000);
+      frameRate = Math.round(frameCount / (time - nextFps + 500) * 1000);
       avgUpdateTime = Math.round(totalUpdateTime / frameCount);
       avgDrawTime = Math.round(totalDrawTime / frameCount);
       maxUpdateTime = updateTime;
@@ -42,7 +42,7 @@ import {Game} from "./game.js";
       frameCount = 0;
       updateTime = totalUpdateTime = 0;
       drawTime = totalDrawTime = 0;
-  	nextFps = time + 500;
+      nextFps = time + 500;
     }
     
     const timestampStart = performance.now();

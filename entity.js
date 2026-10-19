@@ -962,6 +962,7 @@ Entity.prototype.update = function(gameMap, time) {
             }
           }
           this.data.progress = 0;
+          gameMap.game.openVicoryScreen();
         } else {
           for (let i = 0; i < science.inputs.length; i++) {
             this.inputInventory.filters

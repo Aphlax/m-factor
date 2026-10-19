@@ -220,5 +220,65 @@ UiSettingsMenu.prototype.touchEnd = function(e) {
   this.pressedIndex = -1;
 };
 
+function UiVictoryScreen(game, canvas) {
+  this.game = game;
+  this.canvas = canvas;
+  
+  this.pressed = false;
+}
 
-export {UiPauseMenu, UiSettingsMenu};
+UiVictoryScreen.prototype.draw = function(ctx) {
+  const x = this.canvas.width / 2 - 120;
+  const y = this.canvas.height / 2 - 200;
+  
+  ctx.fillStyle = COLOR.scrim;
+  ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  
+  ctx.fillStyle = COLOR.background2;
+  ctx.fillRect(x - 20, y - 20, 280, 420);
+  ctx.strokeStyle = COLOR.border1;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(x - 20, y - 20, 280, 420);
+  
+  ctx.font = "42px monospace";
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "center";
+  ctx.fillStyle = COLOR.primary;
+  ctx.fillText("Victory!", x + 120, y + 60);
+  ctx.font = "24px monospace";
+  ctx.fillText("Congratulations,", x + 120, y + 120);
+  ctx.fillText("you did complete", x + 120, y + 170);
+  ctx.fillText("this game!", x + 120, y + 200);
+  ctx.fillStyle = this.pressed ?
+      COLOR.buttonBackgroundPressed : COLOR.buttonBackground;
+  ctx.fillRect(x, y + 300, 240, 80);
+  ctx.strokeStyle = COLOR.buttonBorder;
+  ctx.strokeRect(x, y + 300, 240, 80);
+  ctx.fillStyle = COLOR.primary;
+  ctx.fillText("Continue", x + 120, y + 45 + 300);
+  ctx.textAlign = "start";
+};
+
+
+UiVictoryScreen.prototype.touchStart = function(e) {
+  const x = this.canvas.width / 2 - 120;
+  const y = this.canvas.height / 2 - 200;
+  const {clientX: px, clientY: py} = e.touches[0];
+  
+  this.pressed = px > x && px < x + 240 &&
+      py > y + 300 && py < y + 380;
+};
+
+
+UiVictoryScreen.prototype.touchMove = function(e) {
+  this.pressed = false;
+};
+
+UiVictoryScreen.prototype.touchEnd = function(e) {
+  if (this.pressed) {
+    this.pressed = false;
+    this.game.continuePlay();
+  }
+};
+
+export {UiPauseMenu, UiSettingsMenu, UiVictoryScreen};
