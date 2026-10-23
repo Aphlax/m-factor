@@ -698,7 +698,7 @@ GameMap.prototype.disconnectEntity = function(entity, time) {
     this.fluidNetwork.removeInputFluidTank(entity);
   }
   if (entity.type == TYPE.electricPole) {
-    this.electricNetwork.removePole(entity);
+    this.electricNetwork.removePole(entity, time);
     for (let other of entity.electricConnections) {
       if (other.energySource == ENERGY.electric) {
         this.electricNetwork.modifyConsumer(other, time);

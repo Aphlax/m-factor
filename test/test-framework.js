@@ -177,12 +177,13 @@ export function blueprintScrambled(blueprint, check, startPerm, rotations) {
   }
 }
 
-const GOD_CONS = {add: () => {}, delete: () => {}},
+const DUMMY_SET = {add: () => {}, delete: () => {}},
     GOD_GRID = {
       satisfaction: 1,
       consumerss: {
-        get: () => GOD_CONS,
-      }
+        get: () => DUMMY_SET,
+      },
+      generators: DUMMY_SET,
     };
 /** Powers an entity. */
 export function power(entity) {

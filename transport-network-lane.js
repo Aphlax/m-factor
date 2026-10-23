@@ -255,7 +255,16 @@ Lane.prototype.extractItem = function(inserter, belt, time, positionForBelt) {
       continue;
     }
     const res = inserter.inserterAllowsItems(a, b, c);
-    if (res == -1) return NEVER;
+    if (res == -1) {
+      // No item that can be inserted.
+      if (i == flow.length) pos = dte + dteLength + 1;
+      const wait = Math.ceil(Math.min(
+          pos - dte - dteLength, 1) / belt.data.beltSpeed * 1000);
+      if (wait < waitTime && wait > 0) {
+        waitTime = wait;
+      }
+      continue;
+    }
     if (!res) continue;
     const index = res == a ? aIndex : (res == b ? bIndex : cIndex);
     // Extract this item.

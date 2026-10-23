@@ -38,9 +38,11 @@ export function draw(ctx, view, time) {
   if (this.animationLength &&
       (this.state == STATE.running || this.state == STATE.working)) {
     // This results in 18.33 fps...
-    animation = Math.floor(animation +
-        (time - this.taskStart) *
-        this.animationSpeed / 60) % this.animationLength;
+    animation += (time - this.taskStart) *
+        this.animationSpeed / 60;
+  }
+  if (this.animationLength) {
+    animation = Math.floor(animation) % this.animationLength;
   }
   const sprite = SPRITES.get(this.sprite + animation);
   if (!sprite) {
@@ -86,9 +88,11 @@ export function drawShadow(ctx, view, time) {
   if (this.animationLength &&
       (this.state == STATE.running || this.state == STATE.working) &&
       this.spriteShadowAnimation) {
-    animation = Math.floor(animation +
-        (time - this.taskStart) * this.animationSpeed / 60) %
-        this.animationLength;
+    animation += (time - this.taskStart) *
+        this.animationSpeed / 60;
+  }
+  if (this.animationLength) {
+    animation = Math.floor(animation) % this.animationLength;
   }
   const sprite = SPRITES.get(this.spriteShadow + animation);
   if (!sprite) {

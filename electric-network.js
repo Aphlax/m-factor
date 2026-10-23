@@ -1,4 +1,4 @@
-import {Grid} from './electric-network-grid.js';
+import {Grid, MULTI_GRID} from './electric-network-grid.js';
 import {TYPE, STATE, NEVER, MIN_SATISFACTION} from './entity-properties.js';
 import {SETTINGS} from './storage.js';
 
@@ -47,7 +47,7 @@ ElectricNetwork.prototype.addPole = function(entity, poleConnections, time) {
   }
 };
 
-ElectricNetwork.prototype.removePole = function(entity) {
+ElectricNetwork.prototype.removePole = function(entity, time) {
   for (let pole of entity.data.wires) {
     otherLoop:
     for (let other of entity.data.wires) {
@@ -83,7 +83,7 @@ ElectricNetwork.prototype.removePole = function(entity) {
   const previous = [];
   for (let pole of entity.data.wires) {
     if (previous.length) {
-      const segment = pole.data.grid.split(pole, entity, previous);
+      const segment = pole.data.grid.split(pole, entity, previous, this, time);
       if (segment) {
         this.grids.push(segment);
       }
@@ -99,26 +99,25 @@ ElectricNetwork.prototype.modifyGenerator = function(entity) {
     if (grid && grid != pole.data.grid) {
       if (entity.data.grid) {
         entity.data.grid.generators.delete(entity);
-        entity.data.grid = undefined;
       }
-      entity.state = STATE.multipleGrids;
+      entity.data.grid = MULTI_GRID;
+      entity.state = STATE.idle;
       return;
     }
     if (!grid) {
       grid = pole.data.grid;
     }
   }
-  if (!grid && entity.data.grid) {
-    entity.data.grid.generators.delete(entity);
-    entity.data.grid = undefined;
-    entity.state = STATE.idle;
-    return;
-  }
   if (entity.data.grid == grid) {
     return;
   }
+  if (entity.data.grid) {
+    entity.data.grid.generators.delete(entity);
+  }
   entity.data.grid = grid;
-  grid.generators.add(entity);
+  if (grid) {
+    grid.generators.add(entity);
+  }
   entity.state = STATE.idle;
 };
 
@@ -126,74 +125,41 @@ ElectricNetwork.prototype.modifyConsumer = function(entity, time) {
   let grid = undefined;
   for (let pole of entity.electricConnections) {
     if (grid && grid != pole.data.grid) {
-      if (entity.data.grid) {
-        const el = entity.state == STATE.running ?
-            entity.energyConsumption : entity.energyDrain;
-        entity.data.grid.consumerss.get(el).delete(entity);
-        entity.data.grid = undefined;
-      }
-      if (entity.state == STATE.running) {
-        const p = (time - entity.taskStart) / entity.taskDuration;
-        entity.taskStart = time - p * NEVER;
-        entity.taskEnd = time + (1 - p) * NEVER;
-        entity.nextUpdate = NEVER;
-        if (entity.animationLength) {
-          const oldSpeed = entity.animationSpeed;
-          entity.animationSpeed = 1 / NEVER;
-          entity.animation = Math.floor(entity.animation +
-              edt * oldSpeed / 60) %
-              entity.animationLength;
-        }
-      }
-      entity.state = STATE.multipleGrids;
-      return;
+      grid = MULTI_GRID;
+      break;
     }
     if (!grid) {
       grid = pole.data.grid;
     }
   }
-  const el = entity.state == STATE.running ?
-      entity.energyConsumption : entity.energyDrain;
-  if (!grid && entity.data.grid) {
-    entity.data.grid.consumerss.get(el).delete(entity);
-    entity.data.grid = undefined;
-    if (entity.state == STATE.running) {
-      const edt = time - entity.taskStart;
-      const p = edt / (entity.taskEnd - entity.taskStart);
-      entity.taskStart = time - p * NEVER;
-      entity.taskEnd = entity.nextUpdate =
-          time + (1 - p) * NEVER;
-      if (entity.animationLength) {
-        const oldSpeed = entity.animationSpeed;
-        entity.animationSpeed = 1 / NEVER;
-        entity.animation = Math.floor(entity.animation +
-            edt * oldSpeed / 60) %
-            entity.animationLength;
-      }
-    }
-    return;
-  }
   if (entity.data.grid == grid) {
     return;
   }
+  const el = entity.state == STATE.running ?
+      entity.energyConsumption : entity.energyDrain;
+  if (entity.data.grid) {
+    entity.data.grid.consumerss.get(el).delete(entity);
+  }
   entity.data.grid = grid;
-  grid.consumerss.get(el).add(entity);
+  if (grid) {
+    grid.consumerss.get(el).add(entity);
+  }
   if (entity.state == STATE.running) {
     const edt = time - entity.taskStart;
     const p = edt / (entity.taskEnd - entity.taskStart);
-    const d = grid.satisfaction < MIN_SATISFACTION ? NEVER :
+    const d = !grid || grid.satisfaction < MIN_SATISFACTION ? NEVER :
         entity.taskDuration / grid.satisfaction;
     entity.taskStart = time - p * d;
     entity.taskEnd = entity.nextUpdate =
         time + (1 - p) * d;
     if (entity.animationLength) {
       const oldSpeed = entity.animationSpeed;
-      entity.animationSpeed = grid.satisfaction < MIN_SATISFACTION ?
+      entity.animationSpeed = !grid || grid.satisfaction < MIN_SATISFACTION ?
           1 / NEVER : grid.satisfaction;
-      entity.animation = ((Math.floor(entity.animation +
-          edt * oldSpeed / 60 -
-          p * d * entity.animationSpeed / 60) %
-          entity.animationLength) +
+      const offset = !grid || grid.satisfaction < MIN_SATISFACTION ?
+          0 : p * entity.taskDuration / 60;
+      entity.animation = (((entity.animation +
+          edt * oldSpeed / 60 - offset) % entity.animationLength) +
           entity.animationLength) % entity.animationLength;
     }
   }

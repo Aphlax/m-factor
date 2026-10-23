@@ -16,6 +16,15 @@ function Grid(poles) {
   this.color = `rgb(${Math.abs(c-255)}, ${Math.abs((c+170)%510-255)}, ${Math.abs((c+340)%510-255)})`;
 }
 
+const DUMMY_SET = {add: () => {}, delete: () => {}},
+    MULTI_GRID = {
+      satisfaction: 0,
+      consumerss: {
+        get: () => DUMMY_SET,
+      },
+      generators: DUMMY_SET,
+    };
+
 Grid.fromPole = function(pole) {
   const grid = new Grid(new Set());
   grid.add(pole);
@@ -88,9 +97,9 @@ Grid.prototype.update = function(time, dt) {
           const oldSpeed = entity.animationSpeed;
           entity.animationSpeed = satisfaction < MIN_SATISFACTION ?
               1 / NEVER : satisfaction;
-          entity.animation = ((Math.floor(entity.animation +
+          entity.animation = (((entity.animation +
               edt * oldSpeed / 60 -
-              p * d * entity.animationSpeed / 60) %
+              p * entity.taskDuration / 60) %
               entity.animationLength) +
               entity.animationLength) % entity.animationLength;
         }
@@ -104,6 +113,7 @@ Grid.prototype.draw = function(ctx, view) {
   ctx.fillStyle = this.color;
   ctx.strokeStyle = this.color;
   ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.5;
   for (let pole of this.poles) {
     ctx.fillRect(
         (pole.x + 0.35) * view.scale - view.x,
@@ -141,6 +151,7 @@ Grid.prototype.draw = function(ctx, view) {
     }
   }
   ctx.fill();
+  ctx.globalAlpha = 1;
   window.numberOtherDraws++;
 };
 
@@ -200,7 +211,7 @@ Grid.prototype.join = function(other, time) {
   other.consumerss.clear();
 };
 
-Grid.prototype.split = function(entity, not, targets) {
+Grid.prototype.split = function(entity, not, targets, network, time) {
   const stack = [entity], poles = new Set();
   while (stack.length) {
     const pole = stack.pop();
@@ -218,27 +229,19 @@ Grid.prototype.split = function(entity, not, targets) {
   for (let pole of poles) {
     pole.data.grid = segment;
     this.poles.delete(pole);
-    /*
   }
   for (let pole of poles) {
     // check if entity has only one grid among poles.
-    */
     for (let entity of pole.electricConnections) {
       if (entity.type == TYPE.generator) {
-        this.generators.delete(entity);
-        segment.generators.add(entity);
-        entity.data.grid = segment;
+        network.modifyGenerator(entity);
       }
       if (entity.energySource == ENERGY.electric) {
-        const el = entity.state == STATE.running ?
-            entity.energyConsumption : entity.energyDrain;
-        this.consumerss.get(el).delete(entity);
-        segment.consumerss.get(el).add(entity);
-        entity.data.grid = segment;
+        network.modifyConsumer(entity, time);
       }
     }
   }
   return segment;
 }
 
-export {Grid};
+export {Grid, MULTI_GRID};

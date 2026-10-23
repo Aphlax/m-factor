@@ -247,7 +247,7 @@ UiVictoryScreen.prototype.draw = function(ctx) {
   ctx.fillText("Victory!", x + 120, y + 60);
   ctx.font = "24px monospace";
   ctx.fillText("Congratulations,", x + 120, y + 120);
-  ctx.fillText("you did complete", x + 120, y + 170);
+  ctx.fillText("you completed", x + 120, y + 160);
   ctx.fillText("this game!", x + 120, y + 200);
   ctx.fillStyle = this.pressed ?
       COLOR.buttonBackgroundPressed : COLOR.buttonBackground;
