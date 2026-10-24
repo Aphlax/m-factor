@@ -1310,6 +1310,27 @@ export const ENTITIES = new Map([
       extraAnimation: 32,
     },
   }],
+  [NAME.accumulator,
+  {
+    label: "Accumulator",
+    prototypeName: "accumulator",
+    type: TYPE.accumulator,
+    width: 2,
+    height: 2,
+    rotatable: false,
+    icon: S.accumulatorIcon,
+    sprites: {
+      [north]: [S.accumulator, S.accumulatorShadow],
+    },
+    animationLength: 0,
+    mapColor: "#7070A4",
+    
+    capacity: 5000, // kJ
+    powerInput: 300, // kW
+    powerOutput: 300, // kW
+    extraSprites: [S.accumulatorCharging, S.accumulatorDischarging],
+    extraAnimationLength: 24,
+  }],
 ]);
 
 ENTITIES.keys().forEach(name =>

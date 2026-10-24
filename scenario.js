@@ -250,6 +250,8 @@ function productionTest(gameMap, time) {
   l(-2, 60, S, 5);
   el(-1, 59);
   
+  e(NAME.accumulator, 10, 67, N);
+  
   gameMap.centerView(0, 50);
 };
 

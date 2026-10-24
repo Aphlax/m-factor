@@ -379,6 +379,14 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.energySource = def.energySource;
     this.energyDrain = def.energyDrain;
     this.energyConsumption = def.energyConsumption;
+  } else if (this.type == TYPE.accumulator) {
+    this.idleAnimation = def.sprites[direction][0];
+    this.data.chargingAnimation = def.extraSprites[0];
+    this.data.dischargingAnimation = def.extraSprites[1];
+    this.data.animationLength = def.extraAnimationLength;
+    this.data.capacity = def.capacity;
+    this.data.powerInput = def.powerInput;
+    this.data.powerOutput = def.powerOutput;
   }
   return this;
 };

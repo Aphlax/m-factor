@@ -383,7 +383,10 @@ export const S = {
   rocketSiloDoorFrontOpen: 18055,
   rocketFlame: 18056, // 16
   rocket: 18072, // 6
-  
+  accumulator: 18078,
+  accumulatorShadow: 18079,
+  accumulatorCharging: 18080, // 24
+  accumulatorDischarging: 18104, // 24
   
   // Items
   ironOreItem: 16000,
@@ -1674,6 +1677,22 @@ export const SPRITES = [
   {
     path: "graphics/entities/rocket-silo/12-rocket-smoke.png",
     sprites: entitySprites(S.rocketSmoke, 41, 145, 8, 3, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/accumulator/accumulator.png",
+    sprites: entitySprites(S.accumulator, 66, 94, 1, 1, 1, 1, 28, 2),
+  },
+  {
+    path: "graphics/entities/accumulator/accumulator-shadow.png",
+    sprites: entitySprites(S.accumulatorShadow, 120, 54, 1, 1, -4, 60, -9, -1),
+  },
+  {
+    path: "graphics/entities/accumulator/accumulator-charging.png",
+    sprites: entitySprites(S.accumulatorCharging, 90, 108, 6, 4, 14, 12, 42, 2),
+  },
+  {
+    path: "graphics/entities/accumulator/accumulator-discharging.png",
+    sprites: entitySprites(S.accumulatorDischarging, 88, 110, 6, 4, 14, 10, 44, 2),
   },
   
   

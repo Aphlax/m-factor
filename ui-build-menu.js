@@ -33,6 +33,7 @@ const BUILD_MENU = [
   NAME.mediumElectricPole,
   NAME.bigElectricPole,
   NAME.substation,
+  NAME.accumulator,
   NAME.pipe,
   NAME.pipeToGround,
   NAME.storageTank,

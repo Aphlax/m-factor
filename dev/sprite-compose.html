@@ -332,7 +332,7 @@ function App() {
         style={{height: '18px', padding: '1px', overflow: 'hidden'}}
         onFocus={e => e.target.select()}></textarea>
   </div>
-  <div className="col" style={{maxHeight: '320px', overflowY: 'auto'}}>
+  <div className="col" style={{maxHeight: '320px', minHeight: '200px', overflowY: 'auto'}}>
     {sprites.map((sprite, i) =>
         <SpriteDef key={sprite.key} sprite={sprite}
         base={basePath} tiles={{x: xTiles, y: yTiles}}

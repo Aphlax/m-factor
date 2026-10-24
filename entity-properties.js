@@ -21,6 +21,7 @@ export const TYPE = {
   trainStop: 19,
   railSignal: 20,
   rocketSilo: 21,
+  accumulator: 22,
 };
 
 export const NAME = {
@@ -68,6 +69,7 @@ export const NAME = {
   railSignal: 42,
   railChainSignal: 43,
   rocketSilo: 44,
+  accumulator: 45,
 };
 
 /** Never value for next update. 285 years from now. */
@@ -113,7 +115,6 @@ export const STATE = {
   mineEmpty: 13,
   noRecipe: 14,
   idle: 15, // No work todo for other reason
-  multipleGrids: 16,
   rocket: 17,
 };
 

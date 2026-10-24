@@ -39,7 +39,7 @@ ElectricNetwork.prototype.addPole = function(entity, poleConnections, time) {
       connected = true;
       pole.data.grid.add(entity);
     } else {
-      pole.data.grid.join(entity.data.grid, time);
+      pole.data.grid.join(entity.data.grid, this, time);
     }
   }
   if (!connected) {

@@ -97,10 +97,10 @@ Grid.prototype.update = function(time, dt) {
           const oldSpeed = entity.animationSpeed;
           entity.animationSpeed = satisfaction < MIN_SATISFACTION ?
               1 / NEVER : satisfaction;
+          const offset = satisfaction < MIN_SATISFACTION ?
+              0 : p * entity.taskDuration / 60;
           entity.animation = (((entity.animation +
-              edt * oldSpeed / 60 -
-              p * entity.taskDuration / 60) %
-              entity.animationLength) +
+              edt * oldSpeed / 60 - offset) % entity.animationLength) +
               entity.animationLength) % entity.animationLength;
         }
       }
@@ -160,10 +160,10 @@ Grid.prototype.add = function(pole) {
   pole.data.grid = this;
 };
 
-Grid.prototype.join = function(other, time) {
+Grid.prototype.join = function(other, network, time) {
   if (other == this) return;
   if (this.poles.size < other.poles.size) {
-    other.join(this, time);
+    other.join(this, network, time);
     return;
   }
   
@@ -171,40 +171,15 @@ Grid.prototype.join = function(other, time) {
     this.poles.add(pole);
     pole.data.grid = this;
   }
-  // check all electricConnections if they were between the two grids.
-  for (let entity of other.generators) {
-    this.generators.add(entity);
-    entity.data.grid = this;
-  }
-  const needSatisfactionUpdate =
-      other.satisfaction != this.satisfaction;
-  for (let [el, consumers] of other.consumerss) {
-    const cons = this.consumerss.get(el);
-    for (let entity of consumers) {
-      cons.add(entity);
-      entity.data.grid = this;
-      if (entity.state == STATE.running &&
-          needSatisfactionUpdate) {
-        const edt = time - entity.taskStart;
-        const p = edt / (entity.taskEnd - entity.taskStart);
-        const d = this.satisfaction < MIN_SATISFACTION ? NEVER :
-            entity.taskDuration / this.satisfaction;
-        entity.taskStart = time - p * d;
-        entity.taskEnd = entity.nextUpdate =
-            time + (1 - p) * d;
-        if (entity.animationLength) {
-          const oldSpeed = entity.animationSpeed;
-          entity.animationSpeed = this.satisfaction < MIN_SATISFACTION ?
-              1 / NEVER : this.satisfaction;
-          entity.animation = ((Math.floor(entity.animation +
-              edt * oldSpeed / 60 -
-              p * d * entity.animationSpeed / 60) %
-              entity.animationLength) +
-              entity.animationLength) % entity.animationLength;
-        }
+  for (let pole of other.poles) {
+    for (let entity of pole.electricConnections) {
+      if (entity.type == TYPE.generator) {
+        network.modifyGenerator(entity);
+      }
+      if (entity.energySource == ENERGY.electric) {
+        network.modifyConsumer(entity, time);
       }
     }
-    consumers.clear();
   }
   other.poles.clear();
   other.generators.clear();
@@ -231,7 +206,6 @@ Grid.prototype.split = function(entity, not, targets, network, time) {
     this.poles.delete(pole);
   }
   for (let pole of poles) {
-    // check if entity has only one grid among poles.
     for (let entity of pole.electricConnections) {
       if (entity.type == TYPE.generator) {
         network.modifyGenerator(entity);
