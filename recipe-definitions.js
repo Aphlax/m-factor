@@ -441,6 +441,30 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 5000,
   },
+  {
+    prototypeName: "construction-robot",
+    inputs: [
+      {item: I.electronicCircuit, amount: 2},
+      {item: I.flyingRobotFrame, amount: 1},
+    ],
+    outputs: [
+      {item: I.constructionRobot, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  {
+    prototypeName: "logistic-robot",
+    inputs: [
+      {item: I.advancedCircuit, amount: 2},
+      {item: I.flyingRobotFrame, amount: 1},
+    ],
+    outputs: [
+      {item: I.logisticRobot, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
   
   
   
@@ -1265,6 +1289,19 @@ export const RECIPES = [
     ],
     entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 250,
+  },
+  {
+    prototypeName: "roboport",
+    inputs: [
+      {item: I.advancedCircuit, amount: 45},
+      {item: I.ironGear, amount: 45},
+      {item: I.steelPlate, amount: 45},
+    ],
+    outputs: [
+      {item: I.roboport, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 5000,
   },
   
   

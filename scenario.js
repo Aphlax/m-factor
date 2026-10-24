@@ -251,6 +251,7 @@ function productionTest(gameMap, time) {
   el(-1, 59);
   
   e(NAME.accumulator, 10, 67, N);
+  e(NAME.roboport, 0, 59, N);
   
   gameMap.centerView(0, 50);
 };

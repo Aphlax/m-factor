@@ -1323,13 +1323,38 @@ export const ENTITIES = new Map([
       [north]: [S.accumulator, S.accumulatorShadow],
     },
     animationLength: 0,
-    mapColor: "#7070A4",
+    mapColor: "#808084",
     
     capacity: 5000, // kJ
     powerInput: 300, // kW
     powerOutput: 300, // kW
     extraSprites: [S.accumulatorCharging, S.accumulatorDischarging],
     extraAnimationLength: 24,
+  }],
+  [NAME.roboport,
+  {
+    label: "Roboport",
+    prototypeName: "roboport",
+    type: TYPE.roboport,
+    width: 4,
+    height: 4,
+    rotatable: false,
+    icon: S.roboportIcon,
+    sprites: {
+      [north]: [S.roboport, S.roboportShadow],
+    },
+    animationLength: 8,
+    noShadowAnimation: true,
+    mapColor: "#C8D090",
+    energySource: ENERGY.electric,
+    energyDrain: 50, // kW
+    energyConsumption: 2150, // kW
+    
+    capacity: 5000, // kJ
+    powerInput: 2100, // kW
+    powerOutput: 500, // kW
+    supplyArea: 50,
+    constructionArea: 110,
   }],
 ]);
 

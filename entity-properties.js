@@ -22,6 +22,7 @@ export const TYPE = {
   railSignal: 20,
   rocketSilo: 21,
   accumulator: 22,
+  roboport: 23,
 };
 
 export const NAME = {
@@ -70,6 +71,7 @@ export const NAME = {
   railChainSignal: 43,
   rocketSilo: 44,
   accumulator: 45,
+  roboport: 46,
 };
 
 /** Never value for next update. 285 years from now. */

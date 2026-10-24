@@ -249,6 +249,7 @@ UiWindow.prototype.initialize = function() {
   this.entityUis.set(TYPE.trainStop, {});
   this.entityUis.set(TYPE.railSignal, {});
   this.entityUis.set(TYPE.accumulator, {});
+  this.entityUis.set(TYPE.roboport, {});
   
   this.entityUis.set(TYPE.belt, {
     snake: new UiButton(this, this.canvasWidth - 96, 86)

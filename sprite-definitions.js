@@ -387,6 +387,8 @@ export const S = {
   accumulatorShadow: 18079,
   accumulatorCharging: 18080, // 24
   accumulatorDischarging: 18104, // 24
+  roboport: 18128, // 8
+  roboportShadow: 18136,
   
   // Items
   ironOreItem: 16000,
@@ -434,6 +436,8 @@ export const S = {
   piercingRoundsMagazineItem: 16042,
   grenadeItem: 16043,
   satelliteItem: 16044,
+  constructionRobotItem: 16045,
+  logisticRobotItem: 16046,
   
   waterFluid: 16050,
   steamFluid: 16051,
@@ -507,6 +511,7 @@ export const S = {
   concreteItem: 16152,
   refinedConcreteItem: 16153,
   refinedHazardConcreteItem: 16154,
+  roboportItem: 16155,
   
   gearIcon: 16500,
   burnerDrillIcon: 16501,
@@ -579,6 +584,7 @@ export const S = {
   concreteIcon: 16568,
   refinedConcreteIcon: 16569,
   refinedHazardConcreteIcon: 16570,
+  roboportIcon: 16571,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -1694,6 +1700,14 @@ export const SPRITES = [
     path: "graphics/entities/accumulator/accumulator-discharging.png",
     sprites: entitySprites(S.accumulatorDischarging, 88, 110, 6, 4, 14, 10, 44, 2),
   },
+  {
+    path: "graphics/entities/roboport/roboport.png",
+    sprites: entitySprites(S.roboport, 143, 149, 8, 1, -10, 25, 21, 0),
+  },
+  {
+    path: "graphics/entities/roboport/roboport-shadow.png",
+    sprites: entitySprites(S.roboportShadow, 147, 101, 1, 1, -21, 40, -20, -7),
+  },
   
   
   
@@ -1878,6 +1892,14 @@ export const SPRITES = [
   {
     path: "graphics/items/satellite.png",
     sprites: itemSprites(S.satelliteItem),
+  },
+  {
+    path: "graphics/items/construction-robot.png",
+    sprites: itemSprites(S.constructionRobotItem),
+  },
+  {
+    path: "graphics/items/logistic-robot.png",
+    sprites: itemSprites(S.logisticRobotItem),
   },
   
   
@@ -2167,9 +2189,10 @@ export const SPRITES = [
     path: "graphics/items/refined-hazard-concrete.png",
     sprites: itemSprites(S.refinedHazardConcreteItem, S.refinedHazardConcreteIcon),
   },
-  
-  
-  
+  {
+    path: "graphics/items/roboport.png",
+    sprites: itemSprites(S.roboportItem, S.roboportIcon),
+  },
   
   
   

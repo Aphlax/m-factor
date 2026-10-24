@@ -387,6 +387,11 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.data.capacity = def.capacity;
     this.data.powerInput = def.powerInput;
     this.data.powerOutput = def.powerOutput;
+  } else if (this.type == TYPE.roboport) {
+    this.state = STATE.working;
+    this.energySource = def.energySource;
+    this.energyDrain = def.energyDrain;
+    this.energyConsumption = def.energyConsumption;
   }
   return this;
 };

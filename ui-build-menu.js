@@ -16,6 +16,7 @@ const BUILD_MENU = [
   NAME.woodenChest,
   NAME.ironChest,
   NAME.steelChest,
+  NAME.roboport,
   NAME.transportBelt,
   NAME.undergroundBelt,
   NAME.splitter,

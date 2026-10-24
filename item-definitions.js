@@ -27,6 +27,8 @@ export const I = {
   lowDensityStructure: 25,
   rocketFuel: 26,
   satellite: 27,
+  constructionRobot: 28,
+  logisticRobot: 29,
   
   automationScience: 40,
   logisticScience: 41,
@@ -93,6 +95,7 @@ export const I = {
   radar: 145,
   accumulator: 146,
   solarPanel: 147,
+  roboport: 148,
   
   speedModule: 200,
   speedModule2: 201,
@@ -317,6 +320,18 @@ export const ITEMS = new Map([
     sprite: S.spaceScienceItem,
     stackSize: 200,
     prototypeName: "space-science-pack",
+  }],
+  [I.constructionRobot,
+  {
+    sprite: S.constructionRobotItem,
+    stackSize: 50,
+    prototypeName: "construction-robot",
+  }],
+  [I.logisticRobot,
+  {
+    sprite: S.logisticRobotItem,
+    stackSize: 50,
+    prototypeName: "logistic-robot",
   }],
   
   
@@ -596,7 +611,7 @@ export const ITEMS = new Map([
   [I.accumulator,
   {
     sprite: S.accumulatorItem,
-    stackSize: 100,
+    stackSize: 50,
     prototypeName: "accumulator",
   }],
   [I.solarPanel,
@@ -628,6 +643,12 @@ export const ITEMS = new Map([
     sprite: S.refinedHazardConcreteItem,
     stackSize: 100,
     prototypeName: "refined-hazard-concrete",
+  }],
+  [I.roboport,
+  {
+    sprite: S.roboportItem,
+    stackSize: 10,
+    prototypeName: "roboport",
   }],
   
   
