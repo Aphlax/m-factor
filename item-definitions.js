@@ -95,7 +95,12 @@ export const I = {
   radar: 145,
   accumulator: 146,
   solarPanel: 147,
-  roboport: 148,
+  storageChest: 148,
+  passiveProviderChest: 149,
+  requesterChest: 150,
+  activeProviderChest: 151,
+  bufferChest: 152,
+  roboport: 153,
   
   speedModule: 200,
   speedModule2: 201,
@@ -649,6 +654,36 @@ export const ITEMS = new Map([
     sprite: S.roboportItem,
     stackSize: 10,
     prototypeName: "roboport",
+  }],
+  [I.storageChest,
+  {
+    sprite: S.storageChestItem,
+    stackSize: 50,
+    prototypeName: "storage-chest",
+  }],
+  [I.passiveProviderChest,
+  {
+    sprite: S.passiveProviderChestItem,
+    stackSize: 50,
+    prototypeName: "passive-provider-chest",
+  }],
+  [I.requesterChest,
+  {
+    sprite: S.requesterChestItem,
+    stackSize: 50,
+    prototypeName: "requester-chest",
+  }],
+  [I.activeProviderChest,
+  {
+    sprite: S.activeProviderChestItem,
+    stackSize: 50,
+    prototypeName: "active-provider-chest",
+  }],
+  [I.bufferChest,
+  {
+    sprite: S.bufferChestItem,
+    stackSize: 50,
+    prototypeName: "buffer-chest",
   }],
   
   

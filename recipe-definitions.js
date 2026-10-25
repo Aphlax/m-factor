@@ -1303,6 +1303,71 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 5000,
   },
+  {
+    prototypeName: "storage-chest",
+    inputs: [
+      {item: I.advancedCircuit, amount: 1},
+      {item: I.electronicCircuit, amount: 3},
+      {item: I.steelChest, amount: 1},
+    ],
+    outputs: [
+      {item: I.storageChest, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  {
+    prototypeName: "passive-provider-chest",
+    inputs: [
+      {item: I.advancedCircuit, amount: 1},
+      {item: I.electronicCircuit, amount: 3},
+      {item: I.steelChest, amount: 1},
+    ],
+    outputs: [
+      {item: I.passiveProviderChest, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  {
+    prototypeName: "requester-chest",
+    inputs: [
+      {item: I.advancedCircuit, amount: 1},
+      {item: I.electronicCircuit, amount: 3},
+      {item: I.steelChest, amount: 1},
+    ],
+    outputs: [
+      {item: I.requesterChest, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  {
+    prototypeName: "active-provider-chest",
+    inputs: [
+      {item: I.advancedCircuit, amount: 1},
+      {item: I.electronicCircuit, amount: 3},
+      {item: I.steelChest, amount: 1},
+    ],
+    outputs: [
+      {item: I.activeProviderChest, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  {
+    prototypeName: "buffer-chest",
+    inputs: [
+      {item: I.advancedCircuit, amount: 1},
+      {item: I.electronicCircuit, amount: 3},
+      {item: I.steelChest, amount: 1},
+    ],
+    outputs: [
+      {item: I.bufferChest, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
   
   
   

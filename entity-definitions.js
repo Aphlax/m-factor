@@ -1356,6 +1356,105 @@ export const ENTITIES = new Map([
     supplyArea: 50,
     constructionArea: 110,
   }],
+  [NAME.radar,
+  {
+    label: "Radar",
+    prototypeName: "radar",
+    type: TYPE.radar,
+    width: 3,
+    height: 3,
+    rotatable: false,
+    icon: S.radarIcon,
+    sprites: {
+      [north]: [S.radar, S.radarShadow],
+    },
+    animationLength: 64,
+    mapColor: "#006094",
+    energySource: ENERGY.electric,
+    energyDrain: 0, // kW
+    energyConsumption: 300, // kW
+  }],
+  [NAME.storageChest,
+  {
+    label: "Storage Chest",
+    prototypeName: "storage-chest",
+    type: TYPE.logisticContainer,
+    width: 1,
+    height: 1,
+    rotatable: false,
+    icon: S.storageChestIcon,
+    sprites: {
+      [north]: [S.storageChest, S.logisticChestShadow],
+    },
+    mapColor: "#006094",
+    
+    capacity: 48,
+  }],
+  [NAME.passiveProviderChest,
+  {
+    label: "Passive Provider",
+    prototypeName: "passive-provider-chest",
+    type: TYPE.logisticContainer,
+    width: 1,
+    height: 1,
+    rotatable: false,
+    icon: S.passiveProviderChestIcon,
+    sprites: {
+      [north]: [S.passiveProviderChest, S.logisticChestShadow],
+    },
+    mapColor: "#006094",
+    
+    capacity: 48,
+  }],
+  [NAME.requesterChest,
+  {
+    label: "Requester Chest",
+    prototypeName: "requester-chest",
+    type: TYPE.logisticContainer,
+    width: 1,
+    height: 1,
+    rotatable: false,
+    icon: S.requesterChestIcon,
+    sprites: {
+      [north]: [S.requesterChest, S.logisticChestShadow],
+    },
+    mapColor: "#006094",
+    
+    capacity: 48,
+  }],
+  [NAME.activeProviderChest,
+  {
+    label: "Active Provider",
+    prototypeName: "active-provider-chest",
+    type: TYPE.logisticContainer,
+    width: 1,
+    height: 1,
+    rotatable: false,
+    icon: S.activeProviderChestIcon,
+    sprites: {
+      [north]: [S.activeProviderChest, S.logisticChestShadow],
+    },
+    mapColor: "#006094",
+    
+    capacity: 48,
+  }],
+  [NAME.bufferChest,
+  {
+    label: "Buffer Chest",
+    prototypeName: "buffer-chest",
+    type: TYPE.logisticContainer,
+    width: 1,
+    height: 1,
+    rotatable: false,
+    icon: S.bufferChestIcon,
+    sprites: {
+      [north]: [S.bufferChest, S.logisticChestShadow],
+    },
+    mapColor: "#006094",
+    
+    capacity: 48,
+  }],
+  
 ]);
 
 ENTITIES.keys().forEach(name =>

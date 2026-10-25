@@ -16,6 +16,11 @@ const BUILD_MENU = [
   NAME.woodenChest,
   NAME.ironChest,
   NAME.steelChest,
+  NAME.storageChest,
+  NAME.passiveProviderChest,
+  NAME.requesterChest,
+  NAME.activeProviderChest,
+  NAME.bufferChest,
   NAME.roboport,
   NAME.transportBelt,
   NAME.undergroundBelt,
@@ -59,6 +64,7 @@ const BUILD_MENU = [
   NAME.railSignal,
   NAME.railChainSignal,
   NAME.rocketSilo,
+  NAME.radar,
 ];
 const DEACC = 50;
 

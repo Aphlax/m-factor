@@ -23,6 +23,8 @@ export const TYPE = {
   rocketSilo: 21,
   accumulator: 22,
   roboport: 23,
+  radar: 24,
+  logisticContainer: 25,
 };
 
 export const NAME = {
@@ -72,6 +74,12 @@ export const NAME = {
   rocketSilo: 44,
   accumulator: 45,
   roboport: 46,
+  radar: 47,
+  storageChest: 48,
+  passiveProviderChest: 49,
+  requesterChest: 50,
+  activeProviderChest: 51,
+  bufferChest: 52,
 };
 
 /** Never value for next update. 285 years from now. */

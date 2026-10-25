@@ -175,6 +175,8 @@ export const S = {
   rocketSiloArmRight: 313*16, // 32
   rocketSiloArmFront: 315*16, // 32
   rocketSiloTurbine: 317*16, // 32
+  radar: 319*16, // 64
+  radarShadow: 323*16, // 64
   
   
   woodenChest: 15000,
@@ -389,6 +391,12 @@ export const S = {
   accumulatorDischarging: 18104, // 24
   roboport: 18128, // 8
   roboportShadow: 18136,
+  storageChest: 18137, // 7
+  passiveProviderChest: 18144, // 7
+  requesterChest: 18151, // 7
+  activeProviderChest: 18158, // 7
+  bufferChest: 18165, // 7
+  logisticChestShadow: 18172,
   
   // Items
   ironOreItem: 16000,
@@ -512,6 +520,11 @@ export const S = {
   refinedConcreteItem: 16153,
   refinedHazardConcreteItem: 16154,
   roboportItem: 16155,
+  storageChestItem: 16156,
+  passiveProviderChestItem: 16157,
+  requesterChestItem: 16158,
+  activeProviderChestItem: 16159,
+  bufferChestItem: 16160,
   
   gearIcon: 16500,
   burnerDrillIcon: 16501,
@@ -585,6 +598,11 @@ export const S = {
   refinedConcreteIcon: 16569,
   refinedHazardConcreteIcon: 16570,
   roboportIcon: 16571,
+  storageChestIcon: 16572,
+  passiveProviderChestIcon: 16573,
+  requesterChestIcon: 16574,
+  activeProviderChestIcon: 16575,
+  bufferChestIcon: 16576,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -1708,6 +1726,38 @@ export const SPRITES = [
     path: "graphics/entities/roboport/roboport-shadow.png",
     sprites: entitySprites(S.roboportShadow, 147, 101, 1, 1, -21, 40, -20, -7),
   },
+  {
+    path: "graphics/entities/radar/radar.png",
+    sprites: entitySprites(S.radar, 98, 128, 8, 8, 1, 1, 31, 1, true),
+  },
+  {
+    path: "graphics/entities/radar/radar-shadow.png",
+    sprites: entitySprites(S.radarShadow, 172, 94, 8, 8, 1, 75, -4, 2, true),
+  },
+  {
+    path: "graphics/entities/logistic-chest/logistic-chest-storage.png",
+    sprites: entitySprites(S.storageChest, 34, 38, 7, 1, 1, 1, 4, 2, true),
+  },
+  {
+    path: "graphics/entities/logistic-chest/logistic-chest-passive-provider.png",
+    sprites: entitySprites(S.passiveProviderChest, 34, 38, 7, 1, 1, 1, 4, 2, true),
+  },
+  {
+    path: "graphics/entities/logistic-chest/logistic-chest-requester.png",
+    sprites: entitySprites(S.requesterChest, 34, 38, 7, 1, 1, 1, 4, 2, true),
+  },
+  {
+    path: "graphics/entities/logistic-chest/logistic-chest-active-provider.png",
+    sprites: entitySprites(S.activeProviderChest, 34, 38, 7, 1, 1, 1, 4, 2, true),
+  },
+  {
+    path: "graphics/entities/logistic-chest/logistic-chest-buffer.png",
+    sprites: entitySprites(S.bufferChest, 34, 38, 7, 1, 1, 1, 4, 2, true),
+  },
+  {
+    path: "graphics/entities/logistic-chest/logistic-chest-shadow.png",
+    sprites: entitySprites(S.logisticChestShadow, 56, 24, 1, 1, -1, 25, -10, 2, true),
+  },
   
   
   
@@ -2192,6 +2242,26 @@ export const SPRITES = [
   {
     path: "graphics/items/roboport.png",
     sprites: itemSprites(S.roboportItem, S.roboportIcon),
+  },
+  {
+    path: "graphics/items/logistic-chest-storage.png",
+    sprites: itemSprites(S.storageChestItem, S.storageChestIcon),
+  },
+  {
+    path: "graphics/items/logistic-chest-passive-provider.png",
+    sprites: itemSprites(S.passiveProviderChestItem, S.passiveProviderChestIcon),
+  },
+  {
+    path: "graphics/items/logistic-chest-requester.png",
+    sprites: itemSprites(S.requesterChestItem, S.requesterChestIcon),
+  },
+  {
+    path: "graphics/items/logistic-chest-active-provider.png",
+    sprites: itemSprites(S.activeProviderChestItem, S.activeProviderChestIcon),
+  },
+  {
+    path: "graphics/items/logistic-chest-buffer.png",
+    sprites: itemSprites(S.bufferChestItem, S.bufferChestIcon),
   },
   
   

@@ -387,7 +387,8 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.data.capacity = def.capacity;
     this.data.powerInput = def.powerInput;
     this.data.powerOutput = def.powerOutput;
-  } else if (this.type == TYPE.roboport) {
+  } else if (this.type == TYPE.roboport ||
+        this.type == TYPE.radar) {
     this.state = STATE.working;
     this.energySource = def.energySource;
     this.energyDrain = def.energyDrain;
