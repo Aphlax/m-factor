@@ -1454,6 +1454,62 @@ export const ENTITIES = new Map([
     
     capacity: 48,
   }],
+  [NAME.constantCombinator,
+  {
+    label: "Constant Combin.",
+    prototypeName: "constant-combinator",
+    type: TYPE.constantCombinator,
+    width: 1,
+    height: 1,
+    rotatable: false,
+    icon: S.constantCombinatorIcon,
+    sprites: {
+      [north]: [S.constantCombinator, S.constantCombinatorShadow],
+    },
+    mapColor: "#006094",
+  }],
+  [NAME.arithmeticCombinator,
+  {
+    label: "Arithmetic Comb.",
+    prototypeName: "arithmetic-combinator",
+    type: TYPE.arithmeticCombinator,
+    size: {
+      [north]: {width: 1, height: 2},
+      [east]: {width: 2, height: 1},
+      [south]: {width: 1, height: 2},
+      [west]: {width: 2, height: 1},
+    },
+    rotatable: true,
+    icon: S.arithmeticCombinatorIcon,
+    sprites: {
+      [north]: [S.arithmeticCombinator+0, S.arithmeticCombinatorShadow+0],
+      [east]: [S.arithmeticCombinator+1, S.arithmeticCombinatorShadow+1],
+      [south]: [S.arithmeticCombinator+2, S.arithmeticCombinatorShadow+2],
+      [west]: [S.arithmeticCombinator+3, S.arithmeticCombinatorShadow+3],
+    },
+    mapColor: "#006094",
+  }],
+  [NAME.deciderCombinator,
+  {
+    label: "Decider Combin.",
+    prototypeName: "decider-combinator",
+    type: TYPE.deciderCombinator,
+    size: {
+      [north]: {width: 1, height: 2},
+      [east]: {width: 2, height: 1},
+      [south]: {width: 1, height: 2},
+      [west]: {width: 2, height: 1},
+    },
+    rotatable: true,
+    icon: S.deciderCombinatorIcon,
+    sprites: {
+      [north]: [S.deciderCombinator+0, S.deciderCombinatorShadow+0],
+      [east]: [S.deciderCombinator+1, S.deciderCombinatorShadow+1],
+      [south]: [S.deciderCombinator+2, S.deciderCombinatorShadow+2],
+      [west]: [S.deciderCombinator+3, S.deciderCombinatorShadow+3],
+    },
+    mapColor: "#006094",
+  }],
   
 ]);
 

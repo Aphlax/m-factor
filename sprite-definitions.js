@@ -397,6 +397,12 @@ export const S = {
   activeProviderChest: 18158, // 7
   bufferChest: 18165, // 7
   logisticChestShadow: 18172,
+  constantCombinator: 18173, // 4
+  constantCombinatorShadow: 18177, // 4
+  arithmeticCombinator: 18181, // 4
+  arithmeticCombinatorShadow: 18185, // 4
+  deciderCombinator: 18189, // 4
+  deciderCombinatorShadow: 18193, // 4
   
   // Items
   ironOreItem: 16000,
@@ -525,6 +531,12 @@ export const S = {
   requesterChestItem: 16158,
   activeProviderChestItem: 16159,
   bufferChestItem: 16160,
+  constantCombinatorItem: 16161,
+  arithmeticCombinatorItem: 16162,
+  deciderCombinatorItem: 16163,
+  powerSwitchItem: 16164,
+  programmableSpeakerItem: 16165,
+  lampItem: 16166,
   
   gearIcon: 16500,
   burnerDrillIcon: 16501,
@@ -603,6 +615,12 @@ export const S = {
   requesterChestIcon: 16574,
   activeProviderChestIcon: 16575,
   bufferChestIcon: 16576,
+  constantCombinatorIcon: 16577,
+  arithmeticCombinatorIcon: 16578,
+  deciderCombinatorIcon: 16579,
+  powerSwitchIcon: 16580,
+  programmableSpeakerIcon: 16581,
+  lampIcon: 16582,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -1758,6 +1776,30 @@ export const SPRITES = [
     path: "graphics/entities/logistic-chest/logistic-chest-shadow.png",
     sprites: entitySprites(S.logisticChestShadow, 56, 24, 1, 1, -1, 25, -10, 2, true),
   },
+  {
+    path: "graphics/entities/combinator/constant-combinator.png",
+    sprites: entitySprites(S.constantCombinator, 58, 52, 4, 1, 13, 13, 6, 14, true),
+  },
+  {
+    path: "graphics/entities/combinator/constant-combinator-shadow.png",
+    sprites: entitySprites(S.constantCombinatorShadow, 50, 34, 4, 1, 0, 18, -3, 5, true),
+  },
+  {
+    path: "graphics/entities/combinator/arithmetic-combinator.png",
+    sprites: entitySprites4Way(S.arithmeticCombinator, 74, 64, 4, 1, 20, 22, 10, 22, true, 1),
+  },
+  {
+    path: "graphics/entities/combinator/arithmetic-combinator-shadow.png",
+    sprites: entitySprites4Way(S.arithmeticCombinatorShadow, 76, 78, 4, 1, 8, 36, 3, 43, true, 1),
+  },
+  {
+    path: "graphics/entities/combinator/decider-combinator.png",
+    sprites: entitySprites4Way(S.deciderCombinator, 78, 66, 4, 1, 23, 23, 10, 24, true, 1),
+  },
+  {
+    path: "graphics/entities/combinator/decider-combinator-shadow.png",
+    sprites: entitySprites4Way(S.deciderCombinatorShadow, 78, 80, 4, 1, 11, 35, 3, 45, true, 1),
+  },
   
   
   
@@ -2263,6 +2305,31 @@ export const SPRITES = [
     path: "graphics/items/logistic-chest-buffer.png",
     sprites: itemSprites(S.bufferChestItem, S.bufferChestIcon),
   },
+  {
+    path: "graphics/items/constant-combinator.png",
+    sprites: itemSprites(S.constantCombinatorItem, S.constantCombinatorIcon),
+  },
+  {
+    path: "graphics/items/arithmetic-combinator.png",
+    sprites: itemSprites(S.arithmeticCombinatorItem, S.arithmeticCombinatorIcon),
+  },
+  {
+    path: "graphics/items/decider-combinator.png",
+    sprites: itemSprites(S.deciderCombinatorItem, S.deciderCombinatorIcon),
+  },
+  {
+    path: "graphics/items/power-switch.png",
+    sprites: itemSprites(S.powerSwitchItem, S.powerSwitchIcon),
+  },
+  {
+    path: "graphics/items/programmable-speaker.png",
+    sprites: itemSprites(S.programmableSpeakerItem, S.programmableSpeakerIcon),
+  },
+  {
+    path: "graphics/items/small-lamp.png",
+    sprites: itemSprites(S.lampItem, S.lampIcon),
+  },
+  
   
   
   
@@ -2385,6 +2452,21 @@ function halfBeltSprites(id, width, height,
   return res;
 }
 
+function entitySprites4Way(id, width, height, xCount, yCount,
+                       left, right, top, bottom, flipXY, tiles) {
+  const sprites = entitySprites(id, width, height, xCount, yCount,
+      left, right, top, bottom, flipXY);
+  sprites.forEach((s, i) => {
+    if (i % 2 == 0) {
+      s.top -= tiles * 16;
+      s.bottom -= tiles * 16;
+    } else {
+      s.left -= tiles * 16;
+      s.right -= tiles * 16;
+    }
+  });
+  return sprites;
+}
 function itemSprites(id, iconId) {
   if (!id && !iconId) throw new Error("no id");
   return [

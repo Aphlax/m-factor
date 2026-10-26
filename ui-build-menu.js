@@ -65,6 +65,9 @@ const BUILD_MENU = [
   NAME.railChainSignal,
   NAME.rocketSilo,
   NAME.radar,
+  NAME.constantCombinator,
+  NAME.arithmeticCombinator,
+  NAME.deciderCombinator,
 ];
 const DEACC = 50;
 

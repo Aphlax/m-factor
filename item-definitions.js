@@ -101,6 +101,12 @@ export const I = {
   activeProviderChest: 151,
   bufferChest: 152,
   roboport: 153,
+  constantCombinator: 154,
+  arithmeticCombinator: 155,
+  deciderCombinator: 156,
+  powerSwitch: 157,
+  programmableSpeaker: 158,
+  lamp: 159,
   
   speedModule: 200,
   speedModule2: 201,
@@ -684,6 +690,42 @@ export const ITEMS = new Map([
     sprite: S.bufferChestItem,
     stackSize: 50,
     prototypeName: "buffer-chest",
+  }],
+  [I.constantCombinator,
+  {
+    sprite: S.constantCombinatorItem,
+    stackSize: 50,
+    prototypeName: "constant-combinator",
+  }],
+  [I.arithmeticCombinator,
+  {
+    sprite: S.arithmeticCombinatorItem,
+    stackSize: 50,
+    prototypeName: "arithmetic-combinator",
+  }],
+  [I.deciderCombinator,
+  {
+    sprite: S.deciderCombinatorItem,
+    stackSize: 50,
+    prototypeName: "decider-combinator",
+  }],
+  [I.powerSwitch,
+  {
+    sprite: S.powerSwitchItem,
+    stackSize: 10,
+    prototypeName: "power-switch",
+  }],
+  [I.programmableSpeaker,
+  {
+    sprite: S.programmableSpeakerItem,
+    stackSize: 10,
+    prototypeName: "programmable-speaker",
+  }],
+  [I.lamp,
+  {
+    sprite: S.lampItem,
+    stackSize: 50,
+    prototypeName: "small-lamp",
   }],
   
   

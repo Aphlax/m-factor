@@ -25,6 +25,9 @@ export const TYPE = {
   roboport: 23,
   radar: 24,
   logisticContainer: 25,
+  constantCombinator: 26,
+  arithmeticCombinator: 27,
+  deciderCombinator: 28,
 };
 
 export const NAME = {
@@ -80,6 +83,9 @@ export const NAME = {
   requesterChest: 50,
   activeProviderChest: 51,
   bufferChest: 52,
+  constantCombinator: 53,
+  arithmeticCombinator: 54,
+  deciderCombinator: 55,
 };
 
 /** Never value for next update. 285 years from now. */

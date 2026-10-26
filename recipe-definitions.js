@@ -1368,7 +1368,82 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
-  
+  {
+    prototypeName: "constant-combinator",
+    inputs: [
+      {item: I.copperCable, amount: 5},
+      {item: I.electronicCircuit, amount: 2},
+    ],
+    outputs: [
+      {item: I.constantCombinator, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  {
+    prototypeName: "arithmetic-combinator",
+    inputs: [
+      {item: I.copperCable, amount: 5},
+      {item: I.electronicCircuit, amount: 5},
+    ],
+    outputs: [
+      {item: I.arithmeticCombinator, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  {
+    prototypeName: "decider-combinator",
+    inputs: [
+      {item: I.copperCable, amount: 5},
+      {item: I.electronicCircuit, amount: 5},
+    ],
+    outputs: [
+      {item: I.deciderCombinator, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
+  {
+    prototypeName: "power-switch",
+    inputs: [
+      {item: I.copperCable, amount: 5},
+      {item: I.electronicCircuit, amount: 2},
+      {item: I.ironPlate, amount: 5},
+    ],
+    outputs: [
+      {item: I.powerSwitch, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 2000,
+  },
+  {
+    prototypeName: "programmable-speaker",
+    inputs: [
+      {item: I.copperCable, amount: 5},
+      {item: I.electronicCircuit, amount: 4},
+      {item: I.ironPlate, amount: 3},
+      {item: I.ironStick, amount: 4},
+    ],
+    outputs: [
+      {item: I.programmableSpeaker, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 2000,
+  },
+  {
+    prototypeName: "small-lamp",
+    inputs: [
+      {item: I.copperCable, amount: 3},
+      {item: I.electronicCircuit, amount: 1},
+      {item: I.ironPlate, amount: 1},
+    ],
+    outputs: [
+      {item: I.lamp, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
   
   
   
