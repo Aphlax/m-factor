@@ -255,6 +255,9 @@ UiWindow.prototype.initialize = function() {
   this.entityUis.set(TYPE.constantCombinator, {});
   this.entityUis.set(TYPE.arithmeticCombinator, {});
   this.entityUis.set(TYPE.deciderCombinator, {});
+  this.entityUis.set(TYPE.powerSwitch, {});
+  this.entityUis.set(TYPE.programmableSpeaker, {});
+  this.entityUis.set(TYPE.lamp, {});
   
   this.entityUis.set(TYPE.belt, {
     snake: new UiButton(this, this.canvasWidth - 96, 86)

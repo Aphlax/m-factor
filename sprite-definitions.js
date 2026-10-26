@@ -403,6 +403,14 @@ export const S = {
   arithmeticCombinatorShadow: 18185, // 4
   deciderCombinator: 18189, // 4
   deciderCombinatorShadow: 18193, // 4
+  powerSwitch: 18197, // 6
+  powerSwitchShadow: 18203, // 6
+  programmableSpeaker: 18209,
+  programmableSpeakerShadow: 18210,
+  lamp: 18211,
+  lampShadow: 18212,
+  
+  
   
   // Items
   ironOreItem: 16000,
@@ -1799,6 +1807,30 @@ export const SPRITES = [
   {
     path: "graphics/entities/combinator/decider-combinator-shadow.png",
     sprites: entitySprites4Way(S.deciderCombinatorShadow, 78, 80, 4, 1, 11, 35, 3, 45, true, 1),
+  },
+  {
+    path: "graphics/entities/power-switch/power-switch.png",
+    sprites: entitySprites(S.powerSwitch, 86, 70, 2, 3, 14, 8, 5, 1, true),
+  },
+  {
+    path: "graphics/entities/power-switch/power-switch-shadow.png",
+    sprites: entitySprites(S.powerSwitchShadow, 84, 46, 2, 3, 3, 17, -19, 1, true),
+  },
+  {
+    path: "graphics/entities/programmable-speaker/programmable-speaker.png",
+    sprites: entitySprites(S.programmableSpeaker, 30, 89, 1, 1, 1, -3, 65, -8, true),
+  },
+  {
+    path: "graphics/entities/programmable-speaker/programmable-speaker-shadow.png",
+    sprites: entitySprites(S.programmableSpeakerShadow, 119, 25, 1, 1, -9, 96, -4, -3, true),
+  },
+  {
+    path: "graphics/entities/lamp/lamp.png",
+    sprites: entitySprites(S.lamp, 42, 36, 1, 1, 5, 5, 1, 3, true),
+  },
+  {
+    path: "graphics/entities/lamp/lamp-shadow.png",
+    sprites: entitySprites(S.lampShadow, 38, 24, 1, 1, -2, 8, -7, -1, true),
   },
   
   

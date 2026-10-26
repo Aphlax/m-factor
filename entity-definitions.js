@@ -7,7 +7,7 @@ const {north, east, south, west} = DIRECTION;
 export const ENTITIES = new Map([
   [NAME.burnerDrill,
   {
-    label: 'Wind up drill',
+    label: 'Wind up Drill',
     prototypeName: "burner-mining-drill",
     type: TYPE.mine,
     width: 2,
@@ -36,7 +36,7 @@ export const ENTITIES = new Map([
   }],
   [NAME.woodenChest,
   {
-    label: 'Wooden chest',
+    label: 'Wooden Chest',
     prototypeName: "wooden-chest",
     type: TYPE.chest,
     width: 1,
@@ -190,7 +190,7 @@ export const ENTITIES = new Map([
   }],
   [NAME.offshorePump,
   {
-    label: "Wind up pump",
+    label: "Wind up Pump",
     prototypeName: "offshore-pump",
     type: TYPE.offshorePump,
     size: {
@@ -454,7 +454,7 @@ export const ENTITIES = new Map([
   }],
   [NAME.electricMiningDrill,
   {
-    label: 'Electric drill',
+    label: 'Electric Drill',
     prototypeName: "electric-mining-drill",
     type: TYPE.mine,
     width: 3,
@@ -828,7 +828,7 @@ export const ENTITIES = new Map([
   }],
   [NAME.ironChest,
   {
-    label: 'Iron chest',
+    label: 'Iron Chest',
     prototypeName: "iron-chest",
     type: TYPE.chest,
     width: 1,
@@ -848,7 +848,7 @@ export const ENTITIES = new Map([
   }],
   [NAME.steelChest,
   {
-    label: 'Steel chest',
+    label: 'Steel Chest',
     prototypeName: "steel-chest",
     type: TYPE.chest,
     width: 1,
@@ -1507,6 +1507,48 @@ export const ENTITIES = new Map([
       [east]: [S.deciderCombinator+1, S.deciderCombinatorShadow+1],
       [south]: [S.deciderCombinator+2, S.deciderCombinatorShadow+2],
       [west]: [S.deciderCombinator+3, S.deciderCombinatorShadow+3],
+    },
+    mapColor: "#006094",
+  }],
+  [NAME.powerSwitch,
+  {
+    label: "Power Switch",
+    prototypeName: "power-switch",
+    type: TYPE.powerSwitch,
+    width: 2,
+    height: 2,
+    rotatable: false,
+    icon: S.powerSwitchIcon,
+    sprites: {
+      [north]: [S.powerSwitch, S.powerSwitchShadow],
+    },
+    mapColor: "#006094",
+  }],
+  [NAME.programmableSpeaker,
+  {
+    label: "Speaker",
+    prototypeName: "programmableSpeaker",
+    type: TYPE.programmableSpeaker,
+    width: 1,
+    height: 1,
+    rotatable: false,
+    icon: S.programmableSpeakerIcon,
+    sprites: {
+      [north]: [S.programmableSpeaker, S.programmableSpeakerShadow],
+    },
+    mapColor: "#006094",
+  }],
+  [NAME.lamp,
+  {
+    label: "Lamp",
+    prototypeName: "small-lamp",
+    type: TYPE.lamp,
+    width: 1,
+    height: 1,
+    rotatable: false,
+    icon: S.lampIcon,
+    sprites: {
+      [north]: [S.lamp, S.lampShadow],
     },
     mapColor: "#006094",
   }],

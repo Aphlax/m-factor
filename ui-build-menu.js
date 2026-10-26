@@ -68,6 +68,9 @@ const BUILD_MENU = [
   NAME.constantCombinator,
   NAME.arithmeticCombinator,
   NAME.deciderCombinator,
+  NAME.powerSwitch,
+  NAME.programmableSpeaker,
+  NAME.lamp,
 ];
 const DEACC = 50;
 

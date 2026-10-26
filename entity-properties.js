@@ -28,6 +28,9 @@ export const TYPE = {
   constantCombinator: 26,
   arithmeticCombinator: 27,
   deciderCombinator: 28,
+  powerSwitch: 29,
+  programmableSpeaker: 30,
+  lamp: 31,
 };
 
 export const NAME = {
@@ -86,6 +89,9 @@ export const NAME = {
   constantCombinator: 53,
   arithmeticCombinator: 54,
   deciderCombinator: 55,
+  powerSwitch: 56,
+  programmableSpeaker: 57,
+  lamp: 58,
 };
 
 /** Never value for next update. 285 years from now. */
