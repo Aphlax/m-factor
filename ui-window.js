@@ -98,6 +98,7 @@ UiWindow.prototype.draw = function(ctx, time) {
     }
   }
   
+  // Grip icon.
   ctx.beginPath();
   ctx.moveTo(width / 2 - 2, y + 16);
   ctx.lineTo(width / 2 + 2, y + 16);
@@ -238,7 +239,13 @@ UiWindow.prototype.initialize = function() {
   });
   
   this.entityUis.set(TYPE.chest, {
-    inventory: new UiInventory(this, 10, 40),
+    inventory: new UiInventory(this, (this.canvasWidth - 362) / 2, 40)
+        .setWrap(8),
+  });
+  
+  this.entityUis.set(TYPE.logisticContainer, {
+    inventory: new UiInventory(this, (this.canvasWidth - 362) / 2, 40)
+        .setWrap(8),
   });
   
   this.entityUis.set(TYPE.offshorePump, {});
@@ -249,15 +256,14 @@ UiWindow.prototype.initialize = function() {
   this.entityUis.set(TYPE.trainStop, {});
   this.entityUis.set(TYPE.railSignal, {});
   this.entityUis.set(TYPE.accumulator, {});
-  this.entityUis.set(TYPE.roboport, {});
   this.entityUis.set(TYPE.radar, {});
-  this.entityUis.set(TYPE.logisticContainer, {});
   this.entityUis.set(TYPE.constantCombinator, {});
   this.entityUis.set(TYPE.arithmeticCombinator, {});
   this.entityUis.set(TYPE.deciderCombinator, {});
   this.entityUis.set(TYPE.powerSwitch, {});
   this.entityUis.set(TYPE.programmableSpeaker, {});
   this.entityUis.set(TYPE.lamp, {});
+  this.entityUis.set(TYPE.solarPanel, {});
   
   this.entityUis.set(TYPE.belt, {
     snake: new UiButton(this, this.canvasWidth - 96, 86)
@@ -335,14 +341,18 @@ UiWindow.prototype.initialize = function() {
         .setIsOutput(true),
   });
   
+  this.entityUis.set(TYPE.roboport, {
+    inventory: new UiInventory(this, 10, 40),
+  });
+  
   for (let ui of this.entityUis.values()) {
     ui.all = Object.values(ui);
   }
 };
 
-UiWindow.prototype.set = function(selectedEntity) {
-  this.selectedEntity = selectedEntity;
-  if (!selectedEntity) {
+UiWindow.prototype.set = function(entity) {
+  this.selectedEntity = entity;
+  if (!entity) {
     this.yTarget = this.canvasHeight;
     this.animationSpeed = (this.yTarget - this.y) / 100;
     return;
@@ -352,109 +362,116 @@ UiWindow.prototype.set = function(selectedEntity) {
     this.animationSpeed = (this.yTarget - this.y) / 100;
   }
   this.x = this.xTarget = 0;
-  const ui = this.entityUi = this.entityUis.get(selectedEntity.type);
+  const ui = this.entityUi = this.entityUis.get(entity.type);
+  let defaultY =  ui.all.length ? 86 : 40;
   
-  if (!selectedEntity.type) {
-    if (selectedEntity.id) {
+  if (!entity.type) {
+    if (entity.id) {
       this.entityUi = this.entityUis.get(NATURAL.resource);
-      this.entityUi.resource.set(selectedEntity);
-    } else if (selectedEntity) {
+      this.entityUi.resource.set(entity);
+    } else if (entity) {
       this.entityUi = this.entityUis.get(NATURAL.tree);
-      this.entityUi.tree.set(selectedEntity);
+      this.entityUi.tree.set(entity);
     }
-  } else if (selectedEntity.type == TYPE.mine) {
-    ui.progress.set(selectedEntity);
-  } else if (selectedEntity.type == TYPE.chest) {
-    ui.inventory.set(selectedEntity.inputInventory);
-  } else if (selectedEntity.type == TYPE.furnace) {
-    ui.input.set(selectedEntity.inputInventory);
-    ui.output.set(selectedEntity.outputInventory);
-    ui.progress.set(selectedEntity);
-  } else if (selectedEntity.type == TYPE.assembler) {
-    ui.input.set(selectedEntity.inputInventory);
-    ui.fluidInput.set(selectedEntity.inputFluidTank);
+  } else if (entity.type == TYPE.mine) {
+    ui.progress.set(entity);
+  } else if (entity.type == TYPE.chest) {
+    ui.inventory.set(entity.inputInventory);
+    defaultY = Math.ceil(entity.inputInventory.capacity / 8) * 46 + 40;
+  } else if (entity.type == TYPE.furnace) {
+    ui.input.set(entity.inputInventory);
+    ui.output.set(entity.outputInventory);
+    ui.progress.set(entity);
+  } else if (entity.type == TYPE.assembler) {
+    ui.input.set(entity.inputInventory);
+    ui.fluidInput.set(entity.inputFluidTank);
     ui.fluidInput.x = 10 +
-        selectedEntity.inputInventory.capacity * 46;
-    ui.output.set(selectedEntity.outputInventory);
+        entity.inputInventory.capacity * 46;
+    ui.output.set(entity.outputInventory);
     ui.output.x = this.canvasWidth - 50 -
-        (selectedEntity.outputInventory.capacity +
-        (selectedEntity.outputFluidTank?.tanklets.length ?? 0)) * 46;
-    ui.fluidOutput.set(selectedEntity.outputFluidTank);
+        (entity.outputInventory.capacity +
+        (entity.outputFluidTank?.tanklets.length ?? 0)) * 46;
+    ui.fluidOutput.set(entity.outputFluidTank);
     ui.fluidOutput.x = this.canvasWidth - 50 -
-        (selectedEntity.outputFluidTank?.tanklets.length ?? 0) * 46;
-    ui.progress.set(selectedEntity);
+        (entity.outputFluidTank?.tanklets.length ?? 0) * 46;
+    ui.progress.set(entity);
     ui.progress.x = 10 +
-        (selectedEntity.inputInventory.capacity +
-        (selectedEntity.inputFluidTank?.tanklets.length ?? 0)) * 46;
+        (entity.inputInventory.capacity +
+        (entity.inputFluidTank?.tanklets.length ?? 0)) * 46;
     ui.progress.width = this.canvasWidth - 66 -
-        46 * (selectedEntity.inputInventory.capacity +
-        selectedEntity.outputInventory.capacity +
-        (selectedEntity.inputFluidTank?.tanklets.length ?? 0) +
-        (selectedEntity.outputFluidTank?.tanklets.length ?? 0));
-    if (!selectedEntity.data.recipe) {
+        46 * (entity.inputInventory.capacity +
+        entity.outputInventory.capacity +
+        (entity.inputFluidTank?.tanklets.length ?? 0) +
+        (entity.outputFluidTank?.tanklets.length ?? 0));
+    if (!entity.data.recipe) {
       ui.recipeChoice.openChoice(
-          CHOICE.assemblerRecipe, selectedEntity);
+          CHOICE.assemblerRecipe, entity);
       this.x = this.xTarget = -this.canvasWidth;
     }
-  } else if (selectedEntity.type == TYPE.lab) {
-    ui.inventory.set(selectedEntity.inputInventory);
-    ui.progress.set(selectedEntity);
-  } else if (selectedEntity.type == TYPE.pipe ||
-      selectedEntity.type == TYPE.pipeToGround) {
-    ui.fluidIndicator.set(selectedEntity);
-  } else if (selectedEntity.type == TYPE.generator) {
+  } else if (entity.type == TYPE.lab) {
+    ui.inventory.set(entity.inputInventory);
+    ui.progress.set(entity);
+  } else if (entity.type == TYPE.pipe ||
+      entity.type == TYPE.pipeToGround) {
+    ui.fluidIndicator.set(entity);
+  } else if (entity.type == TYPE.generator) {
     ui.input.set(this.ui.game.settings.debugPipes ?
-        selectedEntity.inputFluidTank : undefined);
-  } else if (selectedEntity.type == TYPE.undergroundBelt) {
+        entity.inputFluidTank : undefined);
+  } else if (entity.type == TYPE.undergroundBelt) {
     ui.connectUnderground.setButton(
-        (selectedEntity.data.undergroundUp ?
-        !selectedEntity.data.beltInput :
-        !selectedEntity.data.beltOutput) ?
+        (entity.data.undergroundUp ?
+        !entity.data.beltInput :
+        !entity.data.beltOutput) ?
         BUTTON.connectUnderground : BUTTON.none);
-  } else if (selectedEntity.type == TYPE.pipeToGround) {
+  } else if (entity.type == TYPE.pipeToGround) {
     ui.connectUnderground.setButton(
-        !selectedEntity.data.pipes[1] ?
+        !entity.data.pipes[1] ?
         BUTTON.connectUnderground : BUTTON.none);
-  } else if (selectedEntity.type == TYPE.splitter) {
-    ui.priority.set(selectedEntity);
-  } else if (selectedEntity.type == TYPE.inserter) {
-    ui.filters.set(selectedEntity);
-  } else if (selectedEntity.type == TYPE.rocketSilo) {
-    const {recipe, science} = selectedEntity.data;
-    ui.input.set(selectedEntity.inputInventory)
+  } else if (entity.type == TYPE.splitter) {
+    ui.priority.set(entity);
+  } else if (entity.type == TYPE.inserter) {
+    ui.filters.set(entity);
+  } else if (entity.type == TYPE.rocketSilo) {
+    const {recipe, science} = entity.data;
+    ui.input.set(entity.inputInventory)
       .setPart(0, recipe.inputs.length);
-    ui.progress.set(selectedEntity);
+    ui.progress.set(entity);
     ui.progress.x = 10 +
         (recipe.inputs.length) * 46;
     ui.progress.width = this.canvasWidth - 20 -
         46 * (recipe.inputs.length);
-    ui.scienceInput.set(selectedEntity.inputInventory)
+    ui.scienceInput.set(entity.inputInventory)
       .setPart(recipe.inputs.length, 100);
-    ui.rocketProgress.set(selectedEntity);
+    ui.rocketProgress.set(entity);
     ui.rocketProgress.x = 10 +
         (science.inputs.length) * 46;
     ui.rocketProgress.width = this.canvasWidth - 66 -
         46 * (science.inputs.length +
-        selectedEntity.outputInventory.capacity);
-    ui.output.set(selectedEntity.outputInventory);
+        entity.outputInventory.capacity);
+    ui.output.set(entity.outputInventory);
     ui.output.x = this.canvasWidth - 50 -
-        (selectedEntity.outputInventory.capacity) * 46;
+        (entity.outputInventory.capacity) * 46;
+  } else if (entity.type == TYPE.logisticContainer) {
+    ui.inventory.set(entity.inputInventory);
+    defaultY = Math.ceil(entity.inputInventory.capacity / 8) * 46 + 40;
+  } else if (entity.type == TYPE.roboport) {
+    ui.inventory.set(entity.inputInventory);
   }
   
-  this.showDefaultUi = !!selectedEntity.type;
+  this.showDefaultUi = !!entity.type;
   for (let c of this.defaultUi.all) {
-    c.y = this.entityUi.all.length ? 86 : 40;
+    c.y = defaultY;
   }
-  if (selectedEntity.energySource == ENERGY.burner) {
-    this.defaultUi.fuelInventory.set(selectedEntity.fuelInventory);
-    this.defaultUi.fuel.set(selectedEntity);
+  if (entity.energySource == ENERGY.burner) {
+    this.defaultUi.fuelInventory.set(entity.fuelInventory);
+    this.defaultUi.fuel.set(entity);
   } else {
     this.defaultUi.fuelInventory.set();
     this.defaultUi.fuel.set();
   }
-  if (selectedEntity.energySource == ENERGY.windUp) {
+  if (entity.energySource == ENERGY.windUp) {
     this.defaultUi.windUpButton.setButton(BUTTON.windUp);
-    this.defaultUi.windUp.set(selectedEntity);
+    this.defaultUi.windUp.set(entity);
   } else {
     this.defaultUi.windUpButton.setButton(BUTTON.none);
     this.defaultUi.windUp.set();

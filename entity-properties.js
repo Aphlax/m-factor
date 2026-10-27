@@ -31,6 +31,7 @@ export const TYPE = {
   powerSwitch: 29,
   programmableSpeaker: 30,
   lamp: 31,
+  solarPanel: 32,
 };
 
 export const NAME = {
@@ -92,6 +93,7 @@ export const NAME = {
   powerSwitch: 56,
   programmableSpeaker: 57,
   lamp: 58,
+  solarPanel: 59,
 };
 
 /** Never value for next update. 285 years from now. */
@@ -236,6 +238,11 @@ export const ENERGY = {
 export const FUEL_FILTERS =
     [...ITEMS.entries().filter(([i, {fuelValue}]) => fuelValue)
     .map(([item]) => ({item, amount: 1}))];
+
+export const ROBOT_FILTERS = [
+  {item: I.constructionRobot, amount: 1},
+  {item: I.logisticRobot, amount: 1},
+];
 
 
 function rectOverlap(x, y, width, height, entity) {

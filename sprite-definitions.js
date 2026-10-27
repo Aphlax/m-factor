@@ -409,6 +409,8 @@ export const S = {
   programmableSpeakerShadow: 18210,
   lamp: 18211,
   lampShadow: 18212,
+  solarPanel: 18213,
+  solarPanelShadow: 18214,
   
   
   
@@ -1831,6 +1833,14 @@ export const SPRITES = [
   {
     path: "graphics/entities/lamp/lamp-shadow.png",
     sprites: entitySprites(S.lampShadow, 38, 24, 1, 1, -2, 8, -7, -1, true),
+  },
+  {
+    path: "graphics/entities/solar-panel/solar-panel.png",
+    sprites: entitySprites(S.solarPanel, 116, 112, 1, 1, 12, 8, 6, 10, true),
+  },
+  {
+    path: "graphics/entities/solar-panel/solar-panel-shadow.png",
+    sprites: entitySprites(S.solarPanelShadow, 112, 90, 1, 1, -6, 22, -6, 0, true),
   },
   
   

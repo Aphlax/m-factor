@@ -5,7 +5,24 @@ function Inventory(capacity) {
   this.items = [];
   this.amounts = [];
   this.filters = undefined;
+  this.isFilteredSlots = false;
 }
+
+Inventory.prototype.setFilters = function(filters) {
+  if (this.isFilteredSlots && (filters?.length ?? 0) != this.capacity) {
+    throw new Error("Invalid filters");
+  }
+  this.filters = filters;
+  return this;
+};
+
+Inventory.prototype.setIsFilteredSlots = function(value) {
+  if ((this.filters?.length ?? 0) != this.capacity && value) {
+    throw new Error("Invalid isFilteredSlots");
+  }
+  this.isFilteredSlots = value;
+  return this;
+};
 
 /**
  * Returns the itemId of an allowed item,
@@ -14,8 +31,7 @@ function Inventory(capacity) {
  * inserted.
  */
 Inventory.prototype.allowsItems = function(a, b, c) {
-  if (this.filters && this.filters.length == this.capacity) {
-    // Filtered slots
+  if (this.filters && this.isFilteredSlots) {
     let full = false;
     for (let i = 0; i < this.filters.length; i++) {
       const filter = this.filters[i].item;
@@ -84,7 +100,7 @@ Inventory.prototype.allowsItems = function(a, b, c) {
 };
 
 Inventory.prototype.insert = function(item, amount) {
-  if (this.filters && this.filters.length == this.capacity) {
+  if (this.filters && this.isFilteredSlots) {
     for (let i = 0; i < this.filters.length; i++) {
       if (this.filters[i].item != item) continue;
       const stackSize = ITEMS.get(item).stackSize;
@@ -102,8 +118,15 @@ Inventory.prototype.insert = function(item, amount) {
     }
     return 0;
   }
-  if (this.filters && !this.filters.some(f => f.item == item)) {
-    return 0;
+  if (this.filters) {
+    let included = false;
+    for (let i = 0; i < this.filters.length; i++) {
+      if (this.filters[i].item != item){
+        included = true
+        break;
+      }
+    }
+    if (!included) return 0;
   }
   let count = 0, insertIndex = this.items.length;
   const stackSize = ITEMS.get(item).stackSize;
@@ -137,8 +160,7 @@ Inventory.prototype.extract = function(item, amount, onlyFullAmount) {
     }
     const transfer = Math.min(amount - count, this.amounts[i]);
     if (transfer == this.amounts[i]) {
-      if (!this.filters ||
-        this.filters.length != this.capacity) {
+      if (!this.filters || !this.isFilteredSlots) {
         this.items.splice(i, 1);
         this.amounts.splice(i, 1);
       } else {
@@ -153,19 +175,6 @@ Inventory.prototype.extract = function(item, amount, onlyFullAmount) {
   }
   return count;
 }
-
-/**
- * If filters.length > capacity, each slot
- * can take any filter value (for furnace).
- * Otherwise each slot can take the item in
- * the corresponding filter.
- */
-Inventory.prototype.setFilters = function(filters) {
-  if (filters && filters.length < this.capacity)
-    throw new Error("Not implemented!");
-  this.filters = filters;
-  return this;
-};
 
 /** Extracts exactly the items from this inventory. Slow. */
 Inventory.prototype.extractItems = function(items) {
@@ -190,7 +199,7 @@ Inventory.prototype.extractItems = function(items) {
 
 /** Extracts exactly the filters from this inventory. */
 Inventory.prototype.extractFilters = function() {
-  if (this.filters.length != this.capacity) return false;
+  if (!this.isFilteredSlots) return false;
   for (let i = 0; i < this.filters.length; i++) {
     if ((this.amounts[i] ?? 0) < this.filters[i].amount) {
       return false;
@@ -208,7 +217,7 @@ Inventory.prototype.extractFilters = function() {
 
 /** Inserts exactly the filters into this inventory. */
 Inventory.prototype.insertFilters = function() {
-  if (this.filters.length != this.capacity) return false;
+  if (!this.isFilteredSlots) return false;
   for (let i = 0; i < this.filters.length; i++) {
     const stackSize = ITEMS.get(this.filters[i].item).stackSize;
     if ((this.amounts[i] ?? 0) + this.filters[i].amount > stackSize) {

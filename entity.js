@@ -1,7 +1,7 @@
 import {Inventory} from './inventory.js';
 import {FluidTank} from './fluid-tank.js';
 import {ENTITIES} from './entity-definitions.js';
-import {TYPE, NAME, MAX_SIZE, NEVER, STATE, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ENERGY, MIN_SATISFACTION, DIRECTION} from './entity-properties.js';
+import {TYPE, NAME, MAX_SIZE, NEVER, STATE, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ROBOT_FILTERS, ENERGY, MIN_SATISFACTION, DIRECTION} from './entity-properties.js';
 import {ITEMS, I} from './item-definitions.js';
 import {RECIPES, FURNACE_FILTERS} from './recipe-definitions.js';
 import {S, SPRITES} from './sprite-pool.js';
@@ -171,8 +171,8 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     }
     this.data.processingSpeed = def.processingSpeed;
     this.data.recipe = undefined;
-    this.inputInventory = new Inventory(0);
-    this.outputInventory = new Inventory(0);
+    this.inputInventory = new Inventory(0).setIsFilteredSlots(true);
+    this.outputInventory = new Inventory(0).setIsFilteredSlots(true);
     if (def.fluidInputs) {
       this.inputFluidTank = new FluidTank()
           .setPipeConnections(def.fluidInputs[direction]);
@@ -209,7 +209,9 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.taskEnd = NEVER;
     this.taskDuration = def.taskDuration;
     this.inputInventory = this.outputInventory =
-        new Inventory(1).setFilters(LAB_FILTERS);
+        new Inventory(1)
+        .setFilters(LAB_FILTERS)
+        .setIsFilteredSlots(true);
     this.energySource = ENERGY.electric;
     this.energyDrain = 0;
     this.energyConsumption = def.energyConsumption;
@@ -373,9 +375,9 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     const allInputs = [...def.recipe.inputs,
       ...def.science.inputs.map(item => ({...item, item: 0}))];
     this.inputInventory = new Inventory(allInputs.length)
-        .setFilters(allInputs);
+        .setFilters(allInputs).setIsFilteredSlots(true);
     this.outputInventory = new Inventory(def.science.outputs.length)
-        .setFilters(def.science.outputs);
+        .setFilters(def.science.outputs).setIsFilteredSlots(true);
     this.energySource = def.energySource;
     this.energyDrain = def.energyDrain;
     this.energyConsumption = def.energyConsumption;
@@ -387,12 +389,21 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.data.capacity = def.capacity;
     this.data.powerInput = def.powerInput;
     this.data.powerOutput = def.powerOutput;
-  } else if (this.type == TYPE.roboport ||
-        this.type == TYPE.radar) {
+  } else if (this.type == TYPE.roboport) {
     this.state = STATE.working;
     this.energySource = def.energySource;
     this.energyDrain = def.energyDrain;
     this.energyConsumption = def.energyConsumption;
+    this.inputInventory = new Inventory(def.inventoryCapacity)
+        .setFilters(ROBOT_FILTERS);
+  } else if (this.type == TYPE.radar) {
+    this.state = STATE.working;
+    this.energySource = def.energySource;
+    this.energyDrain = def.energyDrain;
+    this.energyConsumption = def.energyConsumption;
+  } else if(this.type == TYPE.logisticContainer) {
+    this.inputInventory = this.outputInventory =
+        new Inventory(def.capacity);
   }
   return this;
 };

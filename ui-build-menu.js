@@ -40,6 +40,7 @@ const BUILD_MENU = [
   NAME.bigElectricPole,
   NAME.substation,
   NAME.accumulator,
+  NAME.solarPanel,
   NAME.pipe,
   NAME.pipeToGround,
   NAME.storageTank,

@@ -1353,6 +1353,7 @@ export const ENTITIES = new Map([
     capacity: 5000, // kJ
     powerInput: 2100, // kW
     powerOutput: 500, // kW
+    inventoryCapacity: 5,
     supplyArea: 50,
     constructionArea: 110,
   }],
@@ -1551,6 +1552,20 @@ export const ENTITIES = new Map([
       [north]: [S.lamp, S.lampShadow],
     },
     mapColor: "#006094",
+  }],
+  [NAME.solarPanel,
+  {
+    label: "Solar Panel",
+    prototypeName: "solar-panel",
+    type: TYPE.solarPanel,
+    width: 3,
+    height: 3,
+    rotatable: false,
+    icon: S.solarPanelIcon,
+    sprites: {
+      [north]: [S.solarPanel, S.solarPanelShadow],
+    },
+    mapColor: "#141418",
   }],
   
 ]);
