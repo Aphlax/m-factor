@@ -177,6 +177,8 @@ export const S = {
   rocketSiloTurbine: 317*16, // 32
   radar: 319*16, // 64
   radarShadow: 323*16, // 64
+  centrifuge: 327*16, // 64
+  centrifugeShadow: 331*16, // 64
   
   
   woodenChest: 15000,
@@ -1860,6 +1862,14 @@ export const SPRITES = [
   {
     path: "graphics/entities/solar-panel/solar-panel-shadow.png",
     sprites: entitySprites(S.solarPanelShadow, 112, 90, 1, 1, -6, 22, -6, 0, true),
+  },
+  {
+    path: "graphics/entities/centrifuge/centrifuge.png",
+    sprites: entitySprites(S.centrifuge, 123, 145, 8, 8, 13, 14, 31, 18, true),
+  },
+  {
+    path: "graphics/entities/centrifuge/centrifuge-shadow.png",
+    sprites: entitySprites(S.centrifugeShadow, 154, 99, 8, 8, -6, 64, -2, 5, true),
   },
   
   

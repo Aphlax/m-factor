@@ -50,6 +50,7 @@ const BUILD_MENU = [
   NAME.assemblingMachine3,
   NAME.oilRefinery,
   NAME.chemicalPlant,
+  NAME.centrifuge,
   NAME.burnerDrill,
   NAME.electricMiningDrill,
   NAME.pumpjack,

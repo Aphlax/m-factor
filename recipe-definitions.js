@@ -477,6 +477,7 @@ export const RECIPES = [
     entities: [NAME.centrifuge],
     duration: 12000,
     sprite: S.uraniumProcessing,
+    hasChance: 1,
   },
   {
     prototypeName: "nuclear-fuel-reprocessing",

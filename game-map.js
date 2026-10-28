@@ -8,6 +8,7 @@ import {TransportNetwork} from './transport-network.js';
 import {FluidNetwork} from './fluid-network.js';
 import {ElectricNetwork} from './electric-network.js';
 import {SETTINGS} from './storage.js';
+import {createRand} from './utils.js';
 
 export const MAP = {
   nauvis: 0,
@@ -25,6 +26,7 @@ function GameMap(seed, type) {
   this.transportNetwork = new TransportNetwork();
   this.fluidNetwork = new FluidNetwork();
   this.electricNetwork = new ElectricNetwork(this);
+  this.productionRandom = createRand(this.seed, 0, 0, 0);
   this.particlePool = [];
   this.particles = [];
 }

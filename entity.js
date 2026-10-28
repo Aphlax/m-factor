@@ -171,6 +171,7 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     }
     this.data.processingSpeed = def.processingSpeed;
     this.data.recipe = undefined;
+    this.data.hasChance = 0; // For random recipe outputs.
     this.inputInventory = new Inventory(0).setIsFilteredSlots(true);
     this.outputInventory = new Inventory(0).setIsFilteredSlots(true);
     if (def.fluidInputs) {
@@ -786,7 +787,18 @@ Entity.prototype.update = function(gameMap, time) {
             (time - this.taskStart) * this.animationSpeed / 60) %
             this.animationLength;
         }
-        if (this.outputFluidTank ?
+        if (this.data.hasChance) {
+          for (let i = 0; i < this.outputInventory.filters.length; i++) {
+            const filter = this.outputInventory.filters[i];
+            if (gameMap.productionRandom() <= filter.amount) {
+              if (!this.outputInventory.insert(filter.item, 1)) {
+                state = STATE.itemReady;
+                break assembler;
+              }
+              break;
+            }
+          }
+        } else if (this.outputFluidTank ?
             !this.insertCombinedFilters() :
             !this.outputInventory.insertFilters()) {
           state = STATE.itemReady;

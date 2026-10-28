@@ -94,6 +94,7 @@ export const NAME = {
   programmableSpeaker: 57,
   lamp: 58,
   solarPanel: 59,
+  centrifuge: 60,
 };
 
 /** Never value for next update. 285 years from now. */

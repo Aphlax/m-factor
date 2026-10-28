@@ -230,7 +230,7 @@ function productionTest(gameMap, time) {
   assembler = e(NAME.assemblingMachine1, -13, 60, 1);
   assembler.setRecipe(PROTO_TO_RECIPE.get("satellite"));
   assembler.outputInventory.insertFilters();
-  const chest = e(NAME.ironChest, -15, 60, 0).inputInventory;
+  let chest = e(NAME.ironChest, -15, 60, 0).inputInventory;
   chest.insert(I.accumulator, 250);
   chest.insert(I.lowDensityStructure, 100);
   chest.insert(I.processingUnit, 100);
@@ -252,6 +252,22 @@ function productionTest(gameMap, time) {
   
   e(NAME.accumulator, 10, 67, N);
   e(NAME.roboport, 0, 59, N);
+  
+  
+  e(NAME.centrifuge, 10, 60, N);
+  e(NAME.ironChest, 8, 62, N)
+      .insert(I.uraniumOre, 10000)
+  e(NAME.fastInserter, 9, 62, E);
+  let ins = e(NAME.fastInserter, 10, 63, S);
+  ins.data.itemFilters = [I.uranium235];
+  ins.data.filterMode = true;
+  ins = e(NAME.fastInserter, 12, 63, S)
+  ins.data.itemFilters = [I.uranium238];
+  ins.data.filterMode = true;
+  l(10, 64, E, 1);
+  l(12, 64, W, 1);
+  l(11, 64, S, 2);
+  
   
   gameMap.centerView(0, 50);
 };

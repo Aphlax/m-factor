@@ -1567,7 +1567,26 @@ export const ENTITIES = new Map([
     },
     mapColor: "#141418",
   }],
-  
+  [NAME.centrifuge,
+  {
+    label: "Centrifuge",
+    prototypeName: "centrifuge",
+    type: TYPE.assembler,
+    width: 3,
+    height: 3,
+    rotatable: false,
+    icon: S.centrifugeIcon,
+    sprites: {
+      [north]: [S.centrifuge, S.centrifugeShadow],
+    },
+    animationLength: 64,
+    mapColor: "#006094",
+    energySource: ENERGY.electric,
+    energyDrain: 11.6, // kW
+    energyConsumption: 361.6, // kW
+    
+    processingSpeed: 1,
+  }],
 ]);
 
 ENTITIES.keys().forEach(name =>
