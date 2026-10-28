@@ -462,23 +462,31 @@ export const S = {
   satelliteItem: 16044,
   constructionRobotItem: 16045,
   logisticRobotItem: 16046,
+  uraniumOreItem: 16047,
+  uranium235Item: 16048,
+  uranium238Item: 16049,
+  uraniumFuelCellItem: 16050,
+  usedUpUraniumFuelCellItem: 16051,
   
-  waterFluid: 16050,
-  steamFluid: 16051,
-  crudeOilFluid: 16052,
-  petroleumGasFluid: 16053,
-  basicOilProcessingRecipe: 16054,
-  heavyOilFluid: 16055,
-  lightOilFluid: 16056,
-  advancedOilProcessingRecipe: 16057,
-  heavyOilCrackingRecipe: 16058,
-  lightOilCrackingRecipe: 16059,
-  coalLiquefactionRecipe: 16060,
-  sulfuricAcidFluid: 16061,
-  lubricantFluid: 16062,
-  solidFuelFromHeavyOilRecipe: 16063,
-  solidFuelFromLightOilRecipe: 16064,
-  solidFuelFromPetroleumGasRecipe: 16065,
+  waterFluid: 16080,
+  steamFluid: 16081,
+  crudeOilFluid: 16082,
+  petroleumGasFluid: 16083,
+  basicOilProcessingRecipe: 16084,
+  heavyOilFluid: 16085,
+  lightOilFluid: 16086,
+  advancedOilProcessingRecipe: 16087,
+  heavyOilCrackingRecipe: 16088,
+  lightOilCrackingRecipe: 16089,
+  coalLiquefactionRecipe: 16090,
+  sulfuricAcidFluid: 16091,
+  lubricantFluid: 16092,
+  solidFuelFromHeavyOilRecipe: 16093,
+  solidFuelFromLightOilRecipe: 16094,
+  solidFuelFromPetroleumGasRecipe: 16095,
+  uraniumProcessing: 16096,
+  nuclearFuelReprocessing: 16097,
+  kovarexEnrichmentProcess: 16098,
   
   burnerDrillItem: 16100,
   woodenChestItem: 16101,
@@ -547,6 +555,12 @@ export const S = {
   powerSwitchItem: 16164,
   programmableSpeakerItem: 16165,
   lampItem: 16166,
+  centrifugeItem: 16167,
+  nuclearReactorItem: 16168,
+  heatPipeItem: 16169,
+  heatBoilerItem: 16170,
+  steamTurbineItem: 16171,
+  
   
   gearIcon: 16500,
   burnerDrillIcon: 16501,
@@ -631,6 +645,11 @@ export const S = {
   powerSwitchIcon: 16580,
   programmableSpeakerIcon: 16581,
   lampIcon: 16582,
+  centrifugeIcon: 16583,
+  nuclearReactorIcon: 16584,
+  heatPipeIcon: 16585,
+  heatBoilerIcon: 16586,
+  steamTurbineIcon: 16587,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -2035,6 +2054,27 @@ export const SPRITES = [
     path: "graphics/items/logistic-robot.png",
     sprites: itemSprites(S.logisticRobotItem),
   },
+  {
+    path: "graphics/items/uranium-ore.png",
+    sprites: itemSprites(S.uraniumOreItem),
+  },
+  {
+    path: "graphics/items/uranium-235.png",
+    sprites: itemSprites(S.uranium235Item),
+  },
+  {
+    path: "graphics/items/uranium-238.png",
+    sprites: itemSprites(S.uranium238Item),
+  },
+  {
+    path: "graphics/items/uranium-fuel-cell.png",
+    sprites: itemSprites(S.uraniumFuelCellItem),
+  },
+  {
+    path: "graphics/items/used-up-uranium-fuel-cell.png",
+    sprites: itemSprites(S.usedUpUraniumFuelCellItem),
+  },
+  
   
   
   {
@@ -2101,6 +2141,19 @@ export const SPRITES = [
     path: "graphics/items/solid-fuel-from-petroleum-gas.png",
     sprites: itemSprites(S.solidFuelFromPetroleumGasRecipe),
   },
+  {
+    path: "graphics/items/uranium-processing.png",
+    sprites: itemSprites(S.uraniumProcessing),
+  },
+  {
+    path: "graphics/items/nuclear-fuel-reprocessing.png",
+    sprites: itemSprites(S.nuclearFuelReprocessing),
+  },
+  {
+    path: "graphics/items/kovarex-enrichment-process.png",
+    sprites: itemSprites(S.kovarexEnrichmentProcess),
+  },
+  
   
   
   {
@@ -2370,6 +2423,26 @@ export const SPRITES = [
   {
     path: "graphics/items/small-lamp.png",
     sprites: itemSprites(S.lampItem, S.lampIcon),
+  },
+  {
+    path: "graphics/items/centrifuge.png",
+    sprites: itemSprites(S.centrifugeItem, S.centrifugeIcon),
+  },
+  {
+    path: "graphics/items/nuclear-reactor.png",
+    sprites: itemSprites(S.nuclearReactorItem, S.nuclearReactorIcon),
+  },
+  {
+    path: "graphics/items/heat-pipe.png",
+    sprites: itemSprites(S.heatPipeItem, S.heatPipeIcon),
+  },
+  {
+    path: "graphics/items/heat-boiler.png",
+    sprites: itemSprites(S.heatBoilerItem, S.heatBoilerIcon),
+  },
+  {
+    path: "graphics/items/steam-turbine.png",
+    sprites: itemSprites(S.steamTurbineItem, S.steamTurbineIcon),
   },
   
   

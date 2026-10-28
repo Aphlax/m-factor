@@ -219,7 +219,7 @@ UiWindow.prototype.initialize = function() {
     fuelInventory: new UiInventory(this, 10, 40),
     fuel: new UiFuel(this, 54, 40),
     windUpButton: new UiButton(this, 10, 40)
-        .setButton(BUTTON.none, S.windUpIcon),
+        .setButton(BUTTON.windUp, S.windUpIcon),
     windUp: new UiWindUp(this, 54, 40),
   };
   this.defaultUi.all = Object.values(this.defaultUi);
@@ -363,7 +363,7 @@ UiWindow.prototype.set = function(entity) {
   }
   this.x = this.xTarget = 0;
   const ui = this.entityUi = this.entityUis.get(entity.type);
-  let defaultY =  ui.all.length ? 86 : 40;
+  let defaultY =  ui?.all.length ? 86 : 40;
   
   if (!entity.type) {
     if (entity.id) {

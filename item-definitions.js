@@ -29,6 +29,11 @@ export const I = {
   satellite: 27,
   constructionRobot: 28,
   logisticRobot: 29,
+  uraniumOre: 30,
+  uranium235: 31,
+  uranium238: 32,
+  uraniumFuelCell: 33,
+  depletedUraniumFuelCell: 34,
   
   automationScience: 40,
   logisticScience: 41,
@@ -107,6 +112,11 @@ export const I = {
   powerSwitch: 157,
   programmableSpeaker: 158,
   lamp: 159,
+  centrifuge: 160,
+  nuclearReactor: 161,
+  heatPipe: 162,
+  heatExchanger: 163,
+  steamTurbine: 164,
   
   speedModule: 200,
   speedModule2: 201,
@@ -344,6 +354,37 @@ export const ITEMS = new Map([
     stackSize: 50,
     prototypeName: "logistic-robot",
   }],
+  [I.uraniumOre,
+  {
+    sprite: S.uraniumOreItem,
+    stackSize: 50,
+    prototypeName: "uranium-ore",
+  }],
+  [I.uranium235,
+  {
+    sprite: S.uranium235Item,
+    stackSize: 100,
+    prototypeName: "uranium-235",
+  }],
+  [I.uranium238,
+  {
+    sprite: S.uranium238Item,
+    stackSize: 100,
+    prototypeName: "uranium-238",
+  }],
+  [I.uraniumFuelCell,
+  {
+    sprite: S.uraniumFuelCellItem,
+    stackSize: 50,
+    prototypeName: "uranium-fuel-cell",
+  }],
+  [I.depletedUraniumFuelCell,
+  {
+    sprite: S.usedUpUraniumFuelCellItem,
+    stackSize: 50,
+    prototypeName: "depleted-uranium-fuel-cell",
+  }],
+  
   
   
   
@@ -726,6 +767,36 @@ export const ITEMS = new Map([
     sprite: S.lampItem,
     stackSize: 50,
     prototypeName: "small-lamp",
+  }],
+  [I.centrifuge,
+  {
+    sprite: S.centrifugeItem,
+    stackSize: 50,
+    prototypeName: "centrifuge",
+  }],
+  [I.nuclearReactor,
+  {
+    sprite: S.nuclearReactorItem,
+    stackSize: 10,
+    prototypeName: "nuclear-reactor",
+  }],
+  [I.heatPipe,
+  {
+    sprite: S.heatPipeItem,
+    stackSize: 50,
+    prototypeName: "heat-pipe",
+  }],
+  [I.heatExchanger,
+  {
+    sprite: S.heatBoilerItem,
+    stackSize: 50,
+    prototypeName: "heat-exchanger",
+  }],
+  [I.steamTurbine,
+  {
+    sprite: S.steamTurbineItem,
+    stackSize: 10,
+    prototypeName: "steam-turbine",
   }],
   
   

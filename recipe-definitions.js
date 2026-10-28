@@ -465,6 +465,58 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
+  {
+    prototypeName: "uranium-processing",
+    inputs: [
+      {item: I.uraniumOre, amount: 10},
+    ],
+    outputs: [
+      {item: I.uranium235, amount: 0.007},
+      {item: I.uranium238, amount: 0.993},
+    ],
+    entities: [NAME.centrifuge],
+    duration: 12000,
+    sprite: S.uraniumProcessing,
+  },
+  {
+    prototypeName: "nuclear-fuel-reprocessing",
+    inputs: [
+      {item: I.depletedUraniumFuelCell, amount: 5},
+    ],
+    outputs: [
+      {item: I.uranium238, amount: 3},
+    ],
+    entities: [NAME.centrifuge],
+    duration: 60000,
+    sprite: S.nuclearFuelReprocessing,
+  },
+  {
+    prototypeName: "kovarex-enrichment-process",
+    inputs: [
+      {item: I.uranium235, amount: 40},
+      {item: I.uranium238, amount: 5},
+    ],
+    outputs: [
+      {item: I.uranium235, amount: 41},
+      {item: I.uranium238, amount: 2},
+    ],
+    entities: [NAME.centrifuge],
+    duration: 60000,
+    sprite: S.kovarexEnrichmentProcess,
+  },
+  {
+    prototypeName: "uranium-fuel-cell",
+    inputs: [
+      {item: I.ironPlate, amount: 10},
+      {item: I.uranium235, amount: 1},
+      {item: I.uranium238, amount: 19},
+    ],
+    outputs: [
+      {item: I.uraniumFuelCell, amount: 10},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 10000,
+  },
   
   
   
@@ -1444,8 +1496,72 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 500,
   },
-  
-  
+  {
+    prototypeName: "centrifuge",
+    inputs: [
+      {item: I.advancedCircuit, amount: 100},
+      {item: I.concrete, amount: 100},
+      {item: I.ironGear, amount: 100},
+      {item: I.steelPlate, amount: 50},
+    ],
+    outputs: [
+      {item: I.centrifuge, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 4000,
+  },
+  {
+    prototypeName: "nuclear-reactor",
+    inputs: [
+      {item: I.advancedCircuit, amount: 500},
+      {item: I.concrete, amount: 500},
+      {item: I.copperPlate, amount: 500},
+      {item: I.steelPlate, amount: 500},
+    ],
+    outputs: [
+      {item: I.nuclearReactor, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 8000,
+  },
+  {
+    prototypeName: "heat-pipe",
+    inputs: [
+      {item: I.copperPlate, amount: 20},
+      {item: I.steelPlate, amount: 10},
+    ],
+    outputs: [
+      {item: I.heatPipe, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 1000,
+  },
+  {
+    prototypeName: "heat-exchanger",
+    inputs: [
+      {item: I.copperPlate, amount: 100},
+      {item: I.pipe, amount: 10},
+      {item: I.steelPlate, amount: 10},
+    ],
+    outputs: [
+      {item: I.heatExchanger, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 3000,
+  },
+  {
+    prototypeName: "steam-turbine",
+    inputs: [
+      {item: I.copperPlate, amount: 50},
+      {item: I.ironGear, amount: 50},
+      {item: I.pipe, amount: 20},
+    ],
+    outputs: [
+      {item: I.steamTurbine, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 3000,
+  },
   
   
   
@@ -1492,6 +1608,7 @@ export const RECIPES = [
     entities: [NAME.rocketSilo],
     duration: 0,
   },
+  
   
   
 ];
