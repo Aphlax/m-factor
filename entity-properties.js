@@ -32,6 +32,7 @@ export const TYPE = {
   programmableSpeaker: 30,
   lamp: 31,
   solarPanel: 32,
+  reactor: 33,
 };
 
 export const NAME = {
@@ -95,6 +96,7 @@ export const NAME = {
   lamp: 58,
   solarPanel: 59,
   centrifuge: 60,
+  nuclearReactor: 61,
 };
 
 /** Never value for next update. 285 years from now. */

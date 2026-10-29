@@ -522,5 +522,27 @@ UiTree.prototype.touchEnd = function(e) {
   }
 }
 
+function UiNotImplemented(parent, x, y) {
+  this.parent = parent;
+  this.x = x;
+  this.y = y;
+}
 
-export {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTree};
+UiNotImplemented.prototype.draw = function(ctx, time) {
+  const x = Math.floor(this.parent.x + this.x),
+        y = Math.floor(this.parent.y + this.y);
+  
+  const sprite = SPRITES.get(S.notImplIcon);
+  ctx.drawImage(sprite.image,
+      sprite.x, sprite.y,
+      sprite.width, sprite.height,
+      x + 4, y + 4, 32, 32);
+  
+  ctx.fillStyle = COLOR.primary;
+  ctx.font = "16px monospace";
+  ctx.textBaseline = "middle";
+  ctx.fillText("Not Implemented!", x + 42, y + 21);
+  window.numberOtherDraws += 3;
+};
+
+export {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTree, UiNotImplemented};

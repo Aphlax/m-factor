@@ -405,6 +405,13 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
   } else if(this.type == TYPE.logisticContainer) {
     this.inputInventory = this.outputInventory =
         new Inventory(def.capacity);
+  } else if(this.type == TYPE.reactor) {
+    this.data.idleAnimation = def.idleAnimation;
+    this.data.idleAnimationHot = def.idleAnimationHot;
+    this.data.workingAnimation = def.workingAnimation;
+    this.inputInventory = new Inventory(1)
+        .setFilters([{item: def.fuelItem, amount: 1}]);
+    this.outputInventory = new Inventory(1);
   }
   return this;
 };
@@ -788,15 +795,17 @@ Entity.prototype.update = function(gameMap, time) {
             this.animationLength;
         }
         if (this.data.hasChance) {
+          let r = gameMap.productionRandom() * this.data.hasChance;
           for (let i = 0; i < this.outputInventory.filters.length; i++) {
             const filter = this.outputInventory.filters[i];
-            if (gameMap.productionRandom() <= filter.amount) {
+            if (r <= filter.amount) {
               if (!this.outputInventory.insert(filter.item, 1)) {
                 state = STATE.itemReady;
                 break assembler;
               }
               break;
             }
+            r -= filter.amount;
           }
         } else if (this.outputFluidTank ?
             !this.insertCombinedFilters() :

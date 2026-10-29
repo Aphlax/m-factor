@@ -73,6 +73,7 @@ const BUILD_MENU = [
   NAME.powerSwitch,
   NAME.programmableSpeaker,
   NAME.lamp,
+  NAME.nuclearReactor,
 ];
 const DEACC = 50;
 

@@ -26,7 +26,7 @@ function GameMap(seed, type) {
   this.transportNetwork = new TransportNetwork();
   this.fluidNetwork = new FluidNetwork();
   this.electricNetwork = new ElectricNetwork(this);
-  this.productionRandom = createRand(this.seed, 0, 0, 0);
+  this.productionRandom = createRand(this.seed, 86, 14, 666);
   this.particlePool = [];
   this.particles = [];
 }

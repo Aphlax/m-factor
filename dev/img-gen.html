@@ -13,7 +13,7 @@ window.onload = function() {
   canvas.style.left = "10px";
   canvas.style.padding = "4px";
   canvas.style.border = "1px solid grey";
-  canvas.width = canvas.height =  80;
+  canvas.width = canvas.height =  40;
   const ctx = canvas.getContext('2d');
   
   //gear(ctx); // 32, 32
@@ -28,11 +28,12 @@ window.onload = function() {
   //tick(ctx); // 64, 64
   //move(ctx); // 32, 32
   //bulldoze(ctx); // 64, 64
-  chop(ctx); // 80, 80
+  //chop(ctx); // 80, 80
+  notImpl(ctx); // 40, 40
   
   // Open in web browser to download.
   let link = document.createElement('a');
-  link.download = "chop" + ".png";
+  link.download = "notImpl" + ".png";
   link.href = canvas.toDataURL();
   link.style.position = "absolute";
   link.style.top = "10px";
@@ -42,6 +43,36 @@ window.onload = function() {
   document.body.appendChild(link);
   document.body.appendChild(canvas);
 };
+
+function notImpl(ctx) {
+  ctx.beginPath();
+  ctx.moveTo(20, 4);
+  ctx.lineTo(38, 35);
+  ctx.lineTo(2, 35);
+  ctx.closePath();
+  ctx.fillStyle = '#FFD800';
+  ctx.fill();
+  ctx.lineWidth = 4;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#FFD800';
+  ctx.stroke();
+  
+  // stem
+  ctx.beginPath();
+  ctx.moveTo(20, 13);
+  ctx.lineTo(20, 25);
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#1F2937';
+  ctx.stroke();
+  
+  // dot
+  ctx.beginPath();
+  ctx.arc(20, 31, 2, 0, Math.PI * 2);
+  ctx.fillStyle = '#1F2937';
+  ctx.fill();
+}
 
 function chop(ctx) {
   const a = Math.PI * 2;

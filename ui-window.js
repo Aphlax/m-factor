@@ -1,5 +1,5 @@
 import {UiInventory, UiFluidInventory} from './ui-inventory.js';
-import {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTree} from './ui-components.js';
+import {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTree, UiNotImplemented} from './ui-components.js';
 import {UiButton, BUTTON} from './ui-button.js';
 import {UiChoice, CHOICE} from './ui-choice.js';
 import {COLOR} from './ui-properties.js';
@@ -252,18 +252,6 @@ UiWindow.prototype.initialize = function() {
   this.entityUis.set(TYPE.boiler, {});
   this.entityUis.set(TYPE.electricPole, {});
   this.entityUis.set(TYPE.pump, {});
-  this.entityUis.set(TYPE.rail, {});
-  this.entityUis.set(TYPE.trainStop, {});
-  this.entityUis.set(TYPE.railSignal, {});
-  this.entityUis.set(TYPE.accumulator, {});
-  this.entityUis.set(TYPE.radar, {});
-  this.entityUis.set(TYPE.constantCombinator, {});
-  this.entityUis.set(TYPE.arithmeticCombinator, {});
-  this.entityUis.set(TYPE.deciderCombinator, {});
-  this.entityUis.set(TYPE.powerSwitch, {});
-  this.entityUis.set(TYPE.programmableSpeaker, {});
-  this.entityUis.set(TYPE.lamp, {});
-  this.entityUis.set(TYPE.solarPanel, {});
   
   this.entityUis.set(TYPE.belt, {
     snake: new UiButton(this, this.canvasWidth - 96, 86)
@@ -341,8 +329,50 @@ UiWindow.prototype.initialize = function() {
         .setIsOutput(true),
   });
   
+  this.entityUis.set(TYPE.rail, {
+    notImplemented: new UiNotImplemented(this, 10, 40),
+  });
+  this.entityUis.set(TYPE.trainStop, {
+    notImplemented: new UiNotImplemented(this, 10, 40),
+  });
+  this.entityUis.set(TYPE.railSignal, {
+    notImplemented: new UiNotImplemented(this, 10, 40),
+  });
+  this.entityUis.set(TYPE.accumulator, {
+    notImplemented: new UiNotImplemented(this, 10, 40),
+  });
+  this.entityUis.set(TYPE.radar, {
+    notImplemented: new UiNotImplemented(this, 10, 40),
+  });
+  this.entityUis.set(TYPE.constantCombinator, {
+    notImplemented: new UiNotImplemented(this, 10, 40),
+  });
+  this.entityUis.set(TYPE.arithmeticCombinator, {
+    notImplemented: new UiNotImplemented(this, 10, 40),
+  });
+  this.entityUis.set(TYPE.deciderCombinator, {
+    notImplemented: new UiNotImplemented(this, 10, 40),
+  });
+  this.entityUis.set(TYPE.powerSwitch, {
+    notImplemented: new UiNotImplemented(this, 10, 40),
+  });
+  this.entityUis.set(TYPE.programmableSpeaker, {
+    notImplemented: new UiNotImplemented(this, 10, 40),
+  });
+  this.entityUis.set(TYPE.lamp, {});
+  this.entityUis.set(TYPE.solarPanel, {
+    notImplemented: new UiNotImplemented(this, 10, 40),
+  });
+  
   this.entityUis.set(TYPE.roboport, {
     inventory: new UiInventory(this, 10, 40),
+    notImplemented: new UiNotImplemented(this, 10, 86),
+  });
+  
+  this.entityUis.set(TYPE.reactor, {
+    inventory: new UiInventory(this, 10, 40),
+    outputInventory: new UiInventory(this, this.canvasWidth - 50, 40),
+    notImplemented: new UiNotImplemented(this, 60, 40),
   });
   
   for (let ui of this.entityUis.values()) {
@@ -456,6 +486,9 @@ UiWindow.prototype.set = function(entity) {
     defaultY = Math.ceil(entity.inputInventory.capacity / 8) * 46 + 40;
   } else if (entity.type == TYPE.roboport) {
     ui.inventory.set(entity.inputInventory);
+  } else if (entity.type == TYPE.reactor) {
+    ui.inventory.set(entity.inputInventory);
+    ui.outputInventory.set(entity.outputInventory);
   }
   
   this.showDefaultUi = !!entity.type;

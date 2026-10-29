@@ -413,7 +413,10 @@ export const S = {
   lampShadow: 18212,
   solarPanel: 18213,
   solarPanelShadow: 18214,
-  
+  nuclearReactorIdle: 18215,
+  nuclearReactorWorking: 18216,
+  nuclearReactorIdleHot: 18217,
+  nuclearReactorShadow: 18218,
   
   
   // Items
@@ -652,6 +655,7 @@ export const S = {
   heatPipeIcon: 16585,
   heatBoilerIcon: 16586,
   steamTurbineIcon: 16587,
+  notImplIcon: 16588,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -1871,6 +1875,22 @@ export const SPRITES = [
     path: "graphics/entities/centrifuge/centrifuge-shadow.png",
     sprites: entitySprites(S.centrifugeShadow, 154, 99, 8, 8, -6, 64, -2, 5, true),
   },
+  {
+    path: "graphics/entities/nuclear-reactor/nuclear-reactor-idle.png",
+    sprites: entitySprites(S.nuclearReactorIdle, 163, 165, 1, 1, 3, 0, 5, 0, true),
+  },
+  {
+    path: "graphics/entities/nuclear-reactor/nuclear-reactor-working.png",
+    sprites: entitySprites(S.nuclearReactorWorking, 163, 165, 1, 1, 3, 0, 5, 0, true),
+  },
+  {
+    path: "graphics/entities/nuclear-reactor/nuclear-reactor-idle-hot.png",
+    sprites: entitySprites(S.nuclearReactorIdleHot, 163, 165, 1, 1, 3, 0, 5, 0, true),
+  },
+  {
+    path: "graphics/entities/nuclear-reactor/nuclear-reactor-shadow.png",
+    sprites: entitySprites(S.nuclearReactorShadow, 263, 162, 1, 1, 0, 103, 1, 1, true),
+  },
   
   
   
@@ -2522,6 +2542,10 @@ export const SPRITES = [
   {
     path: "graphics/icons/chop.png",
     sprites: sprites(S.chopIcon, 80, 80, 1, 1),
+  },
+  {
+    path: "graphics/icons/notImpl.png",
+    sprites: sprites(S.notImplIcon, 40, 40, 1, 1),
   },
   {
     path: "graphics/items/tree.png",

@@ -1,6 +1,7 @@
 import {S} from './sprite-pool.js';
 import {DIRECTION, TYPE, ENERGY, NAME} from './entity-properties.js';
 import {WATER_PUMPING_RECIPE, BOILER_RECIPE, ROCKET_SILO_RECIPE, ROCKET_SCIENCE_RECIPE} from './recipe-definitions.js';
+import {I} from './item-definitions.js';
 
 const {north, east, south, west} = DIRECTION;
 
@@ -1587,6 +1588,27 @@ export const ENTITIES = new Map([
     
     processingSpeed: 1,
   }],
+  [NAME.nuclearReactor,
+  {
+    label: "Nuclear Reactor",
+    prototypeName: "nuclear-reactor",
+    type: TYPE.reactor,
+    width: 5,
+    height: 5,
+    rotatable: false,
+    icon: S.nuclearReactorIcon,
+    sprites: {
+      [north]: [S.nuclearReactorIdle, S.nuclearReactorShadow],
+    },
+    mapColor: "#006094",
+    
+    idleAnimation: S.nuclearReactorIdle,
+    idleAnimationHot: S.nuclearReactorIdleHot,
+    workingAnimation: S.nuclearReactorWorking,
+    fuelItem: I.uraniumFuelCell,
+    powerOutput: 40000, //  kW
+  }],
+  
 ]);
 
 ENTITIES.keys().forEach(name =>

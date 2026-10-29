@@ -254,7 +254,8 @@ function productionTest(gameMap, time) {
   e(NAME.roboport, 0, 59, N);
   
   
-  e(NAME.centrifuge, 10, 60, N);
+  e(NAME.centrifuge, 10, 60, N)
+      .setRecipe(PROTO_TO_RECIPE.get("uranium-processing"));
   e(NAME.ironChest, 8, 62, N)
       .insert(I.uraniumOre, 10000)
   e(NAME.fastInserter, 9, 62, E);
