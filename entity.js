@@ -409,9 +409,19 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.data.idleAnimation = def.idleAnimation;
     this.data.idleAnimationHot = def.idleAnimationHot;
     this.data.workingAnimation = def.workingAnimation;
+    this.data.workingAnimationHot = def.workingAnimationHot;
+    this.data.heatConnections = def.heatConnections[direction];
+    this.data.heatParts = {};
+    this.data.heatCapacity = def.heatCapacity;
     this.inputInventory = new Inventory(1)
         .setFilters([{item: def.fuelItem, amount: 1}]);
     this.outputInventory = new Inventory(1);
+  } else if (this.type == TYPE.heatPipe) {
+    this.data.heatConnections = def.heatConnections[direction];
+    this.data.heatParts = {};
+    this.data.heatCapacity = def.heatCapacity;
+    this.data.heatPipeSprites = def.heatPipeSprites;
+    this.data.heatPipeHotSprites = def.heatPipeHotSprites;
   }
   return this;
 };

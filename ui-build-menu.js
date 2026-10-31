@@ -74,6 +74,7 @@ const BUILD_MENU = [
   NAME.programmableSpeaker,
   NAME.lamp,
   NAME.nuclearReactor,
+  NAME.heatPipe,
 ];
 const DEACC = 50;
 

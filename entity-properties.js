@@ -33,6 +33,7 @@ export const TYPE = {
   lamp: 31,
   solarPanel: 32,
   reactor: 33,
+  heatPipe: 34,
 };
 
 export const NAME = {
@@ -97,6 +98,7 @@ export const NAME = {
   solarPanel: 59,
   centrifuge: 60,
   nuclearReactor: 61,
+  heatPipe: 62,
 };
 
 /** Never value for next update. 285 years from now. */

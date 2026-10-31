@@ -731,6 +731,88 @@ export function getFluidTankConnection(tank, pipe) {
   return;
 }
 
+export function connectHeat(other) {
+  let connected = false;
+  for (let i = 0; i < this.data.heatConnections.length; i++) {
+    const p1 = this.data.heatConnections[i];
+    if (this.x + p1.x < other.x ||
+        this.x + p1.x >= other.x + other.width ||
+        this.y + p1.y < other.y ||
+        this.y + p1.y >= other.y + other.height) continue;
+    for (let j = 0; j < other.data.heatConnections.length; j++) {
+      const p2 = other.data.heatConnections[j];
+      if (other.x + p2.x < this.x ||
+          other.x + p2.x >= this.x + this.width ||
+          other.y + p2.y < this.y ||
+          other.y + p2.y >= this.y + this.height ||
+          (other.x + p2.x != this.x + p1.x &&
+          other.y + p2.y != this.y + p1.y)) continue;
+      this.data.heatParts[i] = other;
+      other.data.heatParts[j] = this;
+      connected = true;
+      break;
+    }
+  }
+  if (!connected) return;
+  this.updateHeatSprites();
+  other.updateHeatSprites();
+}
+
+export function disconnectHeat() {
+  for (let i = 0; i < this.data.heatConnections.length; i++) {
+    const other = this.data.heatParts[i];
+    if (!other) continue;
+    this.data.heatParts[i] = undefined;
+    for (let j = 0; j < other.data.heatConnections.length; j++) {
+      if (other.data.heatParts[j] != this) continue;
+      other.data.heatParts[j] = undefined;
+      other.updateHeatSprites();
+    }
+  }
+}
+
+export function updateHeatSprites() {
+  if (this.name != NAME.heatPipe) return;
+  let count = 0, direction, notdirection;
+  for (let i = 0; i < 4; i++) {
+    if (this.data.heatParts[i]) {
+      count++;
+      direction = i;
+    } else {
+      notdirection = i;
+    }
+  }
+  const cold = this.data.heatPipeSprites;
+  const hot = this.data.heatPipeHotSprites;
+  if (!count) {
+    this.sprite = cold[0];
+    this.extraSpriteOver = hot[0];
+  } else if (count == 1) {
+    this.sprite = cold[direction + 1];
+    this.extraSpriteOver = hot[direction + 1];
+  } else if (count == 2) {
+    if (this.data.heatParts[0] && this.data.heatParts[2]) {
+      this.sprite = cold[5];
+      this.extraSpriteOver = hot[5];
+    } else if (this.data.heatParts[1] && this.data.heatParts[3]) {
+      this.sprite = cold[6];
+      this.extraSpriteOver = hot[6];
+    } else if (this.data.heatParts[0] && this.data.heatParts[3]) {
+      this.sprite = cold[7];
+      this.extraSpriteOver = hot[7];
+    } else {
+      this.sprite = cold[direction + 7];
+      this.extraSpriteOver = hot[direction + 7];
+    }
+  } else if (count == 3) {
+    this.sprite = cold[((notdirection + 2) % 4) + 11];
+    this.extraSpriteOver = hot[((notdirection + 2) % 4) + 11];
+  } else {
+    this.sprite = cold[15];
+    this.extraSpriteOver = hot[15];
+  }
+}
+
 /** Extracts the filters from both the inventory and fluid tanks. */
 export function extractCombinedFilters() {
   const inventoryFilters = this.inputInventory.filters;

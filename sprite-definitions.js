@@ -417,7 +417,38 @@ export const S = {
   nuclearReactorWorking: 18216,
   nuclearReactorIdleHot: 18217,
   nuclearReactorShadow: 18218,
-  
+  heatPipeSingle: 18219,
+  heatPipeEndUp: 18220,
+  heatPipeEndRight: 18221,
+  heatPipeEndDown: 18222,
+  heatPipeEndLeft: 18223,
+  heatPipeStraightVertical: 18224,
+  heatPipeStraightHorizontal: 18225,
+  heatPipeCornerUpLeft: 18226,
+  heatPipeCornerUpRight: 18227,
+  heatPipeCornerDownLeft: 18228,
+  heatPipeCornerDownRight: 18229,
+  heatPipeTUp: 18230,
+  heatPipeTRight: 18231,
+  heatPipeTDown: 18232,
+  heatPipeTLeft: 18233,
+  heatPipeCross: 18234,
+  heatPipeHotSingle: 18235,
+  heatPipeHotEndUp: 18236,
+  heatPipeHotEndRight: 18237,
+  heatPipeHotEndDown: 18238,
+  heatPipeHotEndLeft: 18239,
+  heatPipeHotStraightVertical: 18240,
+  heatPipeHotStraightHorizontal: 18241,
+  heatPipeHotCornerUpLeft: 18242,
+  heatPipeHotCornerUpRight: 18243,
+  heatPipeHotCornerDownLeft: 18244,
+  heatPipeHotCornerDownRight: 18245,
+  heatPipeHotTUp: 18246,
+  heatPipeHotTRight: 18247,
+  heatPipeHotTDown: 18248,
+  heatPipeHotTLeft: 18249,
+  heatPipeHotCross: 18250,
   
   // Items
   ironOreItem: 16000,
@@ -1890,6 +1921,133 @@ export const SPRITES = [
   {
     path: "graphics/entities/nuclear-reactor/nuclear-reactor-shadow.png",
     sprites: entitySprites(S.nuclearReactorShadow, 263, 162, 1, 1, 0, 103, 1, 1, true),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-straight-vertical-single.png",
+    sprites: [
+      ...entitySprites(S.heatPipeSingle, 32, 32, 1, 1, 0, 0, 0, 0),
+      ...entitySprites(S.heatPipeHotSingle, 32, 32, 1, 1, 0, 0, 0, 0),
+    ],
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-ending-up-1.png",
+    sprites: entitySprites(S.heatPipeEndUp, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-ending-right-1.png",
+    sprites: entitySprites(S.heatPipeEndRight, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-ending-down-1.png",
+    sprites: entitySprites(S.heatPipeEndDown, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-ending-left-1.png",
+    sprites: entitySprites(S.heatPipeEndLeft, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-straight-vertical-1.png",
+    sprites: entitySprites(S.heatPipeStraightVertical, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-straight-horizontal-1.png",
+    sprites: entitySprites(S.heatPipeStraightHorizontal, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-corner-up-left-1.png",
+    sprites: entitySprites(S.heatPipeCornerUpLeft, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-corner-up-right-1.png",
+    sprites: entitySprites(S.heatPipeCornerUpRight, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-corner-down-left-1.png",
+    sprites: entitySprites(S.heatPipeCornerDownLeft, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-corner-down-right-1.png",
+    sprites: entitySprites(S.heatPipeCornerDownRight, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-t-up-1.png",
+    sprites: entitySprites(S.heatPipeTUp, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-t-right-1.png",
+    sprites: entitySprites(S.heatPipeTRight, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-t-down-1.png",
+    sprites: entitySprites(S.heatPipeTDown, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-t-left-1.png",
+    sprites: entitySprites(S.heatPipeTLeft, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heat-pipe-t-1.png",
+    sprites: entitySprites(S.heatPipeCross, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heated-ending-up-1.png",
+    sprites: entitySprites(S.heatPipeHotEndUp, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heated-ending-right-1.png",
+    sprites: entitySprites(S.heatPipeHotEndRight, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heated-ending-down-1.png",
+    sprites: entitySprites(S.heatPipeHotEndDown, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heated-ending-left-1.png",
+    sprites: entitySprites(S.heatPipeHotEndLeft, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heated-straight-vertical-1.png",
+    sprites: entitySprites(S.heatPipeHotStraightVertical, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heated-straight-horizontal-1.png",
+    sprites: entitySprites(S.heatPipeHotStraightHorizontal, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heated-corner-up-left-1.png",
+    sprites: entitySprites(S.heatPipeHotCornerUpLeft, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heated-corner-up-right-1.png",
+    sprites: entitySprites(S.heatPipeHotCornerUpRight, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heated-corner-down-left-1.png",
+    sprites: entitySprites(S.heatPipeHotCornerDownLeft, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heated-corner-down-right-1.png",
+    sprites: entitySprites(S.heatPipeHotCornerDownRight, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heated-t-up-1.png",
+    sprites: entitySprites(S.heatPipeHotTUp, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heated-t-right-1.png",
+    sprites: entitySprites(S.heatPipeHotTRight, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heated-t-down-1.png",
+    sprites: entitySprites(S.heatPipeHotTDown, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heated-t-left-1.png",
+    sprites: entitySprites(S.heatPipeHotTLeft, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-pipe/heated-t-1.png",
+    sprites: entitySprites(S.heatPipeHotCross, 32, 32, 1, 1, 0, 0, 0, 0),
   },
   
   

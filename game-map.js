@@ -7,6 +7,7 @@ import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
 import {FluidNetwork} from './fluid-network.js';
 import {ElectricNetwork} from './electric-network.js';
+import {HeatNetwork} from './heat-network.js';
 import {SETTINGS} from './storage.js';
 import {createRand} from './utils.js';
 
@@ -26,6 +27,7 @@ function GameMap(seed, type) {
   this.transportNetwork = new TransportNetwork();
   this.fluidNetwork = new FluidNetwork();
   this.electricNetwork = new ElectricNetwork(this);
+  this.heatNetwork = new HeatNetwork();
   this.productionRandom = createRand(this.seed, 86, 14, 666);
   this.particlePool = [];
   this.particles = [];
@@ -61,6 +63,9 @@ GameMap.prototype.update = function(time, dt) {
   this.electricNetwork.update(time, dt);
   const timestampElectric = performance.now();
   window.timeElectric = timestampElectric - timestampFluids;
+  this.heatNetwork.update(time, dt);
+  const timestampHeat = performance.now();
+  window.timeHeat = timestampHeat - timestampElectric;
   for (let chunks of this.chunks.values()) {
     for (let chunk of chunks.values()) {
       for (let entity of chunk.entities) {
@@ -73,7 +78,11 @@ GameMap.prototype.update = function(time, dt) {
             entity.type == TYPE.pipeToGround ||
             entity.type == TYPE.rail ||
             entity.type == TYPE.trainStop ||
-            entity.type == TYPE.railSignal) continue;
+            entity.type == TYPE.railSignal ||
+            entity.type == TYPE.logisticContainer ||
+            entity.type == TYPE.roboport ||
+            entity.type == TYPE.constantCombinator
+            ) continue;
         if (time < entity.nextUpdate) continue;
         entity.update(this, time);
       }
@@ -106,7 +115,7 @@ GameMap.prototype.update = function(time, dt) {
     this.particles.length -= expired;
   }
   const timestampEntities = performance.now();
-  window.timeEntities = timestampEntities - timestampElectric;
+  window.timeEntities = timestampEntities - timestampHeat;
   
   // Generate missing chunks.
   const {x: vx, y: vy, width: vw, height: vh, scale: s} = this.view;
@@ -310,6 +319,7 @@ GameMap.prototype.draw = function(ctx, time) {
   window.numberEntityDraws = window.numberImageDraws -
       countBeforeEntities - window.numberItemDraws;
   this.fluidNetwork.draw(ctx, this.view);
+  this.heatNetwork.draw(ctx, this.view);
   this.electricNetwork.draw(ctx, this.view);
   const countBeforeParticles = window.numberImageDraws;
   for (let [x, chunks] of this.chunks.entries()) {
@@ -558,6 +568,9 @@ GameMap.prototype.connectEntity = function(entity, time) {
             other.updatePipeSprites();
           }
         }
+        if (entity.data.heatConnections && other.data.heatConnections) {
+          entity.connectHeat(other);
+        }
         if (entity.type == TYPE.inserter) {
           entity.connectInserter(other, time);
         }
@@ -608,6 +621,9 @@ GameMap.prototype.connectEntity = function(entity, time) {
       this.deleteEntity(entity);
       return true;
     }
+  }
+  if (entity.data.heatConnections) {
+    this.heatNetwork.addPart(entity);
   }
   if (isPole) {
     this.electricNetwork.addPole(entity, poleConnections, time);
@@ -692,6 +708,10 @@ GameMap.prototype.disconnectEntity = function(entity, time) {
     }
     this.fluidNetwork.removePipe(entity);
     entity.disconnectPipe();
+  }
+  if (entity.data.heatConnections) {
+    this.heatNetwork.removePart(entity);
+    entity.disconnectHeat();
   }
   if (entity.outputFluidTank) {
     this.fluidNetwork.removeOutputFluidTank(entity);

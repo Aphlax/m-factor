@@ -64,6 +64,9 @@ export function draw(ctx, view, time) {
       (sh * yScale));
   window.numberImageDraws++;
   if (this.extraSpriteOver) {
+    if (this.data.conduit) {
+      ctx.globalAlpha = this.data.conduit.getHeat(this) / 1000;
+    }
     const {x: sx, y: sy, width: sw, height: sh, left, right, top, bottom, image} =
         SPRITES.get(this.extraSpriteOver);
     const xScale = width * s / (sw - left - right);
@@ -74,6 +77,9 @@ export function draw(ctx, view, time) {
         (sw * xScale),
         (sh * yScale));
     window.numberImageDraws++;
+    if (this.data.conduit) {
+      ctx.globalAlpha = 1;
+    }
   }
 };
 

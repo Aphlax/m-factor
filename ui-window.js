@@ -375,6 +375,11 @@ UiWindow.prototype.initialize = function() {
     notImplemented: new UiNotImplemented(this, 60, 40),
   });
   
+  this.entityUis.set(TYPE.heatPipe, {
+    notImplemented: new UiNotImplemented(this, 10, 40),
+  });
+  
+  
   for (let ui of this.entityUis.values()) {
     ui.all = Object.values(ui);
   }
