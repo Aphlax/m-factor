@@ -1750,6 +1750,39 @@ export const ENTITIES = new Map([
       [west]: {x: 0.4, y: 0.6},
     },
   }],
+  [NAME.steamTurbine,
+  {
+    label: "Steam Turbine",
+    prototypeName: "steam-turbine",
+    type: TYPE.generator,
+    size: {
+      [north]: {width: 3, height: 5},
+      [east]: {width: 5, height: 3},
+      [south]: {width: 3, height: 5},
+      [west]: {width: 5, height: 3},
+    },
+    rotatable: true,
+    icon: S.steamTurbineIcon,
+    sprites: {
+      [north]: [S.steamTurbineV, S.steamTurbineShadowV],
+      [east]: [S.steamTurbineH, S.steamTurbineShadowH],
+      [south]: [S.steamTurbineV, S.steamTurbineShadowV],
+      [west]: [S.steamTurbineH, S.steamTurbineShadowH],
+    },
+    animationLength: 8,
+    mapColor: "#006094",
+    
+    pipeConnections: {
+      [north]: [{x: 1, y: -1}, {x: 1, y: 5}],
+      [east]: [{x: -1, y: 1}, {x: 5, y: 1}],
+      [south]: [{x: 1, y: -1}, {x: 1, y: 5}],
+      [west]: [{x: -1, y: 1}, {x: 5, y: 1}],
+    },
+    capacity: 500,
+    fluidConsumption: 60,
+    powerOutput: 5820, // kW
+  }],
+  
 ]);
 
 ENTITIES.keys().forEach(name =>

@@ -453,6 +453,10 @@ export const S = {
   heatExchangerHotS: 18256,
   heatExchangerW: 18257,
   heatExchangerHotW: 18258,
+  steamTurbineH: 18259, // 8
+  steamTurbineShadowH: 18267, // 8
+  steamTurbineV: 18275, // 8
+  steamTurbineShadowV: 18283, // 8
   
   // Items
   ironOreItem: 16000,
@@ -2069,6 +2073,22 @@ export const SPRITES = [
   {
     path: "graphics/entities/heat-exchanger/heatex-W-heated.png",
     sprites: entitySprites(S.heatExchangerHotW, 32, 40, 1, 1, -39, 7, -15, -41),
+  },
+  {
+    path: "graphics/entities/steam-turbine/steam-turbine-H.png",
+    sprites: entitySprites(S.steamTurbineH, 160, 123, 4, 2, 0, 0, 17, 10, true),
+  },
+  {
+    path: "graphics/entities/steam-turbine/steam-turbine-H-shadow.png",
+    sprites: entitySprites(S.steamTurbineShadowH, 217, 74, 4, 2, 0, 57, -20, -2, true),
+  },
+  {
+    path: "graphics/entities/steam-turbine/steam-turbine-V.png",
+    sprites: entitySprites(S.steamTurbineV, 108, 173, 4, 2, 1, 11, 0, 13, true),
+  },
+  {
+    path: "graphics/entities/steam-turbine/steam-turbine-V-shadow.png",
+    sprites: entitySprites(S.steamTurbineShadowV, 151, 131, 4, 2, -9, 64, -29, 0, true),
   },
   
   

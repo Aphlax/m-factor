@@ -100,6 +100,7 @@ export const NAME = {
   nuclearReactor: 61,
   heatPipe: 62,
   heatExchanger: 63,
+  steamTurbine: 64,
 };
 
 /** Never value for next update. 285 years from now. */

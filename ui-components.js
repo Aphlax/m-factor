@@ -2,6 +2,7 @@ import {COLOR} from './ui-properties.js';
 import {STATE, RESOURCE_NAMES} from './entity-properties.js';
 import {SPRITES, S} from './sprite-pool.js';
 import {CHOICE} from './ui-choice.js';
+import {SETTINGS} from './storage.js';
 import {ITEMS, FLUIDS, I} from './item-definitions.js';
 
 const PROGRESS = { task: 1, rocket: 2 };
@@ -455,7 +456,8 @@ UiTemperature.prototype.set = function(entity) {
 };
 
 UiTemperature.prototype.draw = function(ctx, time) {
-  if (!this.entity?.data.conduit) return;
+  const conduit = this.entity?.data.conduit;
+  if (!conduit) return;
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
   
@@ -466,13 +468,18 @@ UiTemperature.prototype.draw = function(ctx, time) {
       x + 8, y + 8, 24, 24);
   window.numberImageDraws++;
   
-  const text = Math.round(this.entity.data.conduit.getTemp(this.entity)) +
+  const text = Math.round(conduit.getTemp(this.entity)) +
       "°C";
   ctx.fillStyle = COLOR.primary;
   ctx.font = "16px monospace";
   ctx.textBaseline = "middle";
   ctx.fillText(text, x + 34, y + 21);
   window.numberOtherDraws++;
+  
+  if (SETTINGS.debugPipes) {
+    ctx.fillText(Math.round(conduit.amount), x + 100, y + 10);
+    ctx.fillText(conduit.capacity, x + 100, y + 30);
+  }
 };
 
 function UiTree(parent, x, y) {

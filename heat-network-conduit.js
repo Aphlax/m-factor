@@ -2,6 +2,7 @@ import {TYPE, STATE, ENERGY, HEAT_ENERGY} from './entity-properties.js';
 
 const MAX_HEAT_DIST = 200;
 const P_MAX_TEMP = 0.8;
+const HEAT_DRAIN_PER_PART = 0.003;
 
 function Conduit(parts) {
   this.parts = parts;
@@ -72,6 +73,8 @@ Conduit.prototype.update = function(time, dt) {
     this.centerY = 0.99 * this.centerY +
         0.01 * (y + height / 2);
   }
+  this.amount -= (this.parts.size + 1) * HEAT_DRAIN_PER_PART * dt / 1000;
+  if (this.amount < 0) this.amount = 0;
   if (this.amount > this.capacity) {
     this.amount = this.capacity;
   }
@@ -86,6 +89,34 @@ Conduit.prototype.draw = function(ctx, view) {
     const x = (part.x + part.width / 2) * s - vx,
         y = (part.y + part.height / 2) * s - vy,
         r = (part.width + part.height) / 4 * s;
+    for (let i = 0; i < 6; i++) {
+      const a = i * Math.PI / 3 + Math.PI / 6;
+      if (i == 0) {
+        ctx.moveTo(x + Math.cos(a) * r, y + Math.sin(a) * r);
+      } else {
+        ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r);
+      }
+    }
+    ctx.closePath();
+  }
+  for (let part of this.reactors) {
+    const x = (part.x + part.width / 2) * s - vx,
+        y = (part.y + part.height / 2) * s - vy,
+        r = (part.width + part.height) / 5 * s;
+    for (let i = 0; i < 6; i++) {
+      const a = i * Math.PI / 3 + Math.PI / 6;
+      if (i == 0) {
+        ctx.moveTo(x + Math.cos(a) * r, y + Math.sin(a) * r);
+      } else {
+        ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r);
+      }
+    }
+    ctx.closePath();
+  }
+  for (let part of this.consumers) {
+    const x = (part.x + part.width / 2) * s - vx,
+        y = (part.y + part.height / 2) * s - vy,
+        r = (part.width + part.height) / 12 * s;
     for (let i = 0; i < 6; i++) {
       const a = i * Math.PI / 3 + Math.PI / 6;
       if (i == 0) {
@@ -181,7 +212,6 @@ Conduit.prototype.join = function(other) {
   
   this.capacity += other.capacity;
   this.amount += other.amount;
-  
 };
 
 Conduit.prototype.split = function(part, not, a, b, c) {
@@ -204,27 +234,30 @@ Conduit.prototype.split = function(part, not, a, b, c) {
     }
   }
   const segment = new Conduit(parts);
-  for (let p of parts) {
-    p.data.conduit = segment;
-    this.parts.delete(p);
+  const pct = this.amount / this.capacity;
+  
+  for (let part of parts) {
+    part.data.conduit = segment;
+    this.parts.delete(part);
     
     if (part.type == TYPE.reactor) {
-      other.reactors.add(part);
       this.reactors.delete(part);
+      segment.reactors.add(part);
     }
     if (part.energySource == ENERGY.heat) {
-      other.consumers.add(part);
       this.consumers.delete(part);
+      segment.consumers.add(part);
     }
     
-    this.capacity -= p.data.heatCapacity;
-    segment.capacity += p.data.heatCapacity;
+    this.capacity -= part.data.heatCapacity;
+    segment.capacity += part.data.heatCapacity;
   }
   
-  const transfer = Math.floor(this.amount /
-      (1 + this.capacity / segment.capacity));
-  segment.amount = Math.min(transfer, segment.capacity);
-  this.amount = Math.min(this.amount - transfer, this.capacity);
+  segment.amount = pct * segment.capacity;
+  this.amount = pct * this.capacity;
+  
+  segment.centerX = this.centerX;
+  segment.centerY = this.centerY;
   
   return segment;
 };

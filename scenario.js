@@ -270,7 +270,7 @@ function productionTest(gameMap, time) {
   l(11, 64, S, 2);
   
   e(NAME.nuclearReactor, 8, 50, N)
-      .data.conduit.amount = 900;
+      .data.conduit.amount = 630;
   e(NAME.ironChest, 6, 54, 0).inputInventory
     .insert(I.uraniumFuelCell, 300);
   e(NAME.fastInserter, 7, 54, E);
@@ -286,6 +286,9 @@ function productionTest(gameMap, time) {
   for (let i = 0; i < 6; i++) {
     e(NAME.storageTank, 25, 56 + i * 3, i % 2 ? E : N);
   }
+  e(NAME.steamTurbine, 15, 61, E);
+  e(NAME.steamTurbine, 20, 61, E);
+  el(21, 64, W, 2);
   
   gameMap.centerView(20, 55);
 };

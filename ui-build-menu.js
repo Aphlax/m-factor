@@ -76,6 +76,7 @@ const BUILD_MENU = [
   NAME.nuclearReactor,
   NAME.heatPipe,
   NAME.heatExchanger,
+  NAME.steamTurbine,
 ];
 const DEACC = 50;
 
