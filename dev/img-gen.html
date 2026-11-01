@@ -29,11 +29,12 @@ window.onload = function() {
   //move(ctx); // 32, 32
   //bulldoze(ctx); // 64, 64
   //chop(ctx); // 80, 80
-  notImpl(ctx); // 40, 40
+  //notImpl(ctx); // 40, 40
+  temp(ctx); // 40, 40
   
   // Open in web browser to download.
   let link = document.createElement('a');
-  link.download = "notImpl" + ".png";
+  link.download = "temperature" + ".png";
   link.href = canvas.toDataURL();
   link.style.position = "absolute";
   link.style.top = "10px";
@@ -43,6 +44,18 @@ window.onload = function() {
   document.body.appendChild(link);
   document.body.appendChild(canvas);
 };
+
+function temp(ctx) {
+  ctx.beginPath()
+  ctx.arc(20, 5, 3, Math.PI, 0, false)
+  //ctx.lineTo(23, 20)
+  ctx.arc(20, 30, 8, -1.2, 4.3, false)
+  ctx.lineTo(17, 10)
+  ctx.closePath()
+  ctx.strokeStyle = "#ffffff"
+  ctx.lineWidth = 2
+  ctx.stroke()
+}
 
 function notImpl(ctx) {
   ctx.beginPath();

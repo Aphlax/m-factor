@@ -691,6 +691,7 @@ export const S = {
   heatExchangerIcon: 16586,
   steamTurbineIcon: 16587,
   notImplIcon: 16588,
+  temperatureIcon: 16589,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -2724,6 +2725,10 @@ export const SPRITES = [
   {
     path: "graphics/icons/notImpl.png",
     sprites: sprites(S.notImplIcon, 40, 40, 1, 1),
+  },
+  {
+    path: "graphics/icons/temperature.png",
+    sprites: sprites(S.temperatureIcon, 40, 40, 1, 1),
   },
   {
     path: "graphics/items/tree.png",

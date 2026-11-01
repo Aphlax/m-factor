@@ -443,6 +443,38 @@ UiInserterFilters.prototype.touchEnd = function(e) {
   this.pressed = 0;
 }
 
+function UiTemperature(parent, x, y) {
+  this.parent = parent;
+  this.x = x;
+  this.y = y;
+  this.entity = undefined;
+}
+
+UiTemperature.prototype.set = function(entity) {
+  this.entity = entity;
+};
+
+UiTemperature.prototype.draw = function(ctx, time) {
+  if (!this.entity?.data.conduit) return;
+  const x = Math.floor(this.parent.x + this.x),
+        y = Math.floor(this.parent.y + this.y);
+  
+  const sprite = SPRITES.get(S.temperatureIcon);
+  ctx.drawImage(sprite.image,
+      sprite.x, sprite.y,
+      sprite.width, sprite.height,
+      x + 8, y + 8, 24, 24);
+  window.numberImageDraws++;
+  
+  const text = Math.round(this.entity.data.conduit.getTemp(this.entity)) +
+      "°C";
+  ctx.fillStyle = COLOR.primary;
+  ctx.font = "16px monospace";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, x + 34, y + 21);
+  window.numberOtherDraws++;
+};
+
 function UiTree(parent, x, y) {
   this.parent = parent;
   this.x = x;
@@ -537,12 +569,13 @@ UiNotImplemented.prototype.draw = function(ctx, time) {
       sprite.x, sprite.y,
       sprite.width, sprite.height,
       x + 4, y + 4, 32, 32);
+  window.numberImageDraws++;
   
   ctx.fillStyle = COLOR.primary;
   ctx.font = "16px monospace";
   ctx.textBaseline = "middle";
   ctx.fillText("Not Implemented!", x + 42, y + 21);
-  window.numberOtherDraws += 3;
+  window.numberOtherDraws++;
 };
 
-export {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTree, UiNotImplemented};
+export {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTemperature, UiTree, UiNotImplemented};

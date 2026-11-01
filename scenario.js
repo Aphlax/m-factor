@@ -269,21 +269,25 @@ function productionTest(gameMap, time) {
   l(12, 64, W, 1);
   l(11, 64, S, 2);
   
-  e(NAME.nuclearReactor, 10, 50, N)
-  for (let i = 0; i < 9; i++) {
-    e(NAME.heatPipe, 15 + i, 52, N)
+  e(NAME.nuclearReactor, 8, 50, N)
+      .data.conduit.amount = 900;
+  e(NAME.ironChest, 6, 54, 0).inputInventory
+    .insert(I.uraniumFuelCell, 300);
+  e(NAME.fastInserter, 7, 54, E);
+  el(8, 56, E, 2);
+  for (let i = 0; i < 16; i++) {
+    e(NAME.heatPipe, 13 + i, 52, N);
   }
-  for (let i = 0; i < 3; i++) {
-    e(NAME.heatExchanger, 16 + i * 3, 53, S)
+  for (let i = 0; i < 5; i++) {
+    e(NAME.heatExchanger, 15 + i * 3, 53, S);
   }
-  p(17, 55, E, 8);
-  p(25, 53, E, 5);
+  p(16, 55, E, 13);
   e(NAME.offshorePump, 30, 53, W);
   for (let i = 0; i < 6; i++) {
-    e(NAME.storageTank, 25, 55 + i * 3, i % 2 ? E : N)
+    e(NAME.storageTank, 25, 56 + i * 3, i % 2 ? E : N);
   }
   
-  gameMap.centerView(0, 50);
+  gameMap.centerView(20, 55);
 };
 
 function inserterTest(gameMap, time) {

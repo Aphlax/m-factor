@@ -1611,7 +1611,9 @@ export const ENTITIES = new Map([
     workingAnimation: S.nuclearReactorWorking,
     hotAnimation: S.nuclearReactorHot,
     fuelItem: I.uraniumFuelCell,
-    powerOutput: 40000, //  kW
+    wasteItem: I.depletedUraniumFuelCell,
+    energyPerItem: 8000000, // kJ
+    powerOutput: 40000, // kW
     heatConnections: {
       [north]: [
         {x: 0, y: -1},
@@ -1683,7 +1685,7 @@ export const ENTITIES = new Map([
     heatConnections: {
       [north]: [{x: 0, y: -1}, {x: 1, y: 0}, {x: 0, y: 1}, {x: -1, y: 0}],
     },
-    heatCapacity: 100,
+    heatCapacity: 10,
   }],
   [NAME.heatExchanger,
   {
@@ -1740,7 +1742,7 @@ export const ENTITIES = new Map([
       [south]: [{x: 1, y: -1}],
       [west]: [{x: 2, y: 1}],
     },
-    heatCapacity: 200,
+    heatCapacity: 80,
     smokePosition: {
       [north]: {x: 0.3, y: -0.85},
       [east]: {x: 1.6, y: -1.2},

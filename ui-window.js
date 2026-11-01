@@ -1,5 +1,5 @@
 import {UiInventory, UiFluidInventory} from './ui-inventory.js';
-import {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTree, UiNotImplemented} from './ui-components.js';
+import {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTemperature, UiTree, UiNotImplemented} from './ui-components.js';
 import {UiButton, BUTTON} from './ui-button.js';
 import {UiChoice, CHOICE} from './ui-choice.js';
 import {COLOR} from './ui-properties.js';
@@ -249,7 +249,10 @@ UiWindow.prototype.initialize = function() {
   });
   
   this.entityUis.set(TYPE.offshorePump, {});
-  this.entityUis.set(TYPE.boiler, {});
+  this.entityUis.set(TYPE.boiler, {
+    temperature: new UiTemperature(this, 10, 40),
+    fluidIndicator: new UiFluidIndicator(this, 110, 40),
+  });
   this.entityUis.set(TYPE.electricPole, {});
   this.entityUis.set(TYPE.pump, {});
   
@@ -371,12 +374,13 @@ UiWindow.prototype.initialize = function() {
   
   this.entityUis.set(TYPE.reactor, {
     inventory: new UiInventory(this, 10, 40),
+    temperature: new UiTemperature(this, 60, 40),
+    progress: new UiProgress(this, this.canvasWidth - 96, 40).setWidth(40),
     outputInventory: new UiInventory(this, this.canvasWidth - 50, 40),
-    notImplemented: new UiNotImplemented(this, 60, 40),
   });
   
   this.entityUis.set(TYPE.heatPipe, {
-    notImplemented: new UiNotImplemented(this, 10, 40),
+    temperature: new UiTemperature(this, 10, 40),
   });
   
   
@@ -449,6 +453,10 @@ UiWindow.prototype.set = function(entity) {
   } else if (entity.type == TYPE.pipe ||
       entity.type == TYPE.pipeToGround) {
     ui.fluidIndicator.set(entity);
+  } else if (entity.type == TYPE.boiler) {
+    ui.temperature.set(entity);
+    ui.fluidIndicator.set(this.ui.game.settings.debugPipes ?
+        entity : undefined);
   } else if (entity.type == TYPE.generator) {
     ui.input.set(this.ui.game.settings.debugPipes ?
         entity.inputFluidTank : undefined);
@@ -493,7 +501,11 @@ UiWindow.prototype.set = function(entity) {
     ui.inventory.set(entity.inputInventory);
   } else if (entity.type == TYPE.reactor) {
     ui.inventory.set(entity.inputInventory);
+    ui.progress.set(entity);
+    ui.temperature.set(entity);
     ui.outputInventory.set(entity.outputInventory);
+  } else if (entity.type == TYPE.heatPipe) {
+    ui.temperature.set(entity);
   }
   
   this.showDefaultUi = !!entity.type;

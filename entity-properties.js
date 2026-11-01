@@ -132,6 +132,9 @@ export const MAX_ELECTRIC_SUPPLY = 2;
 /** Minimal electric satisfaction for an entiry to make progress. */
 export const MIN_SATISFACTION = 0.005;
 
+/** Heat value per kJ energy. */
+export const HEAT_ENERGY = 0.0002; // Reactor heats 8°C/s.
+
 export const STATE = {
   running: 0,
   missingItem: 1,

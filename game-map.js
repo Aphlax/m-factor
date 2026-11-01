@@ -81,7 +81,8 @@ GameMap.prototype.update = function(time, dt) {
             entity.type == TYPE.railSignal ||
             entity.type == TYPE.logisticContainer ||
             entity.type == TYPE.roboport ||
-            entity.type == TYPE.constantCombinator
+            entity.type == TYPE.constantCombinator ||
+            entity.type == TYPE.heatPipe
             ) continue;
         if (time < entity.nextUpdate) continue;
         entity.update(this, time);
@@ -360,8 +361,10 @@ GameMap.prototype.drawMap = function(ctx) {
             (type == TYPE.electricPole && width == 1) ||
             type == TYPE.undergroundBelt ||
             type == TYPE.splitter ||
-            type == TYPE.pipe ||
-            type == TYPE.pipeToGround))) continue;
+            (type == TYPE.pipe && width == 1) ||
+            type == TYPE.pipeToGround ||
+            type == TYPE.logisticContainer ||
+            type == TYPE.heatPipe))) continue;
         if (mapColor != lastColor) {
           ctx.fillStyle = lastColor = mapColor;
         }

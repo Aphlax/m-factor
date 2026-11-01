@@ -67,7 +67,7 @@ export function draw(ctx, view, time) {
   }
   if (this.extraSpriteOver) {
     if (this.data.conduit) {
-      ctx.globalAlpha = this.data.conduit.getHeat(this) / 1000;
+      ctx.globalAlpha = this.data.conduit.getTemp(this) / 1000;
     }
     const {x: sx, y: sy, width: sw, height: sh, left, right, top, bottom, image} =
         SPRITES.get(this.extraSpriteOver);

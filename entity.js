@@ -410,14 +410,19 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.inputInventory = this.outputInventory =
         new Inventory(def.capacity);
   } else if(this.type == TYPE.reactor) {
+    this.state = STATE.missingItem;
+    this.taskDuration = def.energyPerItem / def.powerOutput * 1000;
+    this.data.powerOutput = def.powerOutput;
     this.data.idleAnimation = def.idleAnimation;
     this.data.workingAnimation = def.workingAnimation;
     this.extraSpriteOver = def.hotAnimation;
     this.data.heatConnections = def.heatConnections[direction];
     this.data.heatParts = {};
     this.data.heatCapacity = def.heatCapacity;
+    this.data.wasteItem = def.wasteItem;
     this.inputInventory = new Inventory(1)
-        .setFilters([{item: def.fuelItem, amount: 1}]);
+        .setFilters([{item: def.fuelItem, amount: 1}])
+        .setIsFilteredSlots(true);
     this.outputInventory = new Inventory(1);
   } else if (this.type == TYPE.heatPipe) {
     this.data.heatConnections = def.heatConnections[direction];
@@ -969,7 +974,7 @@ Entity.prototype.update = function(gameMap, time) {
               }
             }
           } else {
-            this.state = STATE.noEnergy;
+            state = STATE.noEnergy;
             break boiler;
           }
         }
@@ -1033,7 +1038,7 @@ Entity.prototype.update = function(gameMap, time) {
               [recipe.inputs.length + i].item = science.inputs[i].item;
           }
           for (let inputEntity of this.inputEntities) {
-            if (inputEntity.state == STATE.missingInput ||
+            if (inputEntity.state == STATE.missingItem ||
                 inputEntity.state == STATE.outputFull ||
                 inputEntity.state == STATE.itemReady) {
               inputEntity.nextUpdate = this.nextUpdate;
@@ -1100,6 +1105,40 @@ Entity.prototype.update = function(gameMap, time) {
         this.data.grid.consumerss.get(this.energyDrain).add(this);
       }
     }
+    this.state = state;
+    this.nextUpdate = nextUpdate;
+  } else if (this.type == TYPE.reactor) {
+    let state = this.state, nextUpdate = NEVER;
+    reactor: {
+      if (state == STATE.running ||
+          state == STATE.itemReady) {
+        if (!this.outputInventory.insert(this.data.wasteItem, 1)) {
+          state = STATE.itemReady;
+          break reactor;
+        }
+        for (let outputEntity of this.outputEntities) {
+          if (outputEntity.state == STATE.missingItem) {
+            outputEntity.nextUpdate = this.nextUpdate;
+          }
+        }
+        state = STATE.missingItem;
+      }
+      if (state == STATE.missingItem) {
+        if (!this.inputInventory.extractFilters()) {
+          break reactor;
+        }
+        for (let inputEntity of this.inputEntities) {
+          if (inputEntity.state == STATE.outputFull ||
+              inputEntity.state == STATE.itemReady) {
+            inputEntity.nextUpdate = this.nextUpdate;
+          }
+        }
+        state = STATE.running;
+        this.taskStart = this.nextUpdate;
+        nextUpdate = this.taskEnd = this.taskStart + this.taskDuration;
+        break reactor;
+      }
+    } // break reactor:
     this.state = state;
     this.nextUpdate = nextUpdate;
   }
