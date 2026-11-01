@@ -1,6 +1,6 @@
 import {S} from './sprite-pool.js';
 import {DIRECTION, TYPE, ENERGY, NAME} from './entity-properties.js';
-import {WATER_PUMPING_RECIPE, BOILER_RECIPE, ROCKET_SILO_RECIPE, ROCKET_SCIENCE_RECIPE} from './recipe-definitions.js';
+import {WATER_PUMPING_RECIPE, BOILER_RECIPE, ROCKET_SILO_RECIPE, ROCKET_SCIENCE_RECIPE, HEAT_EXCHANGER_RECIPE} from './recipe-definitions.js';
 import {I} from './item-definitions.js';
 
 const {north, east, south, west} = DIRECTION;
@@ -272,18 +272,18 @@ export const ENTITIES = new Map([
     rotatable: true,
     icon: S.boilerIcon,
     sprites: {
-      [north]: [S.boilerWorkingN, S.boilerShadowN],
-      [east]: [S.boilerWorkingE, S.boilerShadowE],
-      [south]: [S.boilerWorkingS, S.boilerShadowS],
-      [west]: [S.boilerWorkingW, S.boilerShadowW],
+      [north]: [S.boilerN, S.boilerShadowN],
+      [east]: [S.boilerE, S.boilerShadowE],
+      [south]: [S.boilerS, S.boilerShadowS],
+      [west]: [S.boilerW, S.boilerShadowW],
     },
-    idleAnimation: {
-      [north]: [S.boilerN],
-      [east]: [S.boilerE],
-      [south]: [S.boilerS],
-      [west]: [S.boilerW],
+    workingAnimation: {
+      [north]: [S.boilerWorkingN, S.boilerFireN],
+      [east]: [S.boilerWorkingE, S.boilerFireE],
+      [south]: [S.boilerWorkingS, S.boilerFireS],
+      [west]: [S.boilerWorkingW, S.boilerFireW],
     },
-    animationLength: 32,
+    animationLength: 64,
     noShadowAnimation: true,
     mapColor: "#006094",
     animationSpeed: 0.6,
@@ -304,7 +304,12 @@ export const ENTITIES = new Map([
       [south]: [{x: 1, y: 2}],
       [west]: [{x: -1, y: 1}],
     },
-    smokePosition: {x: 0.7, y: 0.3},
+    smokePosition: {
+      [north]: {x: 1.55, y: 0.25},
+      [east]: {x: 0.7, y: 0.3},
+      [south]: {x: 1.5, y: -0.2},
+      [west]: {x: 1.28, y: 0.48},
+    },
   }],
   [NAME.steamEngine,
   {
@@ -1603,9 +1608,8 @@ export const ENTITIES = new Map([
     mapColor: "#006094",
     
     idleAnimation: S.nuclearReactorIdle,
-    idleAnimationHot: S.nuclearReactorIdleHot,
     workingAnimation: S.nuclearReactorWorking,
-    workingAnimationHot: S.nuclearReactorWorking,
+    hotAnimation: S.nuclearReactorHot,
     fuelItem: I.uraniumFuelCell,
     powerOutput: 40000, //  kW
     heatConnections: {
@@ -1681,7 +1685,69 @@ export const ENTITIES = new Map([
     },
     heatCapacity: 100,
   }],
-  
+  [NAME.heatExchanger,
+  {
+    label: "Heat Exchanger",
+    prototypeName: "heat-exchanger",
+    type: TYPE.boiler,
+    size: {
+      [north]: {width: 3, height: 2},
+      [east]: {width: 2, height: 3},
+      [south]: {width: 3, height: 2},
+      [west]: {width: 2, height: 3},
+    },
+    rotatable: true,
+    icon: S.heatExchangerIcon,
+    sprites: {
+      [north]: [S.heatExchangerN],
+      [east]: [S.heatExchangerE],
+      [south]: [S.heatExchangerS],
+      [west]: [S.heatExchangerW],
+    },
+    workingAnimation: {
+      [north]: [S.heatExchangerN],
+      [east]: [S.heatExchangerE],
+      [south]: [S.heatExchangerS],
+      [west]: [S.heatExchangerW],
+    },
+    hotAnimation: {
+      [north]: [S.heatExchangerHotN],
+      [east]: [S.heatExchangerHotE],
+      [south]: [S.heatExchangerHotS],
+      [west]: [S.heatExchangerHotW],
+    },
+    mapColor: "#006094",
+    energySource: ENERGY.heat,
+    energyConsumption: 10000, // kW
+    
+    recipe: HEAT_EXCHANGER_RECIPE,
+    pipeConnections: {
+      [north]: [{x: -1, y: 1}, {x: 3, y: 1}],
+      [east]: [{x: 0, y: -1}, {x: 0, y: 3}],
+      [south]: [{x: 3, y: 0}, {x: -1, y: 0}],
+      [west]: [{x: 1, y: 3}, {x: 1, y: -1}],
+    },
+    capacity: 200,
+    fluidOutputs: {
+      [north]: [{x: 1, y: -1}],
+      [east]: [{x: 2, y: 1}],
+      [south]: [{x: 1, y: 2}],
+      [west]: [{x: -1, y: 1}],
+    },
+    heatConnections: {
+      [north]: [{x: 1, y: 2}],
+      [east]: [{x: -1, y: 1}],
+      [south]: [{x: 1, y: -1}],
+      [west]: [{x: 2, y: 1}],
+    },
+    heatCapacity: 200,
+    smokePosition: {
+      [north]: {x: 0.3, y: -0.85},
+      [east]: {x: 1.6, y: -1.2},
+      [south]: {x: 2.65, y: -0.4},
+      [west]: {x: 0.4, y: 0.6},
+    },
+  }],
 ]);
 
 ENTITIES.keys().forEach(name =>

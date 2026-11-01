@@ -1588,6 +1588,17 @@ export const RECIPES = [
     duration: 1000 / 6,
   },
   {
+    prototypeName: "heat-steam",
+    inputs: [
+      {item: I.water, amount: 10.3 / 6},
+    ],
+    outputs: [
+      {item: I.steam, amount: 103 / 6},
+    ],
+    entities: [NAME.heatExchanger],
+    duration: 1000 / 6,
+  },
+  {
     prototypeName: "rocket-part",
     inputs: [
       {item: I.processingUnit, amount: 1},
@@ -1626,6 +1637,8 @@ export const WATER_PUMPING_RECIPE =
     PROTO_TO_RECIPE.get("water-pumping");
 export const BOILER_RECIPE =
     PROTO_TO_RECIPE.get("steam");
+export const HEAT_EXCHANGER_RECIPE =
+    PROTO_TO_RECIPE.get("heat-steam");
 export const ROCKET_SILO_RECIPE =
     PROTO_TO_RECIPE.get("rocket-part");
 export const ROCKET_SCIENCE_RECIPE =

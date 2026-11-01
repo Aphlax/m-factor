@@ -67,13 +67,9 @@ export const S = {
   offshorePumpW: 94*16,
   offshorePumpShadowW: 96*16,
   boilerFireN: 98*16, // 64
-  boilerWorkingN: 102*16,
-  boilerFireE: 104*16, // 64
-  boilerWorkingE: 108*16,
-  boilerFireS: 110*16, // 64
-  boilerWorkingS: 114*16,
-  boilerFireW: 116*16, // 64
-  boilerWorkingW: 120*16,
+  boilerFireE: 102*16, // 64
+  boilerFireS: 106*16, // 64
+  boilerFireW: 110*16, // 64
   steamEngineV: 124*16, // 32
   steamEngineShadowV: 126*16,
   steamEngineH: 128*16, // 32
@@ -206,16 +202,16 @@ export const S = {
   pipeCross: 15059,
   boilerN: 15060,
   boilerShadowN: 15061,
-  boilerLightN: 15062,
+  boilerWorkingN: 15062,
   boilerE: 15063,
   boilerShadowE: 15064,
-  boilerLightE: 15065,
+  boilerWorkingE: 15065,
   boilerS: 15066,
   boilerShadowS: 15067,
-  boilerLightS: 15068,
+  boilerWorkingS: 15068,
   boilerW: 15069,
   boilerShadowW: 15070,
-  boilerLightW: 15071,
+  boilerWorkingW: 15071,
   smallElectricPole: 15072, // 4
   smallElectricPoleShadow: 15076, // 4
   electricFurnaceWorking: 15080, // 12
@@ -415,7 +411,7 @@ export const S = {
   solarPanelShadow: 18214,
   nuclearReactorIdle: 18215,
   nuclearReactorWorking: 18216,
-  nuclearReactorIdleHot: 18217,
+  nuclearReactorHot: 18217,
   nuclearReactorShadow: 18218,
   heatPipeSingle: 18219,
   heatPipeEndUp: 18220,
@@ -449,6 +445,14 @@ export const S = {
   heatPipeHotTDown: 18248,
   heatPipeHotTLeft: 18249,
   heatPipeHotCross: 18250,
+  heatExchangerN: 18251,
+  heatExchangerHotN: 18252,
+  heatExchangerE: 18253,
+  heatExchangerHotE: 18254,
+  heatExchangerS: 18255,
+  heatExchangerHotS: 18256,
+  heatExchangerW: 18257,
+  heatExchangerHotW: 18258,
   
   // Items
   ironOreItem: 16000,
@@ -594,7 +598,7 @@ export const S = {
   centrifugeItem: 16167,
   nuclearReactorItem: 16168,
   heatPipeItem: 16169,
-  heatBoilerItem: 16170,
+  heatExchangerItem: 16170,
   steamTurbineItem: 16171,
   
   
@@ -684,7 +688,7 @@ export const S = {
   centrifugeIcon: 16583,
   nuclearReactorIcon: 16584,
   heatPipeIcon: 16585,
-  heatBoilerIcon: 16586,
+  heatExchangerIcon: 16586,
   steamTurbineIcon: 16587,
   notImplIcon: 16588,
   
@@ -1158,15 +1162,7 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/boiler/boiler-N-idle.png",
-    sprites: entitySprites(S.boilerN, 131, 108, 1, 1, 18, 17, 18, 26, true),
-  },
-  {
-    path: "graphics/entities/boiler/boiler-N-fire.png",
-    sprites: entitySprites(S.boilerFireN, 12, 13, 8, 8, -42, -42, -17, -34, true),
-  },
-  {
-    path: "graphics/entities/boiler/boiler-N-light.png",
-    sprites: entitySprites(S.boilerLightN, 100, 87, 1, 1, 3, 1, 18, 5, true),
+    sprites: entitySprites(S.boilerN, 131, 108, 1, 1, 18, 17, 19, 25, true),
   },
   {
     path: "graphics/entities/boiler/boiler-N-shadow.png",
@@ -1174,19 +1170,19 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/boiler/boiler-N-working.png",
-    sprites: entitySprites(S.boilerWorkingN, 131, 108, 8, 4, 18, 17, 18, 26, true),
+    sprites: entitySprites(S.boilerWorkingN, 131, 108, 1, 1, 18, 17, 19, 25, true),
+  },
+  {
+    path: "graphics/entities/boiler/boiler-N-fire.png",
+    sprites: entitySprites(S.boilerFireN, 12, 13, 8, 8, -42, -42, -17, -34, true),
   },
   {
     path: "graphics/entities/boiler/boiler-E-idle.png",
-    sprites: entitySprites(S.boilerE, 105, 147, 1, 1, 25, 18, 26, 25, true),
+    sprites: entitySprites(S.boilerE, 105, 147, 1, 1, 24, 17, 26, 25, true),
   },
   {
     path: "graphics/entities/boiler/boiler-E-fire.png",
-    sprites: entitySprites(S.boilerFireE, 14, 14, 8, 8, -16, -34, -19, -63, true),
-  },
-  {
-    path: "graphics/entities/boiler/boiler-E-light.png",
-    sprites: entitySprites(S.boilerLightE, 70, 122, 1, 1, 2, 4, 26, 0, true),
+    sprites: entitySprites(S.boilerFireE, 14, 14, 8, 8, -14, -36, -18, -64, true),
   },
   {
     path: "graphics/entities/boiler/boiler-E-shadow.png",
@@ -1194,19 +1190,15 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/boiler/boiler-E-working.png",
-    sprites: entitySprites(S.boilerWorkingE, 105, 147, 8, 4, 25, 16, 26, 25, true),
+    sprites: entitySprites(S.boilerWorkingE, 105, 147, 1, 1, 24, 17, 26, 25, true),
   },
   {
     path: "graphics/entities/boiler/boiler-S-idle.png",
-    sprites: entitySprites(S.boilerS, 128, 95, 1, 1, 13, 19, 2, 29, true),
+    sprites: entitySprites(S.boilerS, 128, 95, 1, 1, 13, 19, 3, 28, true),
   },
   {
     path: "graphics/entities/boiler/boiler-S-fire.png",
-    sprites: entitySprites(S.boilerFireS, 12, 9, 8, 8, -41, -43, -2, -53, true),
-  },
-  {
-    path: "graphics/entities/boiler/boiler-S-light.png",
-    sprites: entitySprites(S.boilerLightS, 100, 81, 1, 1, 1, 3, 2, 15, true),
+    sprites: entitySprites(S.boilerFireS, 12, 9, 8, 8, -41, -43, -1, -54, true),
   },
   {
     path: "graphics/entities/boiler/boiler-S-shadow.png",
@@ -1214,19 +1206,15 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/boiler/boiler-S-working.png",
-    sprites: entitySprites(S.boilerWorkingS, 128, 95, 8, 4, 13, 19, 2, 29, true),
+    sprites: entitySprites(S.boilerWorkingS, 128, 95, 1, 1, 13, 19, 3, 28, true),
   },
   {
     path: "graphics/entities/boiler/boiler-W-idle.png",
-    sprites: entitySprites(S.boilerW, 96, 132, 1, 1, 15, 15, 13, 23, true),
+    sprites: entitySprites(S.boilerW, 96, 132, 1, 1, 15, 17, 13, 23, true),
   },
   {
     path: "graphics/entities/boiler/boiler-W-fire.png",
-    sprites: entitySprites(S.boilerFireW, 14, 14, 8, 8, -36, -14, -18, -64, true),
-  },
-  {
-    path: "graphics/entities/boiler/boiler-W-light.png",
-    sprites: entitySprites(S.boilerLightW, 68, 109, 1, 1, 0, 2, 13, 0, true),
+    sprites: entitySprites(S.boilerFireW, 14, 14, 8, 8, -38, -12, -18, -64, true),
   },
   {
     path: "graphics/entities/boiler/boiler-W-shadow.png",
@@ -1234,7 +1222,7 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/boiler/boiler-W-working.png",
-    sprites: entitySprites(S.boilerWorkingW, 96, 132, 8, 4, 15, 15, 13, 23, true),
+    sprites: entitySprites(S.boilerWorkingW, 96, 132, 1, 1, 15, 17, 13, 23, true),
   },
   {
     path: "graphics/entities/steam-engine/steam-engine-V.png",
@@ -1915,8 +1903,8 @@ export const SPRITES = [
     sprites: entitySprites(S.nuclearReactorWorking, 163, 165, 1, 1, 3, 0, 5, 0, true),
   },
   {
-    path: "graphics/entities/nuclear-reactor/nuclear-reactor-idle-hot.png",
-    sprites: entitySprites(S.nuclearReactorIdleHot, 163, 165, 1, 1, 3, 0, 5, 0, true),
+    path: "graphics/entities/nuclear-reactor/nuclear-reactor-hot.png",
+    sprites: entitySprites(S.nuclearReactorHot, 161, 162, 1, 1, 1, 0, 2, 0, true),
   },
   {
     path: "graphics/entities/nuclear-reactor/nuclear-reactor-shadow.png",
@@ -2048,6 +2036,38 @@ export const SPRITES = [
   {
     path: "graphics/entities/heat-pipe/heated-t-1.png",
     sprites: entitySprites(S.heatPipeHotCross, 32, 32, 1, 1, 0, 0, 0, 0),
+  },
+  {
+    path: "graphics/entities/heat-exchanger/heatex-N-idle.png",
+    sprites: entitySprites(S.heatExchangerN, 131, 108, 1, 1, 18, 17, 18, 26),
+  },
+  {
+    path: "graphics/entities/heat-exchanger/heatex-N-heated.png",
+    sprites: entitySprites(S.heatExchangerHotN, 24, 48, 1, 1, -34, -38, -16, 0),
+  },
+  {
+    path: "graphics/entities/heat-exchanger/heatex-E-idle.png",
+    sprites: entitySprites(S.heatExchangerE, 102, 147, 1, 1, 21, 17, 26, 25),
+  },
+  {
+    path: "graphics/entities/heat-exchanger/heatex-E-heated.png",
+    sprites: entitySprites(S.heatExchangerHotE, 40, 40, 1, 1, 9, -33, -15, -41),
+  },
+  {
+    path: "graphics/entities/heat-exchanger/heatex-S-idle.png",
+    sprites: entitySprites(S.heatExchangerS, 128, 100, 1, 1, 13, 19, 8, 28),
+  },
+  {
+    path: "graphics/entities/heat-exchanger/heatex-S-heated.png",
+    sprites: entitySprites(S.heatExchangerHotS, 16, 20, 1, 1, -39, -41, 8, -52),
+  },
+  {
+    path: "graphics/entities/heat-exchanger/heatex-W-idle.png",
+    sprites: entitySprites(S.heatExchangerW, 96, 132, 1, 1, 15, 17, 13, 23),
+  },
+  {
+    path: "graphics/entities/heat-exchanger/heatex-W-heated.png",
+    sprites: entitySprites(S.heatExchangerHotW, 32, 40, 1, 1, -39, 7, -15, -41),
   },
   
   
@@ -2626,7 +2646,7 @@ export const SPRITES = [
   },
   {
     path: "graphics/items/heat-boiler.png",
-    sprites: itemSprites(S.heatBoilerItem, S.heatBoilerIcon),
+    sprites: itemSprites(S.heatExchangerItem, S.heatExchangerIcon),
   },
   {
     path: "graphics/items/steam-turbine.png",

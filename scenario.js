@@ -269,6 +269,19 @@ function productionTest(gameMap, time) {
   l(12, 64, W, 1);
   l(11, 64, S, 2);
   
+  e(NAME.nuclearReactor, 10, 50, N)
+  for (let i = 0; i < 9; i++) {
+    e(NAME.heatPipe, 15 + i, 52, N)
+  }
+  for (let i = 0; i < 3; i++) {
+    e(NAME.heatExchanger, 16 + i * 3, 53, S)
+  }
+  p(17, 55, E, 8);
+  p(25, 53, E, 5);
+  e(NAME.offshorePump, 30, 53, W);
+  for (let i = 0; i < 6; i++) {
+    e(NAME.storageTank, 25, 55 + i * 3, i % 2 ? E : N)
+  }
   
   gameMap.centerView(0, 50);
 };

@@ -5,6 +5,7 @@ function Conduit(parts) {
   
   this.amount = 0;
   this.capacity = 0;
+  this.temp = 0;
   
   const c = Math.ceil(Math.random() * 255 * 2);
   this.color = `rgb(${Math.abs(c-255)}, ${Math.abs((c+170)%510-255)}, ${Math.abs((c+340)%510-255)})`;
@@ -17,7 +18,7 @@ Conduit.fromPart = function(part) {
 };
 
 Conduit.prototype.update = function(time, dt) {
-  
+  this.temp = (time / 5) % 1000;
 };
 
 Conduit.prototype.draw = function(ctx, view) {
@@ -44,7 +45,7 @@ Conduit.prototype.draw = function(ctx, view) {
 };
 
 Conduit.prototype.getHeat = function(entity) {
-  return 500;
+  return this.temp;
 }
 
 Conduit.prototype.add = function(part) {

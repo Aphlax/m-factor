@@ -44,25 +44,27 @@ export function draw(ctx, view, time) {
   if (this.animationLength) {
     animation = Math.floor(animation) % this.animationLength;
   }
-  const sprite = SPRITES.get(this.sprite + animation);
-  if (!sprite) {
-    ctx.strokeStyle = ctx.fillStyle = "red";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x * s - vx, y * s - vy,
-        width * s, height * s);
-    ctx.fillText(this.sprite + animation,
-        x * s - vx + 10, y * s - vy + 10);
-    return;
+  if (this.sprite != 0) {
+    const sprite = SPRITES.get(this.sprite + animation);
+    if (!sprite) {
+      ctx.strokeStyle = ctx.fillStyle = "red";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x * s - vx, y * s - vy,
+          width * s, height * s);
+      ctx.fillText(this.sprite + animation,
+          x * s - vx + 10, y * s - vy + 10);
+      return;
+    }
+    const {x: sx, y: sy, width: sw, height: sh, left, right, top, bottom, image} = sprite;
+    const xScale = width * s / (sw - left - right);
+    const yScale = height * s / (sh - top - bottom);
+    ctx.drawImage(image, sx, sy, sw, sh,
+        (x * s - vx - left * xScale),
+        (y * s - vy - top * yScale),
+        (sw * xScale),
+        (sh * yScale));
+    window.numberImageDraws++;
   }
-  const {x: sx, y: sy, width: sw, height: sh, left, right, top, bottom, image} = sprite;
-  const xScale = width * s / (sw - left - right);
-  const yScale = height * s / (sh - top - bottom);
-  ctx.drawImage(image, sx, sy, sw, sh,
-      (x * s - vx - left * xScale),
-      (y * s - vy - top * yScale),
-      (sw * xScale),
-      (sh * yScale));
-  window.numberImageDraws++;
   if (this.extraSpriteOver) {
     if (this.data.conduit) {
       ctx.globalAlpha = this.data.conduit.getHeat(this) / 1000;

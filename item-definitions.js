@@ -788,7 +788,7 @@ export const ITEMS = new Map([
   }],
   [I.heatExchanger,
   {
-    sprite: S.heatBoilerItem,
+    sprite: S.heatExchangerItem,
     stackSize: 50,
     prototypeName: "heat-exchanger",
   }],

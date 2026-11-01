@@ -236,8 +236,6 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
   } else if (this.type == TYPE.boiler) {
     this.state = STATE.missingItem;
     this.nextUpdate = NEVER;
-    this.energySource = def.energySource;
-    this.energyConsumption = def.energyConsumption;
     this.data.pipeConnections = def.pipeConnections[direction];
     this.data.pipes = {};
     this.data.capacity = def.capacity;
@@ -246,11 +244,12 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.taskDuration = def.recipe.duration;
     this.energySource = def.energySource;
     this.energyConsumption = def.energyConsumption;
-    this.data.workingAnimation = def.sprites[direction][0];
-    this.data.idleAnimation = def.idleAnimation[direction][0];
-    this.data.smokeX = def.smokePosition.x;
-    this.data.smokeY = def.smokePosition.y;
-    this.sprite = this.data.idleAnimation;
+    this.data.idleAnimation = def.sprites[direction][0];
+    this.data.workingAnimation = def.workingAnimation[direction];
+    this.sprite = 0;
+    this.extraSpriteUnder = this.data.idleAnimation;
+    this.data.smokeX = def.smokePosition[direction].x;
+    this.data.smokeY = def.smokePosition[direction].y;
     this.outputFluidTank = new FluidTank()
         .setTanklets([def.recipe.outputs[0].item])
         .setPipeConnections(def.fluidOutputs[direction]);
@@ -260,6 +259,11 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     if (def.energySource == ENERGY.burner) {
       this.fuelInventory = new Inventory(1)
           .setFilters(FUEL_FILTERS);
+    } if (def.energySource == ENERGY.heat) {
+      this.data.heatConnections = def.heatConnections[direction];
+      this.data.heatParts = {};
+      this.data.heatCapacity = def.heatCapacity;
+      this.extraSpriteOver = def.hotAnimation[direction][0];
     }
   } else if (this.type == TYPE.generator) {
     this.state = STATE.idle;
@@ -407,9 +411,8 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
         new Inventory(def.capacity);
   } else if(this.type == TYPE.reactor) {
     this.data.idleAnimation = def.idleAnimation;
-    this.data.idleAnimationHot = def.idleAnimationHot;
     this.data.workingAnimation = def.workingAnimation;
-    this.data.workingAnimationHot = def.workingAnimationHot;
+    this.extraSpriteOver = def.hotAnimation;
     this.data.heatConnections = def.heatConnections[direction];
     this.data.heatParts = {};
     this.data.heatCapacity = def.heatCapacity;
@@ -925,69 +928,74 @@ Entity.prototype.update = function(gameMap, time) {
         this.outputFluidTank.tanklets[0].amount + this.data.outputAmount);
     this.nextUpdate = this.nextUpdate + this.taskDuration;
   } else if (this.type == TYPE.boiler) {
-    let continueNextItem = false;
-    if (this.state == STATE.running ||
-        this.state == STATE.itemReady) {
-      if (this.state == STATE.running)
-        this.energyStored -= this.taskDuration / 1000 * this.energyConsumption;
-      const outputTanklet = this.outputFluidTank.tanklets[0];
-      if (outputTanklet.amount + this.data.outputAmount > outputTanklet.capacity) {
-        this.state = STATE.itemReady;
-        this.nextUpdate = NEVER;
-        this.sprite = this.data.idleAnimation;
-        this.animation = 0;
-        return;
-      }
-      outputTanklet.amount += this.data.outputAmount;
-      continueNextItem = true;
-    }
-    if (this.state == STATE.missingItem ||
-        this.state == STATE.outOfEnergy ||
-        continueNextItem) {
-      const inputTanklet = this.inputFluidTank.tanklets[0];
-      if (inputTanklet.amount < this.data.inputAmount) {
-        this.state = STATE.missingItem;
-        this.nextUpdate = NEVER;
-        this.sprite = this.data.idleAnimation;
-        this.animation = 0;
-        return;
-      }
-      while (this.energyStored < this.taskDuration / 1000 * this.energyConsumption) {
-        if (this.energySource == ENERGY.burner) {
-          const item = this.fuelInventory.items[0];
-          if (!item || !this.fuelInventory.extract(item, 1, true)) {
-            this.state = STATE.outOfEnergy;
-            this.nextUpdate = NEVER;
-            this.sprite = this.data.idleAnimation;
-            this.animation = 0;
-            return;
-          }
-          this.energyStored += ITEMS.get(item).fuelValue;
-          for (let inputEntity of this.inputEntities) {
-            if (inputEntity.state == STATE.outputFull ||
-                inputEntity.state == STATE.itemReady) {
-              inputEntity.nextUpdate = this.nextUpdate;
-            }
-          }
-        } else {
-          this.state = STATE.outOfEnergy;
-          this.nextUpdate = NEVER;
-          this.sprite = this.data.idleAnimation;
-          this.animation = 0;
-          return;
+    let state = this.state, nextUpdate = NEVER;
+    boiler: {
+      if (state == STATE.running ||
+          state == STATE.itemReady) {
+        if (state == STATE.running)
+          this.energyStored -= this.taskDuration / 1000 * this.energyConsumption;
+        if (state == STATE.running && this.animationLength) {
+          this.animation = Math.floor(this.animation +
+            (time - this.taskStart) * this.animationSpeed / 60) %
+            this.animationLength;
         }
+        const outputTanklet = this.outputFluidTank.tanklets[0];
+        if (outputTanklet.amount + this.data.outputAmount > outputTanklet.capacity) {
+          state = STATE.itemReady;
+          break boiler;
+        }
+        outputTanklet.amount += this.data.outputAmount;
+        state = STATE.missingItem;
       }
-      inputTanklet.amount -= this.data.inputAmount;
-      this.state = STATE.running;
-      this.taskStart = this.nextUpdate;
-      this.taskEnd = this.taskStart + this.taskDuration;
-      this.sprite = this.data.workingAnimation;
-      gameMap.createSmoke(this.x + this.data.smokeX,
-          this.y + this.data.smokeY, this.nextUpdate,
-          this.taskEnd - this.nextUpdate);
-      this.nextUpdate = this.taskEnd;
-      return;
+      if (state == STATE.missingItem ||
+          state == STATE.noEnergy) {
+        const inputTanklet = this.inputFluidTank.tanklets[0];
+        if (inputTanklet.amount < this.data.inputAmount) {
+          state = STATE.missingItem;
+          break boiler;
+        }
+        while (this.energyStored < this.taskDuration / 1000 * this.energyConsumption) {
+          if (this.energySource == ENERGY.burner) {
+            const item = this.fuelInventory.items[0];
+            if (!item || !this.fuelInventory.extract(item, 1, true)) {
+              state = STATE.noEnergy;
+              break boiler;
+            }
+            this.energyStored += ITEMS.get(item).fuelValue;
+            for (let inputEntity of this.inputEntities) {
+              if (inputEntity.state == STATE.outputFull ||
+                  inputEntity.state == STATE.itemReady) {
+                inputEntity.nextUpdate = this.nextUpdate;
+              }
+            }
+          } else {
+            this.state = STATE.noEnergy;
+            break boiler;
+          }
+        }
+        inputTanklet.amount -= this.data.inputAmount;
+        state = STATE.running;
+        this.taskStart = this.nextUpdate;
+        nextUpdate = this.taskEnd = this.taskStart + this.taskDuration;
+        gameMap.createSmoke(this.x + this.data.smokeX,
+            this.y + this.data.smokeY, this.taskStart,
+            this.taskEnd - this.taskStart);
+        break boiler;
+      }
+    } // break boiler:
+    if (this.data.idleAnimation) {
+      if (this.state != STATE.running && state == STATE.running) {
+        this.extraSpriteUnder = this.data.workingAnimation[0];
+        this.sprite = this.data.workingAnimation[1] ?? 0;
+      }
+      if (this.state == STATE.running && state != STATE.running) {
+        this.extraSpriteUnder = this.data.idleAnimation;
+        this.sprite = 0;
+        this.animation = 0;
+      }
     }
+    this.state = state;
+    this.nextUpdate = nextUpdate;
   } else if (this.type == TYPE.rocketSilo) {
     let state = this.state, nextUpdate = NEVER;
     const {recipe, science, rocketParts, deployDuration, launchDuration, closeDuration} = this.data;

@@ -40,11 +40,12 @@ function SpriteDef({sprite, base, tiles, onUpdate, onDelete, onUp, onDown}) {
     image.src = base + name;
     image.onload = () => {
       icon.current.src = base + name;
-      onUpdate({...sprite, image});
+      onUpdate({...sprite, image,
+          lightImage: cleanLightSprite(image)});
     };
   }
   useEffect(() => {
-    if (sprite.image)
+    if (sprite.image && icon.current)
       icon.current.src = sprite.image.src;
   }, [sprite]);
   
@@ -156,7 +157,7 @@ function App() {
       val => JSON.parse(val).map((stored, i) => {
         const image = new Image();
         image.src = stored.image;
-        return {
+        const sprite = {
           ...stored,
           key: Math.random() * 0xffffffff | 0,
           cols: Number(stored.cols),
@@ -166,8 +167,13 @@ function App() {
           image,
           keyFrames: stored.keyFrames ?? [],
         };
+        image.onload = () => {
+          onUpdate({...sprite,
+              lightImage: cleanLightSprite(image)})
+        };
+        return sprite;
       }),
-      ss => JSON.stringify(ss.map(s => ({...s, image: s.image?.src}))));
+      ss => JSON.stringify(ss.map(s => ({...s, image: s.image?.src, lightImage: null}))));
   
   const canvas = createRef();
   let ctx, handle;
@@ -400,7 +406,9 @@ function drawFrame(ctx, sprites, n, origin) {
     const x = (animation % s.cols) * width;
     const y = (Math.floor(animation / s.cols) % s.rows) * height;
     
-    ctx.drawImage(s.image,
+    const image = s.light ? s.lightImage : s.image;
+    if (!image) continue;
+    ctx.drawImage(image,
         x, y, width, height,
         s.x + origin.x + dx,
         s.y + origin.y + dy,
@@ -408,9 +416,35 @@ function drawFrame(ctx, sprites, n, origin) {
   }
 }
 
+function cleanLightSprite(img) {
+  const canvas = document.createElement('canvas');
+  canvas.width = img.width;
+  canvas.height = img.height;
+  const ctx = canvas.getContext('2d');
+  
+  ctx.drawImage(img, 0, 0);
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imgData.data;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    const a = data[i + 3];
+
+    if (a === 0 || (r === 0 && g === 0 && b === 0)) {
+      data[i] = data[i + 1] = data[i + 2] = 0;
+      data[i + 3] = 0;
+    }
+  }
+
+  ctx.putImageData(imgData, 0, 0);
+  return canvas;
+}
+
 function useLocalStorage(name, value, toValue = JSON.parse, toStorage = JSON.stringify) {
   const stored = localStorage.getItem(name);
-  const [variable, setter] = useState(stored ? toValue(stored) : value);
+  const [variable, setter] = useState(() => stored ? toValue(stored) : value);
   useEffect(() => localStorage.setItem(name, toStorage(variable)), [variable]);
   return [variable, setter];
 }

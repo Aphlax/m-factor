@@ -99,6 +99,7 @@ export const NAME = {
   centrifuge: 60,
   nuclearReactor: 61,
   heatPipe: 62,
+  heatExchanger: 63,
 };
 
 /** Never value for next update. 285 years from now. */
@@ -238,6 +239,7 @@ export const ENERGY = {
   burner: 1,
   windUp: 2,
   electric: 3,
+  heat: 4,
 };
 
 export const FUEL_FILTERS =
