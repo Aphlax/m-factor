@@ -31,7 +31,7 @@ Grid.fromPole = function(pole) {
   return grid;
 };
 
-Grid.prototype.update = function(time, dt) {
+Grid.prototype.update = function(time, dt, gameMap) {
   let demand = 0, output = 0;
   for (let [el, consumers] of this.consumerss) {
     demand += el * consumers.size;
@@ -78,6 +78,12 @@ Grid.prototype.update = function(time, dt) {
     if (generator.state != STATE.working) {
       generator.state = STATE.working;
       generator.taskStart = time;
+    }
+    if (gameMap && generator.data.smokeType) {
+      gameMap.createSmoke(generator.data.smokeType,
+          generator.x + generator.data.smokeX,
+          generator.y + generator.data.smokeY,
+          time, 1000)
     }
   }
   if (Math.round(satisfaction * 100) !=

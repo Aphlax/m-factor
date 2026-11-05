@@ -1,7 +1,8 @@
 import {TYPE, STATE, ENERGY, HEAT_ENERGY} from './entity-properties.js';
 
-const MAX_HEAT_DIST = 200;
+const MAX_HEAT_DIST = 120;
 const P_MAX_TEMP = 0.8;
+const MAX_CONSUMER_TRANSFER = 15000; // kW
 const HEAT_DRAIN_PER_PART = 0.003;
 
 function Conduit(parts) {
@@ -29,6 +30,7 @@ Conduit.prototype.update = function(time, dt) {
   provide: {
     let need = 0;
     const p = this.amount / this.capacity / P_MAX_TEMP;
+    const max = MAX_CONSUMER_TRANSFER * dt / 1000;
     for (let consumer of this.consumers) {
       const {energyStored, energyConsumption, x, y, width, height} = consumer;
       if (energyStored >= energyConsumption) continue;
@@ -37,7 +39,7 @@ Conduit.prototype.update = function(time, dt) {
       const temp = p * (1 - (dist / MAX_HEAT_DIST)) * 1000;
       if (temp < 500) continue;
       // Store 1s worth of energy in this entity.
-      need += consumer.energyConsumption - consumer.energyStored;
+      need += Math.min(max, energyConsumption - energyStored);
     }
     if (!need) break provide;
     const transfer = Math.min(1, this.amount / (need * HEAT_ENERGY));
@@ -48,13 +50,15 @@ Conduit.prototype.update = function(time, dt) {
           (y + height / 2 - this.centerY) ** 2);
       const temp = p * (1 - (dist / MAX_HEAT_DIST)) * 1000;
       if (temp < 500) continue;
-      consumer.energyStored += transfer * (consumer.energyConsumption - consumer.energyStored);
+      consumer.energyStored += transfer * Math.min(max,
+          energyConsumption - energyStored);
       if (consumer.state == STATE.noEnergy) {
         consumer.nextUpdate = time;
       }
     }
     this.amount -= Math.min(this.amount, need * HEAT_ENERGY);
   }
+  let cx = 0, cy = 0, count = 0;
   for (let reactor of this.reactors) {
     const {state, data, x, y, width, height} = reactor;
     if (state != STATE.running) continue;
@@ -68,10 +72,16 @@ Conduit.prototype.update = function(time, dt) {
     }
     this.amount += bonus * data.powerOutput
         / 1000 * dt * HEAT_ENERGY;
-    this.centerX = 0.99 * this.centerX +
-        0.01 * (x + width / 2);
-    this.centerY = 0.99 * this.centerY +
-        0.01 * (y + height / 2);
+    cx += x + width / 2;
+    cy += y + height / 2;
+    count++;
+  }
+  cx = cx / count - this.centerX;
+  cy = cy / count - this.centerY;
+  const l = Math.sqrt(cx ** 2 + cy ** 2);
+  if (count && l > 0.001) {
+    this.centerX += cx / l * 0.5 * dt / 1000;
+    this.centerY += cy / l * 0.5 * dt / 1000;
   }
   this.amount -= (this.parts.size + 1) * HEAT_DRAIN_PER_PART * dt / 1000;
   if (this.amount < 0) this.amount = 0;
@@ -176,6 +186,7 @@ Conduit.prototype.remove = function(part) {
     this.consumers.delete(part);
   }
   
+  this.amount -= this.amount / this.capacity * part.data.heatCapacity;
   this.capacity -= part.data.heatCapacity;
   if (this.amount > this.capacity) {
     this.amount = this.capacity;
@@ -188,12 +199,6 @@ Conduit.prototype.join = function(other) {
     other.join(this);
     return;
   }
-  this.centerX = (this.centerX * this.parts.size +
-      other.centerX * other.parts.size) /
-      (this.parts.size + other.parts.size);
-  this.centerY = (this.centerY * this.parts.size +
-      other.centerY * other.parts.size) /
-      (this.parts.size + other.parts.size);
   
   for (let part of other.parts) {
     this.parts.add(part);
@@ -209,6 +214,13 @@ Conduit.prototype.join = function(other) {
   other.parts.clear();
   other.reactors.clear();
   other.consumers.clear();
+  
+  this.centerX = (this.centerX * (this.amount + 1) +
+      other.centerX * other.amount) /
+      (this.amount + other.amount + 1);
+  this.centerY = (this.centerY * (this.amount + 1) +
+      other.centerY * other.amount) /
+      (this.amount + other.amount + 1);
   
   this.capacity += other.capacity;
   this.amount += other.amount;

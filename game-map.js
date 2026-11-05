@@ -2,7 +2,7 @@ import {MapGenerator, TestGenerator} from './map-generator.js';
 import {Chunk, SIZE} from './chunk.js';
 import {MINIMAP_SCALE_BOUNDRY} from './game-map-input.js';
 import {S} from './sprite-definitions.js';
-import {NAME, TYPE, STATE, MAX_SIZE, MAX_LOGISTIC_CONNECTION, MAX_UNDERGROUND_CONNECTION, ENERGY, DIRECTIONS, MAX_WIRE_REACH, MAX_SHADOW, MAX_ELECTRIC_SUPPLY, MAX_TREE_SIZE} from './entity-properties.js';
+import {NAME, TYPE, STATE, MAX_SIZE, MAX_LOGISTIC_CONNECTION, MAX_UNDERGROUND_CONNECTION, ENERGY, DIRECTIONS, MAX_WIRE_REACH, MAX_SHADOW, MAX_ELECTRIC_SUPPLY, MAX_TREE_SIZE, SMOKE_TYPE} from './entity-properties.js';
 import {Entity} from './entity.js';
 import {TransportNetwork} from './transport-network.js';
 import {FluidNetwork} from './fluid-network.js';
@@ -924,12 +924,14 @@ GameMap.prototype.canPlaceOffshorePump = function(x, y) {
   return direction;
 };
 
-GameMap.prototype.createSmoke = function(x, y, time, duration) {
+GameMap.prototype.createSmoke = function(type, x, y, time, duration) {
   const cx = Math.floor(x / SIZE);
   if (!this.chunks.has(cx)) return;
   const cy = Math.floor(y / SIZE);
   if (!this.chunks.get(cx).has(cy)) return;
-  let count = Math.floor(duration * 0.005);
+  let count = Math.floor(duration / 200);
+  if (type != SMOKE_TYPE.smoke) count -= Math.floor(count / 4);
+  if (type == SMOKE_TYPE.steam) count -= 1;
   if (!count && time % 200 < duration) count++;
   for (let i = 0; i < count; i++) {
     let p;
@@ -939,20 +941,42 @@ GameMap.prototype.createSmoke = function(x, y, time, duration) {
     } else {
       p = {};
     }
-    p.sprite = S.smoke;
-    p.xStart = x - 0.59;
-    p.yStart = y - 0.2;
-    p.xEnd = x + 1.5 + Math.random();
-    p.yEnd = y - 4 - 1.5 * Math.random();
+    if (type == SMOKE_TYPE.smoke) {
+      p.sprite = S.smoke;
+      p.animationLength = 60;
+      p.xStart = x - 0.59;
+      p.yStart = y - 0.2;
+      p.xEnd = x + 1.5 + Math.random();
+      p.yEnd = y - 4 - 1.5 * Math.random();
+      p.sizeStart = 0.2 + 0.075 * Math.random();
+      p.sizeEnd = 1 + 0.5 * Math.random();
+      p.alphaStart = 0.8;
+    } else if (type == SMOKE_TYPE.steam) {
+      p.sprite = S.cloud;
+      p.animationLength = 45;
+      p.xStart = x - 1.5;
+      p.yStart = y - 1.3;
+      p.xEnd = x + 1.5 + Math.random();
+      p.yEnd = y - 7 - 5 * Math.random();
+      p.sizeStart = 0.3 + 0.09 * Math.random();
+      p.sizeEnd = 0.6 + 0.4 * Math.random();
+      p.alphaStart = 0.5;
+    } else if (type == SMOKE_TYPE.steamSmall) {
+      p.sprite = S.cloud;
+      p.animationLength = 45;
+      p.xStart = x - 0.25;
+      p.yStart = y + 0.01;
+      p.xEnd = x + 1 + 0.5 * Math.random();
+      p.yEnd = y - 4.5 - 1.1 * Math.random();
+      p.sizeStart = 0.07 + 0.02 * Math.random();
+      p.sizeEnd = 0.4 + 0.2 * Math.random();
+      p.alphaStart = 0.4;
+    }
     p.move = 1;
-    p.sizeStart = 0.2 + 0.075 * Math.random();
-    p.sizeEnd = 1 + 0.5 * Math.random();
     p.startTime = time + i * duration / count;
     const d = (p.xEnd - p.xStart) ** 2 + (p.yEnd - p.yStart) ** 2;
     p.duration = (d + 25) / 55 * 4000;
-    p.alphaStart = 0.8;
     p.alphaEnd = 0.05;
-    p.animationLength = 60;
     p.animation = Math.floor(60 * Math.random());
     p.animationSpeed = 0.6;
     

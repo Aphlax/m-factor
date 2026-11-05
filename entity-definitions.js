@@ -1,5 +1,5 @@
 import {S} from './sprite-pool.js';
-import {DIRECTION, TYPE, ENERGY, NAME} from './entity-properties.js';
+import {DIRECTION, TYPE, ENERGY, NAME, SMOKE_TYPE} from './entity-properties.js';
 import {WATER_PUMPING_RECIPE, BOILER_RECIPE, ROCKET_SILO_RECIPE, ROCKET_SCIENCE_RECIPE, HEAT_EXCHANGER_RECIPE} from './recipe-definitions.js';
 import {I} from './item-definitions.js';
 
@@ -304,6 +304,7 @@ export const ENTITIES = new Map([
       [south]: [{x: 1, y: 2}],
       [west]: [{x: -1, y: 1}],
     },
+    smokeType: SMOKE_TYPE.smoke,
     smokePosition: {
       [north]: {x: 1.55, y: 0.25},
       [east]: {x: 0.7, y: 0.3},
@@ -1701,10 +1702,10 @@ export const ENTITIES = new Map([
     rotatable: true,
     icon: S.heatExchangerIcon,
     sprites: {
-      [north]: [S.heatExchangerN],
-      [east]: [S.heatExchangerE],
-      [south]: [S.heatExchangerS],
-      [west]: [S.heatExchangerW],
+      [north]: [S.heatExchangerN, S.boilerShadowN],
+      [east]: [S.heatExchangerE, S.boilerShadowE],
+      [south]: [S.heatExchangerS, S.boilerShadowS],
+      [west]: [S.heatExchangerW, S.boilerShadowW],
     },
     workingAnimation: {
       [north]: [S.heatExchangerN],
@@ -1743,6 +1744,7 @@ export const ENTITIES = new Map([
       [west]: [{x: 2, y: 1}],
     },
     heatCapacity: 80,
+    smokeType: SMOKE_TYPE.steamSmall,
     smokePosition: {
       [north]: {x: 0.3, y: -0.85},
       [east]: {x: 1.6, y: -1.2},
@@ -1781,6 +1783,13 @@ export const ENTITIES = new Map([
     capacity: 500,
     fluidConsumption: 60,
     powerOutput: 5820, // kW
+    smokeType: SMOKE_TYPE.steam,
+    smokePosition: {
+      [north]: {x: 1.6, y: 0.9},
+      [east]: {x: 3.2, y: 0.3},
+      [south]: {x: 1.6, y: 0.9},
+      [west]: {x: 3.2, y: 0.3},
+    },
   }],
   
 ]);

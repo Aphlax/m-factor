@@ -701,6 +701,7 @@ export const S = {
   oilRefineryFire: 17060, // 60
   chemicalPlantSmokeOuter: 17120, // 48
   chemicalPlantSmokeInner: 17170, // 48
+  cloud: 17220, // 45
 };
 
 export const SPRITES = [
@@ -2753,6 +2754,10 @@ export const SPRITES = [
   {
     path: "graphics/items/tree.png",
     sprites: itemSprites(undefined, S.treeIcon),
+  },
+  {
+    path: "graphics/decoratives/cloud.png",
+    sprites: sprites(S.cloud, 256, 256, 7, 7),
   },
 ];
 

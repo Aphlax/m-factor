@@ -1,7 +1,7 @@
 import {Inventory} from './inventory.js';
 import {FluidTank} from './fluid-tank.js';
 import {ENTITIES} from './entity-definitions.js';
-import {TYPE, NAME, MAX_SIZE, NEVER, STATE, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ROBOT_FILTERS, ENERGY, MIN_SATISFACTION, DIRECTION} from './entity-properties.js';
+import {TYPE, NAME, MAX_SIZE, NEVER, STATE, MINE_PRODUCTS, INSERTER_PICKUP_BEND, LAB_FILTERS, FUEL_FILTERS, ROBOT_FILTERS, ENERGY, MIN_SATISFACTION, DIRECTION, SMOKE_TYPE} from './entity-properties.js';
 import {ITEMS, I} from './item-definitions.js';
 import {RECIPES, FURNACE_FILTERS} from './recipe-definitions.js';
 import {S, SPRITES} from './sprite-pool.js';
@@ -248,6 +248,7 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.data.workingAnimation = def.workingAnimation[direction];
     this.sprite = 0;
     this.extraSpriteUnder = this.data.idleAnimation;
+    this.data.smokeType = def.smokeType;
     this.data.smokeX = def.smokePosition[direction].x;
     this.data.smokeY = def.smokePosition[direction].y;
     this.outputFluidTank = new FluidTank()
@@ -276,6 +277,9 @@ Entity.prototype.setup = function(name, x, y, direction, time, data) {
     this.inputFluidTank = new FluidTank()
         .setTanklets([I.steam])
         .setInternalInlet(true);
+    this.data.smokeType = def.smokeType;
+    this.data.smokeX = def.smokePosition?.[direction].x;
+    this.data.smokeY = def.smokePosition?.[direction].y;
   } else if (this.type == TYPE.electricPole) {
     this.nextUpdate = NEVER;
     this.data.wireReach = def.wireReach;
@@ -796,7 +800,8 @@ Entity.prototype.update = function(gameMap, time) {
         nextUpdate = this.taskStart +
             this.energyStored / this.energyConsumption * 1000;
       }
-      gameMap.createSmoke(this.x + this.data.smokeX,
+      gameMap.createSmoke(SMOKE_TYPE.smoke,
+          this.x + this.data.smokeX,
           this.y + this.data.smokeY, this.nextUpdate,
           nextUpdate - this.nextUpdate);
     }
@@ -982,7 +987,8 @@ Entity.prototype.update = function(gameMap, time) {
         state = STATE.running;
         this.taskStart = this.nextUpdate;
         nextUpdate = this.taskEnd = this.taskStart + this.taskDuration;
-        gameMap.createSmoke(this.x + this.data.smokeX,
+        gameMap.createSmoke(this.data.smokeType,
+            this.x + this.data.smokeX,
             this.y + this.data.smokeY, this.taskStart,
             this.taskEnd - this.taskStart);
         break boiler;
@@ -1139,6 +1145,12 @@ Entity.prototype.update = function(gameMap, time) {
         break reactor;
       }
     } // break reactor:
+    if (this.state != STATE.running && state == STATE.running) {
+      this.sprite = this.data.workingAnimation;
+    }
+    if (this.state == STATE.running && state != STATE.running) {
+      this.sprite = this.data.idleAnimation;
+    }
     this.state = state;
     this.nextUpdate = nextUpdate;
   }

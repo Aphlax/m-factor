@@ -255,6 +255,12 @@ export const ROBOT_FILTERS = [
   {item: I.logisticRobot, amount: 1},
 ];
 
+export const SMOKE_TYPE = {
+  smoke: 1,
+  steam: 2,
+  smallSteam: 3,
+}
+
 
 function rectOverlap(x, y, width, height, entity) {
   return x + width > entity.x && x < entity.x + entity.width &&

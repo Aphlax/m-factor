@@ -5,6 +5,8 @@ import {SETTINGS} from './storage.js';
 function ElectricNetwork(gameMap) {
   this.gameMap = gameMap;
   this.grids = [];
+  
+  this.lastSmoke = 0; // Do generators create smoke particles in update?
 }
 
 ElectricNetwork.prototype.addPole = function(entity, poleConnections, time) {
@@ -166,13 +168,16 @@ ElectricNetwork.prototype.modifyConsumer = function(entity, time) {
 };
 
 ElectricNetwork.prototype.update = function(time, dt) {
+  const gameMap = time - this.lastSmoke > 1000 ?
+      this.gameMap : undefined;
+  if (time - this.lastSmoke > 1000) this.lastSmoke = time;
   let removedGrids = 0;
   for (let i = 0; i < this.grids.length; i++) {
     if (!this.grids[i].poles.size) {
       removedGrids++;
       continue;
     }
-    this.grids[i].update(time, dt);
+    this.grids[i].update(time, dt, gameMap);
     if (removedGrids) {
       this.grids[i - removedGrids] = this.grids[i];
     }

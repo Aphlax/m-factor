@@ -82,16 +82,16 @@ const DEACC = 50;
 
 /*
   create blueprint, copy, paste, delete, upgrade, downgrade 6
-  cliff explosives,
   chests, logistic chests, roboport 9
   belts, splitters, underground 9
-  inserters, powerpoles 10
+  inserters 4
+  powerpoles 5
   assemblers, refinery, chem, lab, rocket silo 7
   pipes, pump, offshore pump 4
   rails, rail signals, train stop, loc, wagons 7
   mines, furnaces, pumpjack 6
-  turbines, solars, boilers, accumulator, light, powerpoles 9
-  atomic reactor & co 4
+  turbines, solars, boilers, accumulator, powerpoles 9
+  nuclear reactor & co 5
   logic, speaker, light, wire 7
   walls, turrets 7
 */
@@ -113,66 +113,41 @@ function UiBuildMenu(ui, canvas) {
     }
   });
   
-  this.x = 4;
-  this.oldX = 0;
-  this.dx = 0;
-  this.dragX = 0;
+  this.scroller = new Scroller(BUILD_MENU.length, 23)
   
   this.selectedIndex = -1;
 }
 
 UiBuildMenu.prototype.update = function(time, dt) {
-  if (!this.dragX && this.dx) {
-    const pos = this.x + this.dx * 0.5 * Math.abs(this.dx) / DEACC;
-    const target = Math.max(0, Math.min(this.menu.length - 1,
-        Math.round(pos)));
-    if (Math.abs(pos - target) > 0.001) {
-      this.dx = Math.sign(target - this.x) *
-          Math.sqrt(Math.abs(target - this.x) * 2 * DEACC);
-    }
-    this.x += this.dx * dt * 0.001;
-    if (Math.abs(this.dx) < DEACC * 0.05) {
-      this.x = Math.round(this.x);
-      this.dx = 0;
-    } else {
-      this.dx -= Math.sign(this.dx) * DEACC * dt * 0.001;
-    }
+  if (!this.scroller.update(dt)) return;
+  const x = this.canvasWidth * 0.5,
+      y = this.canvasHeight - 96;
+  
+  // Magnet to round numbers.
+  const dmx = Math.round(this.scroller.pos) - this.scroller.pos;
+  let mx = Math.abs(dmx) > 0.07 ? 0 :
+      Math.sign(dmx) * 0.07 - dmx;
+  if (Math.abs(mx) > Math.abs(dmx)) {
+    mx *= Math.abs(dmx) / Math.abs(mx);
   }
-  
-  if (this.x != this.oldX) {
-    const x = this.canvasWidth * 0.5,
-        y = this.canvasHeight - 96;
-    
-    // Magnet to round numbers.
-    const dmx = Math.round(this.x) - this.x;
-    let mx = Math.abs(dmx) > 0.07 ? 0 :
-        Math.sign(dmx) * 0.07 - dmx;
-    if (Math.abs(mx) > Math.abs(dmx)) {
-      mx *= Math.abs(dmx) / Math.abs(mx);
-    }
-    mx *= 0.9;
-  
-    for (let i = 0; i < this.menu.length; i++) {
-      const d = Math.abs(i - this.x - mx);
-      const size = (8 - d) * 4;
-      if (size < 20) {
-        if (this.menu[i].size) {
-          this.menu[i].x = this.menu[i].y = 0;
-          this.menu[i].size = 0;
-        }
-        continue;
+  mx *= 0.9;
+
+  for (let i = 0; i < this.menu.length; i++) {
+    const d = Math.abs(i - this.scroller.pos - mx);
+    const size = (8 - d) * 4;
+    if (size < 20) {
+      if (this.menu[i].size) {
+        this.menu[i].x = this.menu[i].y = 0;
+        this.menu[i].size = 0;
       }
-      const dy = 16 * d ** 2;
-      const dx = (i - this.x - mx) * 80 *
-          ((d / 3) * 0.8 + (1 - (d / 3)));
-      this.menu[i].x = x + dx - size - 4;
-      this.menu[i].y = y + dy - size - 4;
-      this.menu[i].size = size * 2 + 8;
+      continue;
     }
-    if (this.dragX) {
-      this.dx = (this.x - this.oldX) / (dt * 0.001);
-    }
-    this.oldX = this.x;
+    const dy = 16 * d ** 2;
+    const dx = (i - this.scroller.pos - mx) * 80 *
+        ((d / 3) * 0.8 + (1 - (d / 3)));
+    this.menu[i].x = x + dx - size - 4;
+    this.menu[i].y = y + dy - size - 4;
+    this.menu[i].size = size * 2 + 8;
   }
 };
 
@@ -196,11 +171,10 @@ UiBuildMenu.prototype.draw = function(ctx) {
         size - 8, size - 8);
     window.numberImageDraws++;
   }
-  // return;
   ctx.beginPath();
   ctx.moveTo(0, this.canvasHeight - 30);
-  ctx.lineTo(150, this.canvasHeight - 180);
-  ctx.lineTo(243, this.canvasHeight - 180);
+  ctx.lineTo(this.canvasWidth / 2 - 45, this.canvasHeight - 180);
+  ctx.lineTo(this.canvasWidth / 2 + 45, this.canvasHeight - 180);
   ctx.lineTo(this.canvasWidth, this.canvasHeight - 30);
   ctx.stroke();
   window.numberOtherDraws++;
@@ -215,17 +189,17 @@ UiBuildMenu.prototype.inBounds = function(t) {
 };
 
 UiBuildMenu.prototype.touchStart = function(e) {
-  this.dragX = e.touches[0].clientX + this.x * 60;
+  this.scroller.startDrag(e.touches[0].clientX)
 };
 
 UiBuildMenu.prototype.touchMove = function(e, longTouch) {
   if (!longTouch) {
-    this.x = Math.max(0, Math.min(this.menu.length - 1,
-        (this.dragX - e.touches[0].clientX) / 60));
+    this.scroller.moveDrag(e.touches[0].clientX);
   }
 };
 
 UiBuildMenu.prototype.touchEnd = function(e, shortTouch) {
+  this.scroller.endDrag();
   if (shortTouch) {
     const t = e.changedTouches[0];
     for (let i = 0; i < this.menu.length; i++) {
@@ -241,9 +215,6 @@ UiBuildMenu.prototype.touchEnd = function(e, shortTouch) {
         break;
       }
     }
-  }
-  if (this.dragX) {
-    this.dragX = 0;
   }
 };
 
@@ -269,9 +240,7 @@ UiBuildMenu.prototype.setSelectedEntry = function(entry) {
   const i = this.menu.indexOf(entry);
   if (i == -1) return;
   this.selectedIndex = i;
-  if (this.x != i) {
-    this.dx = Math.sign(i - this.x) * Math.sqrt(Math.abs(i - this.x) * 2 * DEACC);
-  }
+  this.scroller.scrollTo(i);
   
   if (entry.entity?.name == NAME.offshorePump) {
     this.ui.gameMapInput.setOffshorePumpMode(entry.entity);
@@ -302,6 +271,66 @@ UiBuildMenu.prototype.entityBuilt = function() {
 
 UiBuildMenu.prototype.reset = function() {
   this.setSelectedEntry();
+};
+
+const DECELERATION = 50;
+const DRAG_PX_PER_ITEM = 60;
+
+function Scroller(size, initialValue) {
+  this.size = size;
+  this.pos = initialValue;
+  this.lastPos = 0;
+  this.velocity = 0;
+  this.isDragging = false;
+  this.dragStart = 0;
+}
+
+Scroller.prototype.startDrag = function(clientX) {
+  this.isDragging = true;
+  this.dragStart = clientX +
+      this.pos * DRAG_PX_PER_ITEM;
+};
+
+Scroller.prototype.moveDrag = function(clientX) {
+  this.pos = Math.max(0, Math.min(this.size - 1,
+    (this.dragStart - clientX) / DRAG_PX_PER_ITEM));
+};
+
+Scroller.prototype.endDrag = function() {
+  this.isDragging = false;
+};
+
+Scroller.prototype.scrollTo = function(index) {
+  if (this.pos == index) return;
+  const dist = Math.abs(index - this.pos);
+  this.velocity = Math.sign(index - this.pos) *
+      Math.sqrt(dist * 2 * DECELERATION);
+};
+
+Scroller.prototype.update = function(dt) {
+  if (!this.isDragging && this.velocity) {
+    const pos = this.pos +
+        this.velocity * Math.abs(this.velocity) * 0.5 / DECELERATION;
+    const target = Math.max(0, Math.min(this.size - 1,
+        Math.round(pos)));
+    if (Math.abs(pos - target) > 0.001) {
+      this.velocity = Math.sign(target - this.pos) *
+          Math.sqrt(Math.abs(target - this.pos) * 2 * DECELERATION);
+    }
+    this.pos += this.velocity * dt / 1000;
+    if (Math.abs(this.velocity) < DECELERATION * 0.05) {
+      this.pos = Math.round(this.pos);
+      this.velocity = 0;
+    } else {
+      this.velocity -= Math.sign(this.velocity) * DECELERATION * dt / 1000;
+    }
+  }
+  if (this.pos == this.lastPos) return false;
+  if (this.isDragging) {
+    this.velocity = (this.pos - this.lastPos) / (dt / 1000);
+  }
+  this.lastPos = this.pos;
+  return true;
 };
 
 export {UiBuildMenu};

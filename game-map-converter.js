@@ -39,9 +39,7 @@ GMC.serializeMap = function(gameMap) {
         splitterLeft: lane.belts[0].type == TYPE.splitter ?
             lane.belts[0].data.leftOutLane == lane : undefined,
         minusFlow: lane.minusFlow,
-        minusItems: lane.minusItems,
         plusFlow: lane.plusFlow,
-        plusItems: lane.plusItems,
       }));
   const fluidNetworkChannels =
       gameMap.fluidNetwork.channels
@@ -66,6 +64,19 @@ GMC.serializeMap = function(gameMap) {
           satisfaction: grid.satisfaction,
         };
       });
+  const heatNetworkConduits =
+      gameMap.heatNetwork.conduits
+      .filter(conduit => conduit.parts.size)
+      .map(conduit => {
+        const [part] = conduit.parts;
+        return {
+          x: part.x,
+          y: part.y,
+          amount: conduit.amount,
+          centerX: conduit.centerX,
+          centerY: conduit.centerY,
+        };
+      });
   return {
     seed: gameMap.mapGenerator.seed,
     entities,
@@ -73,6 +84,7 @@ GMC.serializeMap = function(gameMap) {
     transportNetworkLanes,
     fluidNetworkChannels,
     electricNetworkGrids,
+    heatNetworkConduits,
     view: gameMap.view,
     playTime: gameMap.playTime,
   };
@@ -143,7 +155,7 @@ GMC.serializeEntity = function(index, entity, blueprintOnly) {
       } : {}),
     ...(entity.type == TYPE.inserter && entity.data.itemFilters ? {
         filters: entity.data.itemFilters.map((item, i) =>
-            ({item: ITEMS.get(item), index: i + 1})).filter(f => f.item),
+            ({item: ITEMS.get(item)?.prototypeName, index: i + 1})).filter(f => f.item),
         filter_mode: entity.data.filterMode ? "whitelist" : "blacklist"} : {}),
     
     // Non-blueprintable.
@@ -154,7 +166,9 @@ GMC.serializeEntity = function(index, entity, blueprintOnly) {
           entity.type == TYPE.assembler ||
           entity.type == TYPE.lab ||
           entity.type == TYPE.boiler ||
-          entity.type == TYPE.generator ? {
+          entity.type == TYPE.generator ||
+          entity.type == TYPE.rocketSilo ||
+          entity.type == TYPE.reactor ? {
             animation: entity.animation,
             state: entity.state,
             nextUpdate: entity.nextUpdate,
@@ -163,7 +177,8 @@ GMC.serializeEntity = function(index, entity, blueprintOnly) {
             taskDuration: entity.taskDuration,
           } : {}),
       ...(entity.energySource == ENERGY.burner ||
-          entity.energySource == ENERGY.windUp ? {
+          entity.energySource == ENERGY.windUp ||
+          entity.energySource == ENERGY.heat ? {
             energyStored: entity.energyStored,
           } : {}),
       ...(entity.energySource == ENERGY.electric ? {
@@ -242,27 +257,29 @@ GMC.deserializeMap = function(map) {
             belt.data.lane.split(belt, gameMap.transportNetwork.laneId++));
       }
       belt.data.lane.minusFlow.push(...lane.minusFlow);
-      belt.data.lane.minusItems.push(...lane.minusItems);
       belt.data.lane.plusFlow.push(...lane.plusFlow);
-      belt.data.lane.plusItems.push(...lane.plusItems);
     } else {
       const outLane = lane.splitterLeft ?
           belt.data.leftOutLane : belt.data.rightOutLane;
       outLane.minusFlow.push(...lane.minusFlow);
-      outLane.minusItems.push(...lane.minusItems);
       outLane.plusFlow.push(...lane.plusFlow);
-      outLane.plusItems.push(...lane.plusItems);
     }
   }
   for (let channel of map.fluidNetworkChannels) {
     const pipe = gameMap.getEntityAt(channel.x, channel.y);
-    if (!pipe) continue;  // TODO: Fix pipe placment.
+    if (!pipe) continue;  // TODO: Remove when pipe placment fixed.
     pipe.data.channel.fluid = channel.fluid;
     pipe.data.channel.amount = channel.amount;
   }
   for (let grid of map.electricNetworkGrids) {
     const pole = gameMap.getEntityAt(grid.x, grid.y);
     pole.data.grid.satisfaction = grid.satisfaction;
+  }
+  for (let conduit of map.heatNetworkConduits) {
+    const part = gameMap.getEntityAt(conduit.x, conduit.y);
+    part.data.conduit.amount = conduit.amount;
+    part.data.conduit.centerX = conduit.centerX;
+    part.data.conduit.centerY = conduit.centerY;
   }
   return gameMap;
 };
@@ -287,8 +304,10 @@ GMC.deserializeEntity = function(e) {
           itemFilter: e.filter ? PROTO_TO_ITEM.get(e.filter).name : undefined,
         } : {}),
     ...(def.type == TYPE.inserter && e.filters ? {
-        itemFilters: e.filters.reduce((arr, f) =>
-            { arr[f.index - 1] = PROTO_TO_ITEM.get(f.item).name; return arr; }, []),
+        itemFilters: e.filters.reduce((arr, filter) => {
+          arr[filter.index - 1] = PROTO_TO_ITEM.get(filter.item).name;
+          return arr;
+        }, []),
         filterMode: e.filter_mode == "whitelist"} : {}),
   };
   return {name, x, y, direction, data};
@@ -302,7 +321,9 @@ GMC.deserializeEntityCustomFields = function(e, entity) {
       entity.type == TYPE.rocketSilo ||
       entity.type == TYPE.lab ||
       entity.type == TYPE.boiler ||
-      entity.type == TYPE.generator) {
+      entity.type == TYPE.generator ||
+      entity.type == TYPE.rocketSilo ||
+      entity.type == TYPE.reactor) {
     entity.animation = e.animation;
     entity.state = e.state;
     entity.nextUpdate = e.nextUpdate;
@@ -311,7 +332,8 @@ GMC.deserializeEntityCustomFields = function(e, entity) {
     entity.taskDuration = e.taskDuration;
   }
   if (entity.energySource == ENERGY.burner ||
-      entity.energySource == ENERGY.windUp) {
+      entity.energySource == ENERGY.windUp ||
+      entity.energySource == ENERGY.heat) {
     entity.energyStored = e.energyStored;
   }
   if (entity.energySource == ENERGY.electric) {

@@ -104,7 +104,7 @@ GameUi.prototype.draw = function(ctx, time) {
   
   if (time < this.longTouchIndicator) {
     const intensity = 1 -  Math.abs((this.longTouchIndicator - time) - 100) / 100;
-    ctx.globalAlpha = 0.5;
+    ctx.globalAlpha = 0.2;
     ctx.strokeStyle = COLOR.longTouchIndicator;
     ctx.lineWidth = Math.floor(intensity * 10) * 2;
     ctx.strokeRect(0, 0, ctx.canvas.width, ctx.canvas.height);
