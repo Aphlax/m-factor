@@ -10,75 +10,86 @@ const TOOL_ICON = new Map([
 ]);
 
 const BUILD_MENU = [
-  TOOL.bulldoze,
-  TOOL.paste,
-  TOOL.copy,
-  NAME.woodenChest,
-  NAME.ironChest,
-  NAME.steelChest,
-  NAME.storageChest,
-  NAME.passiveProviderChest,
-  NAME.requesterChest,
-  NAME.activeProviderChest,
-  NAME.bufferChest,
-  NAME.roboport,
-  NAME.transportBelt,
-  NAME.undergroundBelt,
-  NAME.splitter,
-  NAME.fastTransportBelt,
-  NAME.fastUndergroundBelt,
-  NAME.fastSplitter,
-  NAME.expressTransportBelt,
-  NAME.expressUndergroundBelt,
-  NAME.expressSplitter,
-  NAME.burnerInserter,
-  NAME.inserter,
-  NAME.fastInserter,
-  NAME.longHandedInserter,
-  NAME.smallElectricPole,
-  NAME.mediumElectricPole,
-  NAME.bigElectricPole,
-  NAME.substation,
-  NAME.accumulator,
-  NAME.solarPanel,
-  NAME.pipe,
-  NAME.pipeToGround,
-  NAME.storageTank,
-  NAME.pump,
-  NAME.assemblingMachine1,
-  NAME.assemblingMachine2,
-  NAME.assemblingMachine3,
-  NAME.oilRefinery,
-  NAME.chemicalPlant,
-  NAME.centrifuge,
-  NAME.burnerDrill,
-  NAME.electricMiningDrill,
-  NAME.pumpjack,
-  NAME.stoneFurnace,
-  NAME.steelFurnace,
-  NAME.electricFurnace,
-  NAME.lab,
-  NAME.offshorePump,
-  NAME.boiler,
-  NAME.steamEngine,
-  NAME.rail,
-  NAME.trainStop,
-  NAME.railSignal,
-  NAME.railChainSignal,
-  NAME.rocketSilo,
-  NAME.radar,
-  NAME.constantCombinator,
-  NAME.arithmeticCombinator,
-  NAME.deciderCombinator,
-  NAME.powerSwitch,
-  NAME.programmableSpeaker,
-  NAME.lamp,
-  NAME.nuclearReactor,
-  NAME.heatPipe,
-  NAME.heatExchanger,
-  NAME.steamTurbine,
+  [
+    TOOL.bulldoze,
+    TOOL.paste,
+    TOOL.copy,
+  ], [
+    NAME.woodenChest,
+    NAME.ironChest,
+    NAME.steelChest,
+    NAME.activeProviderChest,
+    NAME.bufferChest,
+    NAME.storageChest,
+    NAME.passiveProviderChest,
+    NAME.requesterChest,
+    NAME.roboport,
+  ], [
+    NAME.transportBelt,
+    NAME.undergroundBelt,
+    NAME.splitter,
+    NAME.fastTransportBelt,
+    NAME.fastUndergroundBelt,
+    NAME.fastSplitter,
+    NAME.expressTransportBelt,
+    NAME.expressUndergroundBelt,
+    NAME.expressSplitter,
+  ], [
+    NAME.burnerInserter,
+    NAME.inserter,
+    NAME.fastInserter,
+    NAME.longHandedInserter,
+  ], [
+    NAME.accumulator,
+    NAME.solarPanel,
+    NAME.smallElectricPole,
+    NAME.mediumElectricPole,
+    NAME.bigElectricPole,
+    NAME.substation,
+  ], [
+    NAME.boiler,
+    NAME.steamEngine,
+    NAME.storageTank,
+    NAME.pipe,
+    NAME.pipeToGround,
+    NAME.pump,
+  ], [
+    NAME.lab,
+    NAME.rocketSilo,
+    NAME.assemblingMachine1,
+    NAME.assemblingMachine2,
+    NAME.assemblingMachine3,
+    NAME.oilRefinery,
+    NAME.chemicalPlant,
+  ], [
+    NAME.burnerDrill,
+    NAME.electricMiningDrill,
+    NAME.offshorePump,
+    NAME.pumpjack,
+    NAME.stoneFurnace,
+    NAME.steelFurnace,
+    NAME.electricFurnace,
+  ], [
+    NAME.rail,
+    NAME.trainStop,
+    NAME.railSignal,
+    NAME.railChainSignal,
+  ], [
+    NAME.powerSwitch,
+    NAME.programmableSpeaker,
+    NAME.radar,
+    NAME.constantCombinator,
+    NAME.arithmeticCombinator,
+    NAME.deciderCombinator,
+    NAME.lamp,
+  ], [
+    NAME.centrifuge,
+    NAME.nuclearReactor,
+    NAME.heatPipe,
+    NAME.heatExchanger,
+    NAME.steamTurbine,
+  ],
 ];
-const DEACC = 50;
 
 /*
   create blueprint, copy, paste, delete, upgrade, downgrade 6
@@ -101,27 +112,36 @@ function UiBuildMenu(ui, canvas) {
   this.canvasWidth = canvas.width;
   this.canvasHeight = canvas.height;
   
-  this.menu = BUILD_MENU.map(entry => {
-    const x = 0, y = 0, size = 0;
-    if (entry > 0) {
-      const entity = ENTITIES.get(entry);
-      if (!entity) throw new Error(`Can not find ${entry}.`);
-      return {sprite: entity.icon, entity, x, y, size};
-    } else {
-      const sprite = TOOL_ICON.get(entry);
-      return {sprite, tool: entry, x, y, size};
-    }
+  this.menu = BUILD_MENU.map(group => {
+    const entries = group.map(entry => {
+      const x = 0, y = 0, size = 0, alpha = 1;
+      if (entry > 0) {
+        const entity = ENTITIES.get(entry);
+        if (!entity) throw new Error(`Can not find ${entry}.`);
+        return {sprite: entity.icon, entity, x, y, size, alpha};
+      } else {
+        const sprite = TOOL_ICON.get(entry);
+        return {sprite, tool: entry, x, y, size, alpha};
+      }
+    });
+    const scroller = new Scroller(entries.length, 30, entries.length - 3)
+    return {entries, scroller, visible: false, x: 0};
   });
   
-  this.scroller = new Scroller(BUILD_MENU.length, 23)
+  this.dragStartX = 0;
+  this.dragStartY = 0;
+  this.dragX = false;
+  this.scrollingGroup = -1;
+  this.scroller = new Scroller(BUILD_MENU.length, 60, 3);
   
-  this.selectedIndex = -1;
+  this.selectedEntry = undefined;
 }
 
 UiBuildMenu.prototype.update = function(time, dt) {
-  if (!this.scroller.update(dt)) return;
-  const x = this.canvasWidth * 0.5,
-      y = this.canvasHeight - 96;
+  this.scroller.update(dt);
+  for (let group of this.menu) {
+    group.scroller.update(dt);
+  }
   
   // Magnet to round numbers.
   const dmx = Math.round(this.scroller.pos) - this.scroller.pos;
@@ -134,48 +154,67 @@ UiBuildMenu.prototype.update = function(time, dt) {
 
   for (let i = 0; i < this.menu.length; i++) {
     const d = Math.abs(i - this.scroller.pos - mx);
-    const size = (8 - d) * 4;
-    if (size < 20) {
-      if (this.menu[i].size) {
-        this.menu[i].x = this.menu[i].y = 0;
-        this.menu[i].size = 0;
-      }
-      continue;
+    if (this.menu[i].visible != (d <= 3.2)) {
+      this.menu[i].visible = d <= 3.2;
     }
-    const dy = 16 * d ** 2;
+    if (d > 3.2) continue;
     const dx = (i - this.scroller.pos - mx) * 80 *
-        ((d / 3) * 0.8 + (1 - (d / 3)));
-    this.menu[i].x = x + dx - size - 4;
-    this.menu[i].y = y + dy - size - 4;
-    this.menu[i].size = size * 2 + 8;
+        (1 - (d / 15));
+    const gx = this.menu[i].x = this.canvasWidth * 0.5 + dx;
+    const gy = this.canvasHeight - 96 + 16 * d ** 2;
+    const size = (9 - d) * 8;
+    const scroller = this.menu[i].scroller;
+    for (let j = 0; j < this.menu[i].entries.length; j++) {
+      const entry = this.menu[i].entries[j];
+      const d = Math.abs(j - scroller.pos);
+      if (d > 3.5) {
+        entry.size = 0;
+        continue;
+      }
+      entry.x = gx;
+      entry.y = gy - (j - scroller.pos) * 40 *
+          Math.max(0, 1 - (d / 15)) * size / 88;
+      entry.size = size * Math.max(0, 1 - (d / 4.5));
+      entry.alpha = Math.max(0, Math.min(2, 3.5 - d)) / 2;
+    }
   }
 };
 
 UiBuildMenu.prototype.draw = function(ctx) {
   for (let i = 0; i < this.menu.length; i++) {
-    const size = this.menu[i].size;
-    if (!size || this.menu[i].y >= this.canvasHeight) continue;
-    ctx.fillStyle = i == this.selectedIndex ?
-        COLOR.buildSingleBackground : COLOR.buildBackground;
-    ctx.fillRect(this.menu[i].x, this.menu[i].y, size, size);
-    ctx.strokeStyle = i == this.selectedIndex ?
-        COLOR.buildSingleBorder : COLOR.buildBorder;
-    ctx.lineWidth = i == this.selectedIndex ? 2 : 1;
-    ctx.strokeRect(this.menu[i].x, this.menu[i].y, size, size);
-    window.numberOtherDraws += 2;
-    const sprite = SPRITES.get(this.menu[i].sprite);
-    ctx.drawImage(sprite.image,
-        sprite.x, sprite.y,
-        sprite.width, sprite.height,
-        this.menu[i].x + 4, this.menu[i].y + 4,
-        size - 8, size - 8);
-    window.numberImageDraws++;
+    const group = this.menu[i];
+    if (!group.visible) continue;
+    let j = 0, k = group.entries.length - 1;
+    while (j <= k) {
+      const l = group.entries[j].size <= group.entries[k].size ? j : k;
+      const {x, y, size, alpha, sprite} = group.entries[l];
+      const selected = group.entries[l] == this.selectedEntry;
+      if (l == j) j++; else k--;
+      if (!size || y - size / 2 >= this.canvasHeight) continue;
+      if (ctx.globalAlpha != alpha) ctx.globalAlpha = alpha;
+      ctx.fillStyle = selected ?
+          COLOR.buildSingleBackground : COLOR.buildBackground;
+      ctx.fillRect(x - size / 2, y - size / 2, size, size);
+      ctx.strokeStyle = selected ?
+          COLOR.buildSingleBorder : COLOR.buildBorder;
+      ctx.lineWidth = selected ? 2 : 1;
+      ctx.strokeRect(x - size / 2, y - size / 2, size, size);
+      window.numberOtherDraws += 2;
+      const s = SPRITES.get(sprite);
+      ctx.drawImage(s.image,
+          s.x, s.y, s.width, s.height,
+          x - size / 2 + 4, y - size / 2 + 4, size - 8, size - 8);
+      window.numberImageDraws++;
+    }
   }
   ctx.beginPath();
   ctx.moveTo(0, this.canvasHeight - 30);
   ctx.lineTo(this.canvasWidth / 2 - 45, this.canvasHeight - 180);
   ctx.lineTo(this.canvasWidth / 2 + 45, this.canvasHeight - 180);
   ctx.lineTo(this.canvasWidth, this.canvasHeight - 30);
+  ctx.strokeStyle = COLOR.buildBorder;
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 1;
   ctx.stroke();
   window.numberOtherDraws++;
 };
@@ -189,58 +228,108 @@ UiBuildMenu.prototype.inBounds = function(t) {
 };
 
 UiBuildMenu.prototype.touchStart = function(e) {
-  this.scroller.startDrag(e.touches[0].clientX)
+  this.dragStartX = e.touches[0].clientX;
+  this.dragStartY = e.touches[0].clientY;
 };
 
 UiBuildMenu.prototype.touchMove = function(e, longTouch) {
   if (!longTouch) {
-    this.scroller.moveDrag(e.touches[0].clientX);
+    const dx = Math.abs(e.touches[0].clientX - this.dragStartX);
+    const dy = Math.abs(e.touches[0].clientY - this.dragStartY);
+    if (!this.dragX && dx > 10) {
+      this.scroller.startDrag(this.dragStartX);
+      this.dragX = true;
+    }
+    if (this.scrollingGroup == -1 && dy > 10 + 0.1 * dx) {
+      if (this.dragX && dx > 50) {
+        this.scrollingGroup = Math.round(this.scroller.pos);
+      } else {
+        let minDist = 1000;
+        for (let i = 0; i < this.menu.length; i++) {
+          const d = Math.abs(e.touches[0].clientX - this.menu[i].x);
+          if (d < minDist) {
+            minDist = d;
+            this.scrollingGroup = i;
+          }
+        }
+      }
+      this.menu[this.scrollingGroup].scroller.startDrag(-this.dragStartY);
+    }
+    if (this.dragX) {
+      this.scroller.moveDrag(e.touches[0].clientX);
+    }
+    if (this.scrollingGroup != -1) {
+      this.menu[this.scrollingGroup].scroller.moveDrag(-e.touches[0].clientY);
+    }
   }
 };
 
 UiBuildMenu.prototype.touchEnd = function(e, shortTouch) {
-  this.scroller.endDrag();
-  if (shortTouch) {
-    const t = e.changedTouches[0];
-    for (let i = 0; i < this.menu.length; i++) {
-      const r = this.menu[i];
-      if (!r.size) continue;
-      if (r.x <= t.clientX && t.clientX <= r.x + r.size &&
-          r.y <= t.clientY && t.clientY <= r.y + r.size) {
-        if (this.selectedIndex == i) {
-          this.setSelectedEntry();
-          break;
-        }
-        this.setSelectedEntry(r);
-        break;
-      }
+  if (this.dragX) this.scroller.endDrag();
+  if (this.scrollingGroup != -1) {
+    this.menu[this.scrollingGroup].scroller.endDrag();
+  }
+  this.dragX = false;
+  this.scrollingGroup = -1;
+  if (!shortTouch) return;
+  const t = e.changedTouches[0];
+  let entry = undefined;
+  for (let i = 0; i < this.menu.length; i++) {
+    const group = this.menu[i];
+    for (let j = 0; j < group.entries.length; j++) {
+      const {x, y, size} = group.entries[j];
+      if (!size ||
+          x - size / 2 > t.clientX || t.clientX > x + size / 2 ||
+          y - size / 2 > t.clientY || t.clientY > y + size / 2) continue;
+      if (entry && entry.size > size) break;
+      entry = group.entries[j];
     }
   }
+  if (this.selectedEntry == entry) {
+    this.setSelectedEntry();
+    return;
+  }
+  this.setSelectedEntry(entry);
 };
 
 UiBuildMenu.prototype.touchLong = function(e) {
   const t = e.touches[0];
+  let entry = undefined;
   for (let i = 0; i < this.menu.length; i++) {
-    const r = this.menu[i];
-    if (!r.size) continue;
-    if (r.x <= t.clientX && t.clientX <= r.x + r.size &&
-        r.y <= t.clientY && t.clientY <= r.y + r.size) {
-      this.setSelectedEntry(r);
-      break;
+    const group = this.menu[i];
+    for (let j = 0; j < group.entries.length; j++) {
+      const {x, y, size} = group.entries[j];
+      if (!size ||
+          x - size / 2 > t.clientX || t.clientX > x + size / 2 ||
+          y - size / 2 > t.clientY || t.clientY > y + size / 2) continue;
+      if (entry && entry.size > size) break;
+      entry = group.entries[j];
     }
   }
+  if (this.selectedEntry == entry) {
+    this.setSelectedEntry();
+    return;
+  }
+  this.setSelectedEntry(entry);
 };
 
 UiBuildMenu.prototype.setSelectedEntry = function(entry) {
   if (!entry) {
-    this.selectedIndex = -1;
+    this.selectedEntry = undefined;
     this.ui.gameMapInput.resetMode();
     return;
   }
-  const i = this.menu.indexOf(entry);
-  if (i == -1) return;
-  this.selectedIndex = i;
+  let i = 0, j = 0;
+  find: for (; i < this.menu.length; i++) {
+    const group = this.menu[i];
+    for (j = 0; j < group.entries.length; j++) {
+      if (group.entries[j] == entry) break find;
+    }
+  }
+  if (i == this.menu.length) return;
+  this.selectedEntry = entry;
   this.scroller.scrollTo(i);
+  this.menu[i].scroller.scrollTo(j);
   
   if (entry.entity?.name == NAME.offshorePump) {
     this.ui.gameMapInput.setOffshorePumpMode(entry.entity);
@@ -252,15 +341,17 @@ UiBuildMenu.prototype.setSelectedEntry = function(entry) {
 };
 
 UiBuildMenu.prototype.getSelectedEntry = function() {
-  return this.menu[this.selectedIndex];
+  return this.selectedEntry;
 };
 
 UiBuildMenu.prototype.trySelectEntry = function(name) {
   if (!name) return;
-  for (let entry of this.menu) {
-    if (entry.entity?.name == name || entry.tool == name) {
-      this.setSelectedEntry(entry);
-      break;
+  for (let group of this.menu) {
+    for (let entry of group.entries) {
+      if (entry.entity?.name == name || entry.tool == name) {
+        this.setSelectedEntry(entry);
+        break;
+      }
     }
   }
 };
@@ -274,26 +365,26 @@ UiBuildMenu.prototype.reset = function() {
 };
 
 const DECELERATION = 50;
-const DRAG_PX_PER_ITEM = 60;
 
-function Scroller(size, initialValue) {
+function Scroller(size, itemLength, initialValue) {
   this.size = size;
   this.pos = initialValue;
   this.lastPos = 0;
   this.velocity = 0;
   this.isDragging = false;
   this.dragStart = 0;
+  this.itemLength = itemLength;
 }
 
 Scroller.prototype.startDrag = function(clientX) {
   this.isDragging = true;
   this.dragStart = clientX +
-      this.pos * DRAG_PX_PER_ITEM;
+      this.pos * this.itemLength;
 };
 
 Scroller.prototype.moveDrag = function(clientX) {
   this.pos = Math.max(0, Math.min(this.size - 1,
-    (this.dragStart - clientX) / DRAG_PX_PER_ITEM));
+    (this.dragStart - clientX) / this.itemLength));
 };
 
 Scroller.prototype.endDrag = function() {
@@ -325,12 +416,11 @@ Scroller.prototype.update = function(dt) {
       this.velocity -= Math.sign(this.velocity) * DECELERATION * dt / 1000;
     }
   }
-  if (this.pos == this.lastPos) return false;
+  if (this.pos == this.lastPos) return;
   if (this.isDragging) {
     this.velocity = (this.pos - this.lastPos) / (dt / 1000);
   }
   this.lastPos = this.pos;
-  return true;
 };
 
 export {UiBuildMenu};

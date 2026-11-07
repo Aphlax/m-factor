@@ -929,9 +929,8 @@ GameMap.prototype.createSmoke = function(type, x, y, time, duration) {
   if (!this.chunks.has(cx)) return;
   const cy = Math.floor(y / SIZE);
   if (!this.chunks.get(cx).has(cy)) return;
-  let count = Math.floor(duration / 200);
-  if (type != SMOKE_TYPE.smoke) count -= Math.floor(count / 4);
-  if (type == SMOKE_TYPE.steam) count -= 1;
+  const cadence = type == SMOKE_TYPE.smoke ? 200 : 330;
+  let count = Math.floor(duration / cadence);
   if (!count && time % 200 < duration) count++;
   for (let i = 0; i < count; i++) {
     let p;
@@ -960,17 +959,17 @@ GameMap.prototype.createSmoke = function(type, x, y, time, duration) {
       p.yEnd = y - 7 - 5 * Math.random();
       p.sizeStart = 0.3 + 0.09 * Math.random();
       p.sizeEnd = 0.6 + 0.4 * Math.random();
-      p.alphaStart = 0.5;
+      p.alphaStart = 0.45;
     } else if (type == SMOKE_TYPE.steamSmall) {
       p.sprite = S.cloud;
       p.animationLength = 45;
       p.xStart = x - 0.25;
       p.yStart = y + 0.01;
       p.xEnd = x + 1 + 0.5 * Math.random();
-      p.yEnd = y - 4.5 - 1.1 * Math.random();
+      p.yEnd = y - 3.5 - 1.1 * Math.random();
       p.sizeStart = 0.07 + 0.02 * Math.random();
       p.sizeEnd = 0.4 + 0.2 * Math.random();
-      p.alphaStart = 0.4;
+      p.alphaStart = 0.35;
     }
     p.move = 1;
     p.startTime = time + i * duration / count;
@@ -978,7 +977,7 @@ GameMap.prototype.createSmoke = function(type, x, y, time, duration) {
     p.duration = (d + 25) / 55 * 4000;
     p.alphaEnd = 0.05;
     p.animation = Math.floor(60 * Math.random());
-    p.animationSpeed = 0.6;
+    p.animationSpeed = 0.7;
     
     this.chunks.get(cx).get(cy).particles.push(p);
   }

@@ -1786,9 +1786,9 @@ export const ENTITIES = new Map([
     smokeType: SMOKE_TYPE.steam,
     smokePosition: {
       [north]: {x: 1.6, y: 0.9},
-      [east]: {x: 3.2, y: 0.3},
+      [east]: {x: 3.2, y: 0.1},
       [south]: {x: 1.6, y: 0.9},
-      [west]: {x: 3.2, y: 0.3},
+      [west]: {x: 3.2, y: 0.1},
     },
   }],
   
