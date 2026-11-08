@@ -291,7 +291,7 @@ UiSplitterPriority.prototype.draw = function(ctx, time) {
         x + 70 + 164 + 4, y + 5, 32, 32);
     window.numberImageDraws++;
   }
-}
+};
 
 UiSplitterPriority.prototype.touchStart = function(e) {
   if (!this.entity) return;
@@ -333,7 +333,7 @@ UiSplitterPriority.prototype.touchEnd = function(e) {
   }
   this.pressed = 0;
   navigator.vibrate(SHORT_VIBRATE);
-}
+};
 
 function UiInserterFilters(parent, x, y) {
   this.parent = parent;
@@ -397,7 +397,7 @@ UiInserterFilters.prototype.draw = function(ctx, time) {
       window.numberImageDraws++;
     }
   }
-}
+};
 
 UiInserterFilters.prototype.touchStart = function(e) {
   if (!this.entity) return;
@@ -443,7 +443,7 @@ UiInserterFilters.prototype.touchEnd = function(e) {
       CHOICE.inserterItemFilter, this.entity, this.pressed - 3);
   this.pressed = 0;
   navigator.vibrate(SHORT_VIBRATE);
-}
+};
 
 function UiTemperature(parent, x, y) {
   this.parent = parent;
@@ -561,15 +561,22 @@ UiTree.prototype.touchEnd = function(e) {
     this.parent.set();
   }
   navigator.vibrate(SHORT_VIBRATE);
-}
+};
 
 function UiNotImplemented(parent, x, y) {
   this.parent = parent;
   this.x = x;
   this.y = y;
+  
+  this.visible = true;
 }
 
+UiNotImplemented.prototype.set = function(visible) {
+  this.visible = visible;
+};
+
 UiNotImplemented.prototype.draw = function(ctx, time) {
+  if (!this.visible) return;
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
   

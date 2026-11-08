@@ -3,7 +3,7 @@ import {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, Ui
 import {UiButton, BUTTON} from './ui-button.js';
 import {UiChoice, CHOICE} from './ui-choice.js';
 import {COLOR} from './ui-properties.js';
-import {TYPE, RESOURCE_LABELS, ENERGY, NATURAL} from './entity-properties.js';
+import {TYPE, NAME, RESOURCE_LABELS, ENERGY, NATURAL} from './entity-properties.js';
 import {S} from './sprite-pool.js';
 import {SETTINGS} from './storage.js';
 
@@ -276,6 +276,7 @@ UiWindow.prototype.initialize = function() {
     filters: new UiInserterFilters(this, 10, 40),
     filterChoice: new UiChoice(this, this.canvasWidth + 10, 40)
         .setWidth(this.canvasWidth - 20),
+    notImplemented: new UiNotImplemented(this, 10, 86),
   });
   
   this.entityUis.set(TYPE.pipeToGround, {
@@ -474,6 +475,7 @@ UiWindow.prototype.set = function(entity) {
     ui.priority.set(entity);
   } else if (entity.type == TYPE.inserter) {
     ui.filters.set(entity);
+    ui.notImplemented.set(entity.name == NAME.bulkInserter)
   } else if (entity.type == TYPE.rocketSilo) {
     const {recipe, science} = entity.data;
     ui.input.set(entity.inputInventory)

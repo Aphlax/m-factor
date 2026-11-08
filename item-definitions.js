@@ -117,6 +117,7 @@ export const I = {
   heatPipe: 162,
   heatExchanger: 163,
   steamTurbine: 164,
+  bulkInserter: 165,
   
   speedModule: 200,
   speedModule2: 201,
@@ -797,6 +798,12 @@ export const ITEMS = new Map([
     sprite: S.steamTurbineItem,
     stackSize: 10,
     prototypeName: "steam-turbine",
+  }],
+  [I.bulkInserter,
+  {
+    sprite: S.bulkInserterItem,
+    stackSize: 50,
+    prototypeName: "bulk-inserter",
   }],
   
   

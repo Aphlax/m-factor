@@ -101,6 +101,7 @@ export const NAME = {
   heatPipe: 62,
   heatExchanger: 63,
   steamTurbine: 64,
+  bulkInserter: 65,
 };
 
 /** Never value for next update. 285 years from now. */

@@ -1563,7 +1563,20 @@ export const RECIPES = [
     entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
     duration: 3000,
   },
-  
+  {
+    prototypeName: "bulk-inserter",
+    inputs: [
+      {item: I.advancedCircuit, amount: 1},
+      {item: I.electronicCircuit, amount: 15},
+      {item: I.fastInserter, amount: 1},
+      {item: I.ironGear, amount: 15},
+    ],
+    outputs: [
+      {item: I.bulkInserter, amount: 1},
+    ],
+    entities: [NAME.assemblingMachine1, NAME.assemblingMachine2, NAME.assemblingMachine3],
+    duration: 500,
+  },
   
   
   

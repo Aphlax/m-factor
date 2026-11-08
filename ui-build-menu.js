@@ -39,6 +39,7 @@ const BUILD_MENU = [
     NAME.inserter,
     NAME.fastInserter,
     NAME.longHandedInserter,
+    NAME.bulkInserter,
   ], [
     NAME.accumulator,
     NAME.solarPanel,
@@ -64,11 +65,11 @@ const BUILD_MENU = [
   ], [
     NAME.burnerDrill,
     NAME.electricMiningDrill,
-    NAME.offshorePump,
-    NAME.pumpjack,
     NAME.stoneFurnace,
     NAME.steelFurnace,
     NAME.electricFurnace,
+    NAME.offshorePump,
+    NAME.pumpjack,
   ], [
     NAME.rail,
     NAME.trainStop,
@@ -231,7 +232,9 @@ UiBuildMenu.prototype.touchMove = function(e, longTouch) {
       this.scroller.startDrag(this.dragStartX);
       this.dragX = true;
     }
-    if (this.scrollingGroup == -1 && dy > 10 + 0.1 * dx) {
+    if (this.scrollingGroup == -1 &&
+        dy > 10 + 0.05 * dx &&
+        Math.abs(this.scroller.velocity) < 2) {
       if (this.dragX && dx > 50) {
         this.scrollingGroup = Math.round(this.scroller.pos);
       } else {

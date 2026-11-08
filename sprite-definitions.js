@@ -457,6 +457,8 @@ export const S = {
   steamTurbineShadowH: 18267, // 8
   steamTurbineV: 18275, // 8
   steamTurbineShadowV: 18283, // 8
+  bulkInserter: 18291, // 4
+  bulkInserterHand: 18295, // 3
   
   // Items
   ironOreItem: 16000,
@@ -604,6 +606,7 @@ export const S = {
   heatPipeItem: 16169,
   heatExchangerItem: 16170,
   steamTurbineItem: 16171,
+  bulkInserterItem: 16172,
   
   
   gearIcon: 16500,
@@ -696,6 +699,7 @@ export const S = {
   steamTurbineIcon: 16587,
   notImplIcon: 16588,
   temperatureIcon: 16589,
+  bulkInserterIcon: 16590,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -1256,7 +1260,7 @@ export const SPRITES = [
   },
   {
     path: "graphics/entities/electric-furnace/electric-furnace-base.png",
-    sprites: entitySprites(S.electricFurnaceIdle, 129, 100, 1, 1, 1, 32, 1, 3, true),
+    sprites: entitySprites(S.electricFurnaceIdle, 129, 100, 1, 1, 1, 32, 2, 2, true),
   },
   {
     path: "graphics/entities/electric-furnace/electric-furnace-working.png",
@@ -2091,7 +2095,22 @@ export const SPRITES = [
     path: "graphics/entities/steam-turbine/steam-turbine-V-shadow.png",
     sprites: entitySprites(S.steamTurbineShadowV, 151, 131, 4, 2, -9, 64, -29, 0, true),
   },
-  
+  {
+    path: "graphics/entities/bulk-inserter/bulk-inserter-platform.png",
+    sprites: entitySprites(S.bulkInserter, 46, 46, 4, 1, 5, 9, 5, 9),
+  },
+  {
+    path: "graphics/entities/bulk-inserter/bulk-inserter-hand-base.png",
+    sprites: entitySprites(S.bulkInserterHand, 8, 34, 1, 1, -12, -12, 1, 1),
+  },
+  {
+    path: "graphics/entities/bulk-inserter/bulk-inserter-hand-open.png",
+    sprites: entitySprites(S.bulkInserterHand + 1, 32, 41, 1, 1, 0, 0, 0, 9),
+  },
+  {
+    path: "graphics/entities/bulk-inserter/bulk-inserter-hand-closed.png",
+    sprites: entitySprites(S.bulkInserterHand + 2, 24, 41, 1, 1, -4, -4, 0, 9),
+  },
   
   
   
@@ -2674,7 +2693,10 @@ export const SPRITES = [
     path: "graphics/items/steam-turbine.png",
     sprites: itemSprites(S.steamTurbineItem, S.steamTurbineIcon),
   },
-  
+  {
+    path: "graphics/items/bulk-inserter.png",
+    sprites: itemSprites(S.bulkInserterItem, S.bulkInserterIcon),
+  },
   
   
   

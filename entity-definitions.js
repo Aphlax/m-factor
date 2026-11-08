@@ -1791,6 +1791,32 @@ export const ENTITIES = new Map([
       [west]: {x: 3.2, y: 0.1},
     },
   }],
+  [NAME.bulkInserter,
+  {
+    label: 'Bulk Inserter',
+    prototypeName: "bulk-inserter",
+    type: TYPE.inserter,
+    width: 1,
+    height: 1,
+    rotatable: true,
+    icon: S.bulkInserterIcon,
+    sprites: {
+      [north]: [S.bulkInserter],
+      [east]: [S.bulkInserter + 1],
+      [south]: [S.bulkInserter + 2],
+      [west]: [S.bulkInserter + 3],
+    },
+    animationLength: 0,
+    mapColor: "#006094",
+    energySource: ENERGY.electric,
+    energyDrain: 1, // kW
+    energyConsumption: 170, // kW
+    
+    inserterReach: 1,
+    inserterHandSize: 2,
+    inserterHandSprites: S.bulkInserterHand,
+    taskDuration: 200,
+  }],
   
 ]);
 
