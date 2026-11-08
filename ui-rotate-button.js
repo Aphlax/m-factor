@@ -1,5 +1,6 @@
-import {COLOR} from './ui-properties.js';
+import {COLOR, SHORT_VIBRATE} from './ui-properties.js';
 import {DIRECTION} from './entity-properties.js';
+
 
 function UiRotateButton(ui, canvas) {
   this.ui = ui;
@@ -54,10 +55,14 @@ UiRotateButton.prototype.touchLong = function(e) {
 
 UiRotateButton.prototype.setDirectionFromTouch = function(t) {
   const dx = t.clientX - this.x, dy = t.clientY - this.y;
+  const oldDirection = this.direction;
   if (Math.abs(dx) > Math.abs(dy)) {
     this.direction = dx > 0 ? DIRECTION.east : DIRECTION.west;
   } else {
     this.direction = dy > 0 ? DIRECTION.south : DIRECTION.north;
+  }
+  if (oldDirection != this.direction) {
+    navigator.vibrate(SHORT_VIBRATE);
   }
 };
 

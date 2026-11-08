@@ -131,10 +131,6 @@ GameUi.prototype.touchStart = function(e) {
     }
   }
   if (this.mode == MODE.none) {
-    if (e.touches[0].clientX < 120 && e.touches[0].clientY < 60) {
-      this.game.loadMap(new GameMap(Math.floor(Math.random() * 1000), MAP.nauvis)
-          .setViewFromCanvas(canvas));
-    }
     if (e.touches[0].clientY >= this.window.y) {
       this.mode = MODE.window;
     } else if (this.buildMenu.inBounds(e.touches[0])) {

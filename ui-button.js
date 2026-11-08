@@ -1,4 +1,4 @@
-import {COLOR} from './ui-properties.js';
+import {COLOR, SHORT_VIBRATE} from './ui-properties.js';
 import {SPRITES} from './sprite-pool.js';
 import {CHOICE} from './ui-choice.js';
 import {TYPE, STATE} from './entity-properties.js';
@@ -92,13 +92,16 @@ UiButton.prototype.touchEnd = function(e) {
   if (this.name == BUTTON.assemblerRecipe) {
     this.parent.entityUi.recipeChoice.openChoice(
         CHOICE.assemblerRecipe, this.parent.selectedEntity);
+    navigator.vibrate(SHORT_VIBRATE);
   } else if (this.name == BUTTON.deleteEntity) {
     this.parent.ui.game.gameMap.deleteEntity(
         this.parent.selectedEntity,
         this.parent.ui.game.playTime);
     this.parent.set();
+    navigator.vibrate(SHORT_VIBRATE);
   } else if (this.name == BUTTON.gameMenu) {
     this.parent.ui.game.openMenu();
+    navigator.vibrate(SHORT_VIBRATE);
   } else if (this.name == BUTTON.windUp) {
     const entity = this.parent.selectedEntity;
     entity.energyStored += Math.round(1 / entity.energyConsumption);
@@ -110,12 +113,15 @@ UiButton.prototype.touchEnd = function(e) {
     if (entity.state == STATE.noEnergy) {
       entity.nextUpdate = this.parent.ui.game.playTime;
     }
+    navigator.vibrate(SHORT_VIBRATE);
   } else if (this.name == BUTTON.snakeBelt) {
     const entity = this.parent.selectedEntity;
     this.parent.ui.gameMapInput.setSnakeBeltMode(entity);
+    navigator.vibrate(SHORT_VIBRATE);
   } else if (this.name == BUTTON.connectUnderground) {
     const entity = this.parent.selectedEntity;
     this.parent.ui.gameMapInput.setUndergroundExitMode(entity);
+    navigator.vibrate(SHORT_VIBRATE);
   }
 };
 

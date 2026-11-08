@@ -1,7 +1,7 @@
 import {ENTITIES} from './entity-definitions.js';
 import {COLOR as ENTITY_COLOR, DIRECTIONS, NATURAL} from './entity-properties.js';
 import {SPRITES, S} from './sprite-pool.js';
-import {TOOL, COLOR} from './ui-properties.js';
+import {TOOL, COLOR, SHORT_VIBRATE} from './ui-properties.js';
 import {GMC} from './game-map-converter.js';
 
 const CLIPBOARD = {
@@ -47,6 +47,9 @@ SelectionTool.prototype.initialize = function(sx, sy, type, drag) {
   this.mode = drag ? SELECTION_MODE.drag : SELECTION_MODE.sit;
   this.type = type;
   this.computeEntities();
+  if (!drag) {
+    navigator.vibrate(SHORT_VIBRATE);
+  }
   return this;
 };
 
@@ -147,27 +150,42 @@ SelectionTool.prototype.touchMove = function(sx, sy) {
     const x = Math.floor((sx + this.view.x) / this.view.scale);
     const y = Math.floor((sy + this.view.y) / this.view.scale);
     if (this.mode == SELECTION_MODE.drag) {
-      this.x2 = x
-      this.y2 = y
+      if (this.x2 != x || this.y2 != y) {
+        navigator.vibrate(SHORT_VIBRATE);
+      }
+      this.x2 = x;
+      this.y2 = y;
     }
     if (this.mode == SELECTION_MODE.diagonalDrag + 0 ||
         this.mode == SELECTION_MODE.diagonalDrag + 3 ||
         this.mode == SELECTION_MODE.sideDrag + 0) {
+      if (Math.min(this.y2, y) != this.y1) {
+        navigator.vibrate(SHORT_VIBRATE);
+      }
       this.y1 = Math.min(this.y2, y);
     }
     if (this.mode == SELECTION_MODE.diagonalDrag + 0 ||
         this.mode == SELECTION_MODE.diagonalDrag + 1 ||
         this.mode == SELECTION_MODE.sideDrag + 1) {
+      if (Math.max(this.x1, x) != this.x2) {
+        navigator.vibrate(SHORT_VIBRATE);
+      }
       this.x2 = Math.max(this.x1, x);
     }
     if (this.mode == SELECTION_MODE.diagonalDrag + 1 ||
         this.mode == SELECTION_MODE.diagonalDrag + 2 ||
         this.mode == SELECTION_MODE.sideDrag + 2) {
+      if (Math.max(this.y1, y) != this.y2) {
+        navigator.vibrate(SHORT_VIBRATE);
+      }
       this.y2 = Math.max(this.y1, y);
     }
     if (this.mode == SELECTION_MODE.diagonalDrag + 2 ||
         this.mode == SELECTION_MODE.diagonalDrag + 3 ||
         this.mode == SELECTION_MODE.sideDrag + 3) {
+      if (Math.min(this.x2, x) != this.x1) {
+        navigator.vibrate(SHORT_VIBRATE);
+      }
       this.x1 = Math.min(this.x2, x);
     }
     this.computeEntities();
@@ -191,12 +209,14 @@ SelectionTool.prototype.touchEnd = function(sx, sy, shortTouch, last) {
       }
       CLIPBOARD.value = entities;
       this.ui.buildMenu.trySelectEntry(TOOL.paste);
+      navigator.vibrate(SHORT_VIBRATE);
       return this.ui.gameMapInput.pasteTool;
     } else if (this.type == SELECTION_TYPE.bulldoze) {
       this.gameMap.deleteEntities(this.entities.filter(e => e.type));
       for (let tree of this.entities.filter(e => !e.type)) {
         this.gameMap.getTreeAt(tree.x, tree.y, /*remove*/ true);
       }
+      navigator.vibrate(SHORT_VIBRATE);
       return;
     }
   } else if (this.mode == SELECTION_MODE.sit) {
@@ -480,6 +500,7 @@ PasteTool.prototype.touchMove = function(sx, sy) {
     if (x == this.x && y == this.y) return;
     this.x = x; this.y = y;
     this.computeEntityState();
+    navigator.vibrate(SHORT_VIBRATE);
   } else if (this.mode == PASTE_MODE.adjust) {
     const dx = sx - this.lastX,
         dy = sy - this.lastY;
@@ -494,6 +515,7 @@ PasteTool.prototype.touchMove = function(sx, sy) {
       this.y += dy > 0 ? 1 : -1;
     }
     this.computeEntityState();
+    navigator.vibrate(SHORT_VIBRATE);
   }
 };
 
@@ -510,6 +532,7 @@ PasteTool.prototype.touchEnd = function(sx, sy, shortTouch, last) {
       const dx = Math.floor(this.x - this.width / 2),
           dy = Math.floor(this.y - this.height / 2);
       this.gameMap.createEntities(entities, dx, dy);
+      navigator.vibrate(SHORT_VIBRATE);
       this.pressedButton = 0;
       this.ui.buildMenu.reset();
       return;

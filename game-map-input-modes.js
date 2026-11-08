@@ -1,7 +1,6 @@
 import {TYPE, DIRECTION, DIRECTIONS, COLOR as ENTITY_COLOR, ENERGY} from './entity-properties.js';
 import {S, SPRITES} from './sprite-pool.js';
-import {COLOR} from './ui-properties.js';
-
+import {COLOR, SHORT_VIBRATE} from './ui-properties.js';
 
 function MultiBuild(ui) {
   this.ui = ui;
@@ -41,15 +40,22 @@ MultiBuild.prototype.touchMove = function(sx, sy) {
       this.entity;
   const diffX = x - this.x - width / 2,
       diffY = y - this.y - height / 2;
+  let dir, len;
   if (Math.abs(diffX) < Math.abs(diffY)) {
-    this.direction = diffY < 0 ?
+    dir = diffY < 0 ?
         DIRECTION.north : DIRECTION.south;
-    this.length = Math.round(Math.abs(diffY / height) + 1);
+    len = Math.round(Math.abs(diffY / height) + 1);
   } else {
-    this.direction = diffX > 0 ?
+    dir = diffX > 0 ?
         DIRECTION.east : DIRECTION.west;
-    this.length = Math.round(Math.abs(diffX / width) + 1);
+    len = Math.round(Math.abs(diffX / width) + 1);
   }
+  if (dir == this.direction && len == this.length)
+    return;
+  this.direction = dir;
+  this.length = len;
+  if (this.length == 1 && len == 1) return;
+  navigator.vibrate(SHORT_VIBRATE);
 };
 
 MultiBuild.prototype.touchEnd = function(sx, sy, shortTouch, last) {
@@ -70,6 +76,7 @@ MultiBuild.prototype.touchEnd = function(sx, sy, shortTouch, last) {
         name: this.entity.name});
   }
   this.gameMap.createEntities(entities);
+  navigator.vibrate(SHORT_VIBRATE);
 };
 
 MultiBuild.prototype.draw = function(ctx) {
@@ -152,6 +159,10 @@ BeltDrag.prototype.touchMove = function(sx, sy) {
       break;
     }
   }
+  if (oldDirection == this.direction && oldLength == this.length)
+    return;
+  if (this.length == 1 && oldLength == 1) return;
+  navigator.vibrate(SHORT_VIBRATE);
 };
 
 BeltDrag.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
@@ -167,6 +178,7 @@ BeltDrag.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
         direction: this.direction});
   }
   this.gameMap.createEntities(entities);
+  navigator.vibrate(SHORT_VIBRATE);
 };
 
 BeltDrag.prototype.draw = function(ctx) {
@@ -286,6 +298,7 @@ SnakeBelt.prototype.touchMove = function(sx, sy) {
     this.nodes.push(new Node(last.x + dx * last.length,
         last.y + dy * last.length, dir));
   }
+  navigator.vibrate(SHORT_VIBRATE);
 };
 
 SnakeBelt.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
@@ -319,6 +332,7 @@ SnakeBelt.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
     }
   }
   this.gameMap.createEntities(entities);
+  navigator.vibrate(SHORT_VIBRATE);
 };
 
 SnakeBelt.prototype.draw = function(ctx) {
@@ -493,7 +507,7 @@ UndergroundChain.prototype.touchMove = function(sx, sy) {
     for (let i = step; i >= 0; i--) {
       if (current + i == this.length) {
         this.gaps.push(i);
-        return;
+        break outer;
       }
       if (this.placeable[current + i] && this.placeable[current + i + 1]) {
         this.gaps.push(i);
@@ -504,6 +518,10 @@ UndergroundChain.prototype.touchMove = function(sx, sy) {
     this.gaps.push(step);
     current += step + 2;
   }
+  if (oldDirection == this.direction && oldLength == this.length)
+    return;
+  if (oldLength == 1 && this.length == 1) return;
+  navigator.vibrate(SHORT_VIBRATE);
 };
 
 UndergroundChain.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
@@ -535,6 +553,7 @@ UndergroundChain.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
     current += 2;
   }
   this.gameMap.createEntities(entities);
+  navigator.vibrate(SHORT_VIBRATE);
 };
 
 UndergroundChain.prototype.draw = function(ctx) {
@@ -633,6 +652,7 @@ UndergroundExit.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
       this.gameMap.createEntity({
         name: this.entity.name,
         x, y, direction, data});
+      navigator.vibrate(SHORT_VIBRATE);
     }
   }
 };
@@ -721,6 +741,10 @@ InserterDrag.prototype.touchMove = function(sx, sy) {
     this.output = output;
     this.positions.push(i);
   }
+  if (oldDirection == this.direction && oldLength == this.length)
+    return;
+  if (oldLength == 1 && this.length == 1) return;
+  navigator.vibrate(SHORT_VIBRATE);
 };
 
 InserterDrag.prototype.touchEnd = function(sx, sy, shortTouch, last) {
@@ -738,6 +762,7 @@ InserterDrag.prototype.touchEnd = function(sx, sy, shortTouch, last) {
         direction: this.inserterDirection});
   }
   this.gameMap.createEntities(entities);
+  navigator.vibrate(SHORT_VIBRATE);
 };
 
 InserterDrag.prototype.draw = function(ctx) {
@@ -818,6 +843,7 @@ PowerPoleDrag.prototype.touchMove = function(sx, sy) {
           continue outer;
       }
       this.positions.push({x, y});
+      navigator.vibrate(SHORT_VIBRATE);
       break;
     }
   }
@@ -833,6 +859,7 @@ PowerPoleDrag.prototype.touchEnd = function(sx, sy, shortTouch, last) {
         {name: this.entity.name, x, y, direction: 0});
   }
   this.gameMap.createEntities(entities);
+  navigator.vibrate(SHORT_VIBRATE);
 };
 
 PowerPoleDrag.prototype.draw = function(ctx) {
@@ -918,6 +945,7 @@ GridDrag.prototype.touchMove = function(sx, sy) {
   if (this.points.length > 1 &&
       (dir + 2) % 4 == last.direction) {
     this.points.pop();
+    navigator.vibrate(SHORT_VIBRATE);
     return;
   }
   const {x, y} = last, {dx, dy} = DIRECTIONS[dir];
@@ -954,9 +982,11 @@ GridDrag.prototype.touchMove = function(sx, sy) {
         this.entity.width, this.entity.height))
       continue;
     this.points.push(new Point(x + dx * dist, y + dy * dist, dir));
+    navigator.vibrate(SHORT_VIBRATE);
     return;
   }
   this.points.push(new Point(x2, y2, dir, false));
+  navigator.vibrate(SHORT_VIBRATE);
 };
 
 GridDrag.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
@@ -980,6 +1010,7 @@ GridDrag.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
         {name: this.entity.name, x, y, direction: 0});
   }
   this.gameMap.createEntities(entities);
+  navigator.vibrate(SHORT_VIBRATE);
 };
 
 GridDrag.prototype.draw = function(ctx) {
@@ -1078,6 +1109,7 @@ OffshorePump.prototype.touchEnd = function(sx, sy, shortTouch, lastTouch) {
     this.gameMap.createEntity({
         name: this.entity.name,
         x, y, direction});
+    navigator.vibrate(SHORT_VIBRATE);
     return this;
   } else {
     this.ui.buildMenu.reset();

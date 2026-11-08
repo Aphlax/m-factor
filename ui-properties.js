@@ -5,6 +5,8 @@ export const TOOL = {
   bulldoze: -3,
 };
 
+export const SHORT_VIBRATE = 1;
+
 export const COLOR = {
   background1: "#333335",
   background2: "#373739",

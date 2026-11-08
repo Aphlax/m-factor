@@ -1,4 +1,4 @@
-import {COLOR, TOOL} from './ui-properties.js';
+import {COLOR, TOOL, SHORT_VIBRATE} from './ui-properties.js';
 import {S, SPRITES} from './sprite-pool.js';
 import {NAME} from './entity-properties.js';
 import {ENTITIES} from './entity-definitions.js';
@@ -92,7 +92,7 @@ const BUILD_MENU = [
 ];
 
 /*
-  create blueprint, copy, paste, delete, upgrade, downgrade 6
+  create blueprint, copy, paste, delete, undo, redo 6
   chests, logistic chests, roboport 9
   belts, splitters, underground 9
   inserters 4
@@ -207,16 +207,7 @@ UiBuildMenu.prototype.draw = function(ctx) {
       window.numberImageDraws++;
     }
   }
-  ctx.beginPath();
-  ctx.moveTo(0, this.canvasHeight - 30);
-  ctx.lineTo(this.canvasWidth / 2 - 45, this.canvasHeight - 180);
-  ctx.lineTo(this.canvasWidth / 2 + 45, this.canvasHeight - 180);
-  ctx.lineTo(this.canvasWidth, this.canvasHeight - 30);
-  ctx.strokeStyle = COLOR.buildBorder;
-  ctx.lineWidth = 1;
   ctx.globalAlpha = 1;
-  ctx.stroke();
-  window.numberOtherDraws++;
 };
 
 UiBuildMenu.prototype.inBounds = function(t) {
@@ -244,7 +235,7 @@ UiBuildMenu.prototype.touchMove = function(e, longTouch) {
       if (this.dragX && dx > 50) {
         this.scrollingGroup = Math.round(this.scroller.pos);
       } else {
-        let minDist = 1000;
+        let minDist = 10000;
         for (let i = 0; i < this.menu.length; i++) {
           const d = Math.abs(e.touches[0].clientX - this.menu[i].x);
           if (d < minDist) {
@@ -265,12 +256,14 @@ UiBuildMenu.prototype.touchMove = function(e, longTouch) {
 };
 
 UiBuildMenu.prototype.touchEnd = function(e, shortTouch) {
-  if (this.dragX) this.scroller.endDrag();
+  if (this.dragX) {
+    this.scroller.endDrag();
+    this.dragX = false;
+  }
   if (this.scrollingGroup != -1) {
     this.menu[this.scrollingGroup].scroller.endDrag();
+    this.scrollingGroup = -1;
   }
-  this.dragX = false;
-  this.scrollingGroup = -1;
   if (!shortTouch) return;
   const t = e.changedTouches[0];
   let entry = undefined;
@@ -285,11 +278,13 @@ UiBuildMenu.prototype.touchEnd = function(e, shortTouch) {
       entry = group.entries[j];
     }
   }
+  if (!entry) return;
   if (this.selectedEntry == entry) {
     this.setSelectedEntry();
-    return;
+  } else {
+    this.setSelectedEntry(entry);
   }
-  this.setSelectedEntry(entry);
+  navigator.vibrate(SHORT_VIBRATE);
 };
 
 UiBuildMenu.prototype.touchLong = function(e) {

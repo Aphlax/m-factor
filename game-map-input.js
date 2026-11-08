@@ -1,12 +1,12 @@
 import {TYPE, DIRECTION, DIRECTIONS} from './entity-properties.js';
-import {COLOR, TOOL} from './ui-properties.js';
+import {COLOR, TOOL, SHORT_VIBRATE} from './ui-properties.js';
 import {S} from './sprite-pool.js';
 import {BeltDrag, MultiBuild, SnakeBelt, UndergroundChain, UndergroundExit, InserterDrag, PowerPoleDrag, GridDrag, OffshorePump} from './game-map-input-modes.js';
 import {SelectionTool, SELECTION_TYPE, PasteTool} from './game-map-input-tools.js';
 import {SETTINGS} from './storage.js';
 
 
-const MIN_SCALE = 1;
+const MIN_SCALE = 0.5;
 const MINIMAP_SCALE_BOUNDRY = 4;
 const MAP_SCALE_BOUNDRY = 16;
 const MAX_SCALE = 32;
@@ -138,10 +138,12 @@ GameMapInput.prototype.touchEnd = function(e, shortTouch) {
       if (entry) {
         this.ui.buildMenu.reset();
       }
+      navigator.vibrate(SHORT_VIBRATE);
     } else if (entry?.entity) {
       const d = this.ui.rotateButton.direction;
       const entity = this.gameMap.tryCreateEntityFromScreen(
           sx, sy, d, entry.entity);
+      navigator.vibrate(SHORT_VIBRATE);
       if (entity?.type == TYPE.undergroundBelt &&
           !entity.data.undergroundUp &&
           !entity.data.beltOutput) {
@@ -168,11 +170,12 @@ GameMapInput.prototype.touchLong = function(e) {
     this.current.touchLong?.(sx, sy);
   } else {
     const entry = this.ui.buildMenu.getSelectedEntry();
-    if (!entry) {
-      const entity = this.gameMap.getSelectedEntity(sx, sy);
+    const entity = this.gameMap.getSelectedEntity(sx, sy);
+    if ((entity && !entry?.tool) || !entry) {
       if (entity?.type) {
         this.ui.window.set();
         this.ui.buildMenu.trySelectEntry(entity.name);
+        this.ui.rotateButton.direction = entity.direction % 4;
       }
     } else if (entry.entity) {
       const entity = entry.entity;

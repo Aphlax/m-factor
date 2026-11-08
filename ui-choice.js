@@ -1,4 +1,4 @@
-import {COLOR} from './ui-properties.js';
+import {COLOR, SHORT_VIBRATE} from './ui-properties.js';
 import {RECIPES} from './recipe-definitions.js';
 import {ITEMS, FLUIDS, FLUID_START, FLUID_END} from './item-definitions.js';
 import {SPRITES, S} from './sprite-pool.js';
@@ -189,6 +189,7 @@ UiChoice.prototype.touchEnd = function(e) {
   this.parent.x = -this.parent.canvasWidth;
   
   this.pressedIndex = -1;
+  navigator.vibrate(SHORT_VIBRATE);
 };
 
 UiChoice.prototype.touchLong = function(e) {

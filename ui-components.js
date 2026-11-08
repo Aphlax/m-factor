@@ -1,4 +1,4 @@
-import {COLOR} from './ui-properties.js';
+import {COLOR, SHORT_VIBRATE} from './ui-properties.js';
 import {STATE, RESOURCE_NAMES} from './entity-properties.js';
 import {SPRITES, S} from './sprite-pool.js';
 import {CHOICE} from './ui-choice.js';
@@ -322,8 +322,6 @@ UiSplitterPriority.prototype.touchEnd = function(e) {
   if (this.pressed == 7) {
     this.parent.entityUi.filterChoice.openChoice(
         CHOICE.splitterItemFilter, this.entity);
-    this.pressed = 0;
-    return;
   } else if (this.pressed <= 3) {
     this.entity.data.outputPriority = this.pressed - 2;
     if (this.entity.data.itemFilter &&
@@ -334,6 +332,7 @@ UiSplitterPriority.prototype.touchEnd = function(e) {
     this.entity.data.inputPriority = this.pressed - 5;
   }
   this.pressed = 0;
+  navigator.vibrate(SHORT_VIBRATE);
 }
 
 function UiInserterFilters(parent, x, y) {
@@ -434,6 +433,7 @@ UiInserterFilters.prototype.touchEnd = function(e) {
       this.entity.nextUpdate =
           this.parent.ui.game.playTime;
     }
+    navigator.vibrate(SHORT_VIBRATE);
     return;
   }
   if (this.entity.data.filterMode === undefined) {
@@ -442,6 +442,7 @@ UiInserterFilters.prototype.touchEnd = function(e) {
   this.parent.entityUi.filterChoice.openChoice(
       CHOICE.inserterItemFilter, this.entity, this.pressed - 3);
   this.pressed = 0;
+  navigator.vibrate(SHORT_VIBRATE);
 }
 
 function UiTemperature(parent, x, y) {
@@ -559,6 +560,7 @@ UiTree.prototype.touchEnd = function(e) {
         this.tree.x, this.tree.y, /*remove*/ true);
     this.parent.set();
   }
+  navigator.vibrate(SHORT_VIBRATE);
 }
 
 function UiNotImplemented(parent, x, y) {
