@@ -23,6 +23,7 @@ const LONG_TOUCH_DURATION = 400;
 
 function GameUi(game, canvas) {
   this.game = game;
+  this.world = undefined;
   this.gameMapInput = new GameMapInput(this);
   this.window = new UiWindow(this, canvas);
   this.window.initialize();
@@ -42,8 +43,9 @@ function GameUi(game, canvas) {
   this.shortTouch = false;
 }
 
-GameUi.prototype.setMap = function(gameMap) {
-  this.gameMapInput.set(gameMap);
+GameUi.prototype.setWorld = function(world) {
+  this.world = world;
+  this.gameMapInput.set(world.gameMap);
   this.buildMenu.reset();
   this.window.set();
   this.window.y = this.window.canvasHeight;
@@ -70,10 +72,10 @@ GameUi.prototype.update = function(time) {
   
   const dt = time - this.lastUpdate;
   this.lastUpdate = time;
-  this.window.update(time, dt);
-  this.buildMenu.update(time, dt);
-  if (this.game.gameMap.view.height != this.window.y) {
-    this.game.gameMap.view.height = this.window.y;
+  this.window.update(dt);
+  this.buildMenu.update(dt);
+  if (this.world.gameMap.view.height != this.window.y) {
+    this.world.gameMap.view.height = this.window.y;
   }
 };
 
@@ -99,7 +101,7 @@ GameUi.prototype.draw = function(ctx, time) {
   this.gameMapInput.draw(ctx);
   this.buildMenu.draw(ctx);
   this.rotateButton.draw(ctx);
-  this.window.draw(ctx, time);
+  this.window.draw(ctx, this.world.playTime);
   this.menuButton.draw(ctx);
   
   if (time < this.longTouchIndicator) {

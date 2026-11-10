@@ -91,7 +91,7 @@ it("loop behaves correctly", () => {
     assertEqual(b1.data.lane, b4.data.lane);
     assertEqual(b1.data.lane.circular, true);
     const b5 = map.createEntity(
-        r({name, x: 1, y: -1, ...south}));
+        r({name, x: 1, y: -1, ...south}), 0);
     assertEqual(b1.data.lane.circular, false);
     map.deleteEntity(b5, 0);
     assertEqual(b1.data.lane.circular, true);
@@ -151,7 +151,7 @@ it("considers underground gaps", () => {
     assertMatch(u1.data.lane.nodes,
         [{length: 4, gaps: [1, 2]}]);
     u4 = map.createEntity(
-        r({name, x: 0, y: 5, ...north, data: {undergroundUp: false}}));
+        r({name, x: 0, y: 5, ...north, data: {undergroundUp: false}}), 0);
     assertMatch(u1.data.lane.nodes,
         [{length: 6, gaps: [0, 2, 3, 2]}]);
     map.deleteEntity(u3, 0);
@@ -178,7 +178,7 @@ it("considers underground items", () => {
     assertMatch(b3.data.lane.minusFlow,
         new Array(4).fill([0, 1]).flat());
     u1 = map.createEntity(
-        r({name, x: 0, y: 0, ...north, data: {undergroundUp: true}}));
+        r({name, x: 0, y: 0, ...north, data: {undergroundUp: true}}), 0);
     assertMatch(u1.data.lane.minusFlow
         .filter((_, i) => !(i % 2)),
         [0,0,0,0,2,0,0,0,0,0,0,0]);
@@ -186,7 +186,7 @@ it("considers underground items", () => {
     u1.data.lane.minusFlow.push(...new Array(20).fill([0, 1]).flat());
     map.deleteEntity(u2, 0);
     u2 = map.createEntity(
-        r({name, x: 0, y: 2, ...north, data: {undergroundUp: false}}));
+        r({name, x: 0, y: 2, ...north, data: {undergroundUp: false}}), 0);
     assertMatch(u1.data.lane.minusFlow
         .filter((_, i) => !(i % 2)),
         [0,0,0,0,0,0,0,0,2,0,0,0]);
@@ -228,7 +228,7 @@ it("connects circular splitter", () => {
     assertEqual(s1.data.leftOutLane, s1.data.leftInLane);
     assertEqual(b1.data.lane.endSplitterData, s1.data);
     assertEqual(b1.data.lane.circular, false);
-    map.deleteEntity(b5);
+    map.deleteEntity(b5, 0);
     assertNotEqual(s1.data.leftOutLane, s1.data.leftInLane);
     assertEqual(s1.data.leftBeltInput);
     assertEqual(b4.data.beltOutput);
@@ -236,7 +236,7 @@ it("connects circular splitter", () => {
         {belts: [s1], nodes:[{length: 1}]});
     assertEqual(s1.data.leftInLane.endSplitterData, s1.data);
     b5 = map.createEntity(
-        r({name, x: 0, y: 1, ...north}));
+        r({name, x: 0, y: 1, ...north}), 0);
     assertEqual(s1.data.leftBeltInput, b5);
     assertEqual(b1.data.lane, b5.data.lane);
     assertEqual(s1.data.leftOutLane, s1.data.leftInLane);
@@ -250,9 +250,9 @@ it("connects two splitters", () => {
   ], ([s1, s2], map, r) => {
     assertEqual(s1.data.leftOutLane, s2.data.leftInLane);
     assertEqual(s1.data.rightOutLane, s2.data.rightInLane);
-    map.deleteEntity(s2);
+    map.deleteEntity(s2, 0);
     s2 = map.createEntity(
-        r({name, x: 1, y: -1, ...north}));
+        r({name, x: 1, y: -1, ...north}), 0);
     assertEqual(s1.data.rightOutLane, s2.data.leftInLane);
   });
 });

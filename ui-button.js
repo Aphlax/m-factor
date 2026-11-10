@@ -30,7 +30,7 @@ UiButton.prototype.setButton = function(name, sprite) {
   return this;
 };
 
-UiButton.prototype.draw = function(ctx, time) {
+UiButton.prototype.draw = function(ctx) {
   if (!this.name) return;
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
@@ -94,9 +94,8 @@ UiButton.prototype.touchEnd = function(e) {
         CHOICE.assemblerRecipe, this.parent.selectedEntity);
     navigator.vibrate(SHORT_VIBRATE);
   } else if (this.name == BUTTON.deleteEntity) {
-    this.parent.ui.game.gameMap.deleteEntity(
-        this.parent.selectedEntity,
-        this.parent.ui.game.playTime);
+    this.parent.ui.world.gameMap.deleteEntity(
+        this.parent.selectedEntity);
     this.parent.set();
     navigator.vibrate(SHORT_VIBRATE);
   } else if (this.name == BUTTON.gameMenu) {

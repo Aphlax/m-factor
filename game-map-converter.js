@@ -1,14 +1,30 @@
 import {GameMap, MAP} from './game-map.js';
+import {World} from './world.js';
+import {Character} from './character.js';
 import {Chunk} from './chunk.js';
 import {ENTITIES, PROTO_TO_NAME} from './entity-definitions.js';
 import {TYPE, ENERGY, STATE} from './entity-properties.js';
 import {ITEMS, PROTO_TO_ITEM} from './item-definitions.js';
 import {PROTO_TO_RECIPE} from './recipe-definitions.js';
+import {Random} from './utils.js';
 
 
 function GMC() {
   
 }
+
+GMC.serializeWorld = function(world) {
+  return {
+    seed: world.seed,
+    playTime: world.playTime,
+    achievedVictory: world.achievedVictory,
+    
+    gameMap: GMC.serializeMap(world.gameMap),
+    character: GMC.serializeCharacter(world.character),
+    
+    productionRandom: world.productionRandom.getState(),
+  };
+};
 
 GMC.serializeMap = function(gameMap) {
   const entities = [], chunks = [];
@@ -78,7 +94,6 @@ GMC.serializeMap = function(gameMap) {
         };
       });
   return {
-    seed: gameMap.mapGenerator.seed,
     entities,
     chunks,
     transportNetworkLanes,
@@ -86,7 +101,6 @@ GMC.serializeMap = function(gameMap) {
     electricNetworkGrids,
     heatNetworkConduits,
     view: gameMap.view,
-    playTime: gameMap.playTime,
   };
 };
 
@@ -210,6 +224,12 @@ GMC.serializeEntity = function(index, entity, blueprintOnly) {
   };
 };
 
+GMC.serializeCharacter = function(character) {
+  return {
+    inventory: GMC.serializeInventory(character.inventory),
+  };
+};
+
 GMC.serializeInventory = function(inventory) {
   return {
     items: inventory.items,
@@ -227,11 +247,23 @@ GMC.serializeFluidTank = function(fluidTank) {
 
 const SPLITTER_PRIORITY = new Map([["left", -1], ["none", 0], ["right", 1]]);
 
-GMC.deserializeMap = function(map) {
-  const gameMap = new GameMap(map.seed, MAP.nauvis);
-  gameMap.initialize();
+GMC.deserializeWorld = function(w) {
+  const world = new World();
+  world.seed = w.seed,
+  world.playTime = w.playTime,
+  world.achievedVictory = w.achievedVictory,
+  
+  world.gameMap = GMC.deserializeMap(w.gameMap, w.seed),
+  world.character = GMC.deserializeCharacter(w.character),
+  
+  world.productionRandom =
+      Random.fromState(w.productionRandom);
+  return world;
+};
+
+GMC.deserializeMap = function(map, seed) {
+  const gameMap = new GameMap(seed, MAP.nauvis);
   Object.assign(gameMap.view, map.view);
-  gameMap.playTime = map.playTime;
   for (let c of map.chunks) {
     if (!gameMap.chunks.has(c.x)) {
       gameMap.chunks.set(c.x, new Map());
@@ -242,7 +274,7 @@ GMC.deserializeMap = function(map) {
   }
   for (let e of map.entities) {
     const entity = GMC.deserializeEntity(e);
-    e.entity = gameMap.createEntity(entity);
+    e.entity = gameMap.createEntity(entity, 0);
   }
   for (let e of map.entities) {
     // Separate loop to prevent connecting from changing timings.
@@ -393,6 +425,12 @@ GMC.deserializeEntityCustomFields = function(e, entity) {
       }
     }
   }
+};
+
+GMC.deserializeCharacter = function(c) {
+  const character = new Character();
+  Object.assign(character.inventory, c.inventory);
+  return character;
 };
 
 /////// BLUEPRINT ///////

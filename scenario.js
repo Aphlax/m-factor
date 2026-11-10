@@ -212,7 +212,8 @@ function productionTest(gameMap, time) {
   rail(0, 75, 2);
   
   // Rocket.
-  e(NAME.rocketSilo, -5, 50, 0);
+  e(NAME.rocketSilo, -5, 50, 0)
+    .data.progress = 20;
   e(NAME.ironChest, -7, 54, 0).inputInventory
     .insert(I.lowDensityStructure, 300);
   e(NAME.ironChest, -12, 55, 0).inputInventory
@@ -241,11 +242,10 @@ function productionTest(gameMap, time) {
   e(NAME.fastInserter, -14, 60, 1);
   e(NAME.fastInserter, -15, 61, 2);
   e(NAME.fastInserter, -14, 62, 1);
-  el(-14, 59);
-  l(-9, 60, E, 6);
+  l(-9, 60, E, 5);
   e(NAME.fastInserter, -10, 60, E);
-  e(NAME.fastInserter, -4, 59, N);
-  el(-5, 59, W, 2);
+  e(NAME.fastInserter, -5, 59, N);
+  el(-6, 59, W, 3, 4);
   e(NAME.fastInserter, -2, 59, S);
   l(-2, 60, S, 5);
   el(-1, 59);

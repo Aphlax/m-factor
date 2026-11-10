@@ -129,7 +129,7 @@ export const MAX_TREE_SIZE = 8;
 export const MAX_WIRE_REACH = 7;
 
 /** Maximal reach of electric supply areas. */
-export const MAX_ELECTRIC_SUPPLY = 2;
+export const MAX_ELECTRIC_SUPPLY = 8;
 
 /** Minimal electric satisfaction for an entiry to make progress. */
 export const MIN_SATISFACTION = 0.005;

@@ -9,7 +9,7 @@ import {FluidNetwork} from './fluid-network.js';
 import {ElectricNetwork} from './electric-network.js';
 import {HeatNetwork} from './heat-network.js';
 import {SETTINGS} from './storage.js';
-import {createRand} from './utils.js';
+import {Random} from './utils.js';
 
 export const MAP = {
   nauvis: 0,
@@ -17,24 +17,24 @@ export const MAP = {
 };
 
 function GameMap(seed, type) {
+  this.world = undefined;
   this.mapGenerator = type == MAP.test ?
       new TestGenerator() :
       new MapGenerator(seed);
   this.view = {};
-  this.playTime = 0;
   this.chunks = new Map(); // 2-D map of coordinate -> chunk
   this.chunkGenerationQueue = [];
-  this.transportNetwork = new TransportNetwork();
-  this.fluidNetwork = new FluidNetwork();
-  this.electricNetwork = new ElectricNetwork(this);
-  this.heatNetwork = new HeatNetwork();
-  this.productionRandom = createRand(this.seed, 86, 14, 666);
   this.particlePool = [];
   this.particles = [];
+  
+  this.transportNetwork = new TransportNetwork();
+  this.fluidNetwork = new FluidNetwork();
+  this.electricNetwork = new ElectricNetwork();
+  this.heatNetwork = new HeatNetwork();
 }
 
-GameMap.prototype.initialize = function(game) {
-  this.game = game; // Only used for victory screen.
+GameMap.prototype.initialize = function(world) {
+  this.world = world;
   this.mapGenerator.initialize();
 };
 
@@ -52,7 +52,6 @@ GameMap.prototype.centerView = function(x, y, scale = 24) {
 };
 
 GameMap.prototype.update = function(time, dt) {
-  this.playTime = time;
   const timestampBegin = performance.now();
   this.transportNetwork.update(time, dt);
   const timestampBelts = performance.now();
@@ -72,7 +71,6 @@ GameMap.prototype.update = function(time, dt) {
         if (entity.type == TYPE.belt ||
             entity.type == TYPE.chest ||
             entity.type == TYPE.pipe ||
-            entity.type == TYPE.generator ||
             entity.type == TYPE.electricPole ||
             entity.type == TYPE.undergroundBelt ||
             entity.type == TYPE.pipeToGround ||
@@ -347,7 +345,7 @@ GameMap.prototype.drawMap = function(ctx) {
     }
   }
   this.transportNetwork.drawMap(ctx, this.view);
-  let lastColor = undefined;
+  let lastColor = undefined, countDraws = 0;
   for (let [x, chunks] of this.chunks.entries()) {
     if ((x + 1) * size <= vx - s || x * size > vx + vw + s) continue;
     for (let [y, chunk] of chunks.entries()) {
@@ -370,9 +368,15 @@ GameMap.prototype.drawMap = function(ctx) {
         }
         ctx.fillRect(Math.floor(ex * s - vx), Math.floor(ey * s - vy),
             Math.ceil(width * s), Math.ceil(height * s));
+        countDraws++;
       }
     }
   }
+  window.numberOtherDraws += countDraws;
+  window.numberGroundDraws = 0;
+  window.numberItemDraws = 0;
+  window.numberEntityDraws = 0;
+  window.numberParticleDraws = 0;
 };
 
 GameMap.prototype.createEntity = function({name, x, y, direction, data}, time) {
@@ -381,7 +385,7 @@ GameMap.prototype.createEntity = function({name, x, y, direction, data}, time) {
   if (!this.chunks.has(cx) || !this.chunks.get(cx).has(cy))
     this.generateChunk(cx, cy);
   
-  time = time ?? this.playTime;
+  time = time ?? this.world.playTime;
   const entity = new Entity().setup(name, x, y, direction, time, data);
   
   const entities = this.chunks.get(cx).get(cy).entities;
@@ -402,6 +406,7 @@ GameMap.prototype.deleteEntity = function(entity, time) {
   const entities = this.chunks.get(cx).get(cy).entities;
   entities.splice(entities.indexOf(entity), 1);
   
+  time = time ?? this.world.playTime;
   this.disconnectEntity(entity, time);
 };
 
@@ -929,9 +934,11 @@ GameMap.prototype.createSmoke = function(type, x, y, time, duration) {
   if (!this.chunks.has(cx)) return;
   const cy = Math.floor(y / SIZE);
   if (!this.chunks.get(cx).has(cy)) return;
-  const cadence = type == SMOKE_TYPE.smoke ? 200 : 330;
+  const cadence =
+      type == SMOKE_TYPE.smoke ? 200 :
+      type == SMOKE_TYPE.steam ? 330 : 160;
   let count = Math.floor(duration / cadence);
-  if (!count && time % 200 < duration) count++;
+  if (!count && time % cadence < duration) count++;
   for (let i = 0; i < count; i++) {
     let p;
     if (this.particlePool.length) {

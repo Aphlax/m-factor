@@ -1,11 +1,10 @@
 "use strict";
 
-import {GameMap, MAP} from './game-map.js';
+import {World} from './world.js';
 import {GameUi} from './game-ui.js';
 import {UiPauseMenu, UiSettingsMenu, UiVictoryScreen} from './game-menu.js';
 import {Storage, STORAGE} from './storage.js';
 import {SPRITES} from './sprite-pool.js';
-import {scenario} from './scenario.js';
 import {GMC} from './game-map-converter.js';
 import {STATE} from './entity-properties.js';
 import {MAP_SCALE_BOUNDRY} from './game-map-input.js';
@@ -20,7 +19,7 @@ const MODE = {
 };
 
 function Game(canvas) {
-  this.seed = 114;
+  this.canvas = canvas;
   this.mode = MODE.loading;
   this.spritePool = SPRITES;
   this.spritePool.load();
@@ -32,25 +31,11 @@ function Game(canvas) {
   this.pauseMenu = new UiPauseMenu(this, canvas);
   this.settingsMenu = new UiSettingsMenu(this, canvas);
   this.victoryScreen = new UiVictoryScreen(this, canvas);
-  this.gameMap = undefined;
-  
-  this.setupScenario = true;
   this.lastUpdate = 0;
-  this.playTime = 0;
-  this.achievedVictory = false;
   
-  this.loadMap(new GameMap(this.seed, MAP.nauvis)
-      .setViewFromCanvas(canvas));
+  this.world = undefined;
   this.mode = MODE.loading;
 }
-
-Game.prototype.loadMap = function(gameMap) {
-  this.playTime = gameMap.playTime;
-  this.gameMap = gameMap;
-  this.gameMap.initialize(this);
-  this.ui.setMap(gameMap);
-  this.mode = MODE.playing;
-};
 
 Game.prototype.update = function(time) {
   if (this.ui.window.selectedEntity?.type) {
@@ -69,16 +54,14 @@ Game.prototype.update = function(time) {
   if (this.mode == MODE.playing) {
     const dt = time - this.lastUpdate;
     if (dt < 100) {
-      this.playTime += dt;
-      this.gameMap.update(this.playTime, dt);
-      this.ui.update(this.playTime);
-      if (this.setupScenario) {
-        scenario(this.gameMap, this.playTime);
-        this.setupScenario = false;
-      }
+      this.world.update(dt);
     }
+    this.ui.update(time);
   } else if (this.mode == MODE.loading) {
     if (this.spritePool.isLoaded()) {
+      this.world = World.create(114, this.canvas)
+          .initialize(this);
+      this.ui.setWorld(this.world);
       this.mode = MODE.playing;
     }
   }
@@ -87,38 +70,38 @@ Game.prototype.update = function(time) {
 
 Game.prototype.draw = function(ctx, time) {
   if (this.mode == MODE.playing) {
-    if (this.gameMap.view.scale >= MAP_SCALE_BOUNDRY) {
-      this.gameMap.drawGround(ctx, this.playTime);
+    if (this.world.gameMap.view.scale >= MAP_SCALE_BOUNDRY) {
+      this.world.drawGround(ctx);
       this.ui.drawGroundIndicators(ctx);
-      this.gameMap.draw(ctx, this.playTime);
+      this.world.draw(ctx);
     } else {
-      this.gameMap.drawMap(ctx, this.playTime);
+      this.world.drawMap(ctx);
     }
-    this.ui.draw(ctx, this.playTime);
+    this.ui.draw(ctx, time);
   } else if (this.mode == MODE.loading) {
     this.spritePool.draw(ctx, time);
     this.storage.draw(ctx, time);
   } else if (this.mode == MODE.pauseMenu) {
-    if (this.gameMap.view.scale >= MAP_SCALE_BOUNDRY) {
-      this.gameMap.drawGround(ctx, this.playTime);
-      this.gameMap.draw(ctx, this.playTime);
+    if (this.world.gameMap.view.scale >= MAP_SCALE_BOUNDRY) {
+      this.world.drawGround(ctx);
+      this.world.draw(ctx);
     } else {
-      this.gameMap.drawMap(ctx);
+      this.world.drawMap(ctx);
     }
-    this.ui.window.draw(ctx, this.playTime);
+    this.ui.window.draw(ctx, this.world.playTime);
     this.pauseMenu.draw(ctx);
     this.storage.draw(ctx, time);
   } else if (this.mode == MODE.settingsMenu) {
     this.settingsMenu.draw(ctx);
     this.storage.draw(ctx, time);
   } else if (this.mode == MODE.victoryScreen) {
-    if (this.gameMap.view.scale >= MAP_SCALE_BOUNDRY) {
-      this.gameMap.drawGround(ctx, this.playTime);
-      this.gameMap.draw(ctx, this.playTime);
+    if (this.world.gameMap.view.scale >= MAP_SCALE_BOUNDRY) {
+      this.world.drawGround(ctx);
+      this.world.draw(ctx);
     } else {
-      this.gameMap.drawMap(ctx);
+      this.world.drawMap(ctx);
     }
-    this.ui.window.draw(ctx, this.playTime);
+    this.ui.window.draw(ctx, this.world.playTime);
     this.victoryScreen.draw(ctx);
   }
 };
@@ -137,23 +120,24 @@ Game.prototype.openSettings = function() {
 };
 
 Game.prototype.openVicoryScreen = function() {
-  if (this.achievedVictory) return;
-  this.achievedVictory = true;
+  if (this.world.achievedVictory) return;
+  this.world.achievedVictory = true;
   this.mode = MODE.victoryScreen;
 };
 
 Game.prototype.saveGame = function() {
   const save = {
     name: "",
-    map: GMC.serializeMap(this.gameMap),
+    world: GMC.serializeWorld(this.world),
   };
   this.storage.save(STORAGE.saves, save);
 };
 
 Game.prototype.loadGame = function() {
   this.storage.load(STORAGE.saves, "").then(save => {
-    const gameMap = GMC.deserializeMap(save.map);
-    this.loadMap(gameMap);
+    const world = GMC.deserializeWorld(save.world);
+    this.world = world.initialize(this);
+    this.ui.setWorld(world);
   });
 };
 

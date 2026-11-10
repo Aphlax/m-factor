@@ -1,6 +1,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {GameMap, MAP} from '../game-map.js';
+import {World} from '../world.js';
 import {ENTITIES} from '../entity-definitions.js';
 
 const style = document.createElement('style');
@@ -146,11 +147,12 @@ function pp(x) {
 
 /** Tests a blueprint. */
 export function blueprint(blueprint, check) {
-  const gameMap = new GameMap(0, MAP.test);
-  gameMap.initialize();
+  const world = new World();
+  world.gameMap = new GameMap(0, MAP.test);
+  world.initialize();
   const entities = blueprint.map(bp =>
-      gameMap.createEntity(bp));
-  check(entities, gameMap, x => x);
+      world.gameMap.createEntity(bp, 0));
+  check(entities, world.gameMap, x => x);
 }
 
 /** Tests a blueprint with all possible creation orders and rotations. */
@@ -164,15 +166,16 @@ export function blueprintScrambled(blueprint, check, startPerm, rotations) {
       assertNr = 0;
       rotation = rot;
       const rotFn = createRotation(rot);
-      const gameMap = new GameMap(0, MAP.test);
-      gameMap.initialize();
+      const world = new World();
+      world.gameMap = new GameMap(0, MAP.test);
+      world.initialize();
       const entities = new Array(perm.length);
       for (let i = 0; i < perm.length; i++) {
         entities[perm[i]] =
-            gameMap.createEntity(
-            rotFn(blueprint[perm[i]]));
+            world.gameMap.createEntity(
+            rotFn(blueprint[perm[i]]), 0);
       }
-      check(entities, gameMap, rotFn);
+      check(entities, world.gameMap, rotFn);
     }
   }
 }
@@ -192,9 +195,9 @@ export function power(entity) {
 
 /** Runs time. */
 export function elapse(map, seconds = 0.1) {
-  let startTime = map.playTime;
-  while (map.playTime - startTime < seconds * 1000) {
-    map.update(map.playTime + 100, 100);
+  let startTime = map.world.playTime;
+  while (map.world.playTime - startTime < seconds * 1000) {
+    map.world.update(100);
   }
 }
 

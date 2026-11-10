@@ -6,7 +6,7 @@ import {SelectionTool, SELECTION_TYPE, PasteTool} from './game-map-input-tools.j
 import {SETTINGS} from './storage.js';
 
 
-const MIN_SCALE = 0.5;
+const MIN_SCALE = 0.75;
 const MINIMAP_SCALE_BOUNDRY = 4;
 const MAP_SCALE_BOUNDRY = 16;
 const MAX_SCALE = 32;

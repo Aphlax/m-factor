@@ -31,7 +31,7 @@ Grid.fromPole = function(pole) {
   return grid;
 };
 
-Grid.prototype.update = function(time, dt, gameMap) {
+Grid.prototype.update = function(time, dt) {
   let demand = 0, output = 0;
   for (let [el, consumers] of this.consumerss) {
     demand += el * consumers.size;
@@ -44,6 +44,7 @@ Grid.prototype.update = function(time, dt, gameMap) {
             (time - generator.taskStart) * generator.animationSpeed / 60) %
             generator.animationLength;
         generator.taskStart = NEVER;
+        generator.nextUpdate = NEVER;
       }
     }
     return;
@@ -68,6 +69,7 @@ Grid.prototype.update = function(time, dt, gameMap) {
             (time - generator.taskStart) * generator.animationSpeed / 60) %
             generator.animationLength;
         generator.taskStart = NEVER;
+        generator.nextUpdate = NEVER;
       }
       continue;
     }
@@ -78,12 +80,7 @@ Grid.prototype.update = function(time, dt, gameMap) {
     if (generator.state != STATE.working) {
       generator.state = STATE.working;
       generator.taskStart = time;
-    }
-    if (gameMap && generator.data.smokeType) {
-      gameMap.createSmoke(generator.data.smokeType,
-          generator.x + generator.data.smokeX,
-          generator.y + generator.data.smokeY,
-          time, 1000)
+      generator.nextUpdate = time;
     }
   }
   if (Math.round(satisfaction * 100) !=

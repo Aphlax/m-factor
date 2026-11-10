@@ -1,6 +1,6 @@
 import {PerlinNoise} from './perlin-noise.js';
 import {PointNoise} from './point-noise.js';
-import {createRand, createSeedRand} from './utils.js';
+import {Random} from './utils.js';
 import {S} from './sprite-pool.js';
 import {RESOURCE_NAMES, resourceSprite} from './entity-properties.js';
 
@@ -133,14 +133,14 @@ function MapGenerator(seed) {
 }
 
 MapGenerator.prototype.initialize = function() {
-  const randSeed = createSeedRand(...SEED, this.seed);
-  this.lakeNoise = new PerlinNoise(randSeed(),
+  const randSeed = new Random(...SEED, this.seed);
+  this.lakeNoise = new PerlinNoise(randSeed.nextSeed(),
       0.00743, 5, 2, 0.5);
   this.terrainNoises = TERRAIN.map(t =>
-      new PerlinNoise(randSeed(), t.s, 5, 2, 0.5));
-  const rand = createRand(...randSeed());
+      new PerlinNoise(randSeed.nextSeed(), t.s, 5, 2, 0.5));
+  const rand = new Random(...randSeed.nextSeed());
   this.tileOffsets = new Array(32).fill(0).map(() =>
-      new Array(32).fill(0).map(() => Math.floor(rand() * 16)));
+      new Array(32).fill(0).map(() => Math.floor(rand.next() * 16)));
   this.starterLakePos =
       createStarterPos(rand, 85, 15);
   this.resources = [];
@@ -151,12 +151,12 @@ MapGenerator.prototype.initialize = function() {
             this.starterLakePos, this.resources.map(r => r.pos)),
       });
   }
-  this.resourcePointNoise = new PointNoise(rand(), 60, 0.04);
-  this.resourceNoise = new PerlinNoise(randSeed(),
+  this.resourcePointNoise = new PointNoise(rand.next(), 60, 0.04);
+  this.resourceNoise = new PerlinNoise(randSeed.nextSeed(),
       0.025, 5, 2, 0.65)
-  this.crudeOilNoise = new PointNoise(rand(), 4, 0.1);
-  this.treePointNoise = new PointNoise(rand(), 2, 0.8);
-  this.treeNoise = new PerlinNoise(randSeed());
+  this.crudeOilNoise = new PointNoise(rand.next(), 4, 0.1);
+  this.treePointNoise = new PointNoise(rand.next(), 2, 0.8);
+  this.treeNoise = new PerlinNoise(randSeed.nextSeed());
 }
 
 MapGenerator.prototype.generateTiles = function (cx, cy) {
@@ -328,7 +328,7 @@ MapGenerator.prototype.generateTrees = function(cx, cy, tiles, resources) {
 
 function createStarterPos(rand, r, dr, lake, others) {
   while(true) {
-    let phi = rand() * 2 * Math.PI, a = r + (2 * rand() - 1) * dr;
+    let phi = rand.next() * 2 * Math.PI, a = r + (2 * rand.next() - 1) * dr;
     const pos = {x: Math.cos(phi) * a, y: Math.sin(phi) * a};
     if (lake && dist(pos, lake) < 60) {
       continue;

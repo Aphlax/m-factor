@@ -2,8 +2,7 @@ import {Grid, MULTI_GRID} from './electric-network-grid.js';
 import {TYPE, STATE, NEVER, MIN_SATISFACTION} from './entity-properties.js';
 import {SETTINGS} from './storage.js';
 
-function ElectricNetwork(gameMap) {
-  this.gameMap = gameMap;
+function ElectricNetwork() {
   this.grids = [];
   
   this.lastSmoke = 0; // Do generators create smoke particles in update?
@@ -168,8 +167,6 @@ ElectricNetwork.prototype.modifyConsumer = function(entity, time) {
 };
 
 ElectricNetwork.prototype.update = function(time, dt) {
-  const gameMap = time - this.lastSmoke > 1000 ?
-      this.gameMap : undefined;
   if (time - this.lastSmoke > 1000) this.lastSmoke = time;
   let removedGrids = 0;
   for (let i = 0; i < this.grids.length; i++) {
@@ -177,7 +174,7 @@ ElectricNetwork.prototype.update = function(time, dt) {
       removedGrids++;
       continue;
     }
-    this.grids[i].update(time, dt, gameMap);
+    this.grids[i].update(time, dt);
     if (removedGrids) {
       this.grids[i - removedGrids] = this.grids[i];
     }

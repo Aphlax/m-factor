@@ -45,7 +45,7 @@ function UiWindow(ui, canvas) {
   this.showDefaultUi = true;
 }
 
-UiWindow.prototype.update = function(time, dt) {
+UiWindow.prototype.update = function(dt) {
   if (this.x != this.xTarget) {
     let diff = this.xTarget - this.x;
     if (Math.abs(diff) > 2 * dt) {
@@ -65,7 +65,7 @@ UiWindow.prototype.update = function(time, dt) {
   }
 };
 
-UiWindow.prototype.draw = function(ctx, time) {
+UiWindow.prototype.draw = function(ctx, playTime) {
   if (this.y >= this.canvasHeight - 1) return;
   
   const width = this.canvasWidth;
@@ -120,12 +120,12 @@ UiWindow.prototype.draw = function(ctx, time) {
   
   if (this.entityUi) {
     for (let c of this.entityUi.all) {
-      c.draw(ctx, time);
+      c.draw(ctx, playTime);
     }
   }
   if (this.showDefaultUi) {
     for (let c of this.defaultUi.all) {
-      c.draw(ctx, time);
+      c.draw(ctx, playTime);
     }
   }
 };

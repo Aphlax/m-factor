@@ -138,7 +138,7 @@ function UiBuildMenu(ui, canvas) {
   this.selectedEntry = undefined;
 }
 
-UiBuildMenu.prototype.update = function(time, dt) {
+UiBuildMenu.prototype.update = function(dt) {
   this.scroller.update(dt);
   for (let group of this.menu) {
     group.scroller.update(dt);

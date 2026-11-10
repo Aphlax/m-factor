@@ -1,15 +1,15 @@
-import {createRand} from './utils.js';
+import {Random} from './utils.js';
 
 function PerlinNoise(seed, scale, octaves, freq, amp) {
   this.scale = scale ?? 0.01;
   this.octaves = octaves ?? 5;
   this.freq = freq ?? 2;
   this.amp = amp ?? 0.5;
-  let rand = createRand(...seed);
+  let rand = new Random(...seed);
   const permutation = this.permutation =
       new Array(512).fill(0).map((a, i) => i);
   for (let i = permutation.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * i), t = permutation[i];
+    const j = Math.floor(rand.next() * i), t = permutation[i];
     permutation[i] = permutation[j];
     permutation[j] = t;
   }

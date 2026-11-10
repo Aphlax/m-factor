@@ -68,7 +68,7 @@ import {Game} from "./game.js";
       ctx.textBaseline = "alphabetic";
       ctx.textAlign = "end";
       ctx.font = "24px Arial";
-      ctx.fillText((game.playTime / 1000).toFixed(1), canvas.width - 60, 48);
+      ctx.fillText((game.world?.playTime / 1000).toFixed(1), canvas.width - 60, 48);
       ctx.font = "18px Arial";
       ctx.fillText(window.numberGroundDraws ?? 0, canvas.width - 60, 120);
       ctx.fillText(window.numberEntityDraws ?? 0, canvas.width - 60, 140);

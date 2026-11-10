@@ -818,7 +818,7 @@ Entity.prototype.update = function(gameMap, time) {
             this.animationLength;
         }
         if (this.data.hasChance) {
-          let r = gameMap.productionRandom() * this.data.hasChance;
+          let r = gameMap.world.productionRandom.next() * this.data.hasChance;
           for (let i = 0; i < this.outputInventory.filters.length; i++) {
             const filter = this.outputInventory.filters[i];
             if (r <= filter.amount) {
@@ -1007,6 +1007,14 @@ Entity.prototype.update = function(gameMap, time) {
     }
     this.state = state;
     this.nextUpdate = nextUpdate;
+  } else if (this.type == TYPE.generator) {
+    if (this.data.smokeType) {
+      gameMap.createSmoke(this.data.smokeType,
+          this.x + this.data.smokeX,
+          this.y + this.data.smokeY,
+          time, 1000);
+      this.nextUpdate = time + 1000;
+    }
   } else if (this.type == TYPE.rocketSilo) {
     let state = this.state, nextUpdate = NEVER;
     const {recipe, science, rocketParts, deployDuration, launchDuration, closeDuration} = this.data;
@@ -1037,7 +1045,7 @@ Entity.prototype.update = function(gameMap, time) {
             }
           }
           this.data.progress = 0;
-          gameMap.game.openVicoryScreen();
+          gameMap.world.game.openVicoryScreen();
         } else {
           for (let i = 0; i < science.inputs.length; i++) {
             this.inputInventory.filters

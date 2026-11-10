@@ -30,7 +30,7 @@ UiProgress.prototype.setMode = function(mode) {
   return this;
 };
 
-UiProgress.prototype.draw = function(ctx, time) {
+UiProgress.prototype.draw = function(ctx, playTime) {
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
   
@@ -38,7 +38,7 @@ UiProgress.prototype.draw = function(ctx, time) {
   if (this.mode == PROGRESS.task) {
     if (this.entity.state == STATE.running ||
         this.entity.state == STATE.outOfEnergy) {
-      progress = (time - this.entity.taskStart) /
+      progress = (playTime - this.entity.taskStart) /
           (this.entity.taskEnd - this.entity.taskStart)
     } else if (this.entity.state == STATE.outputFull ||
         this.entity.state == STATE.itemReady) {
@@ -122,7 +122,7 @@ UiFuel.prototype.set = function(entity) {
   this.entity = entity;
 };
 
-UiFuel.prototype.draw = function(ctx, time) {
+UiFuel.prototype.draw = function(ctx, playTime) {
   if (!this.entity) return;
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
@@ -134,7 +134,7 @@ UiFuel.prototype.draw = function(ctx, time) {
   const current = (this.entity.state == STATE.outOfEnergy ? 0 :
       this.entity.energyStored) - 
       (this.entity.state != STATE.running ? 0 :
-      Math.max(time - this.entity.taskStart, 0) /
+      Math.max(playTime - this.entity.taskStart, 0) /
       1000 * this.entity.energyConsumption);
   const height = Math.min(36, Math.max(0,
       Math.ceil(current / maxFuel * 36)));
@@ -159,7 +159,7 @@ UiWindUp.prototype.set = function(entity) {
   this.entity = entity;
 };
 
-UiWindUp.prototype.draw = function(ctx, time) {
+UiWindUp.prototype.draw = function(ctx, playTime) {
   if (!this.entity) return;
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
@@ -182,7 +182,7 @@ UiFluidIndicator.prototype.set = function(entity) {
   this.entity = entity;
 };
 
-UiFluidIndicator.prototype.draw = function(ctx, time) {
+UiFluidIndicator.prototype.draw = function(ctx, playTime) {
   if (!this.entity?.data.channel) return;
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
@@ -228,7 +228,7 @@ UiSplitterPriority.prototype.set = function(entity) {
   this.entity = entity;
 };
 
-UiSplitterPriority.prototype.draw = function(ctx, time) {
+UiSplitterPriority.prototype.draw = function(ctx, playTime) {
   if (!this.entity) return;
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
@@ -347,7 +347,7 @@ UiInserterFilters.prototype.set = function(entity) {
   this.entity = entity;
 };
 
-UiInserterFilters.prototype.draw = function(ctx, time) {
+UiInserterFilters.prototype.draw = function(ctx, playTime) {
   if (!this.entity) return;
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
@@ -456,7 +456,7 @@ UiTemperature.prototype.set = function(entity) {
   this.entity = entity;
 };
 
-UiTemperature.prototype.draw = function(ctx, time) {
+UiTemperature.prototype.draw = function(ctx, playTime) {
   const conduit = this.entity?.data.conduit;
   if (!conduit) return;
   const x = Math.floor(this.parent.x + this.x),
@@ -575,7 +575,7 @@ UiNotImplemented.prototype.set = function(visible) {
   this.visible = visible;
 };
 
-UiNotImplemented.prototype.draw = function(ctx, time) {
+UiNotImplemented.prototype.draw = function(ctx, playTime) {
   if (!this.visible) return;
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
