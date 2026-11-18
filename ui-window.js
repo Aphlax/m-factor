@@ -1,5 +1,5 @@
 import {UiInventory, UiFluidInventory} from './ui-inventory.js';
-import {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTemperature, UiTree, UiLabel, UiNotImplemented} from './ui-components.js';
+import {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTemperature, UiResourceGather, UiLabel, UiNotImplemented} from './ui-components.js';
 import {UiButton, BUTTON} from './ui-button.js';
 import {UiChoice, CHOICE} from './ui-choice.js';
 import {COLOR} from './ui-properties.js';
@@ -197,11 +197,13 @@ UiWindow.prototype.initialize = function() {
   
   this.entityUis.set(NATURAL.resource, {
     resource: new UiResource(this, padding, 40),
+    gather: new UiResourceGather(this, this.canvasWidth / 2, 40)
+        .setType(NATURAL.resource).setMaxProgress(2),
   });
   
   this.entityUis.set(NATURAL.tree, {
-    tree: new UiTree(this, this.canvasWidth / 2, 40)
-        .setMaxProgress(3),
+    gather: new UiResourceGather(this, this.canvasWidth / 2, 40)
+        .setType(NATURAL.tree).setMaxProgress(3),
   });
   
   this.entityUis.set(TYPE.mine, {
@@ -379,9 +381,10 @@ UiWindow.prototype.set = function(entity, scrollToOpenHeight) {
     if (entity.id) {
       this.entityUi = this.entityUis.get(NATURAL.resource);
       this.entityUi.resource.set(entity);
+      this.entityUi.gather.set(entity);
     } else if (entity) {
       this.entityUi = this.entityUis.get(NATURAL.tree);
-      this.entityUi.tree.set(entity);
+      this.entityUi.gather.set(entity);
     }
   } else if (entity.type == TYPE.mine) {
     ui.progress.set(entity);

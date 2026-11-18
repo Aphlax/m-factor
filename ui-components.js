@@ -1,5 +1,5 @@
 import {COLOR, SHORT_VIBRATE} from './ui-properties.js';
-import {STATE, RESOURCE_NAMES} from './entity-properties.js';
+import {STATE, RESOURCE_NAMES, NATURAL, MINE_PRODUCTS} from './entity-properties.js';
 import {SPRITES, S} from './sprite-pool.js';
 import {CHOICE} from './ui-choice.js';
 import {SETTINGS} from './storage.js';
@@ -483,29 +483,35 @@ UiTemperature.prototype.draw = function(ctx, playTime) {
   }
 };
 
-function UiTree(parent, x, y) {
+function UiResourceGather(parent, x, y) {
   this.parent = parent;
   this.x = x;
   this.y = y;
   this.maxProgress = 0;
-  this.tree = undefined;
+  this.resource = undefined;
+  this.type = undefined;
   this.progress = 0;
   this.pressed = false;
 }
 
-UiTree.prototype.set = function(tree) {
-  if (this.tree != tree) {
+UiResourceGather.prototype.set = function(resource) {
+  if (this.resource != resource) {
     this.progress = 0;
   }
-  this.tree = tree;
+  this.resource = resource;
 };
 
-UiTree.prototype.setMaxProgress = function(maxProgress) {
+UiResourceGather.prototype.setMaxProgress = function(maxProgress) {
   this.maxProgress = maxProgress;
   return this;
 };
 
-UiTree.prototype.draw = function(ctx, realTime) {
+UiResourceGather.prototype.setType = function(type) {
+  this.type = type;
+  return this;
+};
+
+UiResourceGather.prototype.draw = function(ctx, realTime) {
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
   
@@ -514,7 +520,9 @@ UiTree.prototype.draw = function(ctx, realTime) {
       COLOR.buttonBackground;
   ctx.fillRect(x - 44, y, 88, 88);
   
-  const sprite = SPRITES.get(S.chopIcon);
+  const spriteId = this.type == NATURAL.resource ?
+      S.pickaxeIcon : S.chopIcon;
+  const sprite = SPRITES.get(spriteId);
   ctx.drawImage(sprite.image,
       sprite.x, sprite.y,
       sprite.width, sprite.height,
@@ -534,8 +542,8 @@ UiTree.prototype.draw = function(ctx, realTime) {
   window.numberOtherDraws += 2;
 };
 
-UiTree.prototype.touchStart = function(e) {
-  if (!this.tree) return;
+UiResourceGather.prototype.touchStart = function(e) {
+  if (!this.resource) return;
   const x = Math.floor(this.parent.x + this.x),
         y = Math.floor(this.parent.y + this.y);
   const {clientX: px, clientY: py} = e.touches[0];
@@ -545,22 +553,44 @@ UiTree.prototype.touchStart = function(e) {
   this.pressed = true;
 };
 
-UiTree.prototype.touchMove = function(e) {
+UiResourceGather.prototype.touchMove = function(e) {
   if (this.pressed) {
     this.pressed = false;
   }
 };
 
-UiTree.prototype.touchEnd = function(e) {
+UiResourceGather.prototype.touchEnd = function(e) {
   if (!this.pressed) return;
   this.pressed = false;
   
-  if (++this.progress == this.maxProgress) {
-    this.parent.ui.world.gameMap.getTreeAt(
-        this.tree.x, this.tree.y, /*remove*/ true);
+  navigator.vibrate(SHORT_VIBRATE);
+  if (++this.progress != this.maxProgress) return;
+  const world = this.parent.ui.world;
+  if (this.type == NATURAL.resource) {
+    this.resource.amount--;
+    if (this.resource.amount == 25 ||
+        this.resource.amount == 100 ||
+        this.resource.amount == 400 ||
+        this.resource.amount == 2000 ||
+        this.resource.amount == 8000 ||
+        this.resource.amount == 40000 ||
+        this.resource.amount == 200000) {
+      this.resource.sprite--;
+    } else if (!this.resource.amount) {
+      world.gameMap.getResourceAt(
+        this.resource.x, this.resource.y, /*remove*/ true);
+      this.parent.set();
+    }
+    this.progress = 0;
+    world.character.inventory.insert(
+        MINE_PRODUCTS[this.resource.id], 1);
+  } else {
+    world.gameMap.getTreeAt(
+        this.resource.x, this.resource.y, /*remove*/ true);
+    world.character.inventory.insert(
+        I.wood, 2);
     this.parent.set();
   }
-  navigator.vibrate(SHORT_VIBRATE);
 };
 
 function UiLabel(parent, x, y) {
@@ -627,4 +657,4 @@ UiNotImplemented.prototype.draw = function(ctx, playTime) {
   window.numberOtherDraws++;
 };
 
-export {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTemperature, UiTree, UiLabel, UiNotImplemented};
+export {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTemperature, UiResourceGather, UiLabel, UiNotImplemented};

@@ -700,6 +700,7 @@ export const S = {
   notImplIcon: 16588,
   temperatureIcon: 16589,
   bulkInserterIcon: 16590,
+  pickaxeIcon: 16591,
   
   smoke: 17000, // 60
   oilRefineryFire: 17060, // 60
@@ -2780,6 +2781,10 @@ export const SPRITES = [
   {
     path: "graphics/decoratives/cloud.png",
     sprites: sprites(S.cloud, 256, 256, 7, 7),
+  },
+  {
+    path: "graphics/icons/pickaxe.png",
+    sprites: sprites(S.pickaxeIcon, 80, 80, 1, 1),
   },
 ];
 
