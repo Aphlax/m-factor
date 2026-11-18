@@ -556,11 +556,44 @@ UiTree.prototype.touchEnd = function(e) {
   this.pressed = false;
   
   if (++this.progress == this.maxProgress) {
-    this.parent.ui.game.gameMap.getTreeAt(
+    this.parent.ui.world.gameMap.getTreeAt(
         this.tree.x, this.tree.y, /*remove*/ true);
     this.parent.set();
   }
   navigator.vibrate(SHORT_VIBRATE);
+};
+
+function UiLabel(parent, x, y) {
+  this.parent = parent;
+  this.x = x;
+  this.y = y;
+  
+  this.text = "";
+  this.font = "16px monospace";
+  this.color = COLOR.primary;
+  this.caps = "normal";
+}
+
+UiLabel.prototype.set = function(text, color, font, caps) {
+  this.text = text;
+  this.color = color ?? this.color;
+  this.font = font ?? this.font;
+  this.caps = caps ?? this.caps;
+  return this;
+};
+
+UiLabel.prototype.draw = function(ctx, playTime) {
+  if (this.text == "") return;
+  const x = Math.floor(this.parent.x + this.x),
+        y = Math.floor(this.parent.y + this.y);
+  
+  ctx.fillStyle = this.color;
+  ctx.font = this.font;
+  ctx.fontVariantCaps = this.caps;
+  ctx.textBaseline = "middle";
+  ctx.fillText(this.text, x, y + 21);
+  window.numberOtherDraws++;
+  ctx.fontVariantCaps = "normal";
 };
 
 function UiNotImplemented(parent, x, y) {
@@ -594,4 +627,4 @@ UiNotImplemented.prototype.draw = function(ctx, playTime) {
   window.numberOtherDraws++;
 };
 
-export {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTemperature, UiTree, UiNotImplemented};
+export {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTemperature, UiTree, UiLabel, UiNotImplemented};

@@ -11,6 +11,8 @@ function UiRotateButton(ui, canvas) {
 }
 
 UiRotateButton.prototype.draw = function(ctx) {
+  if (this.ui.window.height > 150) return false;
+  ctx.globalAlpha = Math.max(0, Math.min(1, 1 - (this.ui.window.height - 50) / 100));
   ctx.fillStyle = COLOR.buildBackground;
   ctx.strokeStyle = COLOR.buildBorder;
   ctx.beginPath();
@@ -26,10 +28,12 @@ UiRotateButton.prototype.draw = function(ctx) {
   ctx.lineTo(this.x, this.y);
   ctx.fill();
   ctx.stroke();
+  ctx.globalAlpha = 1;
   window.numberOtherDraws += 4;
 };
 
 UiRotateButton.prototype.inBounds = function(t) {
+  if (this.ui.window.height > 100) return false;
   const d = (t.clientX - this.x) ** 2 +
       (t.clientY - this.y) ** 2;
   return d < 1600;

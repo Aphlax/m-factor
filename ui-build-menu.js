@@ -182,6 +182,8 @@ UiBuildMenu.prototype.update = function(dt) {
 };
 
 UiBuildMenu.prototype.draw = function(ctx) {
+  if (this.ui.window.height > 150) return false;
+  const alphaMod = Math.max(0, Math.min(1, 1 - (this.ui.window.height - 50) / 100));
   for (let i = 0; i < this.menu.length; i++) {
     const group = this.menu[i];
     if (!group.visible) continue;
@@ -192,7 +194,8 @@ UiBuildMenu.prototype.draw = function(ctx) {
       const selected = group.entries[l] == this.selectedEntry;
       if (l == j) j++; else k--;
       if (!size || y - size / 2 >= this.canvasHeight) continue;
-      if (ctx.globalAlpha != alpha) ctx.globalAlpha = alpha;
+      const a = alphaMod * alpha;
+      if (ctx.globalAlpha != a) ctx.globalAlpha = a;
       ctx.fillStyle = selected ?
           COLOR.buildSingleBackground : COLOR.buildBackground;
       ctx.fillRect(x - size / 2, y - size / 2, size, size);
@@ -213,6 +216,7 @@ UiBuildMenu.prototype.draw = function(ctx) {
 
 UiBuildMenu.prototype.inBounds = function(t) {
   const w = this.canvasWidth, h = this.canvasHeight;
+  if (this.ui.window.height > 100) return false;
   const a = Math.abs(t.clientX - w / 2) + Math.abs(t.clientY - (h - 30));
   const b1 = Math.abs(t.clientX - (w / 2 - 197)) + Math.abs(t.clientY - (h - 197 - 30));
   const b2 = Math.abs(t.clientX - (w / 2 + 197)) + Math.abs(t.clientY - (h - 197 - 30));
@@ -258,7 +262,7 @@ UiBuildMenu.prototype.touchMove = function(e, longTouch) {
   }
 };
 
-UiBuildMenu.prototype.touchEnd = function(e, shortTouch) {
+UiBuildMenu.prototype.touchEnd = function(e, shortTouch, doubleTap) {
   if (this.dragX) {
     this.scroller.endDrag();
     this.dragX = false;
@@ -267,7 +271,7 @@ UiBuildMenu.prototype.touchEnd = function(e, shortTouch) {
     this.menu[this.scrollingGroup].scroller.endDrag();
     this.scrollingGroup = -1;
   }
-  if (!shortTouch) return;
+  if (!shortTouch || doubleTap) return;
   const t = e.changedTouches[0];
   let entry = undefined;
   for (let i = 0; i < this.menu.length; i++) {

@@ -68,9 +68,9 @@ UiChoice.prototype.openChoice = function(choice, entity, data) {
   }
   this.entity = entity;
   
-  this.parent.xTarget = -this.parent.canvasWidth;
-  this.parent.yTarget = Math.max(150, this.parent.canvasHeight - 44 -
-        46 * Math.ceil(this.choices.length / 8));
+  this.parent.scrollX(-this.parent.canvasWidth);
+  this.parent.scrollY(Math.max(150, 44 +
+        46 * Math.ceil(this.choices.length / 8)));
   this.parent.animationSpeed = (this.parent.yTarget - this.parent.y) / 100;
   return this;
 };
@@ -184,9 +184,8 @@ UiChoice.prototype.touchEnd = function(e) {
   } // break actions:
   
   // This extends the window to default height.
-  this.parent.yTarget = this.parent.canvasHeight;
-  this.parent.set(this.entity);
-  this.parent.x = -this.parent.canvasWidth;
+  this.parent.set(this.entity, /* scrollToOpenHeight */ true);
+  this.parent.scrollX(0);
   
   this.pressedIndex = -1;
   navigator.vibrate(SHORT_VIBRATE);

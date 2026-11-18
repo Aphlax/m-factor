@@ -1070,7 +1070,7 @@ export const ENTITIES = new Map([
   }],
   [NAME.fastUndergroundBelt,
   {
-    label: "Fast Underground",
+    label: "Fast Underground Belt",
     prototypeName: "fast-underground-belt",
     type: TYPE.undergroundBelt,
     width: 1,
@@ -1104,7 +1104,7 @@ export const ENTITIES = new Map([
   }],
   [NAME.expressUndergroundBelt,
   {
-    label: "Express Undergr.",
+    label: "Express Underground Belt",
     prototypeName: "express-underground-belt",
     type: TYPE.undergroundBelt,
     width: 1,
@@ -1464,7 +1464,7 @@ export const ENTITIES = new Map([
   }],
   [NAME.constantCombinator,
   {
-    label: "Constant Combin.",
+    label: "Constant Combinator",
     prototypeName: "constant-combinator",
     type: TYPE.constantCombinator,
     width: 1,
@@ -1478,7 +1478,7 @@ export const ENTITIES = new Map([
   }],
   [NAME.arithmeticCombinator,
   {
-    label: "Arithmetic Comb.",
+    label: "Arithmetic Combinator",
     prototypeName: "arithmetic-combinator",
     type: TYPE.arithmeticCombinator,
     size: {
@@ -1499,7 +1499,7 @@ export const ENTITIES = new Map([
   }],
   [NAME.deciderCombinator,
   {
-    label: "Decider Combin.",
+    label: "Decider Combinator",
     prototypeName: "decider-combinator",
     type: TYPE.deciderCombinator,
     size: {

@@ -1,5 +1,5 @@
 import {UiInventory, UiFluidInventory} from './ui-inventory.js';
-import {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTemperature, UiTree, UiNotImplemented} from './ui-components.js';
+import {PROGRESS, UiProgress, UiResource, UiFuel, UiWindUp, UiFluidIndicator, UiSplitterPriority, UiInserterFilters, UiTemperature, UiTree, UiLabel, UiNotImplemented} from './ui-components.js';
 import {UiButton, BUTTON} from './ui-button.js';
 import {UiChoice, CHOICE} from './ui-choice.js';
 import {COLOR} from './ui-properties.js';
@@ -8,8 +8,7 @@ import {S} from './sprite-pool.js';
 import {SETTINGS} from './storage.js';
 
 const OPEN_HEIGHT = 44 + 2 * 46;
-const ANIMATION_SPEED = OPEN_HEIGHT / 100;
-const MIN_Y = 150;
+const MIN_Y = 222;
 
 /*
   default buttons:
@@ -30,13 +29,11 @@ function UiWindow(ui, canvas) {
   
   this.canvasWidth = canvas.width;
   this.canvasHeight = canvas.height;
+  this.scroller = new Scroller(0, this.canvasHeight / 2);
+  this.scrollerX = new Scroller(-this.canvasWidth, 0);
   this.x = 0;
   this.y = this.canvasHeight;
-  this.xTarget = this.x;
-  this.yTarget = this.y;
-  
-  this.headerDrag = 0;
-  this.animationSpeed = ANIMATION_SPEED;
+  this.height = 0;
   
   this.selectedEntity = undefined;
   this.entityUis = new Map();
@@ -45,33 +42,33 @@ function UiWindow(ui, canvas) {
   this.showDefaultUi = true;
 }
 
+UiWindow.prototype.scrollX = function(position) {
+  this.scrollerX.scrollTo(position);
+};
+
+UiWindow.prototype.scrollY = function(position) {
+  this.scroller.scrollTo(position);
+};
+
 UiWindow.prototype.update = function(dt) {
-  if (this.x != this.xTarget) {
-    let diff = this.xTarget - this.x;
-    if (Math.abs(diff) > 2 * dt) {
-      diff = 2 * dt * Math.sign(diff);
-    }
-    this.x = Math.floor(this.x + diff);
-  }
-  if (this.y != this.yTarget) {
-    let diff = this.yTarget - this.y;
-    if (Math.abs(diff) > Math.abs(this.animationSpeed) * dt) {
-      diff = this.animationSpeed * dt;
-    }
-    this.y = Math.floor(this.y + diff);
-    if (this.y == this.canvasHeight && this.selectedEntity) {
-      this.set();
-    }
+  this.scrollerX.update(dt);
+  this.scroller.update(dt);
+  this.x = this.scrollerX.pos;
+  this.y = this.canvasHeight - this.scroller.pos;
+  this.height = this.canvasHeight - Math.max(this.y, MIN_Y);
+  if (this.scroller.pos < 50 && this.scroller.velocity == 0) {
+    this.set();
   }
 };
 
 UiWindow.prototype.draw = function(ctx, playTime) {
-  if (this.y >= this.canvasHeight - 1) return;
+  const width = this.canvasWidth,
+      height = this.canvasHeight;
+  if (this.y >= height - 1) return;
   
-  const width = this.canvasWidth;
-  const y = Math.floor(this.y);
+  const y = Math.floor(height - this.height);
   ctx.fillStyle = COLOR.background2;
-  ctx.fillRect(0, y + 32, width, this.canvasHeight - y - 32);
+  ctx.fillRect(0, y + 32, width, height - y - 32);
   ctx.fillStyle = this.headerDrag ? COLOR.backgroundDrag : COLOR.background1;
   ctx.fillRect(0, y, width, 32);
   ctx.strokeStyle = COLOR.border1;
@@ -98,26 +95,10 @@ UiWindow.prototype.draw = function(ctx, playTime) {
     }
   }
   
-  // Grip icon.
+  ctx.save();
   ctx.beginPath();
-  ctx.moveTo(width / 2 - 2, y + 16);
-  ctx.lineTo(width / 2 + 2, y + 16);
-  ctx.strokeStyle = COLOR.primary;
-  ctx.lineWidth = 4;
-  ctx.lineCaps = "round";
-  ctx.stroke();
-  window.numberOtherDraws++;
-  ctx.beginPath();
-  ctx.moveTo(width / 2 - 2, y + 11);
-  ctx.lineTo(width / 2 + 2, y + 11);
-  ctx.moveTo(width / 2 - 2, y + 21);
-  ctx.lineTo(width / 2 + 2, y + 21);
-  ctx.strokeStyle = COLOR.primary;
-  ctx.lineWidth = 1;
-  ctx.lineCaps = "butt";
-  ctx.stroke();
-  window.numberOtherDraws++;
-  
+  ctx.rect(0, y + 32, width, height - y - 32);
+  ctx.clip();
   if (this.entityUi) {
     for (let c of this.entityUi.all) {
       c.draw(ctx, playTime);
@@ -128,104 +109,94 @@ UiWindow.prototype.draw = function(ctx, playTime) {
       c.draw(ctx, playTime);
     }
   }
+  ctx.restore();
 };
 
-UiWindow.prototype.touchStart = function(e) {
-  if (e.touches[0].clientY < this.y + 32) {
-    this.headerDrag = e.touches[0].clientY;
-    this.animationSpeed = 0;
+UiWindow.prototype.inBounds = function(t) {
+  return t.clientY >= this.canvasHeight - this.height; 
+};
+
+UiWindow.prototype.touchStart = function(e, doubleTap) {
+  if (e.touches.length == 1 && !doubleTap) {
+    this.scroller.startDrag(e.touches[0].clientY);
   }
+  
   for (let c of this.entityUi.all) {
-    c.touchStart?.(e);
+    c.touchStart?.(e, doubleTap);
   }
   if (this.showDefaultUi) {
     for (let c of this.defaultUi.all) {
-      c.touchStart?.(e);
+      c.touchStart?.(e, doubleTap);
     }
   }
 };
 
-UiWindow.prototype.touchMove = function(e, longTouch) {
-  if (this.headerDrag) {
-    this.y = this.yTarget =
-        this.y + e.touches[0].clientY - this.headerDrag;
-    this.animationSpeed = (e.touches[0].clientY - this.headerDrag) / 11;
-    this.headerDrag = e.touches[0].clientY;
-    if (this.y < MIN_Y) {
-      this.y = this.yTarget = MIN_Y;
-    }
-    if (this.y >= this.canvasHeight - 50) {
-      this.headerDrag = 0;
-      this.animationSpeed = 2;
+UiWindow.prototype.touchMove = function(e, longTouch, doubleTap) {
+  if (this.scroller.isDragging) {
+    this.scroller.moveDrag(e.touches[0].clientY);
+    if (this.scroller.pos < 50) {
+      this.scroller.endDrag();
       this.set();
     }
   }
+  
   for (let c of this.entityUi.all) {
-    c.touchMove?.(e, longTouch);
+    c.touchMove?.(e, longTouch, doubleTap);
   }
   if (this.showDefaultUi) {
     for (let c of this.defaultUi.all) {
-      c.touchMove?.(e);
+      c.touchMove?.(e, longTouch, doubleTap);
     }
   }
 };
 
-UiWindow.prototype.touchEnd = function(e, shortTouch) {
-  if (this.headerDrag && !e.touches.length) {
-    this.headerDrag = 0;
-    if (Math.abs(this.animationSpeed) > 0.8) {
-      this.yTarget = this.y + this.animationSpeed * 120;
-      this.animationSpeed *= 0.8;
-      if (this.yTarget < MIN_Y + 100) {
-        this.yTarget = MIN_Y;
-      }
-      if (this.yTarget >= this.canvasHeight - 100) {
-        this.yTarget = this.canvasHeight;
-      }
-      if (this.yTarget >= this.canvasHeight - OPEN_HEIGHT - 50 &&
-          this.yTarget < this.canvasHeight - OPEN_HEIGHT + 50) {
-        this.yTarget = this.canvasHeight - OPEN_HEIGHT;
-      }
-    }
-  }
+UiWindow.prototype.touchEnd = function(e, shortTouch, doubleTap) {
+  this.scroller.endDrag();
+  
   for (let c of this.entityUi.all) {
-    c.touchEnd?.(e, shortTouch);
+    c.touchEnd?.(e, shortTouch, doubleTap);
   }
   if (this.showDefaultUi) {
     for (let c of this.defaultUi.all) {
-      c.touchEnd?.(e, shortTouch);
+      c.touchEnd?.(e, shortTouch, doubleTap);
     }
   }
 };
 
-UiWindow.prototype.touchLong = function(e) {
-  if (this.headerDrag) {
-    this.headerDrag = 0;
+UiWindow.prototype.touchLong = function(e, doubleTap) {
+  if (this.scroller.isDragging) {
+    this.scroller.endDrag();
   }
+  
   for (let c of this.entityUi.all) {
-    c.touchLong?.(e);
+    c.touchLong?.(e, doubleTap);
   }
   if (this.showDefaultUi) {
     for (let c of this.defaultUi.all) {
-      c.touchLong?.(e);
+      c.touchLong?.(e, doubleTap);
     }
   }
 }
 
 UiWindow.prototype.initialize = function() {
+  const padding = (this.canvasWidth - 362) / 2;
   this.defaultUi = {
-    deleteEntity: new UiButton(this, this.canvasWidth - 50, 40)
+    deleteEntity: new UiButton(this, this.canvasWidth - 40 - padding, 40)
         .setButton(BUTTON.deleteEntity, S.crossIcon),
-    fuelInventory: new UiInventory(this, 10, 40),
-    fuel: new UiFuel(this, 54, 40),
-    windUpButton: new UiButton(this, 10, 40)
+    fuelInventory: new UiInventory(this, padding, 40),
+    fuel: new UiFuel(this, padding + 44, 40),
+    windUpButton: new UiButton(this, padding, 40)
         .setButton(BUTTON.windUp, S.windUpIcon),
-    windUp: new UiWindUp(this, 54, 40),
+    windUp: new UiWindUp(this, padding + 44, 40),
+    inventoryLabel: new UiLabel(this, padding, 84)
+        .set("Inventory", COLOR.secondary, "16px sans", "small-caps"),
+    inventory: new UiInventory(this, padding, 96)
+        .setWrap(8),
   };
   this.defaultUi.all = Object.values(this.defaultUi);
   
   this.entityUis.set(NATURAL.resource, {
-    resource: new UiResource(this, 10, 40),
+    resource: new UiResource(this, padding, 40),
   });
   
   this.entityUis.set(NATURAL.tree, {
@@ -234,154 +205,154 @@ UiWindow.prototype.initialize = function() {
   });
   
   this.entityUis.set(TYPE.mine, {
-    progress: new UiProgress(this, 10, 40)
-        .setWidth(this.canvasWidth - 20),
+    progress: new UiProgress(this, padding, 40)
+        .setWidth(this.canvasWidth - 2 * padding),
   });
   
   this.entityUis.set(TYPE.chest, {
-    inventory: new UiInventory(this, (this.canvasWidth - 362) / 2, 40)
+    inventory: new UiInventory(this, padding, 40)
         .setWrap(8),
   });
   
   this.entityUis.set(TYPE.logisticContainer, {
-    inventory: new UiInventory(this, (this.canvasWidth - 362) / 2, 40)
+    inventory: new UiInventory(this, padding, 40)
         .setWrap(8),
   });
   
   this.entityUis.set(TYPE.offshorePump, {});
   this.entityUis.set(TYPE.boiler, {
-    temperature: new UiTemperature(this, 10, 40),
-    fluidIndicator: new UiFluidIndicator(this, 110, 40),
+    temperature: new UiTemperature(this, padding, 40),
+    fluidIndicator: new UiFluidIndicator(this, padding + 100, 40),
   });
   this.entityUis.set(TYPE.electricPole, {});
   this.entityUis.set(TYPE.pump, {});
   
   this.entityUis.set(TYPE.belt, {
-    snake: new UiButton(this, this.canvasWidth - 96, 86)
+    snake: new UiButton(this, this.canvasWidth - padding - 86, 40)
         .setButton(BUTTON.snakeBelt, S.snakeIcon),
   });
   
   this.entityUis.set(TYPE.undergroundBelt, {
-    connectUnderground: new UiButton(this, this.canvasWidth - 96, 86)
+    connectUnderground: new UiButton(this, this.canvasWidth - padding - 86, 40)
         .setButton(BUTTON.connectUnderground, S.undergroundConnectIcon),
   });
   
   this.entityUis.set(TYPE.splitter, {
-    priority: new UiSplitterPriority(this, 10, 40),
-    filterChoice: new UiChoice(this, this.canvasWidth + 10, 40)
-        .setWidth(this.canvasWidth - 20),
+    priority: new UiSplitterPriority(this, padding, 40),
+    filterChoice: new UiChoice(this, this.canvasWidth + padding, 40)
+        .setWidth(this.canvasWidth - 2 * padding),
   });
   
   this.entityUis.set(TYPE.inserter, {
-    filters: new UiInserterFilters(this, 10, 40),
-    filterChoice: new UiChoice(this, this.canvasWidth + 10, 40)
-        .setWidth(this.canvasWidth - 20),
-    notImplemented: new UiNotImplemented(this, 10, 86),
+    filters: new UiInserterFilters(this, padding, 40),
+    filterChoice: new UiChoice(this, this.canvasWidth + padding, 40)
+        .setWidth(this.canvasWidth - 2 * padding),
+    notImplemented: new UiNotImplemented(this, padding, 86),
   });
   
   this.entityUis.set(TYPE.pipeToGround, {
-    connectUnderground: new UiButton(this, this.canvasWidth - 96, 86)
+    connectUnderground: new UiButton(this, this.canvasWidth - padding - 86, 40)
         .setButton(BUTTON.connectUnderground, S.undergroundConnectIcon),
-    fluidIndicator: new UiFluidIndicator(this, 10, 40),
+    fluidIndicator: new UiFluidIndicator(this, padding, 40),
   });
   
   this.entityUis.set(TYPE.furnace, {
-    input: new UiInventory(this, 10, 40),
-    output: new UiInventory(this, this.canvasWidth - 50, 40)
+    input: new UiInventory(this, padding, 40),
+    output: new UiInventory(this, this.canvasWidth - padding - 40, 40)
         .setIsOutput(true),
-    progress: new UiProgress(this, 56, 40)
-        .setWidth(this.canvasWidth - 112),
+    progress: new UiProgress(this, padding + 46, 40)
+        .setWidth(this.canvasWidth - 2 * padding - 92),
   });
   
   this.entityUis.set(TYPE.assembler, {
-    input: new UiInventory(this, 10, 40),
-    output: new UiInventory(this, this.canvasWidth - 96, 40)
+    input: new UiInventory(this, padding, 40),
+    output: new UiInventory(this, this.canvasWidth - padding - 40, 40)
         .setIsOutput(true),
-    fluidInput: new UiFluidInventory(this, 10, 40),
-    fluidOutput: new UiFluidInventory(this, this.canvasWidth - 96, 40),
-    progress: new UiProgress(this, 56, 40)
-        .setWidth(this.canvasWidth - 158),
-    recipe: new UiButton(this, this.canvasWidth - 50, 40)
+    fluidInput: new UiFluidInventory(this, padding, 40),
+    fluidOutput: new UiFluidInventory(this, this.canvasWidth - padding - 40, 40),
+    progress: new UiProgress(this, padding + 46, 40)
+        .setWidth(this.canvasWidth - padding - 148),
+    recipe: new UiButton(this, this.canvasWidth - padding - 86, 86)
         .setButton(BUTTON.assemblerRecipe, S.gearIcon),
-    recipeChoice: new UiChoice(this, this.canvasWidth + 10, 40)
-        .setWidth(this.canvasWidth - 20),
+    recipeChoice: new UiChoice(this, this.canvasWidth + padding, 40)
+        .setWidth(this.canvasWidth - 2 * padding),
   });
   
   this.entityUis.set(TYPE.lab, {
-    inventory: new UiInventory(this, 10, 40),
-    progress: new UiProgress(this, 56, 40)
-        .setWidth(this.canvasWidth - 66),
+    inventory: new UiInventory(this, padding, 40),
+    progress: new UiProgress(this, padding + 46, 40)
+        .setWidth(this.canvasWidth - 2 * padding - 46),
   });
   
   this.entityUis.set(TYPE.pipe, {
-    fluidIndicator: new UiFluidIndicator(this, 10, 40),
+    fluidIndicator: new UiFluidIndicator(this, padding, 40),
   });
   
   this.entityUis.set(TYPE.generator, {
-    input: new UiFluidInventory(this, 10, 40),
+    input: new UiFluidInventory(this, padding, 40),
   });
   
   this.entityUis.set(TYPE.rocketSilo, {
-    input: new UiInventory(this, 10, 40),
-    progress: new UiProgress(this, 56, 40)
-        .setWidth(this.canvasWidth - 112),
-    scienceInput: new UiInventory(this, 10, 86),
-    rocketProgress: new UiProgress(this, 56, 86)
-        .setWidth(this.canvasWidth - 88)
+    input: new UiInventory(this, padding, 40),
+    progress: new UiProgress(this, padding + 46, 40)
+        .setWidth(this.canvasWidth - padding - 102),
+    scienceInput: new UiInventory(this, padding, 86),
+    rocketProgress: new UiProgress(this, padding + 46, 86)
+        .setWidth(this.canvasWidth - padding - 78)
         .setMode(PROGRESS.rocket),
-    output: new UiInventory(this, this.canvasWidth - 50, 86)
+    output: new UiInventory(this, this.canvasWidth - padding - 40, 86)
         .setIsOutput(true),
   });
   
   this.entityUis.set(TYPE.rail, {
-    notImplemented: new UiNotImplemented(this, 10, 40),
+    notImplemented: new UiNotImplemented(this, padding, 40),
   });
   this.entityUis.set(TYPE.trainStop, {
-    notImplemented: new UiNotImplemented(this, 10, 40),
+    notImplemented: new UiNotImplemented(this, padding, 40),
   });
   this.entityUis.set(TYPE.railSignal, {
-    notImplemented: new UiNotImplemented(this, 10, 40),
+    notImplemented: new UiNotImplemented(this, padding, 40),
   });
   this.entityUis.set(TYPE.accumulator, {
-    notImplemented: new UiNotImplemented(this, 10, 40),
+    notImplemented: new UiNotImplemented(this, padding, 40),
   });
   this.entityUis.set(TYPE.radar, {
-    notImplemented: new UiNotImplemented(this, 10, 40),
+    notImplemented: new UiNotImplemented(this, padding, 40),
   });
   this.entityUis.set(TYPE.constantCombinator, {
-    notImplemented: new UiNotImplemented(this, 10, 40),
+    notImplemented: new UiNotImplemented(this, padding, 40),
   });
   this.entityUis.set(TYPE.arithmeticCombinator, {
-    notImplemented: new UiNotImplemented(this, 10, 40),
+    notImplemented: new UiNotImplemented(this, padding, 40),
   });
   this.entityUis.set(TYPE.deciderCombinator, {
-    notImplemented: new UiNotImplemented(this, 10, 40),
+    notImplemented: new UiNotImplemented(this, padding, 40),
   });
   this.entityUis.set(TYPE.powerSwitch, {
-    notImplemented: new UiNotImplemented(this, 10, 40),
+    notImplemented: new UiNotImplemented(this, padding, 40),
   });
   this.entityUis.set(TYPE.programmableSpeaker, {
-    notImplemented: new UiNotImplemented(this, 10, 40),
+    notImplemented: new UiNotImplemented(this, padding, 40),
   });
   this.entityUis.set(TYPE.lamp, {});
   this.entityUis.set(TYPE.solarPanel, {
-    notImplemented: new UiNotImplemented(this, 10, 40),
+    notImplemented: new UiNotImplemented(this, padding, 40),
   });
   
   this.entityUis.set(TYPE.roboport, {
-    inventory: new UiInventory(this, 10, 40),
-    notImplemented: new UiNotImplemented(this, 10, 86),
+    inventory: new UiInventory(this, padding, 40),
+    notImplemented: new UiNotImplemented(this, padding, 86),
   });
   
   this.entityUis.set(TYPE.reactor, {
-    inventory: new UiInventory(this, 10, 40),
-    temperature: new UiTemperature(this, 60, 40),
-    progress: new UiProgress(this, this.canvasWidth - 96, 40).setWidth(40),
-    outputInventory: new UiInventory(this, this.canvasWidth - 50, 40),
+    inventory: new UiInventory(this, padding, 40),
+    temperature: new UiTemperature(this, padding + 50, 40),
+    progress: new UiProgress(this, this.canvasWidth - padding - 178, 40).setWidth(86),
+    outputInventory: new UiInventory(this, this.canvasWidth - padding - 86, 40),
   });
   
   this.entityUis.set(TYPE.heatPipe, {
-    temperature: new UiTemperature(this, 10, 40),
+    temperature: new UiTemperature(this, padding, 40),
   });
   
   
@@ -390,20 +361,19 @@ UiWindow.prototype.initialize = function() {
   }
 };
 
-UiWindow.prototype.set = function(entity) {
+UiWindow.prototype.set = function(entity, scrollToOpenHeight) {
+  const padding = (this.canvasWidth - 362) / 2;
   this.selectedEntity = entity;
   if (!entity) {
-    this.yTarget = this.canvasHeight;
-    this.animationSpeed = (this.yTarget - this.y) / 100;
+    this.scroller.scrollTo(0);
     return;
   }
-  if (this.yTarget == this.canvasHeight) {
-    this.yTarget = this.canvasHeight - OPEN_HEIGHT;
-    this.animationSpeed = (this.yTarget - this.y) / 100;
+  if (this.scroller.pos == 0 || scrollToOpenHeight) {
+    this.scroller.scrollTo(OPEN_HEIGHT);
   }
-  this.x = this.xTarget = 0;
+  this.scrollerX.pos = 0;
   const ui = this.entityUi = this.entityUis.get(entity.type);
-  let defaultY =  ui?.all.length ? 86 : 40;
+  let usedRows = ui?.all.length ? 1 : 0;
   
   if (!entity.type) {
     if (entity.id) {
@@ -417,7 +387,7 @@ UiWindow.prototype.set = function(entity) {
     ui.progress.set(entity);
   } else if (entity.type == TYPE.chest) {
     ui.inventory.set(entity.inputInventory);
-    defaultY = Math.ceil(entity.inputInventory.capacity / 8) * 46 + 40;
+    usedRows = Math.ceil(entity.inputInventory.capacity / 8);
   } else if (entity.type == TYPE.furnace) {
     ui.input.set(entity.inputInventory);
     ui.output.set(entity.outputInventory);
@@ -425,52 +395,59 @@ UiWindow.prototype.set = function(entity) {
   } else if (entity.type == TYPE.assembler) {
     ui.input.set(entity.inputInventory);
     ui.fluidInput.set(entity.inputFluidTank);
-    ui.fluidInput.x = 10 +
+    ui.fluidInput.x = padding +
         entity.inputInventory.capacity * 46;
     ui.output.set(entity.outputInventory);
-    ui.output.x = this.canvasWidth - 50 -
+    ui.output.x = this.canvasWidth - padding + 6 -
         (entity.outputInventory.capacity +
         (entity.outputFluidTank?.tanklets.length ?? 0)) * 46;
     ui.fluidOutput.set(entity.outputFluidTank);
-    ui.fluidOutput.x = this.canvasWidth - 50 -
+    ui.fluidOutput.x = this.canvasWidth - padding + 6 -
         (entity.outputFluidTank?.tanklets.length ?? 0) * 46;
     ui.progress.set(entity);
-    ui.progress.x = 10 +
+    ui.progress.x = padding +
         (entity.inputInventory.capacity +
         (entity.inputFluidTank?.tanklets.length ?? 0)) * 46;
-    ui.progress.width = this.canvasWidth - 66 -
+    ui.progress.width = this.canvasWidth - 2 * padding -
         46 * (entity.inputInventory.capacity +
         entity.outputInventory.capacity +
         (entity.inputFluidTank?.tanklets.length ?? 0) +
         (entity.outputFluidTank?.tanklets.length ?? 0));
     if (!entity.data.recipe) {
+      this.scrollerX.pos = -this.canvasWidth;
       ui.recipeChoice.openChoice(
           CHOICE.assemblerRecipe, entity);
-      this.x = this.xTarget = -this.canvasWidth;
     }
   } else if (entity.type == TYPE.lab) {
     ui.inventory.set(entity.inputInventory);
     ui.progress.set(entity);
-  } else if (entity.type == TYPE.pipe ||
-      entity.type == TYPE.pipeToGround) {
+  } else if (entity.type == TYPE.pipe) {
     ui.fluidIndicator.set(entity);
+    usedRows = 0;
   } else if (entity.type == TYPE.boiler) {
     ui.temperature.set(entity);
     ui.fluidIndicator.set(this.ui.game.settings.debugPipes ?
         entity : undefined);
+    usedRows = 0;
   } else if (entity.type == TYPE.generator) {
     ui.input.set(this.ui.game.settings.debugPipes ?
         entity.inputFluidTank : undefined);
+    usedRows = 0;
+  } else if (entity.type == TYPE.belt) {
+    usedRows = 0;
   } else if (entity.type == TYPE.undergroundBelt) {
     ui.connectUnderground.setButton(
         (entity.data.undergroundUp ?
         !entity.data.beltInput :
         !entity.data.beltOutput) ?
         BUTTON.connectUnderground : BUTTON.none);
+    usedRows = 0;
   } else if (entity.type == TYPE.pipeToGround) {
+    ui.fluidIndicator.set(entity);
     ui.connectUnderground.setButton(
         !entity.data.pipes[1] ?
         BUTTON.connectUnderground : BUTTON.none);
+    usedRows = 0;
   } else if (entity.type == TYPE.splitter) {
     ui.priority.set(entity);
   } else if (entity.type == TYPE.inserter) {
@@ -481,24 +458,24 @@ UiWindow.prototype.set = function(entity) {
     ui.input.set(entity.inputInventory)
       .setPart(0, recipe.inputs.length);
     ui.progress.set(entity);
-    ui.progress.x = 10 +
+    ui.progress.x = padding +
         (recipe.inputs.length) * 46;
-    ui.progress.width = this.canvasWidth - 20 -
+    ui.progress.width = this.canvasWidth - 2 * padding -
         46 * (recipe.inputs.length);
     ui.scienceInput.set(entity.inputInventory)
       .setPart(recipe.inputs.length, 100);
     ui.rocketProgress.set(entity);
-    ui.rocketProgress.x = 10 +
+    ui.rocketProgress.x = padding +
         (science.inputs.length) * 46;
-    ui.rocketProgress.width = this.canvasWidth - 66 -
+    ui.rocketProgress.width = this.canvasWidth - 2 * padding - 46 -
         46 * (science.inputs.length +
         entity.outputInventory.capacity);
     ui.output.set(entity.outputInventory);
-    ui.output.x = this.canvasWidth - 50 -
+    ui.output.x = this.canvasWidth - padding - 40 -
         (entity.outputInventory.capacity) * 46;
   } else if (entity.type == TYPE.logisticContainer) {
     ui.inventory.set(entity.inputInventory);
-    defaultY = Math.ceil(entity.inputInventory.capacity / 8) * 46 + 40;
+    usedRows = Math.ceil(entity.inputInventory.capacity / 8);
   } else if (entity.type == TYPE.roboport) {
     ui.inventory.set(entity.inputInventory);
   } else if (entity.type == TYPE.reactor) {
@@ -506,11 +483,17 @@ UiWindow.prototype.set = function(entity) {
     ui.progress.set(entity);
     ui.temperature.set(entity);
     ui.outputInventory.set(entity.outputInventory);
+    usedRows = 0;
   } else if (entity.type == TYPE.heatPipe) {
     ui.temperature.set(entity);
+    usedRows = 0;
   }
   
-  this.showDefaultUi = !!entity.type;
+  if (!(this.showDefaultUi = !!entity.type)) {
+    this.scroller.max = padding + 126;
+    return;
+  }
+  const defaultY = usedRows * 46 + 40;
   for (let c of this.defaultUi.all) {
     c.y = defaultY;
   }
@@ -528,6 +511,81 @@ UiWindow.prototype.set = function(entity) {
     this.defaultUi.windUpButton.setButton(BUTTON.none);
     this.defaultUi.windUp.set();
   }
+  
+  const charInventory = this.ui.world.character.inventory;
+  this.defaultUi.inventory.set(charInventory);
+  this.defaultUi.inventoryLabel.y += 30;
+  this.defaultUi.inventory.y += 60;
+  
+  this.scroller.max = defaultY + padding + 54 +
+      Math.ceil(charInventory.capacity / 8) * 46;
+};
+
+const FRICTION = 16;
+const MIN_VELOCITY = 5;
+
+function Scroller(min, max) {
+  this.min = min;
+  this.max = max;
+  this.pos = 0;
+  this.lastPos = 0;
+  this.velocity = 0;
+  this.isDragging = false;
+  this.lastPoint = 0;
+}
+
+Scroller.prototype.scrollTo = function(target) {
+  const d = target - this.pos;
+  if (!d) return this.velocity = 0;
+  this.velocity = d * FRICTION;// + Math.sign(d) * MIN_VELOCITY;
+}
+
+Scroller.prototype.startDrag = function(point) {
+  this.isDragging = true;
+  this.lastPoint = point;
+  this.velocity = 0;
+};
+
+Scroller.prototype.moveDrag = function(point) {
+  let delta = this.lastPoint - point;
+  this.lastPoint = point;
+
+  const over = this.pos < this.min ? this.pos - this.min :
+      this.pos > this.max ? this.pos - this.max : 0;
+  if (over !== 0 && Math.sign(delta) === Math.sign(over)) {
+    delta /= 1 + Math.abs(over);
+  }
+  this.pos += delta;
+};
+
+Scroller.prototype.endDrag = function() {
+  this.isDragging = false;
+};
+
+Scroller.prototype.update = function(dt) {
+  if (this.isDragging) {
+    const v = (this.pos - this.lastPos) / (dt / 1000);
+    this.velocity += (v - this.velocity) * 0.5;
+  } else if (this.pos < this.min || this.pos > this.max) {
+    const over = this.pos - (this.pos < this.min ? this.min : this.max);
+    const accel = -300 * over - 35 * this.velocity;
+    this.velocity += accel * dt / 1000;
+    this.pos += this.velocity * dt / 1000;
+
+    if (Math.abs(over) < 0.5 && Math.abs(this.velocity) < MIN_VELOCITY) {
+      this.pos = Math.max(this.min, Math.min(this.max, this.pos));
+      this.velocity = 0;
+    }
+  } else if (this.velocity) {
+    this.pos += this.velocity * dt / 1000;
+    this.velocity *= Math.exp(-FRICTION * dt / 1000);
+    if (Math.abs(this.velocity) < MIN_VELOCITY) {
+      this.pos = Math.round(this.pos);
+      this.velocity = 0;
+    }
+  }
+
+  this.lastPos = this.pos;
 };
 
 export {UiWindow};

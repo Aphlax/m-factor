@@ -65,7 +65,9 @@ function productionTest(gameMap, time) {
   }
   
   // iron.
-  l(-7, 12, S, 29);
+  l(-7, 12, S, 29).minusFlow
+      .push(10, I.ironPlate,
+        ...Array(20).fill([0, I.ironPlate]).flat());
   e(NAME.splitter, -7, 41, S);
   l(-6, 42, E, 1);
   l(-5, 42, S, 2);
@@ -79,7 +81,8 @@ function productionTest(gameMap, time) {
   
   // copper.
   l(-25, 12, S, 18);
-  l(-25, 30, E, 16);
+  l(-25, 30, E, 16).plusFlow
+      .push(...Array(20).fill([0, I.copperPlate]).flat());
   l(-9, 30, S, 14);
   e(NAME.fastSplitter, -9, 44, S);
   l(-8, 45, E, 26);
